@@ -2,7 +2,9 @@
 AXI4 Verification IP (AXI4, AXI4-Lite, AXI4-Stream)
 
 Models
+
 **Axi4LiteMaster.vhd**
+
   AXI-Lite 4 Master Models
   Current action list
   - Add Byte Enables
@@ -10,9 +12,11 @@ Models
   - non-blocking MasterWrite and MasterRead operations
   
 **Axi4LiteSlave_Transactor.vhd**
+
   Interacts with the master model via transactions in the testbench
 
 **Axi4LiteMonitor_dummy.vhd**
+
 Currently a place holder for an AXI-Lite 4 Monitor
 
 ## Release History

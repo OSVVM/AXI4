@@ -447,7 +447,7 @@ begin
         "Read Operation." &
         "  ARAddr: "  & to_hstring(ARAddr) &
         "  ARProt: "  & to_string(ARProt) &
-        "  Operation# " & to_string(ReadAddressReceiveCount),
+        "  Operation# " & to_string(ReadAddressReceiveCount + 1), -- adjusted for delay of ReadAddressReceiveCount
         INFO
       ) ;
     end loop ReadAddressOperation ;

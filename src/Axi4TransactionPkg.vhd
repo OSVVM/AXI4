@@ -46,7 +46,6 @@ library ieee ;
 library osvvm ; 
     context osvvm.OsvvmContext ; 
 
-  
 package Axi4TransactionPkg is 
 
   -- Model AXI Lite Operations
@@ -92,30 +91,32 @@ package Axi4TransactionPkg is
   --      1 Instruction access
   constant AXI4_PROT_INIT   : Axi4ProtType := "ZZZ" ; 
 
-  
-  -- representing transaction values as integer_vector
---!TODO does this eventually migrate to TbUtilPkg or ResolutionPkg
---  subtype  TransactionType is integer_vector_max_c ; 
+  -- Conversions to/from transaction values  
+  function Extend(A: std_logic_vector; Size : natural) return std_logic_vector ; 
+  function Reduce(A: std_logic_vector; Size : natural) return std_logic_vector ; 
   subtype  TransactionType is std_logic_vector_max_c ; 
-  function To_TransactionType(A : std_logic_vector) return TransactionType ;
-  function To_TransactionType(A : integer; Size : natural) return TransactionType ;
-  function From_TransactionType (A: TransactionType; Size : natural) return std_logic_vector ;
-  function From_TransactionType (A: TransactionType) return integer ;
-  function SizeOf_TransactionType(BitWidth : natural) return natural ; 
-  
+  function ToTransaction(A : std_logic_vector) return TransactionType ;
+  function ToTransaction(A : integer; Size : natural) return TransactionType ;
+  function FromTransaction (A: TransactionType) return std_logic_vector ;
+  function FromTransaction (A: TransactionType) return integer ;
+  function SizeOfTransaction (AxiSize : integer) return integer ;
+
   -- Record creates a channel for communicating transactions to the model.
   type Axi4TransactionRecType is record 
-    Rdy              : bit_max ;  
-    Ack              : bit_max ;  
-    Operation        : Axi4OperationType ; 
-    Prot             : integer_max ;
-    Address          : TransactionType ;
-    DataToModel      : TransactionType ;
-    DataFromModel    : TransactionType ;
-    Resp             : Axi4RespEnumType ; 
-    Strb             : integer_max ; 
-    AlertLogID       : resolved_max AlertLogIDType ; 
-    StatusMsgOn      : boolean_max ; 
+    Rdy                : bit_max ;  
+    Ack                : bit_max ;  
+    AxiAddrWidth       : integer_max ; 
+    AxiDataWidth       : integer_max ; 
+    Operation          : Axi4OperationType ; 
+    Prot               : integer_max ;
+    Address            : TransactionType ;
+    DataToModel        : TransactionType ;
+    DataFromModel      : TransactionType ;
+    DataBytes          : integer_max ; 
+    Resp               : Axi4RespEnumType ; 
+    Strb               : integer_max ; 
+    AlertLogID         : resolved_max AlertLogIDType ; 
+    StatusMsgOn        : boolean_max ; 
   end record Axi4TransactionRecType ;
   
 --!TODO add VHDL-2018 Interfaces
@@ -143,8 +144,8 @@ package Axi4TransactionPkg is
   -- do CPU Write Cycle 
   ------------------------------------------------------------
     signal   TransRec    : InOut Axi4TransactionRecType ;
-             AddrI       : In    std_logic_vector ;
-             DataI       : In    std_logic_vector ;
+             iAddr       : In    std_logic_vector ;
+             iData       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
   ) ;
 
@@ -156,8 +157,8 @@ package Axi4TransactionPkg is
   -- do CPU Read Cycle and return data
   ------------------------------------------------------------
     signal   TransRec    : InOut Axi4TransactionRecType ;
-             AddrI       : In    std_logic_vector ;
-    variable rData       : Out   std_logic_vector ;
+             iAddr       : In    std_logic_vector ;
+    variable oData       : Out   std_logic_vector ;
              StatusMsgOn : In    boolean := false
   ) ;
 
@@ -169,19 +170,19 @@ package Axi4TransactionPkg is
   -- do CPU Read Cycle and check supplied data
   ------------------------------------------------------------
     signal   TransRec    : InOut Axi4TransactionRecType ;
-             AddrI       : In    std_logic_vector ;
-             DataI       : In    std_logic_vector ;
+             iAddr       : In    std_logic_vector ;
+             iData       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
   ) ; 
 
   ------------------------------------------------------------
-  procedure MasterPoll (
-  -- Read location (AddrI) until Data(IndexI) = ValueI
+  procedure MasterReadPoll (
+  -- Read location (iAddr) until Data(IndexI) = ValueI
   ------------------------------------------------------------
     signal   TransRec    : InOut Axi4TransactionRecType ;
-             AddrI       : In    std_logic_vector ;
-             IndexI      : In    Integer ;
-             ValueI      : In    std_logic ;
+             iAddr       : In    std_logic_vector ;
+             Index       : In    Integer ;
+             BitValue    : In    std_logic ;
              StatusMsgOn : In    boolean := false ;
              WaitTime    : In    natural := 10 
   ) ; 
@@ -250,54 +251,45 @@ package body Axi4TransactionPkg is
   end function to_Axi4RespType ;
   
   ------------------------------------------------------------
-  -- To_TransactionType
-  --    supports representing transaction values as integer_vector_max_c
-  function To_TransactionType(A : std_logic_vector) return TransactionType is
-    alias aA : std_logic_vector(A'length-1 downto 0) is A ;
-    constant TRANS_SIZE : natural := SizeOf_TransactionType(A'length) ;
-    variable result : TransactionType (TRANS_SIZE -1 downto 0) ; 
+  -- Conversions to/from transaction values  
+  --     Extend, Reduce, ToTransaction, FromTransaction
+  function Extend(A: std_logic_vector; Size : natural) return std_logic_vector is
+    variable extA : std_logic_vector(Size downto 1) := (others => '0') ;
+  begin
+    extA(A'length downto 1) := A ; 
+    return extA ;
+  end function Extend ; 
+  
+  function Reduce(A: std_logic_vector; Size : natural) return std_logic_vector is 
+    alias aA : std_logic_vector(A'length-1 downto 0) is A ; 
+  begin
+    return aA(Size-1 downto 0) ;
+  end function Reduce ; 
+  
+  function ToTransaction(A : std_logic_vector) return TransactionType is
   begin
     return TransactionType(A) ; 
---    for i in 0 to TRANS_SIZE - 2 loop
---      result(i) := to_integer(signed(aA(32*i+31 downto 32*i)));
---    end loop ; 
---    result(TRANS_SIZE-1) := to_integer(signed(aA(aA'left downto 32*(TRANS_SIZE-1)))) ;
---    return result ; 
-  end function To_TransactionType ; 
-
-  function To_TransactionType(A : integer; Size : natural) return TransactionType is
---    variable result : TransactionType (Size -1 downto 0) := (others => 0) ; 
+  end function ToTransaction ; 
+  
+  function ToTransaction(A : integer; Size : natural) return TransactionType is
   begin
     return TransactionType(to_signed(A, Size)) ; 
---    result(0) := A ; 
---    return result ; 
-  end function To_TransactionType ; 
+  end function ToTransaction ; 
 
-  
-  function From_TransactionType (A: TransactionType; Size : natural) return std_logic_vector is
-    constant TRANS_SIZE : natural := A'length ;
-    variable result : std_logic_vector (Size -1 downto 0) ; 
+  function FromTransaction (A: TransactionType) return std_logic_vector is
   begin
     return std_logic_vector(A) ;
---    for i in 0 to TRANS_SIZE - 2 loop
---      result(32*i+31 downto 32*i) := std_logic_vector(to_signed(A(i), 32));
---    end loop ; 
---    result(result'left downto 32*(TRANS_SIZE-1)):= 
---      std_logic_vector(to_signed(A(TRANS_SIZE-1), result'left + 1 - 32*(TRANS_SIZE-1)));
---    return result ; 
-  end function From_TransactionType ; 
+  end function FromTransaction ; 
 
-  function From_TransactionType (A: TransactionType) return integer is
+  function FromTransaction (A: TransactionType) return integer is
   begin
     return to_integer(signed(A)) ;
---    return A(0) ;
-  end function From_TransactionType ; 
-
-  function SizeOf_TransactionType (BitWidth : natural) return natural is
+  end function FromTransaction ; 
+  
+  function SizeOfTransaction (AxiSize : integer) return integer is
   begin
-    return BitWidth ; 
---    return integer(ceil(real(BitWidth)/32.0)) ; 
-  end function SizeOf_TransactionType ;
+    return AxiSize ; 
+  end function SizeOfTransaction ; 
 
   ------------------------------------------------------------
   procedure NoOp (
@@ -308,7 +300,7 @@ package body Axi4TransactionPkg is
   ) is
   begin
     TransRec.Operation     <= NO_OP ;
-    TransRec.DataToModel   <= to_TransactionType(NoOpCycles, TransRec.DataToModel'length);
+    TransRec.DataToModel   <= ToTransaction(NoOpCycles, TransRec.DataToModel'length);
     RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
   end procedure NoOp ; 
   
@@ -325,27 +317,35 @@ package body Axi4TransactionPkg is
     RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
     
     -- Return Error Count
-    ErrCnt := From_TransactionType(TransRec.DataFromModel) ;
+    ErrCnt := FromTransaction(TransRec.DataFromModel) ;
   end procedure GetErrors ; 
+  
 
   ------------------------------------------------------------
   procedure MasterWrite (
   -- do CPU Write Cycle 
   ------------------------------------------------------------
     signal   TransRec    : InOut Axi4TransactionRecType ;
-             AddrI       : In    std_logic_vector ;
-             DataI       : In    std_logic_vector ;
+             iAddr       : In    std_logic_vector ;
+             iData       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
   ) is
+    variable ByteCount : integer ; 
   begin
-    TransRec.Operation      <= WRITE ;
-    TransRec.Address        <= to_TransactionType(AddrI) ;
---!TODO Make PROT programmable
-    TransRec.Prot           <= 0 ;
-    TransRec.DataToModel    <= to_TransactionType(DataI) ;
---!TODO Make WStrb programmable
-    TransRec.Strb           <= to_integer(unsigned'(DataI'length/8-1 downto 0 => '1')) ;
-    TransRec.StatusMsgOn    <= StatusMsgOn ; 
+    ByteCount := iData'length / 8 ;
+
+    -- Parameter Checks
+    AlertIf(TransRec.AlertLogID, iAddr'length /= TransRec.AxiAddrWidth, "Master Write, Address length does not match", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, iData'length mod 8 /= 0, "Master Write, Data not on a byte boundary", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, iData'length > TransRec.AxiDataWidth, "Master Write, Data length to large", FAILURE) ;
+    
+    -- Put values in record
+    TransRec.Operation        <= WRITE ;
+    TransRec.Address          <= ToTransaction(iAddr) ;
+    TransRec.Prot             <= 0 ;
+    TransRec.DataToModel      <= ToTransaction(Extend(iData, TransRec.AxiDataWidth)) ;
+    TransRec.DataBytes        <= ByteCount ; 
+    TransRec.StatusMsgOn      <= StatusMsgOn ; 
     RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
   end procedure MasterWrite ; 
 
@@ -357,19 +357,28 @@ package body Axi4TransactionPkg is
   -- do CPU Read Cycle and return data
   ------------------------------------------------------------
     signal   TransRec    : InOut Axi4TransactionRecType ;
-             AddrI       : In    std_logic_vector ;
-    variable rData       : Out   std_logic_vector ;
+             iAddr       : In    std_logic_vector ;
+    variable oData       : Out   std_logic_vector ;
              StatusMsgOn : In    boolean := false
   ) is
+    variable ByteCount : integer ; 
   begin
-    TransRec.Operation      <= READ ;
-    TransRec.Address        <= to_TransactionType(AddrI) ;
---!TODO Make PROT programmable
-    TransRec.Prot           <= 0 ;
-    TransRec.StatusMsgOn    <= StatusMsgOn ; 
+    ByteCount := oData'length / 8 ;
+
+    -- Parameter Checks
+    AlertIf(TransRec.AlertLogID, iAddr'length /= TransRec.AxiAddrWidth, "Master Read, Address length does not match", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, oData'length mod 8 /= 0, "Master Read, Data not on a byte boundary", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, oData'length > TransRec.AxiDataWidth, "Master Read, Data length to large", FAILURE) ;
+    
+    -- Put values in record
+    TransRec.Operation          <= READ ;
+    TransRec.Address            <= ToTransaction(iAddr) ;
+    TransRec.DataBytes          <= ByteCount ; 
+    TransRec.Prot               <= 0 ;
+    TransRec.StatusMsgOn        <= StatusMsgOn ; 
     RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
     
-    rData := From_TransactionType(TransRec.DataFromModel, rData'Length) ;
+    oData := Reduce(FromTransaction(TransRec.DataFromModel), oData'Length) ;
   end procedure MasterRead ; 
 
 --!TODO          Axi4LiteReadAddress
@@ -380,43 +389,52 @@ package body Axi4TransactionPkg is
   -- do CPU Read Cycle and check supplied data
   ------------------------------------------------------------
     signal   TransRec    : InOut Axi4TransactionRecType ;
-             AddrI       : In    std_logic_vector ;
-             DataI       : In    std_logic_vector ;
+             iAddr       : In    std_logic_vector ;
+             iData       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
   ) is
+    variable ByteCount : integer ; 
   begin
-    TransRec.Operation      <= READ_CHECK ;
-    TransRec.Address        <= to_TransactionType(AddrI) ;
+    ByteCount := iData'length / 8 ;
+
+    -- Parameter Checks
+    AlertIf(TransRec.AlertLogID, iAddr'length /= TransRec.AxiAddrWidth, "Master Read, Address length does not match", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, iData'length mod 8 /= 0, "Master Read, Data not on a byte boundary", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, iData'length > TransRec.AxiDataWidth, "Master Read, Data length to large", FAILURE) ;
+    
+    -- Put values in record
+    TransRec.Operation        <= READ_CHECK ;
+    TransRec.Address          <= ToTransaction(iAddr) ;
 --!TODO Make PROT programmable
-    TransRec.Prot           <= 0 ;
-    TransRec.DataToModel    <= to_TransactionType(DataI) ;
-    TransRec.StatusMsgOn    <= StatusMsgOn ; 
+    TransRec.Prot             <= 0 ;
+    TransRec.DataToModel      <= ToTransaction(Extend(iData, TransRec.DataToModel'length)) ;
+    TransRec.DataBytes        <= ByteCount ; 
+    TransRec.StatusMsgOn      <= StatusMsgOn ; 
     RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
   end procedure MasterReadCheck ; 
 
   ------------------------------------------------------------
-  procedure MasterPoll (
-  -- Read location (AddrI) until Data(IndexI) = ValueI
+  procedure MasterReadPoll (
+  -- Read location (iAddr) until Data(IndexI) = ValueI
   ------------------------------------------------------------
     signal   TransRec    : InOut Axi4TransactionRecType ;
-             AddrI       : In    std_logic_vector ;
-             IndexI      : In    Integer ;
-             ValueI      : In    std_logic ;
+             iAddr       : In    std_logic_vector ;
+             Index       : In    Integer ;
+             BitValue    : In    std_logic ;
              StatusMsgOn : In    boolean := false ;
              WaitTime    : In    natural := 10 
   ) is 
-    constant MAX_DATA_SIZE : natural := 32*TransRec.DataToModel'length ;
-    variable rData    : std_logic_vector(MAX_DATA_SIZE-1 downto 0) ;
+    variable iData    : std_logic_vector(TransRec.AxiDataWidth-1 downto 0) ;
   begin
     loop 
       NoOp(TransRec, WaitTime) ;
-      MasterRead (TransRec, AddrI, rData) ;
-      exit when rData(IndexI) = ValueI;
+      MasterRead (TransRec, iAddr, iData) ;
+      exit when iData(Index) = BitValue ;
     end loop ;
 
-    Log(TransRec.AlertLogID, "CpuPoll: address" & to_hstring(AddrI) & 
-      "  Data: " & to_hstring(from_TransactionType(TransRec.DataFromModel,TransRec.DataFromModel'length*32)), INFO, StatusMsgOn) ; 
-  end procedure MasterPoll ;
+    Log(TransRec.AlertLogID, "CpuPoll: address" & to_hstring(iAddr) & 
+      "  Data: " & to_hstring(FromTransaction(TransRec.DataFromModel)), INFO, StatusMsgOn) ; 
+  end procedure MasterReadPoll ;
   
   ------------------------------------------------------------
   procedure SlaveGetWrite (
@@ -427,12 +445,22 @@ package body Axi4TransactionPkg is
     variable oData       : Out   std_logic_vector ;
     constant StatusMsgOn : In    boolean := false
   ) is
+    variable ByteCount : integer ; 
   begin
-    TransRec.Operation      <= WRITE ;
-    TransRec.StatusMsgOn    <= StatusMsgOn ; 
+    ByteCount := oData'length / 8 ;
+
+    -- Parameter Checks
+    AlertIf(TransRec.AlertLogID, oAddr'length /= TransRec.AxiAddrWidth, "Slave Get Write, Address length does not match", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, oData'length mod 8 /= 0, "Slave Get Write, Data not on a byte boundary", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, oData'length > TransRec.AxiDataWidth, "Slave Get Write, Data length to large", FAILURE) ;
+    
+    -- Put values in record
+    TransRec.Operation        <= WRITE ;
+    TransRec.DataBytes        <= ByteCount ;
+    TransRec.StatusMsgOn      <= StatusMsgOn ; 
     RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
-    oAddr  := from_TransactionType(TransRec.Address, oAddr'length) ;
-    oData  := from_TransactionType(TransRec.DataFromModel, oData'length) ;
+    oAddr  := FromTransaction(TransRec.Address) ;
+    oData  := Reduce(FromTransaction(TransRec.DataFromModel), oData'length) ;
   end procedure SlaveGetWrite ; 
   
   ------------------------------------------------------------
@@ -441,17 +469,27 @@ package body Axi4TransactionPkg is
   ------------------------------------------------------------
     signal   TransRec    : InOut Axi4TransactionRecType ;
     variable oAddr       : Out   std_logic_vector ;
-    Constant iData       : In    std_logic_vector ;
+    constant iData       : In    std_logic_vector ;
     constant StatusMsgOn : In    boolean := false
   ) is
+    variable ByteCount : integer ; 
   begin
-    TransRec.Operation      <= READ ;
-    TransRec.DataToModel    <= to_TransactionType(iData) ;
-    TransRec.Resp           <= OKAY ;
-    TransRec.StatusMsgOn    <= StatusMsgOn ; 
-    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
-    oAddr  := from_TransactionType(TransRec.Address, oAddr'length) ;
-  end procedure SlaveRead ; 
+    ByteCount := iData'length / 8 ;
 
+    -- Parameter Checks
+    AlertIf(TransRec.AlertLogID, oAddr'length /= TransRec.AxiAddrWidth, "Slave Read, Address length does not match", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, iData'length mod 8 /= 0, "Slave Read, Data not on a byte boundary", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, iData'length > TransRec.AxiDataWidth, "Slave Read, Data length to large", FAILURE) ;
+    
+    -- Put values in record
+    TransRec.Operation        <= READ ;
+    TransRec.DataBytes        <= ByteCount ; 
+    TransRec.DataToModel      <= ToTransaction(Extend(iData, TransRec.AxiDataWidth)) ;
+    TransRec.Resp             <= OKAY ;
+    TransRec.StatusMsgOn      <= StatusMsgOn ; 
+    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
+    oAddr  := FromTransaction(TransRec.Address) ;
+  end procedure SlaveRead ; 
+  
   
 end package body Axi4TransactionPkg ;

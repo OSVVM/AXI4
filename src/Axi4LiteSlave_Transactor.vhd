@@ -155,13 +155,17 @@ begin
   Initalize : process
     variable ID : AlertLogIDType ; 
   begin
+    -- Transaction Interface
+    TransRec.AxiAddrWidth   <= AWAddr'length ; 
+    TransRec.AxiDataWidth   <= WData'length ; 
+
     -- Alerts
-    ID                   := GetAlertLogID(MODEL_INSTANCE_NAME) ; 
-    ModelID              <= ID ; 
-    TransRec.AlertLogID  <= ID ; 
-    ProtocolID           <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
-    DataCheckID          <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
-    BusFailedID          <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
+    ID                      := GetAlertLogID(MODEL_INSTANCE_NAME) ; 
+    ModelID                 <= ID ; 
+    TransRec.AlertLogID     <= ID ; 
+    ProtocolID              <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
+    DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
+    BusFailedID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
 
     -- FIFOs
     WriteAddressFifo.SetAlertLogID(     "AXI Slave WriteAddressFIFO"); 
@@ -181,10 +185,14 @@ begin
   ------------------------------------------------------------
   TransactionDispatcher : process
     variable NoOpCycles : integer ; 
-    variable localAddr  : AWAddr'subtype ; 
-    variable localProt  : AWProt'subtype ;
-    variable localData  : WData'subtype ; 
-    variable localWstrb : WStrb'subtype ;
+    variable WriteAddr  : AWAddr'subtype ; 
+    variable WriteProt  : AWProt'subtype ;
+    variable WriteData  : WData'subtype ; 
+    variable WriteStrb  : WStrb'subtype ;
+    variable ReadAddr   : ARAddr'subtype ; 
+    variable ReadProt   : ARProt'subtype ;
+    variable ReadData   : RData'subtype ; 
+    variable ReadResp   : RResp'subtype ; 
   begin
     WaitForTransaction(
        Clk      => Clk,
@@ -204,32 +212,34 @@ begin
         end if ; 
         
         -- Get Write Operation from FIFO
-        (localAddr, localProt, localData, localWstrb) := WriteTransactionFifo.pop ;
-        TransRec.Address        <= to_TransactionType(localAddr) ; 
-        TransRec.Prot           <= to_integer(localProt) ; 
-        TransRec.DataFromModel  <= to_TransactionType(LocalData) ;
-        TransRec.Strb           <= to_integer(localWstrb) ; 
+        (WriteAddr, WriteProt, WriteData, WriteStrb) := WriteTransactionFifo.pop ;
+        TransRec.Address        <= ToTransaction(WriteAddr) ; 
+        TransRec.Prot           <= to_integer(WriteProt) ; 
+        TransRec.DataFromModel  <= ToTransaction(Extend(WriteData, TransRec.DataFromModel'length)) ;
+        TransRec.Strb           <= to_integer(WriteStrb) ; 
         wait for 0 ns ; 
         
         
       when READ =>
-        -- Push Read Data Response Values
-        ReadDataFifo.push( 
-           from_TransactionType(TransRec.DataToModel, RData'length) & 
-           to_Axi4RespType(TransRec.Resp)  ) ; 
-        Increment(ReadDataRequestCount) ;
+        -- Get Read Data Response Values
+        ReadData := FromTransaction(TransRec.DataToModel) ;
+        ReadResp := to_Axi4RespType(TransRec.Resp) ; 
            
         -- Expect Read Address Cycle
         if ReadAddressFifo.empty then 
           WaitForToggle(ReadAddressReceiveCount) ;
         end if ; 
-        (localAddr, localProt) := ReadAddressFifo.pop ;
-        TransRec.Address        <= to_TransactionType(localAddr) ; 
-        TransRec.Prot           <= to_integer(localProt) ; 
+        (ReadAddr, ReadProt) := ReadAddressFifo.pop ;
+        TransRec.Address        <= ToTransaction(ReadAddr) ; 
+        TransRec.Prot           <= to_integer(ReadProt) ; 
+        
+        -- Push Read Data Response Values
+        ReadDataFifo.push(ReadData & ReadResp) ; 
+        Increment(ReadDataRequestCount) ;
         wait for 0 ns ; 
 
       when NO_OP =>
-        NoOpCycles := From_TransactionType(TransRec.DataToModel) ;
+        NoOpCycles := FromTransaction(TransRec.DataToModel) ;
         wait for (NoOpCycles * tperiod_Clk) - 1 ns ;
         wait until Clk = '1' ;
 
@@ -237,7 +247,7 @@ begin
         -- Report and Get Errors
         print("") ;
         ReportNonZeroAlerts(AlertLogID => ModelID) ;
-        TransRec.DataFromModel <= To_TransactionType(GetAlertCount(AlertLogID => ModelID), TransRec.DataFromModel'length) ;
+        TransRec.DataFromModel <= ToTransaction(GetAlertCount(AlertLogID => ModelID), TransRec.DataFromModel'length) ;
         wait until Clk = '1' ;
 
       when others =>
@@ -317,35 +327,35 @@ begin
   --    Collect Write Address and Data transactions
   ------------------------------------------------------------
   WriteHandler : process
-    variable localAddr  : AWAddr'subtype ; 
-    variable localProt  : AWProt'subtype ; 
-    variable localData  : WData'subtype ; 
-    variable localWstrb : WStrb'subtype ; 
+    variable WriteAddr  : AWAddr'subtype ; 
+    variable WriteProt  : AWProt'subtype ; 
+    variable WriteData  : WData'subtype ; 
+    variable WriteStrb : WStrb'subtype ; 
   begin
     -- Find Write Address and Data transaction
     if WriteAddressFifo.empty then 
       WaitForToggle(WriteAddressReceiveCount) ;
     end if ;
-    (localAddr, localProt) := WriteAddressFifo.pop ; 
+    (WriteAddr, WriteProt) := WriteAddressFifo.pop ; 
     
     if WriteDataFifo.empty then
       WaitForToggle(WriteDataReceiveCount) ;
     end if ; 
-    (localData, localWstrb) := WriteDataFifo.pop ; 
+    (WriteData, WriteStrb) := WriteDataFifo.pop ; 
 
 --! TODO:   Add handshaking/handoff with TransactionDispatcher
 --          Must be conditional so transactions do not need to pull from it
-    WriteTransactionFifo.push(localAddr & localProt & localData & localWstrb) ;
+    WriteTransactionFifo.push(WriteAddr & WriteProt & WriteData & WriteStrb) ;
     increment(WriteReceiveCount) ;
     wait for 0 ns ;  -- allow update before looping
 
     -- Log this operation
     Log(ModelID, 
       "Address Write." &
-      "  AWAddr: "  & to_hstring(localAddr) &
-      "  AWProt: "  & to_string(localProt) &
-      "  WData: "  & to_hstring(localData) &
-      "  WStrb: "  & to_string(localWstrb) &
+      "  AWAddr: "  & to_hstring(WriteAddr) &
+      "  AWProt: "  & to_string(WriteProt) &
+      "  WData: "  & to_hstring(WriteData) &
+      "  WStrb: "  & to_string(WriteStrb) &
       "  Operation# " & to_string(WriteReceiveCount),
       INFO
     ) ;
@@ -361,7 +371,8 @@ begin
   begin
     -- initialize 
     BValid <= '0' ;
-    
+    BResp  <= (BResp'range => '0') ;
+
     WriteResponseLoop : loop 
       -- Find Transaction
       if WriteResponseDoneCount >= WriteReceiveCount then
@@ -436,7 +447,7 @@ begin
         "Read Operation." &
         "  ARAddr: "  & to_hstring(ARAddr) &
         "  ARProt: "  & to_string(ARProt) &
-        "  Operation# " & to_string(ReadAddressReceiveCount),
+        "  Operation# " & to_string(ReadAddressReceiveCount + 1), -- adjusted for delay of ReadAddressReceiveCount
         INFO
       ) ;
     end loop ReadAddressOperation ;
@@ -448,14 +459,14 @@ begin
   --    Receive Read Data Transactions
   ------------------------------------------------------------
   ReadDataHandler : process
-    variable localAddr  : ARAddr'subtype ; 
-    variable localProt  : ARProt'subtype ; 
-    variable localData  : RData'subtype ;
-    variable localResp  : RResp'subtype ;
+    variable ReadData  : RData'subtype ;
+    variable ReadResp  : RResp'subtype ;
   begin
     -- initialize
     RValid <= '0' ;
-  
+    RData  <= (RData'range => '0') ;
+    RResp  <= (RResp'range => '0') ;
+
     ReadDataLoop : loop 
       -- Start a Read Data Response Transaction after receiving a read address
       if ReadAddressReceiveCount <= ReadDataDoneCount then 
@@ -466,19 +477,19 @@ begin
         WaitForToggle(ReadDataRequestCount) ;
       end if ; 
       
-      (localData, localResp) := ReadDataFifo.pop ; 
+      (ReadData, ReadResp) := ReadDataFifo.pop ; 
       
 --      -- Find Response if available
 --      if not ReadDataFifo.Empty then
---        (localData, localResp) := ReadDataFifo.pop ; 
+--        (ReadData, ReadResp) := ReadDataFifo.pop ; 
 --      else
---        localData := to_slv(ReadAddressReceiveCount, RData'length) ;
---        localResp := AXI4_RESP_OKAY ;
+--        ReadData := to_slv(ReadAddressReceiveCount, RData'length) ;
+--        ReadResp := AXI4_RESP_OKAY ;
 --      end if ;
 
       -- Transaction Values 
-      RData  <= localData  after tpd_Clk_RDATA ;
-      RResp  <= localResp  after tpd_Clk_RResp ;
+      RData  <= ReadData  after tpd_Clk_RDATA ;
+      RResp  <= ReadResp  after tpd_Clk_RResp ;
       
       ---------------------
       DoAxiValidHandshake (
@@ -502,8 +513,8 @@ begin
 
       -- State after operation
       RValid <= '0' after tpd_Clk_RValid ;
-      RData  <= not localData after tpd_clk_RData ; 
-      RResp  <= not localResp after tpd_Clk_RResp ;
+      RData  <= not ReadData after tpd_clk_RData ; 
+      RResp  <= not ReadResp after tpd_Clk_RResp ;
 
       -- Signal completion
       Increment(ReadDataDoneCount) ;

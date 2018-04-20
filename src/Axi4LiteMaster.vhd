@@ -23,7 +23,7 @@
 --    04/2018    2018.04    First Release
 --
 --
--- Copyright 2017 SynthWorks Design Inc
+-- Copyright 2017-2108 SynthWorks Design Inc
 --
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -110,6 +110,11 @@ port (
 end entity Axi4LiteMaster ;
 architecture SimpleMaster of Axi4LiteMaster is
 
+  constant AXI_ADDR_WIDTH : integer := AWAddr'length ;
+  constant AXI_DATA_WIDTH : integer := WData'length ;
+  constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
+
+
   constant MODEL_INSTANCE_NAME : string     := PathTail(to_lower(Axi4LiteMaster'PATH_NAME)) ;
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ; 
   
@@ -148,23 +153,29 @@ begin
   ------------------------------------------------------------
   --  Initialize alerts
   ------------------------------------------------------------
-  InitalizeAlerts : process
+  Initialize : process
     variable ID : AlertLogIDType ; 
   begin
-    ID                   := GetAlertLogID(MODEL_INSTANCE_NAME) ; 
-    ModelID              <= ID ; 
-    TransRec.AlertLogID  <= ID ; 
-    ProtocolID           <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
-    DataCheckID          <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
-    BusFailedID          <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
+    -- Transaction Interface
+    TransRec.AxiAddrWidth   <= AXI_ADDR_WIDTH ; 
+    TransRec.AxiDataWidth   <= AXI_DATA_WIDTH ; 
+    
+    -- Alerts 
+    ID                      := GetAlertLogID(MODEL_INSTANCE_NAME) ; 
+    ModelID                 <= ID ; 
+    TransRec.AlertLogID     <= ID ; 
+    ProtocolID              <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
+    DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
+    BusFailedID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
 
+    -- FIFOS
     WriteAddressFifo.SetAlertLogID(        "AXI Master WriteAddressFIFO"); 
     WriteDataFifo.SetAlertLogID(           "AXI Master WriteDataFifo"); 
     ReadAddressFifo.SetAlertLogID(         "AXI Master ReadAddressFifo"); 
     ReadDataFifo.SetAlertLogID(            "AXI Master ReadDataFifo"); 
     WriteResponseScoreboard.SetAlertLogID( "AXI Master WriteResponse Scoreboard"); 
     wait ; 
-  end process InitalizeAlerts ;
+  end process Initialize ;
 
 
   ------------------------------------------------------------
@@ -172,15 +183,18 @@ begin
   --    Dispatches transactions to
   ------------------------------------------------------------
   TransactionDispatcher : process
-    variable WriteAddress : AWAddr'subtype ; 
-    variable WriteProt    : AWProt'subtype ;
-    variable WriteData    : WData'subtype ; 
-    variable WriteStrb    : WStrb'subtype ;
-    variable ReadAddress  : ARAddr'subtype ; 
-    variable ReadProt     : ARProt'subtype ;
-    variable ReadData     : RData'subtype ; 
-    variable ExpectedData : RData'subtype ; 
-    variable NoOpCycles   : integer ; 
+    variable WriteAddress  : AWAddr'subtype ; 
+    variable WriteByteAddr : integer ; 
+    variable WriteProt     : AWProt'subtype ;
+    variable WriteData     : WData'subtype ; 
+    variable WriteStrb     : WStrb'subtype ;
+    variable WriteResp     : BResp'subtype ; 
+    variable ReadAddress   : ARAddr'subtype ; 
+    variable ReadByteAddr  : integer ; 
+    variable ReadProt      : ARProt'subtype ;
+    variable ReadData      : RData'subtype ; 
+    variable ExpectedData  : RData'subtype ; 
+    variable NoOpCycles    : integer ; 
   begin
     WaitForTransaction(
        Clk      => Clk,
@@ -190,11 +204,19 @@ begin
 
     case TransRec.Operation is
       when WRITE =>
-        WriteAddress := from_TransactionType(TransRec.Address, AWAddr'length) ;
-        WriteProt    := to_slv(TransRec.Prot, AWProt'length) ;
-        WriteData    := from_TransactionType(TransRec.DataToModel, WData'length) ;
-        WriteStrb    := to_slv(TransRec.Strb, WStrb'length);
-        
+        -- Extract transaction information from the record.
+        WriteAddress  := FromTransaction(TransRec.Address) ;
+        WriteByteAddr := CalculateAxiByteAddress(WriteAddress, AXI_DATA_BYTE_WIDTH);
+        WriteProt     := to_slv(TransRec.Prot, AWProt'length) ;
+        WriteStrb     := CalculateAxiWriteStrobe(WriteByteAddr, TransRec.DataBytes, AXI_DATA_BYTE_WIDTH) ; 
+        WriteData     := FromTransaction(TransRec.DataToModel) ;
+        if TransRec.DataBytes /= AXI_DATA_BYTE_WIDTH then 
+          AlignAxiWriteData(WriteData, WriteByteAddr) ; 
+          AlertIf(ModelID, AXI_DATA_BYTE_WIDTH - WriteByteAddr < TransRec.DataBytes, 
+            "Master Write, Byte Address not consistent with number of bytes sent", FAILURE) ; 
+        end if ; 
+        WriteResp     := to_Axi4RespType(TransRec.Resp) ;
+
         -- Initiate Write Address
         WriteAddressFifo.Push(WriteAddress & WriteProt) ; 
         Increment(WriteAddressRequestCount) ;
@@ -204,7 +226,7 @@ begin
         Increment(WriteDataRequestCount) ;
 
         -- Write Response
-        WriteResponseScoreboard.Push(to_Axi4RespType(TransRec.Resp)) ;
+        WriteResponseScoreboard.Push(WriteResp) ;
         Increment(WriteResponseExpectCount) ;
 
 -- Current version blocks until both write address and data done.        
@@ -214,8 +236,9 @@ begin
 
       when READ | READ_CHECK =>
         -- Initiate Read Address Cycle
-        ReadAddress :=  from_TransactionType(TransRec.Address, ARAddr'length) ;
-        ReadProt    := to_slv(TransRec.Prot, ARProt'length) ;
+        ReadAddress   :=  FromTransaction(TransRec.Address) ;
+        ReadByteAddr  :=  CalculateAxiByteAddress(ReadAddress, RData'length/8);
+        ReadProt      :=  to_slv(TransRec.Prot, ARProt'length) ;
         ReadAddressFifo.Push(ReadAddress & ReadProt);
         Increment(ReadAddressRequestCount) ;
 
@@ -228,12 +251,17 @@ begin
 
         -- Get Read Data
         ReadData := ReadDataFifo.Pop ;
-        TransRec.DataFromModel <= to_TransactionType(ReadData) ;
+        if TransRec.DataBytes /= AXI_DATA_BYTE_WIDTH then 
+          AlignAxiReadData(ReadData, ReadByteAddr, TransRec.DataBytes) ; 
+          AlertIf(ModelID, AXI_DATA_BYTE_WIDTH - ReadByteAddr < TransRec.DataBytes, 
+            "Master Read, Byte Address not consistent with number of bytes expected", FAILURE) ; 
+        end if ; 
+        TransRec.DataFromModel <= ToTransaction(ReadData) ;
 
 --!TODO move logs and data checks to Address and Data handling processes 
 -- Or keep it here and move the logs for write to the transaction handler       
         if TransRec.Operation = READ_CHECK then
-          ExpectedData := from_TransactionType(TransRec.DataToModel, ExpectedData'length) ;
+          ExpectedData := FromTransaction(TransRec.DataToModel) ;
           AffirmIf( DataCheckID, ReadData = ExpectedData,
             "Read Address: " & to_hstring(ReadAddress) &
             " Data: " & to_hstring(ReadData),
@@ -250,7 +278,7 @@ begin
         end if ;
 
       when NO_OP =>
-        NoOpCycles := From_TransactionType(TransRec.DataToModel) ;
+        NoOpCycles := FromTransaction(TransRec.DataToModel) ;
         wait for (NoOpCycles * tperiod_Clk) - 1 ns ;
         wait until Clk = '1' ;
 
@@ -258,7 +286,7 @@ begin
         -- Report and Get Errors
         print("") ;
         ReportNonZeroAlerts(AlertLogID => ModelID) ;
-        TransRec.DataFromModel <= To_TransactionType(GetAlertCount(AlertLogID => ModelID), TransRec.DataFromModel'length) ;
+        TransRec.DataFromModel <= ToTransaction(GetAlertCount(AlertLogID => ModelID), TransRec.DataFromModel'length) ;
         wait until Clk = '1' ;
 
       when others =>
@@ -280,7 +308,9 @@ begin
     variable WriteAddress : AWAddr'subtype ; 
   begin
     AWValid <= '0' ;
-  
+    AWAddr  <= (AWAddr'range => '0') ;
+    AWProt  <= (AWProt'range => '0') ;
+
     WriteAddressLoop : loop 
       -- Find Transaction
       if WriteAddressFifo.Empty then
@@ -333,6 +363,8 @@ begin
   begin
     -- initialize
     WValid <= '0' ; 
+    WData  <= (WData'range => '0') ;
+    WStrb  <= (WStrb'range => '0') ;
     
     WriteDataLoop : loop
       -- Find Transaction
@@ -444,7 +476,9 @@ begin
   begin
     -- initialize 
     ARValid <= '0'  ; 
-    
+    ARAddr  <= (ARAddr'range => '0') ;
+    ARProt  <= (ARProt'range => '0') ;
+
     AddressReadLoop : loop 
       -- Find Transaction
       if ReadAddressFifo.Empty then

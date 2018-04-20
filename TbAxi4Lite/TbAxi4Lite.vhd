@@ -63,9 +63,9 @@ architecture TestHarness of TbAxi4Lite is
 
   -- Testbench Transaction Interface
   subtype TransactionRecType is Axi4TransactionRecType(
-    Address(SizeOf_TransactionType(AXI_ADDR_WIDTH)-1 downto 0), 
-    DataToModel(SizeOf_TransactionType(AXI_DATA_WIDTH)-1 downto 0),
-    DataFromModel(SizeOf_TransactionType(AXI_DATA_WIDTH)-1 downto 0)
+    Address(SizeOfTransaction(AXI_ADDR_WIDTH)-1 downto 0), 
+    DataToModel(SizeOfTransaction(AXI_DATA_WIDTH)-1 downto 0),
+    DataFromModel(SizeOfTransaction(AXI_DATA_WIDTH)-1 downto 0)
   ) ;  
   signal AxiMasterTransRec   : TransactionRecType ;
   signal AxiSlaveTransRec    : TransactionRecType ;

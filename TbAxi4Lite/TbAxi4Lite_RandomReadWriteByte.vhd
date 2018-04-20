@@ -1,5 +1,5 @@
 --
---  File Name:         TestCtrl_Test2.vhd
+--  File Name:         TbAxi4Lite_RandomReadWriteByte.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -37,11 +37,12 @@
 -- limitations under the License.
 --
 --
-architecture Test2 of TestCtrl is
+architecture RandomReadWriteByte of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
   constant AXI_ADDR_WIDTH : integer := 32 ; 
   constant AXI_DATA_WIDTH : integer := 32 ; 
+  constant AXI_DATA_BYTES : integer := AXI_DATA_WIDTH / 8 ; 
   
   type OpType is (WRITE_OP_ENUM, READ_OP_ENUM) ;  -- Add TEST_DONE?
   -- constant NO_OP_INDEX    : integer := OpType'pos(NO_OP) ;
@@ -66,26 +67,27 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("Test2") ;
+    SetAlertLogName("TbAxi4Lite_RandomReadWriteByte") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/Test2.txt") ;
+    TranscriptOpen("./results/TbAxi4Lite_RandomReadWriteByte.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
     wait until nReset = '1' ;  
     ClearAlerts ;
+    SetAlertStopCount(ERROR, 2) ;
 
     -- Wait for test to finish
     WaitForBarrier(TestDone, 1 ms) ;
     AlertIf(now >= 1 ms, "Test finished due to timeout") ;
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
-    TranscriptClose ; 
---    AlertIfDiff("./results/Test2.txt", "../sim_shared/validated_results/Test2.txt", "") ; 
+--    TranscriptClose ; 
+--    AlertIfDiff("./results/TbAxi4Lite_RandomReadWriteByte.txt", "../sim_shared/validated_results/TbAxi4Lite_RandomReadWriteByte.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 
@@ -100,18 +102,23 @@ begin
   --   Generate transactions for AxiMaster
   ------------------------------------------------------------
   AxiMasterProc : process
-    variable OpRV      : RandomPType ;   
-    variable NoOpRV    : RandomPType ;   
-    variable Operation : OperationType ; 
-    variable Address   : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
-    variable Data      : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
-    variable ReadData  : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
+    variable OpRV           : RandomPType ;   
+    variable NoOpRV         : RandomPType ;   
+    variable DataRV         : RandomPType ;   
+    variable Operation      : OperationType ; 
+    variable Address        : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
+    variable ByteAddress    : integer ;
+    variable NumberOfBytes  : integer ;
+    variable MasterData     : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
+    variable SlaveData      : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
+    variable ReadData       : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
     
     variable counts : integer_vector(0 to OpType'Pos(OpType'Right)) ; 
   begin
     -- Initialize Randomization Objects
     OpRV.InitSeed(OpRv'instance_name) ;
     NoOpRV.InitSeed(NoOpRV'instance_name) ;
+    DataRV.InitSeed(DataRV'instance_name) ;
     
     -- Find exit of reset
     wait until nReset = '1' ;  
@@ -122,10 +129,24 @@ begin
     
     OperationLoop : loop
       -- Calculate Address and Data if Write or Read Operation
-      Address   := OpRV.RandSlv(size => AXI_ADDR_WIDTH) ;
-      Data      := OpRV.RandSlv(size => AXI_DATA_WIDTH) ;
-      Operation := to_slv(OpRV.DistInt(counts), Operation'length) ;
-      OperationFifo.push(Operation & Address & Data) ;
+      Operation      := to_slv(OpRV.DistInt(counts), Operation'length) ;
+      Address        := OpRV.RandSlv(size => AXI_ADDR_WIDTH) ;
+      ByteAddress    := to_integer(Address(1 downto 0)) ;
+      NumberOfBytes  := OpRv.RandInt(1, AXI_DATA_BYTES - ByteAddress) ;
+
+      -- Get MasterData right aligned and SlaveData word aligned
+      SlaveData      := (others => '0') ;
+      MasterData     := (others => '0') ;
+      for i in AXI_DATA_BYTES - 1 downto 0 loop
+        SlaveData := SlaveData(AXI_DATA_BYTES*8 - 9 downto 0) & (0 to 7 => '0') ;
+        if i >= ByteAddress and i < ByteAddress + NumberOfBytes then
+          SlaveData(7 downto 0) := DataRV.RandSlv(0, 255, 8) ;
+          MasterData := MasterData(AXI_DATA_BYTES*8 - 9 downto 0) & SlaveData(7 downto 0) ;
+        end if ; 
+      end loop ;
+      
+      -- Send the operation to the Slave Handler
+      OperationFifo.push(Operation & Address & SlaveData) ;
       Increment(OperationCount) ;
       
       -- 20 % of the time add a no-op cycle with a delay of 1 to 5 clocks
@@ -138,14 +159,15 @@ begin
         when WRITE_OP =>  
           counts(WRITE_OP_INDEX) := counts(WRITE_OP_INDEX) - 1 ; 
           -- Log("Starting: Master Write with Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
-          MasterWrite(AxiMasterTransRec, Address, Data) ;
+          MasterWrite(AxiMasterTransRec, Address, MasterData(NumberOfBytes*8-1 downto 0)) ;
           
         when READ_OP =>  
           counts(READ_OP_INDEX) := counts(READ_OP_INDEX) - 1 ; 
           -- Log("Starting: Master Read with Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
-          MasterRead(AxiMasterTransRec, Address, ReadData) ;
-          AffirmIf(ReadData = Data, "AXI Master Read Data: "& to_hstring(ReadData), 
-                   "  Expected: " & to_hstring(Data)) ;
+          ReadData := (others => '0') ;  -- Clear out all data values for short reads
+          MasterRead(AxiMasterTransRec, Address, ReadData(NumberOfBytes*8-1 downto 0)) ;
+          AffirmIf(ReadData = MasterData, "AXI Master Read Data: "& to_hstring(ReadData), 
+                   "  Expected: " & to_hstring(MasterData) & "  ByteAddress: " & to_string(ByteAddress)) ;
 
         when others =>
           Alert("Invalid Operation Generated", FAILURE) ;
@@ -226,4 +248,12 @@ begin
   end process AxiSlaveProc ;
 
 
-end Test2 ;
+end RandomReadWriteByte ;
+
+Configuration TbAxi4Lite_RandomReadWriteByte of TbAxi4Lite is
+  for TestHarness
+    for TestCtrl_1 : TestCtrl
+      use entity work.TestCtrl(RandomReadWriteByte) ; 
+    end for ; 
+  end for ; 
+end TbAxi4Lite_RandomReadWriteByte ; 

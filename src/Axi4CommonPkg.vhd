@@ -73,6 +73,41 @@ package Axi4CommonPkg is
     constant TimeOutMessage         : in    string := "" ; 
     constant TimeOutPeriod          : in    time := time'right
   ) ;
+  
+  ------------------------------------------------------------
+  function CalculateAxiByteAddress (
+  -- Fetch the address and data the slave sees for a write 
+  ------------------------------------------------------------
+    constant Address       : In  std_logic_vector ;
+    constant MaxBytes      : In  integer 
+  ) return integer ; 
+
+  ------------------------------------------------------------
+  function CalculateAxiWriteStrobe (
+  -- Fetch the address and data the slave sees for a write 
+  ------------------------------------------------------------
+    constant ByteAddr      : In  integer ;
+    constant NumberOfBytes : In  integer ; 
+    constant MaxBytes      : In  integer 
+  ) return std_logic_vector ; 
+  
+  ------------------------------------------------------------
+  procedure AlignAxiWriteData (
+  -- Shift Data to Align it. 
+  ------------------------------------------------------------
+    variable Data          : InOut std_logic_vector ;
+    constant ByteAddr      : In    integer  
+  ) ; 
+  
+  ------------------------------------------------------------
+  procedure AlignAxiReadData (
+  -- Shift Data Right and MASK unused bytes. 
+  ------------------------------------------------------------
+    variable Data          : InOut std_logic_vector ;
+    constant ByteAddr      : In    integer ; 
+    constant DataBytes     : In    integer  
+  ) ;   
+  
 end package Axi4CommonPkg ;
 
 -- /////////////////////////////////////////////////////////////////////////////////////////
@@ -148,8 +183,64 @@ package body Axi4CommonPkg is
     -- State after operation
     Ready <= '0' after tpd_Clk_Ready ;
   end procedure DoAxiReadyHandshake ;
-
   
+  ------------------------------------------------------------
+  function CalculateAxiByteAddress (
+  -- Fetch the address and data the slave sees for a write 
+  ------------------------------------------------------------
+    constant Address       : In  std_logic_vector ;
+    constant MaxBytes      : In  integer 
+  ) return integer is
+    alias    aAddr         : std_logic_vector(Address'length downto 1) is Address ; 
+    constant NumAddrBits   : integer := integer(round(Log2(real(MaxBytes)))) ; 
+  begin 
+    return to_integer(aAddr(NumAddrBits downto 1) ) ;
+  end function CalculateAxiByteAddress ; 
+
+  ------------------------------------------------------------
+  function CalculateAxiWriteStrobe (
+  -- Fetch the address and data the slave sees for a write 
+  ------------------------------------------------------------
+    constant ByteAddr      : In  integer ;
+    constant NumberOfBytes : In  integer ; 
+    constant MaxBytes      : In  integer 
+  ) return std_logic_vector is
+    variable WriteStrobe   : std_logic_vector(MaxBytes downto 1) := (others => '0') ; 
+  begin
+    -- Calculate Initial WriteStrobe based on number of bytes
+    WriteStrobe(NumberOfBytes downto 1) := (others => '1') ;
+        
+    -- Adjust WriteStrobe for Address
+    return WriteStrobe(MaxBytes - ByteAddr downto 1) & (ByteAddr downto 1 => '0') ;
+  end function CalculateAxiWriteStrobe ; 
+  
+  ------------------------------------------------------------
+  procedure AlignAxiWriteData (
+  -- Shift Data to Align it. 
+  ------------------------------------------------------------
+    variable Data          : InOut std_logic_vector ;
+    constant ByteAddr      : In    integer  
+  ) is
+    alias    aData         : std_logic_vector(Data'length-1 downto 0) is Data ; 
+  begin    
+      Data := aData(Data'length - ByteAddr*8 - 1 downto 0) & (ByteAddr*8 downto 1 => '0') ; 
+  end procedure AlignAxiWriteData ; 
+  
+  ------------------------------------------------------------
+  procedure AlignAxiReadData (
+  -- Shift Data Right and MASK unused bytes. 
+  ------------------------------------------------------------
+    variable Data          : InOut std_logic_vector ;
+    constant ByteAddr      : In    integer ; 
+    constant DataBytes     : In    integer  
+  ) is
+    alias    aData   : std_logic_vector(Data'length-1 downto 0) is Data ; 
+    variable Mask    : std_logic_vector(Data'length-1 downto 0) ;
+  begin    
+      Data := (ByteAddr*8 downto 1 => '0') & aData(Data'length - 1 downto ByteAddr*8) ; 
+      Mask := (Data'length-1 downto DataBytes*8 => '0') & (DataBytes*8 - 1 downto 0 => '1') ;
+      Data := Mask and Data ; 
+  end procedure AlignAxiReadData ; 
 end package body Axi4CommonPkg ; 
 
   

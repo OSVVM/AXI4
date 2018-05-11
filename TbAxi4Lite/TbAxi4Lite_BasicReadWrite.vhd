@@ -58,8 +58,8 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
---    TranscriptOpen("./results/TbAxi4Lite_BasicReadWrite.txt") ;
---    SetTranscriptMirror(TRUE) ; 
+    TranscriptOpen("./results/TbAxi4Lite_BasicReadWrite.txt") ;
+    SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
     wait until nReset = '1' ;  
@@ -71,8 +71,8 @@ begin
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     
---    TranscriptClose ; 
---    AlertIfDiff("./results/TbAxi4Lite_BasicReadWrite.txt", "../sim_shared/validated_results/TbAxi4Lite_BasicReadWrite.txt", "") ; 
+    TranscriptClose ; 
+    AlertIfDiff("./results/TbAxi4Lite_BasicReadWrite.txt", "../sim_shared/validated_results/TbAxi4Lite_BasicReadWrite.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 

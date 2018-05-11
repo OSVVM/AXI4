@@ -66,8 +66,7 @@ package Axi4CommonPkg is
     signal   Valid                  : in    std_logic ; 
     signal   Ready                  : inout std_logic ; 
     constant ReadyBeforeValid       : in    boolean ; 
-    constant ReadyDelayCycles       : in    integer ; 
-    constant tperiod_Clk            : in    time ; 
+    constant ReadyDelayCycles       : in    time ; 
     constant tpd_Clk_Ready          : in    time ;
     constant AlertLogID             : in    AlertLogIDType := ALERTLOG_DEFAULT_ID; 
     constant TimeOutMessage         : in    string := "" ; 
@@ -137,7 +136,8 @@ package body Axi4CommonPkg is
     AlertIf(
       AlertLogID, 
       Ready /= '1', 
-      TimeOutMessage & ".   Ready: " & to_string(Ready) & "  Expected: 1"
+      TimeOutMessage & ".   Ready: " & to_string(Ready) & "  Expected: 1",
+      FAILURE
     ) ;
   end procedure DoAxiValidHandshake ;
 
@@ -148,8 +148,7 @@ package body Axi4CommonPkg is
     signal   Valid                  : in    std_logic ; 
     signal   Ready                  : inout std_logic ; 
     constant ReadyBeforeValid       : in    boolean ; 
-    constant ReadyDelayCycles       : in    integer ; 
-    constant tperiod_Clk            : in    time ; 
+    constant ReadyDelayCycles       : in    time ; 
     constant tpd_Clk_Ready          : in    time ;
     constant AlertLogID             : in    AlertLogIDType := ALERTLOG_DEFAULT_ID; 
     constant TimeOutMessage         : in    string := "" ; 
@@ -158,21 +157,22 @@ package body Axi4CommonPkg is
   begin 
     
     if ReadyBeforeValid then
-      Ready <= transport '1' after ReadyDelayCycles * tperiod_Clk + tpd_Clk_Ready ;
+      Ready <= transport '1' after ReadyDelayCycles + tpd_Clk_Ready ;
     end if ;  
     
     -- Wait to Receive Transaction
-    wait on Clk until Clk = '1' and Valid = '1' for TimeOutPeriod;
+    wait on Clk until Clk = '1' and Valid = '1' for TimeOutPeriod ;
     
     -- Check for TimeOut
     AlertIf(
       AlertLogID, 
       Valid /= '1', 
-      TimeOutMessage & ".   Valid: " & to_string(Valid) & "  Expected: 1"
+      TimeOutMessage & ".   Valid: " & to_string(Valid) & "  Expected: 1",
+      FAILURE
     ) ;
 
     if not ReadyBeforeValid then 
-      Ready <= '1' after ReadyDelayCycles * tperiod_Clk + tpd_Clk_Ready ;
+      Ready <= '1' after ReadyDelayCycles + tpd_Clk_Ready ;
     end if ; 
     
     -- If ready not signaled yet, find ready at a rising edge of clk

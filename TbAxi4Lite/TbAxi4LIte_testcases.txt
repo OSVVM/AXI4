@@ -1,2 +1,3 @@
 TbAxi4Lite_BasicReadWrite
 TbAxi4Lite_RandomReadWrite
+TbAxi4Lite_RandomReadWriteByte

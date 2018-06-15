@@ -1,6 +1,6 @@
 --
---  File Name:         Axi4TransactionPkg.vhd
---  Design Unit Name:  Axi4TransactionPkg
+--  File Name:         Axi4LiteMasterTransactionPkg.vhd
+--  Design Unit Name:  Axi4LiteMasterTransactionPkg
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -46,72 +46,54 @@ library ieee ;
 library osvvm ;
     context osvvm.OsvvmContext ;
 
-package Axi4TransactionPkg is
+  use work.Axi4CommonPkg.all ; 
+    
+package Axi4LiteMasterTransactionPkg is
 
   -- Model AXI Lite Operations
-  type Axi4UnresolvedOperationType is (
+  type Axi4UnresolvedMasterOperationType is (
     -- Model Directives
     NO_OP, GET_ERRORS, SET_MODEL_OPTIONS,
     --  bus operations
-    --                       -- Master                         -- Slave
-    --                       ----------------------------      ----------------------------
-    WRITE,                   -- Blocking (Tx Addr & Data)      -- Blocking (Rx Addr & Data)
-    READ,                    -- Blocking(Tx Addr, Rx Data)     -- Blocking (Rx Addr, Tx Data)
+    --                       -- Master                         
+    --                       ----------------------------      
+    WRITE,                   -- Blocking (Tx Addr & Data)      
+    READ,                    -- Blocking(Tx Addr, Rx Data)     
     --  Master Only
-    READ_CHECK,              -- Blocking (Tx Addr & Data)      -- ----------
-    ASYNC_WRITE,             -- Non-blocking (Tx Addr & Data)  -- ----------
-    ASYNC_WRITE_ADDRESS,     -- Non-blocking (Tx Addr)         -- ----------
-    ASYNC_WRITE_DATA,        -- Non-blocking (Tx Data)         -- ----------
-    ASYNC_READ_ADDRESS,      -- Non-blocking (Tx Addr)         -- ----------
-    READ_DATA,               -- Blocking (Rx Data)             -- ----------
-    TRY_READ_DATA,           -- Non-blocking try & get         -- ----------
+    READ_CHECK,              -- Blocking (Tx Addr & Data)      
+    ASYNC_WRITE,             -- Non-blocking (Tx Addr & Data)  
+    ASYNC_WRITE_ADDRESS,     -- Non-blocking (Tx Addr)         
+    ASYNC_WRITE_DATA,        -- Non-blocking (Tx Data)         
+    ASYNC_READ_ADDRESS,      -- Non-blocking (Tx Addr)         
+    READ_DATA,               -- Blocking (Rx Data)             
+    TRY_READ_DATA,           -- Non-blocking try & get         
 --! TODO - add transaction for READ_DATA_CHECK
-    READ_DATA_CHECK,         -- Blocking (Tx Data)             -- ----------
+    READ_DATA_CHECK,         -- Blocking (Tx Data)             
 --! TODO - add transaction and master behavior for TRY_READ_DATA_CHECK
     -- TRY_READ_DATA_CHECK,     -- Non-blocking read check
-    --  Slave Only
-    WRITE_ADDRESS,           -- ----------                     -- Blocking (Rx Addr)
-    WRITE_DATA,              -- ----------                     -- Blocking (Rx Data)
-    TRY_WRITE,               -- ----------                     -- Check for Write(Rx Addr & Data)
-    TRY_WRITE_ADDRESS,       -- ----------                     -- Non-blocking try & get
-    TRY_WRITE_DATA,          -- ----------                     -- Non-blocking try & get
-    READ_ADDRESS,            -- ----------                     -- Blocking (Rx Addr)
-    TRY_READ_ADDRESS,        -- ----------                     -- Non-blocking try & get
-    ASYNC_READ_DATA,         -- ----------                     -- Non-blocking (Tx Data)
     THE_END
   ) ;
-  type Axi4UnresolvedOperationVectorType is array (natural range <>) of Axi4UnresolvedOperationType ;
-  alias resolved_max is maximum[ Axi4UnresolvedOperationVectorType return Axi4UnresolvedOperationType] ;
+  type Axi4UnresolvedMasterOperationVectorType is array (natural range <>) of Axi4UnresolvedMasterOperationType ;
+  alias resolved_max is maximum[ Axi4UnresolvedMasterOperationVectorType return Axi4UnresolvedMasterOperationType] ;
   -- Maximum is implicitly defined for any array type in VHDL-2008.   Function resolved_max is a fall back.
   -- function resolved_max ( s : Axi4LiteUnresolvedOperationVectorType) return Axi4LiteUnresolvedOperationType ;
-  subtype Axi4OperationType is resolved_max Axi4UnresolvedOperationType ;
+  subtype Axi4MasterOperationType is resolved_max Axi4UnresolvedMasterOperationType ;
 
   -- AXI Model Options
-  type Axi4UnresolvedOptionsType is (
+  type Axi4UnresolvedMasterOptionsType is (
     --
     -- Master Ready TimeOut Checks
     WRITE_ADDRESS_READY_TIME_OUT,
     WRITE_DATA_READY_TIME_OUT,
     READ_ADDRESS_READY_TIME_OUT,
-    -- Slave Ready TimeOut Checks
-    WRITE_RESPONSE_READY_TIME_OUT,
-    READ_DATA_READY_TIME_OUT,
     -- Master Valid TimeOut Checks
     WRITE_RESPONSE_VALID_TIME_OUT,
     READ_DATA_VALID_TIME_OUT,
     --
-    -- Slave Ready Before Valid
-    WRITE_ADDRESS_READY_BEFORE_VALID,
-    WRITE_DATA_READY_BEFORE_VALID,
-    READ_ADDRESS_READY_BEFORE_VALID,
     -- Master Ready Before Valid
     WRITE_RESPONSE_READY_BEFORE_VALID,
     READ_DATA_READY_BEFORE_VALID,
     --
-    -- Slave Ready Delay Cycles
-    WRITE_ADDRESS_READY_DELAY_CYCLES,
-    WRITE_DATA_READY_DELAY_CYCLES,
-    READ_ADDRESS_READY_DELAY_CYCLES,
     -- Master Ready Delay Cycles
     WRITE_RESPONSE_READY_DELAY_CYCLES,
     READ_DATA_READY_DELAY_CYCLES,
@@ -122,65 +104,22 @@ package Axi4TransactionPkg is
     SET_WRITE_PROT,
     USE_WRITE_PROT_FROM_MODEL,
     --
-    -- Slave RESP Settings
-    SET_READ_RESP,
-    USE_READ_RESP_FROM_MODEL,
-    SET_WRITE_RESP,
-    USE_WRITE_RESP_FROM_MODEL,
-    --
     -- The End -- Done
     THE_END
   ) ;
-  type Axi4UnresolvedOptionsVectorType is array (natural range <>) of Axi4UnresolvedOptionsType ;
-  alias resolved_max is maximum[ Axi4UnresolvedOptionsVectorType return Axi4UnresolvedOptionsType] ;
-  subtype Axi4OptionsType is resolved_max Axi4UnresolvedOptionsType ;
+  type Axi4UnresolvedMasterOptionsVectorType is array (natural range <>) of Axi4UnresolvedMasterOptionsType ;
+  alias resolved_max is maximum[ Axi4UnresolvedMasterOptionsVectorType return Axi4UnresolvedMasterOptionsType] ;
+  subtype Axi4LiteMasterOptionsType is resolved_max Axi4UnresolvedMasterOptionsType ;
 
-  --                                     00    01      10      11
-  type  Axi4UnresolvedRespEnumType is (OKAY, EXOKAY, SLVERR, DECERR) ;
-  type Axi4UnresolvedRespVectorEnumType is array (natural range <>) of Axi4UnresolvedRespEnumType ;
-  alias resolved_max is maximum[ Axi4UnresolvedRespVectorEnumType return Axi4UnresolvedRespEnumType] ;
-  -- Maximum is implicitly defined for any array type in VHDL-2008.   Function resolved_max is a fall back.
-  -- function resolved_max ( s : Axi4UnresolvedRespVectorEnumType) return Axi4UnresolvedRespEnumType ;
-  subtype Axi4RespEnumType is resolved_max Axi4UnresolvedRespEnumType ;
-
-  subtype  Axi4RespType is std_logic_vector(1 downto 0) ;
-  constant AXI4_RESP_OKAY   : Axi4RespType := "00" ;
-  constant AXI4_RESP_EXOKAY : Axi4RespType := "01" ; -- Not for Lite
-  constant AXI4_RESP_SLVERR : Axi4RespType := "10" ;
-  constant AXI4_RESP_DECERR : Axi4RespType := "11" ;
-  constant AXI4_RESP_INIT   : Axi4RespType := "ZZ" ;
-
-  function from_Axi4RespType (a: Axi4RespType) return Axi4RespEnumType ;
-  function to_Axi4RespType (a: Axi4RespEnumType) return Axi4RespType ;
-
-
-  subtype Axi4ProtType is std_logic_vector(2 downto 0) ;
-  --  [0] 0 Unprivileged access
-  --      1 Privileged access
-  --  [1] 0 Secure access
-  --      1 Non-secure access
-  --  [2] 0 Data access
-  --      1 Instruction access
-  constant AXI4_PROT_INIT   : Axi4ProtType := "ZZZ" ;
-
-  -- Conversions to/from transaction values
-  function Extend(A: std_logic_vector; Size : natural) return std_logic_vector ;
-  function Reduce(A: std_logic_vector; Size : natural) return std_logic_vector ;
-  subtype  TransactionType is std_logic_vector_max_c ;
-  function ToTransaction(A : std_logic_vector) return TransactionType ;
-  function ToTransaction(A : integer; Size : natural) return TransactionType ;
-  function FromTransaction (A: TransactionType) return std_logic_vector ;
-  function FromTransaction (A: TransactionType) return integer ;
-  function SizeOfTransaction (AxiSize : integer) return integer ;
 
   -- Record creates a channel for communicating transactions to the model.
-  type Axi4TransactionRecType is record
+  type Axi4LiteMasterTransactionRecType is record
     Rdy                : bit_max ;
     Ack                : bit_max ;
     AxiAddrWidth       : integer_max ;
     AxiDataWidth       : integer_max ;
-    Operation          : Axi4OperationType ;
-    Options            : Axi4OptionsType ;
+    Operation          : Axi4MasterOperationType ;
+    Options            : Axi4LiteMasterOptionsType ;
     Prot               : integer_max ;
     Address            : TransactionType ;
     DataToModel        : TransactionType ;
@@ -193,7 +132,7 @@ package Axi4TransactionPkg is
     OptionInt          : integer_max ;
     OptionBool         : boolean_max ;
     ModelBool          : boolean_max ;
-  end record Axi4TransactionRecType ;
+  end record Axi4LiteMasterTransactionRecType ;
 
 --!TODO add VHDL-2018 Interfaces
 
@@ -202,7 +141,7 @@ package Axi4TransactionPkg is
   procedure NoOp (
   -- Directive:  Do nothing for NoOpCycles number of clocks
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              NoOpCycles  : In    natural := 1
   ) ;
 
@@ -211,7 +150,7 @@ package Axi4TransactionPkg is
   -- Error reporting for testbenches that do not use AlertLogPkg
   -- Returns error count.  If an error count /= 0, also print it
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
     variable ErrCnt      : Out   natural
   ) ;
 
@@ -219,7 +158,7 @@ package Axi4TransactionPkg is
   procedure MasterWrite (
   -- do CPU Write Cycle
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iAddr       : In    std_logic_vector ;
              iData       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
@@ -229,7 +168,7 @@ package Axi4TransactionPkg is
   procedure MasterWriteAsync (
   -- dispatch CPU Write Cycle
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iAddr       : In    std_logic_vector ;
              iData       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
@@ -239,7 +178,7 @@ package Axi4TransactionPkg is
   procedure MasterWriteAddressAsync (
   -- dispatch CPU Write Address Cycle
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iAddr       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
   ) ;
@@ -248,7 +187,7 @@ package Axi4TransactionPkg is
   procedure MasterWriteDataAsync (
   -- dispatch CPU Write Data Cycle
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iData       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
   ) ;
@@ -257,7 +196,7 @@ package Axi4TransactionPkg is
   procedure MasterRead (
   -- do CPU Read Cycle and return data
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iAddr       : In    std_logic_vector ;
     variable oData       : Out   std_logic_vector ;
              StatusMsgOn : In    boolean := false
@@ -267,7 +206,7 @@ package Axi4TransactionPkg is
   procedure MasterReadCheck (
   -- do CPU Read Cycle and check supplied data
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iAddr       : In    std_logic_vector ;
              iData       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
@@ -277,7 +216,7 @@ package Axi4TransactionPkg is
   procedure MasterReadAddressAsync (
   -- dispatch CPU Read Address Cycle
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iAddr       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
   ) ;
@@ -286,7 +225,7 @@ package Axi4TransactionPkg is
   procedure MasterReadData (
   -- Do CPU Read Data Cycle
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
     variable oData       : Out   std_logic_vector ;
              StatusMsgOn : In    boolean := false
   ) ;
@@ -297,7 +236,7 @@ package Axi4TransactionPkg is
   -- If data is available, get it and return available TRUE.  
   -- Otherwise Return Available FALSE.
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
     variable oData       : Out   std_logic_vector ;
     variable Available   : Out   boolean ;
              StatusMsgOn : In    boolean := false
@@ -307,7 +246,7 @@ package Axi4TransactionPkg is
   procedure MasterReadPoll (
   -- Read location (iAddr) until Data(IndexI) = ValueI
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iAddr       : In    std_logic_vector ;
              Index       : In    Integer ;
              BitValue    : In    std_logic ;
@@ -316,139 +255,41 @@ package Axi4TransactionPkg is
   ) ;
 
   ------------------------------------------------------------
-  procedure SlaveGetWrite (
-  -- Fetch the address and data the slave sees for a write
-  ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
-    variable oAddr       : Out   std_logic_vector ;
-    variable oData       : Out   std_logic_vector ;
-    constant StatusMsgOn : In    boolean := false
-  ) ;
-
-  ------------------------------------------------------------
-  procedure SlaveRead (
-  -- Fetch the address and data the slave sees for a write
-  ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
-    variable oAddr       : Out   std_logic_vector ;
-    Constant iData       : In    std_logic_vector ;
-    constant StatusMsgOn : In    boolean := false
-  ) ;
-
-  ------------------------------------------------------------
   procedure SetModelOptions (
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
-    constant Option      : In    Axi4OptionsType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
+    constant Option      : In    Axi4LiteMasterOptionsType ;
     constant OptVal      : In    boolean
   ) ;
 
   ------------------------------------------------------------
   procedure SetModelOptions (
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
-    constant Option      : In    Axi4OptionsType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
+    constant Option      : In    Axi4LiteMasterOptionsType ;
     constant OptVal      : In    integer
   ) ;
 
   ------------------------------------------------------------
   procedure SetModelOptions (
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
-    constant Option      : In    Axi4OptionsType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
+    constant Option      : In    Axi4LiteMasterOptionsType ;
     constant OptVal      : In    Axi4RespEnumType
   ) ;
 
-end package Axi4TransactionPkg ;
+end package Axi4LiteMasterTransactionPkg ;
 
 -- /////////////////////////////////////////////////////////////////////////////////////////
 -- /////////////////////////////////////////////////////////////////////////////////////////
 
-package body Axi4TransactionPkg is
-  -- Maximum is implicitly defined for any array type in VHDL-2008.   Function resolved_max is a fall back.
-  -- function resolved_max ( s : Axi4LiteUnresolvedOperationVectorType) return Axi4LiteUnresolvedOperationType is
-  -- begin
-  --   return maximum s ;
-  -- end function resolved_max ;
-  --
-  -- function resolved_max ( s : Axi4UnresolvedRespVectorEnumType) return Axi4UnresolvedRespEnumType ;
-  -- begin
-  --   return maximum s ;
-  -- end function resolved_max ;
-
-  ------------------------------------------------------------
-  type TbRespType_indexby_Integer is array (integer range <>) of Axi4RespEnumType;
-  constant RESP_TYPE_TB_TABLE : TbRespType_indexby_Integer := (
-      0   => OKAY,
-      1   => EXOKAY,
-      2   => SLVERR,
-      3   => DECERR
-    ) ;
-  function from_Axi4RespType (a: Axi4RespType) return Axi4RespEnumType is
-  begin
-    return RESP_TYPE_TB_TABLE(to_integer(a)) ;
-  end function from_Axi4RespType ;
-
-  ------------------------------------------------------------
-  type RespType_indexby_TbRespType is array (Axi4RespEnumType) of Axi4RespType;
-  constant TB_TO_RESP_TYPE_TABLE : RespType_indexby_TbRespType := (
-      OKAY     => "00",
-      EXOKAY   => "01",
-      SLVERR   => "10",
-      DECERR   => "11"
-    ) ;
-  function to_Axi4RespType (a: Axi4RespEnumType) return Axi4RespType is
-  begin
-    return TB_TO_RESP_TYPE_TABLE(a) ; -- replace with lookup table
-  end function to_Axi4RespType ;
-
-  ------------------------------------------------------------
-  -- Conversions to/from transaction values
-  --     Extend, Reduce, ToTransaction, FromTransaction
-  function Extend(A: std_logic_vector; Size : natural) return std_logic_vector is
-    variable extA : std_logic_vector(Size downto 1) := (others => '0') ;
-  begin
-    extA(A'length downto 1) := A ;
-    return extA ;
-  end function Extend ;
-
-  function Reduce(A: std_logic_vector; Size : natural) return std_logic_vector is
-    alias aA : std_logic_vector(A'length-1 downto 0) is A ;
-  begin
-    return aA(Size-1 downto 0) ;
-  end function Reduce ;
-
-  function ToTransaction(A : std_logic_vector) return TransactionType is
-  begin
-    return TransactionType(A) ;
-  end function ToTransaction ;
-
-  function ToTransaction(A : integer; Size : natural) return TransactionType is
-  begin
-    return TransactionType(to_signed(A, Size)) ;
-  end function ToTransaction ;
-
-  function FromTransaction (A: TransactionType) return std_logic_vector is
-  begin
-    return std_logic_vector(A) ;
-  end function FromTransaction ;
-
-  function FromTransaction (A: TransactionType) return integer is
-  begin
-    return to_integer(signed(A)) ;
-  end function FromTransaction ;
-
-  function SizeOfTransaction (AxiSize : integer) return integer is
-  begin
-    return AxiSize ;
-  end function SizeOfTransaction ;
-
+package body Axi4LiteMasterTransactionPkg is
   
   ------------------------------------------------------------
   procedure NoOp (
   -- Directive:  Do nothing for NoOpCycles number of clocks
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              NoOpCycles  : In    natural := 1
   ) is
   begin
@@ -463,7 +304,7 @@ package body Axi4TransactionPkg is
   -- Error reporting for testbenches that do not use AlertLogPkg
   -- Returns error count.  If an error count /= 0, also print it
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
     variable ErrCnt      : Out   natural
   ) is
   begin
@@ -479,7 +320,7 @@ package body Axi4TransactionPkg is
   procedure MasterWrite (
   -- do CPU Write Cycle
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iAddr       : In    std_logic_vector ;
              iData       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
@@ -491,7 +332,7 @@ package body Axi4TransactionPkg is
     -- Parameter Checks
     AlertIf(TransRec.AlertLogID, iAddr'length /= TransRec.AxiAddrWidth, "Master Write, Address length does not match", FAILURE) ;
     AlertIf(TransRec.AlertLogID, iData'length mod 8 /= 0, "Master Write, Data not on a byte boundary", FAILURE) ;
-    AlertIf(TransRec.AlertLogID, iData'length > TransRec.AxiDataWidth, "Master Write, Data length to large", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, iData'length > TransRec.AxiDataWidth, "Master Write, Data length too large", FAILURE) ;
 
     -- Put values in record
     TransRec.Operation        <= WRITE ;
@@ -508,7 +349,7 @@ package body Axi4TransactionPkg is
   procedure MasterWriteAsync (
   -- dispatch CPU Write Cycle
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iAddr       : In    std_logic_vector ;
              iData       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
@@ -520,7 +361,7 @@ package body Axi4TransactionPkg is
     -- Parameter Checks
     AlertIf(TransRec.AlertLogID, iAddr'length /= TransRec.AxiAddrWidth, "Master Write, Address length does not match", FAILURE) ;
     AlertIf(TransRec.AlertLogID, iData'length mod 8 /= 0, "Master Write, Data not on a byte boundary", FAILURE) ;
-    AlertIf(TransRec.AlertLogID, iData'length > TransRec.AxiDataWidth, "Master Write, Data length to large", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, iData'length > TransRec.AxiDataWidth, "Master Write, Data length too large", FAILURE) ;
 
     -- Put values in record
     TransRec.Operation        <= ASYNC_WRITE ;
@@ -537,7 +378,7 @@ package body Axi4TransactionPkg is
   procedure MasterWriteAddressAsync (
   -- dispatch CPU Write Address Cycle
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iAddr       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
   ) is
@@ -560,7 +401,7 @@ package body Axi4TransactionPkg is
   procedure MasterWriteDataAsync (
   -- dispatch CPU Write Data Cycle
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iData       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
   ) is
@@ -570,7 +411,7 @@ package body Axi4TransactionPkg is
 
     -- Parameter Checks
     AlertIf(TransRec.AlertLogID, iData'length mod 8 /= 0, "Master Write, Data not on a byte boundary", FAILURE) ;
-    AlertIf(TransRec.AlertLogID, iData'length > TransRec.AxiDataWidth, "Master Write, Data length to large", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, iData'length > TransRec.AxiDataWidth, "Master Write, Data length too large", FAILURE) ;
 
     -- Put values in record
     TransRec.Operation        <= ASYNC_WRITE_DATA ;
@@ -587,7 +428,7 @@ package body Axi4TransactionPkg is
   procedure MasterRead (
   -- do CPU Read Cycle and return data
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iAddr       : In    std_logic_vector ;
     variable oData       : Out   std_logic_vector ;
              StatusMsgOn : In    boolean := false
@@ -599,7 +440,7 @@ package body Axi4TransactionPkg is
     -- Parameter Checks
     AlertIf(TransRec.AlertLogID, iAddr'length /= TransRec.AxiAddrWidth, "Master Read, Address length does not match", FAILURE) ;
     AlertIf(TransRec.AlertLogID, oData'length mod 8 /= 0, "Master Read, Data not on a byte boundary", FAILURE) ;
-    AlertIf(TransRec.AlertLogID, oData'length > TransRec.AxiDataWidth, "Master Read, Data length to large", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, oData'length > TransRec.AxiDataWidth, "Master Read, Data length too large", FAILURE) ;
 
     -- Put values in record
     TransRec.Operation          <= READ ;
@@ -617,7 +458,7 @@ package body Axi4TransactionPkg is
   procedure MasterReadCheck (
   -- do CPU Read Cycle and check supplied data
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iAddr       : In    std_logic_vector ;
              iData       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
@@ -629,7 +470,7 @@ package body Axi4TransactionPkg is
     -- Parameter Checks
     AlertIf(TransRec.AlertLogID, iAddr'length /= TransRec.AxiAddrWidth, "Master Read, Address length does not match", FAILURE) ;
     AlertIf(TransRec.AlertLogID, iData'length mod 8 /= 0, "Master Read, Data not on a byte boundary", FAILURE) ;
-    AlertIf(TransRec.AlertLogID, iData'length > TransRec.AxiDataWidth, "Master Read, Data length to large", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, iData'length > TransRec.AxiDataWidth, "Master Read, Data length too large", FAILURE) ;
 
     -- Put values in record
     TransRec.Operation        <= READ_CHECK ;
@@ -646,7 +487,7 @@ package body Axi4TransactionPkg is
   procedure MasterReadAddressAsync (
   -- dispatch CPU Read Address Cycle
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iAddr       : In    std_logic_vector ;
              StatusMsgOn : In    boolean := false
   ) is
@@ -669,7 +510,7 @@ package body Axi4TransactionPkg is
   procedure MasterReadData (
   -- Do CPU Read Data Cycle
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
     variable oData       : Out   std_logic_vector ;
              StatusMsgOn : In    boolean := false
   ) is
@@ -679,7 +520,7 @@ package body Axi4TransactionPkg is
 
     -- Parameter Checks
     AlertIf(TransRec.AlertLogID, oData'length mod 8 /= 0, "Master Read, Data not on a byte boundary", FAILURE) ;
-    AlertIf(TransRec.AlertLogID, oData'length > TransRec.AxiDataWidth, "Master Read, Data length to large", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, oData'length > TransRec.AxiDataWidth, "Master Read, Data length too large", FAILURE) ;
 
     -- Put values in record
     TransRec.Operation          <= READ_DATA ;
@@ -699,7 +540,7 @@ package body Axi4TransactionPkg is
   -- If data is available, get it and return available TRUE.  
   -- Otherwise Return Available FALSE.
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
     variable oData       : Out   std_logic_vector ;
     variable Available   : Out   boolean ;
              StatusMsgOn : In    boolean := false
@@ -710,7 +551,7 @@ package body Axi4TransactionPkg is
 
     -- Parameter Checks
     AlertIf(TransRec.AlertLogID, oData'length mod 8 /= 0, "Master Read, Data not on a byte boundary", FAILURE) ;
-    AlertIf(TransRec.AlertLogID, oData'length > TransRec.AxiDataWidth, "Master Read, Data length to large", FAILURE) ;
+    AlertIf(TransRec.AlertLogID, oData'length > TransRec.AxiDataWidth, "Master Read, Data length too large", FAILURE) ;
 
     -- Put values in record
     TransRec.Operation          <= TRY_READ_DATA ;
@@ -729,7 +570,7 @@ package body Axi4TransactionPkg is
   procedure MasterReadPoll (
   -- Read location (iAddr) until Data(IndexI) = ValueI
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
              iAddr       : In    std_logic_vector ;
              Index       : In    Integer ;
              BitValue    : In    std_logic ;
@@ -748,67 +589,12 @@ package body Axi4TransactionPkg is
       "  Data: " & to_hstring(FromTransaction(TransRec.DataFromModel)), INFO, StatusMsgOn) ;
   end procedure MasterReadPoll ;
 
-  
-  ------------------------------------------------------------
-  procedure SlaveGetWrite (
-  -- Fetch the address and data the slave sees for a write
-  ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
-    variable oAddr       : Out   std_logic_vector ;
-    variable oData       : Out   std_logic_vector ;
-    constant StatusMsgOn : In    boolean := false
-  ) is
-    variable ByteCount : integer ;
-  begin
-    ByteCount := oData'length / 8 ;
-
-    -- Parameter Checks
-    AlertIf(TransRec.AlertLogID, oAddr'length /= TransRec.AxiAddrWidth, "Slave Get Write, Address length does not match", FAILURE) ;
-    AlertIf(TransRec.AlertLogID, oData'length mod 8 /= 0, "Slave Get Write, Data not on a byte boundary", FAILURE) ;
-    AlertIf(TransRec.AlertLogID, oData'length > TransRec.AxiDataWidth, "Slave Get Write, Data length to large", FAILURE) ;
-
-    -- Put values in record
-    TransRec.Operation        <= WRITE ;
-    TransRec.DataBytes        <= ByteCount ;
-    TransRec.StatusMsgOn      <= StatusMsgOn ;
-    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
-    oAddr  := FromTransaction(TransRec.Address) ;
-    oData  := Reduce(FromTransaction(TransRec.DataFromModel), oData'length) ;
-  end procedure SlaveGetWrite ;
-
-  ------------------------------------------------------------
-  procedure SlaveRead (
-  -- Fetch the address and data the slave sees for a write
-  ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
-    variable oAddr       : Out   std_logic_vector ;
-    constant iData       : In    std_logic_vector ;
-    constant StatusMsgOn : In    boolean := false
-  ) is
-    variable ByteCount : integer ;
-  begin
-    ByteCount := iData'length / 8 ;
-
-    -- Parameter Checks
-    AlertIf(TransRec.AlertLogID, oAddr'length /= TransRec.AxiAddrWidth, "Slave Read, Address length does not match", FAILURE) ;
-    AlertIf(TransRec.AlertLogID, iData'length mod 8 /= 0, "Slave Read, Data not on a byte boundary", FAILURE) ;
-    AlertIf(TransRec.AlertLogID, iData'length > TransRec.AxiDataWidth, "Slave Read, Data length to large", FAILURE) ;
-
-    -- Put values in record
-    TransRec.Operation        <= READ ;
-    TransRec.DataBytes        <= ByteCount ;
-    TransRec.DataToModel      <= ToTransaction(Extend(iData, TransRec.AxiDataWidth)) ;
-    TransRec.Resp             <= OKAY ;
-    TransRec.StatusMsgOn      <= StatusMsgOn ;
-    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
-    oAddr  := FromTransaction(TransRec.Address) ;
-  end procedure SlaveRead ;
 
   ------------------------------------------------------------
   procedure SetModelOptions (
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
-    constant Option      : In    Axi4OptionsType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
+    constant Option      : In    Axi4LiteMasterOptionsType ;
     constant OptVal      : In    boolean
   ) is
   begin
@@ -821,8 +607,8 @@ package body Axi4TransactionPkg is
   ------------------------------------------------------------
   procedure SetModelOptions (
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
-    constant Option      : In    Axi4OptionsType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
+    constant Option      : In    Axi4LiteMasterOptionsType ;
     constant OptVal      : In    integer
   ) is
   begin
@@ -835,8 +621,8 @@ package body Axi4TransactionPkg is
   ------------------------------------------------------------
   procedure SetModelOptions (
   ------------------------------------------------------------
-    signal   TransRec    : InOut Axi4TransactionRecType ;
-    constant Option      : In    Axi4OptionsType ;
+    signal   TransRec    : InOut Axi4LiteMasterTransactionRecType ;
+    constant Option      : In    Axi4LiteMasterOptionsType ;
     constant OptVal      : In    Axi4RespEnumType
   ) is
   begin
@@ -846,4 +632,4 @@ package body Axi4TransactionPkg is
     RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
   end procedure SetModelOptions ;
 
-end package body Axi4TransactionPkg ;
+end package body Axi4LiteMasterTransactionPkg ;

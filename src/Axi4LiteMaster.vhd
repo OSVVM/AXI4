@@ -46,7 +46,8 @@ library osvvm ;
   context osvvm.OsvvmContext ;
   use osvvm.ScoreboardPkg_slv.all ;
   
-  use work.Axi4TransactionPkg.all ; 
+--  use work.Axi4LiteCommonTransactionPkg.all ; 
+  use work.Axi4LiteMasterTransactionPkg.all ; 
   use work.Axi4LiteInterfacePkg.all ; 
   use work.Axi4CommonPkg.all ; 
 
@@ -77,7 +78,7 @@ port (
   nReset      : in   std_logic ;
 
   -- Testbench Transaction Interface
-  TransRec    : inout Axi4TransactionRecType ;
+  TransRec    : inout Axi4LiteMasterTransactionRecType ;
 
   -- AXI Master Functional Interface
   AxiLiteBus  : inout Axi4LiteRecType 
@@ -203,7 +204,7 @@ begin
     variable ReadData      : RData'subtype ; 
     variable ExpectedData  : RData'subtype ; 
     variable NoOpCycles    : integer ; 
-    variable Operation     : Axi4OperationType ; 
+    variable Operation     : TransRec.Operation'subtype ; 
     variable ReadDataTransactionCount : integer := 1 ; 
     
     ------------------------------------------------------------
@@ -357,13 +358,6 @@ begin
           else 
             wait for 0 ns ; 
           end if ; 
---          if ReadDataReceiveCount < ReadDataTransactionCount then 
---            -- Block until receive data 
---            wait until ReadDataReceiveCount >= ReadDataTransactionCount ;
---          else
---            wait for 0 ns ; 
---          end if ;
---          ReadDataTransactionCount := ReadDataTransactionCount + 1 ; 
           TransRec.ModelBool <= TRUE ; 
           
           GetCheckReadData ;

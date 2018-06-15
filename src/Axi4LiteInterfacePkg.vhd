@@ -46,7 +46,7 @@ library ieee ;
 library osvvm ; 
     context osvvm.OsvvmContext ; 
 
-use work.Axi4TransactionPkg.all ;
+use work.Axi4CommonPkg.all ;
 
 package Axi4LiteInterfacePkg is 
 

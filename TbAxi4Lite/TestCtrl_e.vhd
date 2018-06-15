@@ -46,7 +46,9 @@ library ieee ;
 library OSVVM ; 
   context OSVVM.OsvvmContext ; 
 
-use work.Axi4TransactionPkg.all ; 
+use work.Axi4CommonPkg.all ; 
+use work.Axi4LiteMasterTransactionPkg.all ; 
+use work.Axi4LiteSlaveTransactionPkg.all ; 
 use work.Axi4LiteInterfacePkg.all ; 
 
 entity TestCtrl is
@@ -56,8 +58,8 @@ entity TestCtrl is
     nReset              : In    std_logic ;
 
     -- Transaction Interfaces
-    AxiMasterTransRec   : inout Axi4TransactionRecType ;
-    AxiSlaveTransRec    : inout Axi4TransactionRecType 
+    AxiMasterTransRec   : inout Axi4LiteMasterTransactionRecType ;
+    AxiSlaveTransRec    : inout Axi4LiteSlaveTransactionRecType 
 
   ) ;
 end entity TestCtrl ;

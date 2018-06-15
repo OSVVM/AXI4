@@ -19,10 +19,10 @@
 --
 --  Revision History:
 --    Date       Version    Description
---    09/2017:   2017       Initial revision
+--    04/2018:   2018       Initial revision
 --
 --
--- Copyright 2017 SynthWorks Design Inc
+-- Copyright 2018 SynthWorks Design Inc
 --
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -44,7 +44,9 @@ library ieee ;
 library osvvm ;
     context osvvm.OsvvmContext ;
     
-  use work.Axi4TransactionPkg.all ; 
+  use work.Axi4CommonPkg.all ; 
+  use work.Axi4LiteMasterTransactionPkg.all ; 
+  use work.Axi4LiteSlaveTransactionPkg.all ; 
   use work.Axi4LiteInterfacePkg.all ; 
 
 entity TbAxi4Lite is
@@ -62,13 +64,19 @@ architecture TestHarness of TbAxi4Lite is
   signal nReset      : std_logic ;
 
   -- Testbench Transaction Interface
-  subtype TransactionRecType is Axi4TransactionRecType(
+  subtype MasterTransactionRecType is Axi4LiteMasterTransactionRecType(
     Address(SizeOfTransaction(AXI_ADDR_WIDTH)-1 downto 0), 
     DataToModel(SizeOfTransaction(AXI_DATA_WIDTH)-1 downto 0),
     DataFromModel(SizeOfTransaction(AXI_DATA_WIDTH)-1 downto 0)
   ) ;  
-  signal AxiMasterTransRec   : TransactionRecType ;
-  signal AxiSlaveTransRec    : TransactionRecType ;
+  signal AxiMasterTransRec   : MasterTransactionRecType ;
+  
+  subtype SlaveTransactionRecType is Axi4LiteSlaveTransactionRecType(
+    Address(SizeOfTransaction(AXI_ADDR_WIDTH)-1 downto 0), 
+    DataToModel(SizeOfTransaction(AXI_DATA_WIDTH)-1 downto 0),
+    DataFromModel(SizeOfTransaction(AXI_DATA_WIDTH)-1 downto 0)
+  ) ;  
+  signal AxiSlaveTransRec    : SlaveTransactionRecType ;
   
 
   -- AXI Master Functional Interface
@@ -86,7 +94,7 @@ architecture TestHarness of TbAxi4Lite is
     nReset      : in   std_logic ;
 
     -- Testbench Transaction Interface
-    TransRec    : inout Axi4TransactionRecType ;
+    TransRec    : inout Axi4LiteMasterTransactionRecType ;
 
     -- AXI Master Functional Interface
     AxiLiteBus  : inout Axi4LiteRecType 
@@ -100,7 +108,7 @@ architecture TestHarness of TbAxi4Lite is
     nReset      : in   std_logic ;
 
     -- Testbench Transaction Interface
-    TransRec    : inout Axi4TransactionRecType ;
+    TransRec    : inout Axi4LiteSlaveTransactionRecType ;
 
     -- AXI Master Functional Interface
     AxiLiteBus  : inout Axi4LiteRecType 
@@ -125,8 +133,8 @@ architecture TestHarness of TbAxi4Lite is
       nReset              : In    std_logic ;
 
       -- Transaction Interfaces
-      AxiMasterTransRec   : inout Axi4TransactionRecType ;
-      AxiSlaveTransRec    : inout Axi4TransactionRecType 
+      AxiMasterTransRec   : inout Axi4LiteMasterTransactionRecType ;
+      AxiSlaveTransRec    : inout Axi4LiteSlaveTransactionRecType 
 
     ) ;
   end component TestCtrl ;

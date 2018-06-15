@@ -45,7 +45,8 @@ library osvvm ;
   context osvvm.OsvvmContext ;
   use osvvm.ScoreboardPkg_slv.all ;
 
-  use work.Axi4TransactionPkg.all ; 
+--  use work.Axi4LiteCommonTransactionPkg.all ; 
+  use work.Axi4LiteSlaveTransactionPkg.all ; 
   use work.Axi4LiteInterfacePkg.all ; 
   use work.Axi4CommonPkg.all ; 
 
@@ -72,7 +73,7 @@ port (
   nReset      : in   std_logic ;
 
   -- Testbench Transaction Interface
-  TransRec    : inout Axi4TransactionRecType ;
+  TransRec    : inout Axi4LiteSlaveTransactionRecType ;
 
   -- AXI Master Functional Interface
   AxiLiteBus  : inout Axi4LiteRecType 
@@ -441,6 +442,8 @@ begin
 
     WriteResponseLoop : loop 
       -- Find Transaction
+--! Done always less than Receive, change to just "="
+--! ">" will break due to roll over if there are more than 2**30 transfers
       if WriteResponseDoneCount >= WriteReceiveCount then
         WaitForToggle(WriteReceiveCount) ;
       end if ; 

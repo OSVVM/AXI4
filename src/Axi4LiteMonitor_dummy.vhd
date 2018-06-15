@@ -44,7 +44,6 @@ library ieee ;
 library osvvm ;
     context osvvm.OsvvmContext ;
 
-  use work.Axi4TransactionPkg.all ; 
   use work.Axi4LiteInterfacePkg.all ; 
   use work.Axi4CommonPkg.all ; 
 

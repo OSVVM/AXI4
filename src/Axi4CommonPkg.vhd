@@ -47,6 +47,37 @@ library osvvm ;
   
 package Axi4CommonPkg is 
 
+  --                                     00    01      10      11
+  type  Axi4UnresolvedRespEnumType is (OKAY, EXOKAY, SLVERR, DECERR) ;
+  type Axi4UnresolvedRespVectorEnumType is array (natural range <>) of Axi4UnresolvedRespEnumType ;
+  alias resolved_max is maximum[ Axi4UnresolvedRespVectorEnumType return Axi4UnresolvedRespEnumType] ;
+  -- Maximum is implicitly defined for any array type in VHDL-2008.   Function resolved_max is a fall back.
+  -- function resolved_max ( s : Axi4UnresolvedRespVectorEnumType) return Axi4UnresolvedRespEnumType ;
+  subtype Axi4RespEnumType is resolved_max Axi4UnresolvedRespEnumType ;
+
+  subtype  Axi4RespType is std_logic_vector(1 downto 0) ;
+  constant AXI4_RESP_OKAY   : Axi4RespType := "00" ;
+  constant AXI4_RESP_EXOKAY : Axi4RespType := "01" ; -- Not for Lite
+  constant AXI4_RESP_SLVERR : Axi4RespType := "10" ;
+  constant AXI4_RESP_DECERR : Axi4RespType := "11" ;
+  constant AXI4_RESP_INIT   : Axi4RespType := "ZZ" ;
+
+  function from_Axi4RespType (a: Axi4RespType) return Axi4RespEnumType ;
+  function to_Axi4RespType (a: Axi4RespEnumType) return Axi4RespType ;
+
+
+  subtype Axi4ProtType is std_logic_vector(2 downto 0) ;
+  --  [0] 0 Unprivileged access
+  --      1 Privileged access
+  --  [1] 0 Secure access
+  --      1 Non-secure access
+  --  [2] 0 Data access
+  --      1 Instruction access
+  constant AXI4_PROT_INIT   : Axi4ProtType := "ZZZ" ;
+  
+  subtype  TransactionType is std_logic_vector_max_c ;
+  function SizeOfTransaction (AxiSize : integer) return integer ;
+
   ------------------------------------------------------------
   procedure DoAxiValidHandshake (
   ------------------------------------------------------------
@@ -112,7 +143,39 @@ end package Axi4CommonPkg ;
 -- /////////////////////////////////////////////////////////////////////////////////////////
 -- /////////////////////////////////////////////////////////////////////////////////////////
 
-package body Axi4CommonPkg is 
+package body Axi4CommonPkg is
+ 
+  ------------------------------------------------------------
+  type TbRespType_indexby_Integer is array (integer range <>) of Axi4RespEnumType;
+  constant RESP_TYPE_TB_TABLE : TbRespType_indexby_Integer := (
+      0   => OKAY,
+      1   => EXOKAY,
+      2   => SLVERR,
+      3   => DECERR
+    ) ;
+  function from_Axi4RespType (a: Axi4RespType) return Axi4RespEnumType is
+  begin
+    return RESP_TYPE_TB_TABLE(to_integer(a)) ;
+  end function from_Axi4RespType ;
+
+  ------------------------------------------------------------
+  type RespType_indexby_TbRespType is array (Axi4RespEnumType) of Axi4RespType;
+  constant TB_TO_RESP_TYPE_TABLE : RespType_indexby_TbRespType := (
+      OKAY     => "00",
+      EXOKAY   => "01",
+      SLVERR   => "10",
+      DECERR   => "11"
+    ) ;
+  function to_Axi4RespType (a: Axi4RespEnumType) return Axi4RespType is
+  begin
+    return TB_TO_RESP_TYPE_TABLE(a) ; -- replace with lookup table
+  end function to_Axi4RespType ;
+
+  
+  function SizeOfTransaction (AxiSize : integer) return integer is
+  begin
+    return AxiSize ;
+  end function SizeOfTransaction ;
 
   ------------------------------------------------------------
   procedure DoAxiValidHandshake (

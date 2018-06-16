@@ -223,7 +223,7 @@ begin
       WriteAddressFifo.Push(WriteAddress & WriteProt) ; 
       WriteAddressTransactionFifo.Push(WriteAddress & WriteProt);
       Increment(WriteAddressRequestCount) ;
-      wait for 0 ns ; 
+      wait for 0 ns ;  wait for 0 ns ; 
     end procedure QueueWriteAddress ; 
     
     ------------------------------------------------------------
@@ -242,7 +242,7 @@ begin
       -- Initiate Write Data
       WriteDataFifo.Push('0' & WriteData & WriteStrb) ; 
       Increment(WriteDataRequestCount) ;
-      wait for 0 ns ; 
+      wait for 0 ns ;  wait for 0 ns ; 
     end procedure QueueWriteData ; 
     
     ------------------------------------------------------------
@@ -254,7 +254,7 @@ begin
 
       WriteResponseScoreboard.Push(WriteResp) ;
       Increment(WriteResponseExpectCount) ;
-      wait for 0 ns ; 
+      wait for 0 ns ;  wait for 0 ns ; 
     end procedure QueueWriteResponse ; 
     
     ------------------------------------------------------------
@@ -274,7 +274,7 @@ begin
 
       -- Expect a Read Data Cycle - one read data cycle for each address issued.
       Increment(ReadDataExpectCount) ;
-      wait for 0 ns ;
+      wait for 0 ns ;  wait for 0 ns ; 
     end procedure QueueReadAddress ; 
 
     ------------------------------------------------------------
@@ -323,40 +323,37 @@ begin
 
     case Operation is
       when WRITE | ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
-        if Operation /= ASYNC_WRITE_DATA then 
+        if IsAxiWriteAddress(Operation) then 
           QueueWriteAddress ;
           QueueWriteResponse ; 
         end if ; 
-        if Operation /= ASYNC_WRITE_ADDRESS then 
+        if IsAxiWriteData(Operation) then 
           QueueWriteData ; 
         end if ; 
         
-        if Operation = WRITE then 
+        if IsAxiBlockOnWriteAddress(Operation) then 
           -- Block until both write address and data done.        
           wait until WriteAddressRequestCount = WriteAddressDoneCount and
                      WriteDataRequestCount = WriteDataDoneCount ;
         else
-          wait for 0 ns ; 
+          wait for 0 ns ;  wait for 0 ns ; 
         end if ; 
 
 
       when READ | READ_CHECK | ASYNC_READ_ADDRESS | READ_DATA | READ_DATA_CHECK | TRY_READ_DATA =>
-        if Operation = READ or Operation = READ_CHECK or Operation = ASYNC_READ_ADDRESS then
+        if IsAxiReadAddress(Operation) then
           QueueReadAddress ; 
         end if ; 
 
-        if Operation = ASYNC_READ_ADDRESS then
-          -- nothing else to do.   
-          wait for 0 ns ; 
-        elsif Operation = TRY_READ_DATA and ReadDataFifo.Empty then
+        if IsAxiTryReadData(Operation) and ReadDataFifo.Empty then
           -- ReadDataReceiveCount < ReadDataTransactionCount then 
             TransRec.ModelBool <= FALSE ; 
-            wait for 0 ns ; 
-        else
+            wait for 0 ns ; wait for 0 ns ; 
+        elsif IsAxiReadData(Operation) then
           if ReadDataFifo.Empty then 
             WaitForToggle(ReadDataReceiveCount) ;
           else 
-            wait for 0 ns ; 
+            wait for 0 ns ;  wait for 0 ns ;
           end if ; 
           TransRec.ModelBool <= TRUE ; 
           

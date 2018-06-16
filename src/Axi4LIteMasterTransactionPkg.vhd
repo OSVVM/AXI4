@@ -23,7 +23,7 @@
 --    09/2017:   2017       Initial revision
 --
 --
--- Copyright 2017 SynthWorks Design Inc
+-- Copyright 2017 - 2018 SynthWorks Design Inc
 --
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -277,7 +277,49 @@ package Axi4LiteMasterTransactionPkg is
     constant Option      : In    Axi4LiteMasterOptionsType ;
     constant OptVal      : In    Axi4RespEnumType
   ) ;
+  
+  ------------------------------------------------------------
+  function IsAxiWriteAddress (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean ;
+  
+  ------------------------------------------------------------
+  function IsAxiBlockOnWriteAddress (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean ;
+  
+  ------------------------------------------------------------
+  function IsAxiWriteData (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean ;
+  
+  ------------------------------------------------------------
+  function IsAxiBlockOnWriteData (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean ;
+  
+  ------------------------------------------------------------
+  function IsAxiReadAddress (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean ;
+  
+  ------------------------------------------------------------
+  function IsAxiReadData (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean ;
 
+  ------------------------------------------------------------
+  function IsAxiTryReadData (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean ;
+  
 end package Axi4LiteMasterTransactionPkg ;
 
 -- /////////////////////////////////////////////////////////////////////////////////////////
@@ -631,5 +673,89 @@ package body Axi4LiteMasterTransactionPkg is
     TransRec.Resp          <= OptVal ;
     RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
   end procedure SetModelOptions ;
+  
+  
+  ------------------------------------------------------------
+  function IsAxiWriteAddress (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean is
+  begin
+    return 
+      (Operation = WRITE) or 
+      (Operation = ASYNC_WRITE) or 
+      (Operation = ASYNC_WRITE_ADDRESS) ;
+  end function IsAxiWriteAddress ;
+  
+  
+  ------------------------------------------------------------
+  function IsAxiBlockOnWriteAddress (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean is
+  begin
+    return (Operation = WRITE) ;
+  end function IsAxiBlockOnWriteAddress ;
+  
+  
+  ------------------------------------------------------------
+  function IsAxiWriteData (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean is
+  begin
+    return 
+      (Operation = WRITE) or 
+      (Operation = ASYNC_WRITE) or 
+      (Operation = ASYNC_WRITE_DATA) ;
+  end function IsAxiWriteData ;
+  
+  
+  ------------------------------------------------------------
+  function IsAxiBlockOnWriteData (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean is
+  begin
+    return (Operation = WRITE) ;
+  end function IsAxiBlockOnWriteData ;
+  
+  
+  ------------------------------------------------------------
+  function IsAxiReadAddress (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean is
+  begin
+    return 
+      (Operation = READ) or 
+      (Operation = READ_CHECK) or 
+      (Operation = ASYNC_READ_ADDRESS) ;
+  end function IsAxiReadAddress ;
+  
+  
+  ------------------------------------------------------------
+  function IsAxiReadData (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean is
+  begin
+    return 
+      (Operation = READ) or 
+      (Operation = READ_CHECK) or 
+      (Operation = READ_DATA) or 
+      (Operation = TRY_READ_DATA) or 
+      (Operation = READ_DATA_CHECK) ;
+  end function IsAxiReadData ;
+  
 
+  ------------------------------------------------------------
+  function IsAxiTryReadData (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean is
+  begin
+    return (Operation = TRY_READ_DATA)  ;
+  end function IsAxiTryReadData ;
+  
 end package body Axi4LiteMasterTransactionPkg ;

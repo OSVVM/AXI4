@@ -206,111 +206,6 @@ begin
     variable NoOpCycles    : integer ; 
     variable Operation     : TransRec.Operation'subtype ; 
     variable ReadDataTransactionCount : integer := 1 ; 
-    
-    ------------------------------------------------------------
-    procedure QueueWriteAddress is
-    ------------------------------------------------------------
-    begin 
-      -- Extract transaction information from the record.
-      WriteAddress  := FromTransaction(TransRec.Address) ;
-      if UseWriteProtFromModel then
-        WriteProt   := ModelWriteProt ;
-      else
-        WriteProt   := to_slv(TransRec.Prot, AWProt'length) ;
-      end if ; 
-      
-      -- Initiate Write Address
-      WriteAddressFifo.Push(WriteAddress & WriteProt) ; 
-      WriteAddressTransactionFifo.Push(WriteAddress & WriteProt);
-      Increment(WriteAddressRequestCount) ;
-      wait for 0 ns ;  wait for 0 ns ; 
-    end procedure QueueWriteAddress ; 
-    
-    ------------------------------------------------------------
-    procedure QueueWriteData is
-    ------------------------------------------------------------
-    begin 
-      (WriteAddress, WriteProt) := WriteAddressTransactionFifo.Pop ;
-      WriteByteAddr := CalculateAxiByteAddress(WriteAddress, AXI_DATA_BYTE_WIDTH);
-      WriteStrb     := CalculateAxiWriteStrobe(WriteByteAddr, TransRec.DataBytes, AXI_DATA_BYTE_WIDTH) ; 
-      WriteData     := FromTransaction(TransRec.DataToModel) ;
-      if TransRec.DataBytes /= AXI_DATA_BYTE_WIDTH then 
-        AlignAxiWriteData(WriteData, WriteByteAddr) ; 
-        AlertIf(ModelID, AXI_DATA_BYTE_WIDTH - WriteByteAddr < TransRec.DataBytes, 
-          "Master Write, Byte Address not consistent with number of bytes sent", FAILURE) ; 
-      end if ; 
-      -- Initiate Write Data
-      WriteDataFifo.Push('0' & WriteData & WriteStrb) ; 
-      Increment(WriteDataRequestCount) ;
-      wait for 0 ns ;  wait for 0 ns ; 
-    end procedure QueueWriteData ; 
-    
-    ------------------------------------------------------------
-    procedure QueueWriteResponse is
-    ------------------------------------------------------------
-    begin 
-      -- Write Response
-      WriteResp     := to_Axi4RespType(TransRec.Resp) ;
-
-      WriteResponseScoreboard.Push(WriteResp) ;
-      Increment(WriteResponseExpectCount) ;
-      wait for 0 ns ;  wait for 0 ns ; 
-    end procedure QueueWriteResponse ; 
-    
-    ------------------------------------------------------------
-    procedure QueueReadAddress is
-    ------------------------------------------------------------
-    begin 
-      -- Initiate Read Address Cycle
-      ReadAddress   :=  FromTransaction(TransRec.Address) ;
-      if UseReadProtFromModel then
-        ReadProt    := ModelReadProt ;
-      else
-        ReadProt    :=  to_slv(TransRec.Prot, ARProt'length) ;
-      end if ; 
-      ReadAddressFifo.Push(ReadAddress & ReadProt);
-      ReadAddressTransactionFifo.Push(ReadAddress & ReadProt);
-      Increment(ReadAddressRequestCount) ;
-
-      -- Expect a Read Data Cycle - one read data cycle for each address issued.
-      Increment(ReadDataExpectCount) ;
-      wait for 0 ns ;  wait for 0 ns ; 
-    end procedure QueueReadAddress ; 
-
-    ------------------------------------------------------------
-    procedure GetCheckReadData is
-    ------------------------------------------------------------
-    begin 
---!! TODO:  expand st. checks more than just READ_CHECK   
-      -- Get Read Data
-      (ReadAddress, ReadProt) := ReadAddressTransactionFifo.Pop ;
-      ReadByteAddr  :=  CalculateAxiByteAddress(ReadAddress, RData'length/8);
-      ReadData := ReadDataFifo.Pop ;
-      if TransRec.DataBytes /= AXI_DATA_BYTE_WIDTH then 
-        AlignAxiReadData(ReadData, ReadByteAddr, TransRec.DataBytes) ; 
-        AlertIf(ModelID, AXI_DATA_BYTE_WIDTH - ReadByteAddr < TransRec.DataBytes, 
-          "Master Read, Byte Address not consistent with number of bytes expected", FAILURE) ; 
-      end if ; 
-      TransRec.DataFromModel <= ToTransaction(ReadData) ;
-
-      if TransRec.Operation = READ_CHECK or TransRec.Operation = READ_DATA_CHECK then
-        ExpectedData := FromTransaction(TransRec.DataToModel) ;
-        AffirmIf( DataCheckID, ReadData = ExpectedData,
-          "Read Data: " & to_hstring(ReadData) & 
-          "  Read Address: " & to_hstring(ReadAddress) &
-          "  Prot: " & to_hstring(ReadProt),
-          "  Expected: " & to_hstring(ExpectedData),
-          TransRec.StatusMsgOn or IsLogEnabled(ModelID, INFO) ) ;
-      else
-        Log( ModelID,
-          "Read Data: " & to_hstring(ReadData) & 
-          "  Read Address: " & to_hstring(ReadAddress) &
-          "  Prot: " & to_hstring(ReadProt),
-          INFO,
-          TransRec.StatusMsgOn
-        ) ;
-      end if ;
-    end procedure GetCheckReadData ; 
 
   begin
     WaitForTransaction(
@@ -324,42 +219,115 @@ begin
     case Operation is
       when WRITE | ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
         if IsAxiWriteAddress(Operation) then 
-          QueueWriteAddress ;
-          QueueWriteResponse ; 
-        end if ; 
-        if IsAxiWriteData(Operation) then 
-          QueueWriteData ; 
+          -- Queue Write Address
+          WriteAddress  := FromTransaction(TransRec.Address) ;
+          if UseWriteProtFromModel then
+            WriteProt   := ModelWriteProt ;
+          else
+            WriteProt   := to_slv(TransRec.Prot, AWProt'length) ;
+          end if ; 
+          
+          -- Initiate Write Address
+          WriteAddressFifo.Push(WriteAddress & WriteProt) ; 
+          WriteAddressTransactionFifo.Push(WriteAddress & WriteProt);
+          Increment(WriteAddressRequestCount) ;
+
+          -- Queue Write Response 
+          WriteResp     := to_Axi4RespType(TransRec.Resp) ;
+
+          WriteResponseScoreboard.Push(WriteResp) ;
+          Increment(WriteResponseExpectCount) ;
         end if ; 
         
-        if IsAxiBlockOnWriteAddress(Operation) then 
-          -- Block until both write address and data done.        
-          wait until WriteAddressRequestCount = WriteAddressDoneCount and
-                     WriteDataRequestCount = WriteDataDoneCount ;
-        else
-          wait for 0 ns ;  wait for 0 ns ; 
+        if IsAxiWriteData(Operation) then 
+          -- Queue Write Data 
+          (WriteAddress, WriteProt) := WriteAddressTransactionFifo.Pop ;
+          WriteByteAddr := CalculateAxiByteAddress(WriteAddress, AXI_DATA_BYTE_WIDTH);
+          WriteStrb     := CalculateAxiWriteStrobe(WriteByteAddr, TransRec.DataBytes, AXI_DATA_BYTE_WIDTH) ; 
+          WriteData     := FromTransaction(TransRec.DataToModel) ;
+          if TransRec.DataBytes /= AXI_DATA_BYTE_WIDTH then 
+            AlignAxiWriteData(WriteData, WriteByteAddr) ; 
+            AlertIf(ModelID, AXI_DATA_BYTE_WIDTH - WriteByteAddr < TransRec.DataBytes, 
+              "Master Write, Byte Address not consistent with number of bytes sent", FAILURE) ; 
+          end if ; 
+          -- Initiate Write Data
+          WriteDataFifo.Push('0' & WriteData & WriteStrb) ; 
+          Increment(WriteDataRequestCount) ;
+        end if ; 
+        
+        if IsAxiBlockOnWriteAddress(Operation) and 
+            WriteAddressRequestCount /= WriteAddressDoneCount then 
+          -- Block until both write address done.        
+          wait until WriteAddressRequestCount = WriteAddressDoneCount ;
+        end if ; 
+        if IsAxiBlockOnWriteData(Operation) and 
+            WriteDataRequestCount /= WriteDataDoneCount then 
+          -- Block until both write data done.        
+          wait until WriteDataRequestCount = WriteDataDoneCount ;
         end if ; 
 
+        -- Transaction wait time 
+        wait for 0 ns ;  wait for 0 ns ; 
 
       when READ | READ_CHECK | ASYNC_READ_ADDRESS | READ_DATA | READ_DATA_CHECK | TRY_READ_DATA =>
         if IsAxiReadAddress(Operation) then
-          QueueReadAddress ; 
+          -- Queue Read Address ; 
+          ReadAddress   :=  FromTransaction(TransRec.Address) ;
+          if UseReadProtFromModel then
+            ReadProt    := ModelReadProt ;
+          else
+            ReadProt    :=  to_slv(TransRec.Prot, ARProt'length) ;
+          end if ; 
+          ReadAddressFifo.Push(ReadAddress & ReadProt);
+          ReadAddressTransactionFifo.Push(ReadAddress & ReadProt);
+          Increment(ReadAddressRequestCount) ;
+
+          -- Expect a Read Data Cycle - one read data cycle for each address issued.
+          Increment(ReadDataExpectCount) ;
         end if ; 
 
         if IsAxiTryReadData(Operation) and ReadDataFifo.Empty then
           -- ReadDataReceiveCount < ReadDataTransactionCount then 
             TransRec.ModelBool <= FALSE ; 
-            wait for 0 ns ; wait for 0 ns ; 
         elsif IsAxiReadData(Operation) then
           if ReadDataFifo.Empty then 
             WaitForToggle(ReadDataReceiveCount) ;
-          else 
-            wait for 0 ns ;  wait for 0 ns ;
           end if ; 
           TransRec.ModelBool <= TRUE ; 
           
-          GetCheckReadData ;
-          
+          -- Get Read Data and Check
+--!! TODO:  expand st. checks more than just READ_CHECK   
+          (ReadAddress, ReadProt) := ReadAddressTransactionFifo.Pop ;
+          ReadByteAddr  :=  CalculateAxiByteAddress(ReadAddress, RData'length/8);
+          ReadData := ReadDataFifo.Pop ;
+          if TransRec.DataBytes /= AXI_DATA_BYTE_WIDTH then 
+            AlignAxiReadData(ReadData, ReadByteAddr, TransRec.DataBytes) ; 
+            AlertIf(ModelID, AXI_DATA_BYTE_WIDTH - ReadByteAddr < TransRec.DataBytes, 
+              "Master Read, Byte Address not consistent with number of bytes expected", FAILURE) ; 
+          end if ; 
+          TransRec.DataFromModel <= ToTransaction(ReadData) ;
+
+          if IsAxiReadCheck(TransRec.Operation) then
+            ExpectedData := FromTransaction(TransRec.DataToModel) ;
+            AffirmIf( DataCheckID, ReadData = ExpectedData,
+              "Read Data: " & to_hstring(ReadData) & 
+              "  Read Address: " & to_hstring(ReadAddress) &
+              "  Prot: " & to_hstring(ReadProt),
+              "  Expected: " & to_hstring(ExpectedData),
+              TransRec.StatusMsgOn or IsLogEnabled(ModelID, INFO) ) ;
+          else
+            Log( ModelID,
+              "Read Data: " & to_hstring(ReadData) & 
+              "  Read Address: " & to_hstring(ReadAddress) &
+              "  Prot: " & to_hstring(ReadProt),
+              INFO,
+              TransRec.StatusMsgOn
+            ) ;
+          end if ;
         end if ;
+        
+        -- Transaction wait time 
+        wait for 0 ns ;  wait for 0 ns ; 
       
       when NO_OP =>
         NoOpCycles := FromTransaction(TransRec.DataToModel) ;
@@ -403,11 +371,11 @@ begin
           when others => 
             Alert(ModelID, "Unknown model option", FAILURE) ;
         end case ;
-        wait for 0 ns ; 
+        wait for 0 ns ;  wait for 0 ns ; 
         
       when others =>
         Alert(ModelID, "Unimplemented Transaction", FAILURE) ;
-        wait for 0 ns ; 
+        wait for 0 ns ;  wait for 0 ns ; 
     end case ;
 
     -- Wait for 1 delta cycle, required if a wait is not in all case branches above

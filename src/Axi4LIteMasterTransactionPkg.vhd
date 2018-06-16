@@ -315,6 +315,12 @@ package Axi4LiteMasterTransactionPkg is
   ) return boolean ;
 
   ------------------------------------------------------------
+  function IsAxiReadCheck (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean ;
+
+  ------------------------------------------------------------
   function IsAxiTryReadData (
   -----------------------------------------------------------
     constant Operation     : in Axi4MasterOperationType
@@ -757,5 +763,16 @@ package body Axi4LiteMasterTransactionPkg is
   begin
     return (Operation = TRY_READ_DATA)  ;
   end function IsAxiTryReadData ;
+  
+  ------------------------------------------------------------
+  function IsAxiReadCheck (
+  -----------------------------------------------------------
+    constant Operation     : in Axi4MasterOperationType
+  ) return boolean is
+  begin
+    return 
+      (Operation = READ_CHECK) or 
+      (Operation = READ_DATA_CHECK) ;
+  end function IsAxiReadCheck ;
   
 end package body Axi4LiteMasterTransactionPkg ;

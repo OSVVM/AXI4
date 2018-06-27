@@ -108,7 +108,8 @@ package Axi4LiteMasterTransactionPkg is
     THE_END
   ) ;
   type Axi4UnresolvedMasterOptionsVectorType is array (natural range <>) of Axi4UnresolvedMasterOptionsType ;
-  alias resolved_max is maximum[ Axi4UnresolvedMasterOptionsVectorType return Axi4UnresolvedMasterOptionsType] ;
+  -- alias resolved_max is maximum[ Axi4UnresolvedMasterOptionsVectorType return Axi4UnresolvedMasterOptionsType] ;
+  function resolved_max(A : Axi4UnresolvedMasterOptionsVectorType) return Axi4UnresolvedMasterOptionsType ;
   subtype Axi4LiteMasterOptionsType is resolved_max Axi4UnresolvedMasterOptionsType ;
 
 
@@ -332,6 +333,12 @@ end package Axi4LiteMasterTransactionPkg ;
 -- /////////////////////////////////////////////////////////////////////////////////////////
 
 package body Axi4LiteMasterTransactionPkg is
+
+  function resolved_max ( A : Axi4UnresolvedMasterOptionsVectorType) return Axi4UnresolvedMasterOptionsType is
+  begin
+    return maximum(A) ;
+  end function resolved_max ; 
+
   
   ------------------------------------------------------------
   procedure NoOp (

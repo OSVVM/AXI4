@@ -87,7 +87,7 @@ package Axi4CommonPkg is
     constant tpd_Clk_Valid          : in    time ;
     constant AlertLogID             : in    AlertLogIDType := ALERTLOG_DEFAULT_ID; 
     constant TimeOutMessage         : in    string := "" ; 
-    constant TimeOutPeriod          : in    time := time'right
+    constant TimeOutPeriod          : in    time := std.env.resolution_limit * 2 ** 30 *2**30
   ) ;
 
   ------------------------------------------------------------
@@ -101,7 +101,7 @@ package Axi4CommonPkg is
     constant tpd_Clk_Ready          : in    time ;
     constant AlertLogID             : in    AlertLogIDType := ALERTLOG_DEFAULT_ID; 
     constant TimeOutMessage         : in    string := "" ; 
-    constant TimeOutPeriod          : in    time := time'right
+    constant TimeOutPeriod          : in    time := std.env.resolution_limit * 2 ** 30 *2**30
   ) ;
   
   ------------------------------------------------------------
@@ -186,7 +186,7 @@ package body Axi4CommonPkg is
     constant tpd_Clk_Valid          : in    time ;
     constant AlertLogID             : in    AlertLogIDType := ALERTLOG_DEFAULT_ID; 
     constant TimeOutMessage         : in    string := "" ; 
-    constant TimeOutPeriod          : in    time := time'right
+    constant TimeOutPeriod          : in    time := std.env.resolution_limit * 2 ** 30 *2**30
   ) is
   begin 
     
@@ -215,7 +215,7 @@ package body Axi4CommonPkg is
     constant tpd_Clk_Ready          : in    time ;
     constant AlertLogID             : in    AlertLogIDType := ALERTLOG_DEFAULT_ID; 
     constant TimeOutMessage         : in    string := "" ; 
-    constant TimeOutPeriod          : in    time := time'right
+    constant TimeOutPeriod          : in    time := std.env.resolution_limit * 2 ** 30 *2**30
   ) is
   begin 
     

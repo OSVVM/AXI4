@@ -72,9 +72,9 @@ package Axi4LiteSlaveTransactionPkg is
     THE_END
   ) ;
   type Axi4UnresolvedSlaveOperationVectorType is array (natural range <>) of Axi4UnresolvedSlaveOperationType ;
-  alias resolved_max is maximum[ Axi4UnresolvedSlaveOperationVectorType return Axi4UnresolvedSlaveOperationType] ;
+--  alias resolved_max is maximum[ Axi4UnresolvedSlaveOperationVectorType return Axi4UnresolvedSlaveOperationType] ;
+  function resolved_max ( A : Axi4UnresolvedSlaveOperationVectorType) return Axi4UnresolvedSlaveOperationType ; 
   -- Maximum is implicitly defined for any array type in VHDL-2008.   Function resolved_max is a fall back.
-  -- function resolved_max ( s : Axi4LiteUnresolvedOperationVectorType) return Axi4LiteUnresolvedSlaveOperationType ;
   subtype Axi4SlaveOperationType is resolved_max Axi4UnresolvedSlaveOperationType ;
 
   -- AXI Model Options
@@ -110,7 +110,9 @@ package Axi4LiteSlaveTransactionPkg is
     THE_END
   ) ;
   type Axi4UnresolvedSlaveOptionsVectorType is array (natural range <>) of Axi4UnresolvedSlaveOptionsType ;
-  alias resolved_max is maximum[ Axi4UnresolvedSlaveOptionsVectorType return Axi4UnresolvedSlaveOptionsType] ;
+--  alias resolved_max is maximum[ Axi4UnresolvedSlaveOptionsVectorType return Axi4UnresolvedSlaveOptionsType] ;
+  function resolved_max ( A : Axi4UnresolvedSlaveOptionsVectorType) return Axi4UnresolvedSlaveOptionsType ; 
+  
   subtype Axi4SlaveOptionsType is resolved_max Axi4UnresolvedSlaveOptionsType ;
 
 
@@ -207,17 +209,15 @@ end package Axi4LiteSlaveTransactionPkg ;
 -- /////////////////////////////////////////////////////////////////////////////////////////
 
 package body Axi4LiteSlaveTransactionPkg is
-  -- Maximum is implicitly defined for any array type in VHDL-2008.   Function resolved_max is a fall back.
-  -- function resolved_max ( s : Axi4LiteUnresolvedOperationVectorType) return Axi4LiteUnresolvedSlaveOperationType is
-  -- begin
-  --   return maximum s ;
-  -- end function resolved_max ;
-  --
-  -- function resolved_max ( s : Axi4UnresolvedRespVectorEnumType) return Axi4UnresolvedRespEnumType ;
-  -- begin
-  --   return maximum s ;
-  -- end function resolved_max ;
-  
+  function resolved_max ( A : Axi4UnresolvedSlaveOperationVectorType) return Axi4UnresolvedSlaveOperationType is
+  begin
+    return maximum(A) ;
+  end function resolved_max ; 
+  function resolved_max ( A : Axi4UnresolvedSlaveOptionsVectorType) return Axi4UnresolvedSlaveOptionsType is
+  begin
+    return maximum(A) ;
+  end function resolved_max ;  
+
   
   ------------------------------------------------------------
   procedure NoOp (

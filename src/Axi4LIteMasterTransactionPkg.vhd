@@ -74,9 +74,9 @@ package Axi4LiteMasterTransactionPkg is
     THE_END
   ) ;
   type Axi4UnresolvedMasterOperationVectorType is array (natural range <>) of Axi4UnresolvedMasterOperationType ;
-  alias resolved_max is maximum[ Axi4UnresolvedMasterOperationVectorType return Axi4UnresolvedMasterOperationType] ;
+--  alias resolved_max is maximum[ Axi4UnresolvedMasterOperationVectorType return Axi4UnresolvedMasterOperationType] ;
   -- Maximum is implicitly defined for any array type in VHDL-2008.   Function resolved_max is a fall back.
-  -- function resolved_max ( s : Axi4LiteUnresolvedOperationVectorType) return Axi4LiteUnresolvedOperationType ;
+  function resolved_max ( s : Axi4UnresolvedMasterOperationVectorType) return Axi4UnresolvedMasterOperationType ;
   subtype Axi4MasterOperationType is resolved_max Axi4UnresolvedMasterOperationType ;
 
   -- AXI Model Options
@@ -334,10 +334,17 @@ end package Axi4LiteMasterTransactionPkg ;
 
 package body Axi4LiteMasterTransactionPkg is
 
+  function resolved_max ( s : Axi4UnresolvedMasterOperationVectorType) return Axi4UnresolvedMasterOperationType is
+  begin
+    return maximum(s) ;
+  end function resolved_max ; 
+
   function resolved_max ( A : Axi4UnresolvedMasterOptionsVectorType) return Axi4UnresolvedMasterOptionsType is
   begin
     return maximum(A) ;
   end function resolved_max ; 
+  
+
 
   
   ------------------------------------------------------------

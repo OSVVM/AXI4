@@ -50,9 +50,9 @@ package Axi4CommonPkg is
   --                                     00    01      10      11
   type  Axi4UnresolvedRespEnumType is (OKAY, EXOKAY, SLVERR, DECERR) ;
   type Axi4UnresolvedRespVectorEnumType is array (natural range <>) of Axi4UnresolvedRespEnumType ;
-  alias resolved_max is maximum[ Axi4UnresolvedRespVectorEnumType return Axi4UnresolvedRespEnumType] ;
+  -- alias resolved_max is maximum[ Axi4UnresolvedRespVectorEnumType return Axi4UnresolvedRespEnumType] ;
   -- Maximum is implicitly defined for any array type in VHDL-2008.   Function resolved_max is a fall back.
-  -- function resolved_max ( s : Axi4UnresolvedRespVectorEnumType) return Axi4UnresolvedRespEnumType ;
+  function resolved_max ( s : Axi4UnresolvedRespVectorEnumType) return Axi4UnresolvedRespEnumType ;
   subtype Axi4RespEnumType is resolved_max Axi4UnresolvedRespEnumType ;
 
   subtype  Axi4RespType is std_logic_vector(1 downto 0) ;
@@ -145,6 +145,11 @@ end package Axi4CommonPkg ;
 
 package body Axi4CommonPkg is
  
+  function resolved_max ( s : Axi4UnresolvedRespVectorEnumType) return Axi4UnresolvedRespEnumType is
+  begin
+    return maximum(s) ;
+  end function resolved_max ; 
+
   ------------------------------------------------------------
   type TbRespType_indexby_Integer is array (integer range <>) of Axi4RespEnumType;
   constant RESP_TYPE_TB_TABLE : TbRespType_indexby_Integer := (
@@ -305,6 +310,3 @@ package body Axi4CommonPkg is
       Data := Mask and Data ; 
   end procedure AlignAxiReadData ; 
 end package body Axi4CommonPkg ; 
-
-  
-

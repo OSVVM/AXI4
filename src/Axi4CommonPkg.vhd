@@ -43,7 +43,8 @@ library ieee ;
   use ieee.math_real.all ;
   
 library osvvm ; 
-    context osvvm.OsvvmContext ; 
+    use osvvm.AlertLogPkg.all ; 
+    use osvvm.ResolutionPkg.all ; 
   
 package Axi4CommonPkg is 
 

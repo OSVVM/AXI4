@@ -255,6 +255,9 @@ begin
           Increment(WriteDataRequestCount) ;
         end if ; 
         
+        -- Transaction wait time and allow RequestCounts a delta cycle to update
+        wait for 0 ns ;  wait for 0 ns ; 
+        
         if IsAxiBlockOnWriteAddress(Operation) and 
             WriteAddressRequestCount /= WriteAddressDoneCount then 
           -- Block until both write address done.        
@@ -266,8 +269,6 @@ begin
           wait until WriteDataRequestCount = WriteDataDoneCount ;
         end if ; 
 
-        -- Transaction wait time 
-        wait for 0 ns ;  wait for 0 ns ; 
 
       when READ | READ_CHECK | ASYNC_READ_ADDRESS | READ_DATA | READ_DATA_CHECK | TRY_READ_DATA =>
         if IsAxiReadAddress(Operation) then

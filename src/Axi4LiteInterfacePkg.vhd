@@ -43,9 +43,23 @@ library ieee ;
   use ieee.numeric_std.all ;
   use ieee.numeric_std_unsigned.all ;
   
-use work.Axi4CommonPkg.all ;
 
 package Axi4LiteInterfacePkg is 
+  subtype  Axi4RespType is std_logic_vector(1 downto 0) ;
+  constant AXI4_RESP_OKAY   : Axi4RespType := "00" ;
+  constant AXI4_RESP_EXOKAY : Axi4RespType := "01" ; -- Not for Lite
+  constant AXI4_RESP_SLVERR : Axi4RespType := "10" ;
+  constant AXI4_RESP_DECERR : Axi4RespType := "11" ;
+  constant AXI4_RESP_INIT   : Axi4RespType := "ZZ" ;
+
+  subtype Axi4ProtType is std_logic_vector(2 downto 0) ;
+  --  [0] 0 Unprivileged access
+  --      1 Privileged access
+  --  [1] 0 Secure access
+  --      1 Non-secure access
+  --  [2] 0 Data access
+  --      1 Instruction access
+  constant AXI4_PROT_INIT   : Axi4ProtType := "ZZZ" ;
 
   -- AXI Write Address Channel
   type Axi4LiteWriteAddressRecType is record

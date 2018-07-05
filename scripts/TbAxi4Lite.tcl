@@ -3,10 +3,10 @@ if {$argc > 0} {
   set AXI4_DIR $1
 }
 
+vcom -2008 ${AXI4_DIR}/src/Axi4LiteInterfacePkg.vhd
 vcom -2008 ${AXI4_DIR}/src/Axi4CommonPkg.vhd
 vcom -2008 ${AXI4_DIR}/src/Axi4LiteMasterTransactionPkg.vhd
 vcom -2008 ${AXI4_DIR}/src/Axi4LiteSlaveTransactionPkg.vhd
-vcom -2008 ${AXI4_DIR}/src/Axi4LiteInterfacePkg.vhd
 
 vcom -2008 ${AXI4_DIR}/src/Axi4LiteMaster.vhd
 vcom -2008 ${AXI4_DIR}/src/Axi4LiteSlave_Transactor.vhd

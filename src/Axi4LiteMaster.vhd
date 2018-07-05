@@ -170,18 +170,25 @@ begin
     -- Alerts 
     ID                      := GetAlertLogID(MODEL_INSTANCE_NAME) ; 
     ModelID                 <= ID ; 
-    TransRec.AlertLogID     <= ID ; 
+    TransRec.AlertLogID     <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Transaction", ID ) ;
     ProtocolID              <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
     DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
     BusFailedID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
 
-    -- FIFOS 
-    WriteAddressFifo.SetAlertLogID(            MODEL_INSTANCE_NAME & ": WriteAddressFIFO", ID); 
-    WriteAddressTransactionFifo.SetAlertLogID( MODEL_INSTANCE_NAME & ": WriteAddressTransactionFifo", ID); 
-    WriteDataFifo.SetAlertLogID(               MODEL_INSTANCE_NAME & ": WriteDataFifo", ID); 
-    ReadAddressFifo.SetAlertLogID(             MODEL_INSTANCE_NAME & ": ReadAddressFifo"); 
-    ReadAddressTransactionFifo.SetAlertLogID(  MODEL_INSTANCE_NAME & ": ReadAddressTransactionFifo", ID); 
-    ReadDataFifo.SetAlertLogID(                MODEL_INSTANCE_NAME & ": ReadDataFifo", ID); 
+    -- FIFOS.  FIFOS share main ID as they only generate errors if the model uses them wrong  
+    WriteAddressFifo.SetAlertLogID(ID); 
+    WriteAddressFifo.SetName(            MODEL_INSTANCE_NAME & ": WriteAddressFIFO"); 
+    WriteAddressTransactionFifo.SetAlertLogID(ID); 
+    WriteAddressTransactionFifo.SetName( MODEL_INSTANCE_NAME & ": WriteAddressTransactionFifo"); 
+    WriteDataFifo.SetAlertLogID(ID); 
+    WriteDataFifo.SetName(               MODEL_INSTANCE_NAME & ": WriteDataFifo"); 
+    ReadAddressFifo.SetAlertLogID(ID); 
+    ReadAddressFifo.SetName(             MODEL_INSTANCE_NAME & ": ReadAddressFifo"); 
+    ReadAddressTransactionFifo.SetAlertLogID(ID); 
+    ReadAddressTransactionFifo.SetName(  MODEL_INSTANCE_NAME & ": ReadAddressTransactionFifo"); 
+    ReadDataFifo.SetAlertLogID(ID); 
+    ReadDataFifo.SetName(                MODEL_INSTANCE_NAME & ": ReadDataFifo"); 
+    
     WriteResponseScoreboard.SetAlertLogID(     MODEL_INSTANCE_NAME & ": WriteResponse Scoreboard", ID); 
     wait ; 
   end process Initialize ;

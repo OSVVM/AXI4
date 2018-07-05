@@ -168,19 +168,25 @@ begin
     -- Alerts
     ID                      := GetAlertLogID(MODEL_INSTANCE_NAME) ; 
     ModelID                 <= ID ; 
-    TransRec.AlertLogID     <= ID ; 
+    TransRec.AlertLogID     <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Transaction", ID ) ;
     ProtocolID              <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
     DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
     BusFailedID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
 
-    -- FIFOs
-    WriteAddressFifo.SetAlertLogID(     MODEL_INSTANCE_NAME & ": WriteAddressFIFO", ID); 
-    WriteDataFifo.SetAlertLogID(        MODEL_INSTANCE_NAME & ": WriteDataFifo", ID); 
-    WriteTransactionFifo.SetAlertLogID( MODEL_INSTANCE_NAME & ": WriteTransactionFifo", ID); 
-    WriteResponseFifo.SetAlertLogID(    MODEL_INSTANCE_NAME & ": WriteResponseFifo", ID); 
+    -- FIFOS.  FIFOS share main ID as they only generate errors if the model uses them wrong  
+    WriteAddressFifo.SetAlertLogID(ID); 
+    WriteAddressFifo.SetName(     MODEL_INSTANCE_NAME & ": WriteAddressFIFO"); 
+    WriteDataFifo.SetAlertLogID(ID); 
+    WriteDataFifo.SetName(        MODEL_INSTANCE_NAME & ": WriteDataFifo"); 
+    WriteTransactionFifo.SetAlertLogID(ID); 
+    WriteTransactionFifo.SetName( MODEL_INSTANCE_NAME & ": WriteTransactionFifo"); 
+    WriteResponseFifo.SetAlertLogID(ID); 
+    WriteResponseFifo.SetName(    MODEL_INSTANCE_NAME & ": WriteResponseFifo"); 
 
-    ReadAddressFifo.SetAlertLogID(      MODEL_INSTANCE_NAME & ": ReadAddressFifo", ID); 
-    ReadDataFifo.SetAlertLogID(         MODEL_INSTANCE_NAME & ": ReadDataFifo", ID); 
+    ReadAddressFifo.SetAlertLogID(ID);
+    ReadAddressFifo.SetName(      MODEL_INSTANCE_NAME & ": ReadAddressFifo"); 
+    ReadDataFifo.SetAlertLogID(ID); 
+    ReadDataFifo.SetName(         MODEL_INSTANCE_NAME & ": ReadDataFifo"); 
     wait ; 
   end process Initalize ;
 

@@ -344,8 +344,6 @@ package body Axi4LiteMasterTransactionPkg is
     return maximum(A) ;
   end function resolved_max ; 
   
-
-
   
   ------------------------------------------------------------
   procedure NoOp (

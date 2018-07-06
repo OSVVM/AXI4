@@ -1,4 +1,0 @@
-TestCtrl_e.vhd
-TbAxi4Lite.vhd
-TbAxi4Lite_BasicReadWrite.vhd
-TbAxi4Lite_RandomReadWrite.vhd

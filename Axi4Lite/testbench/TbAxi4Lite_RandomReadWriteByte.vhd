@@ -40,8 +40,6 @@
 architecture RandomReadWriteByte of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
-  constant AXI_ADDR_WIDTH : integer := 32 ; 
-  constant AXI_DATA_WIDTH : integer := 32 ; 
   constant AXI_DATA_BYTES : integer := AXI_DATA_WIDTH / 8 ; 
   
   type OpType is (WRITE_OP_ENUM, READ_OP_ENUM) ;  -- Add TEST_DONE?

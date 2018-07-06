@@ -127,6 +127,10 @@ architecture TestHarness of TbAxi4Lite is
   end component Axi4LiteMonitor ;
 
   component TestCtrl is
+    generic (
+      constant AXI_ADDR_WIDTH : integer ; 
+      constant AXI_DATA_WIDTH : integer  
+    ) ;
     port (
       -- Global Signal Interface
       Clk                 : In    std_logic ;
@@ -196,6 +200,10 @@ begin
   
   
   TestCtrl_1 : TestCtrl
+  generic map (
+    AXI_ADDR_WIDTH => AXI_ADDR_WIDTH, 
+    AXI_DATA_WIDTH => AXI_DATA_WIDTH
+  ) 
   port map ( 
     -- Globals
     Clk                => Clk,

@@ -40,8 +40,6 @@
 architecture BasicReadWrite of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
-  constant AXI_ADDR_WIDTH : integer := 32 ; 
-  constant AXI_DATA_WIDTH : integer := 32 ; 
  
 begin
 

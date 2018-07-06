@@ -52,6 +52,10 @@ use work.Axi4LiteSlaveTransactionPkg.all ;
 use work.Axi4LiteInterfacePkg.all ; 
 
 entity TestCtrl is
+  generic (
+    constant AXI_ADDR_WIDTH : integer := 32 ; 
+    constant AXI_DATA_WIDTH : integer := 32  
+  ) ;
   port (
     -- Global Signal Interface
     Clk                 : In    std_logic ;

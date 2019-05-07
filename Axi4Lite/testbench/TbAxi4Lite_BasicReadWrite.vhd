@@ -70,7 +70,7 @@ begin
     
     
     TranscriptClose ; 
-    AlertIfDiff("./results/TbAxi4Lite_BasicReadWrite.txt", "../sim_shared/validated_results/TbAxi4Lite_BasicReadWrite.txt", "") ; 
+    AlertIfDiff("./results/TbAxi4Lite_BasicReadWrite.txt", "../AXI4/Axi4Lite/testbench/validated_results/TbAxi4Lite_BasicReadWrite.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 

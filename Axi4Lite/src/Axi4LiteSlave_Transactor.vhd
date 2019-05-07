@@ -335,10 +335,10 @@ begin
         ReadyDelayCycles        => WriteAddressReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_AWReady
       ) ;
-            
+
       -- capture address, prot
       WriteAddressFifo.push(AWAddr & AWProt) ;
-      
+
       -- Log this operation
       Log(ModelID, 
         "Write Address." &

@@ -67,9 +67,9 @@ package AxiStreamTransactionPkg is
     THE_END
   ) ;
   type AxiStreamUnresolvedOperationVectorType is array (natural range <>) of AxiStreamUnresolvedOperationType ;
-  alias resolved_max is maximum[ AxiStreamUnresolvedOperationVectorType return AxiStreamUnresolvedOperationType] ;
+  -- alias resolved_max is maximum[ AxiStreamUnresolvedOperationVectorType return AxiStreamUnresolvedOperationType] ;
   -- Maximum is implicitly defined for any array type in VHDL-2008.   Function resolved_max is a fall back.
-  -- function resolved_max ( s : Axi4LiteUnresolvedOperationVectorType) return Axi4LiteUnresolvedOperationType ;
+  function resolved_max ( s : AxiStreamUnresolvedOperationVectorType) return AxiStreamUnresolvedOperationType ;
   subtype AxiStreamOperationType is resolved_max AxiStreamUnresolvedOperationType ;
 
 
@@ -157,6 +157,13 @@ end package AxiStreamTransactionPkg ;
 
 package body AxiStreamTransactionPkg is
   
+  ------------------------------------------------------------
+  function resolved_max ( s : AxiStreamUnresolvedOperationVectorType) return AxiStreamUnresolvedOperationType is
+  ------------------------------------------------------------
+  begin
+    return maximum(s) ;
+  end function resolved_max ; 
+
 
   ------------------------------------------------------------
   procedure Send (
@@ -170,7 +177,7 @@ package body AxiStreamTransactionPkg is
     ByteCount := iData'length / 8 ;
 
     -- Parameter Checks
-    AlertIf(TransRec.AlertLogID, iData'length mod 8 /= 0, "Send, Data not on a byte boundary", FAILURE) ;
+--    AlertIf(TransRec.AlertLogID, iData'length mod 8 /= 0, "Send, Data not on a byte boundary", FAILURE) ;
     -- AlertIf(TransRec.AlertLogID, iData'length > TransRec.AxiDataWidth, "Send, Data length too large", FAILURE) ;
 
     -- Put values in record
@@ -194,7 +201,7 @@ package body AxiStreamTransactionPkg is
     ByteCount := oData'length / 8 ;
 
     -- Parameter Checks
-    AlertIf(TransRec.AlertLogID, oData'length mod 8 /= 0, "Master Read, Data not on a byte boundary", FAILURE) ;
+--    AlertIf(TransRec.AlertLogID, oData'length mod 8 /= 0, "Master Read, Data not on a byte boundary", FAILURE) ;
 --    AlertIf(TransRec.AlertLogID, oData'length > TransRec.AxiDataWidth, "Master Read, Data length to large", FAILURE) ;
 
     -- Put values in record
@@ -223,7 +230,9 @@ package body AxiStreamTransactionPkg is
     ByteCount := oData'length / 8 ;
 
     -- Parameter Checks
-    AlertIf(TransRec.AlertLogID, oData'length mod 8 /= 0, "Master Read, Data not on a byte boundary", FAILURE) ;
+-- Not all AxiStream Compatible interfaces are 32 bits
+--    AlertIf(TransRec.AlertLogID, oData'length mod 8 /= 0, "Master Read, Data not on a byte boundary", FAILURE) ;
+-- Not in the record currently
     -- AlertIf(TransRec.AlertLogID, oData'length > TransRec.AxiDataWidth, "Master Read, Data length to large", FAILURE) ;
 
     -- Put values in record

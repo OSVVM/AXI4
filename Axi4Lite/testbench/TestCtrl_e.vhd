@@ -1,5 +1,4 @@
 --
---
 --  File Name:         TestCtrl_e.vhd
 --  Design Unit Name:  TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
@@ -20,10 +19,11 @@
 --
 --  Revision History:
 --    Date       Version    Description
---    09/2017:   2017       Initial revision
+--    09/2017:   2017.09    Initial revision
+--    05/2019    2019.05    Added context reference
 --
 --
--- Copyright 2017 SynthWorks Design Inc
+-- Copyright 2017-2019 SynthWorks Design Inc
 --
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -46,10 +46,8 @@ library ieee ;
 library OSVVM ; 
   context OSVVM.OsvvmContext ; 
 
-use work.Axi4CommonPkg.all ; 
-use work.Axi4LiteMasterTransactionPkg.all ; 
-use work.Axi4LiteSlaveTransactionPkg.all ; 
-use work.Axi4LiteInterfacePkg.all ; 
+library OSVVM_AXI4 ;
+  context OSVVM_AXI4.Axi4LiteContext ; 
 
 entity TestCtrl is
   generic (

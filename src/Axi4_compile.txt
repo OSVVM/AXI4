@@ -1,6 +1,0 @@
-Axi4TransactionPkg.vhd
-Axi4LiteInterfacePkg.vhd
-Axi4CommonPkg.vhd
-Axi4LiteMaster.vhd
-Axi4LiteSlave_Transactor.vhd
-Axi4LiteMonitor_dummy.vhd

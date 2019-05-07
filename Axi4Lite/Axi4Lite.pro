@@ -1,0 +1,10 @@
+library osvvm_axi4
+analyze ./src/Axi4LiteSlaveTransactionPkg.vhd
+analyze ./src/Axi4LiteMasterTransactionPkg.vhd
+analyze ./src/Axi4LiteMasterComponentPkg.vhd
+analyze ./src/Axi4LiteSlaveComponentPkg.vhd
+analyze ./src/Axi4LiteMonitorComponentPkg.vhd
+analyze ./src/Axi4LiteContext.vhd
+analyze ./src/Axi4LiteMaster.vhd
+analyze ./src/Axi4LiteMonitor_dummy.vhd
+analyze ./src/Axi4LiteSlave_Transactor.vhd

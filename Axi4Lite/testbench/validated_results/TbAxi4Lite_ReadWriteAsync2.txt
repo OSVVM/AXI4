@@ -1,0 +1,133 @@
+%% Log   ALWAYS  in TB Master Proc, Write and Read with ByteAddr = 0, 4 Bytes at 110 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteAddressAsync,  Addr: AAAA_AAA0 at 110 ns
+%% Log   INFO    in axi4litemaster_1 Axi4LiteMaster, Write Address.  AWAddr: AAAAAAA0  AWProt: 000  Operation# 1 at 110 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteDataAsync, Data: 5555_5555 at 110 ns
+%% Log   INFO    in axi4litemaster_1 Axi4LiteMaster, Write Data.  WData: 55555555  WStrb: 1111  Operation# 1 at 110 ns
+%% Log   INFO    in axi4liteslave_1 Axi4LiteSlave, Write Data.  WData: 55555555  WStrb: 1111  Operation# 1 at 120 ns
+%% Log   INFO    in axi4liteslave_1 Axi4LiteSlave, Write Address.  AWAddr: AAAAAAA0  AWProt: 000  Operation# 1 at 120 ns
+%% Log   INFO    in axi4liteslave_1 Axi4LiteSlave, Write Response.  BResp: 0  Operation# 1 at 120 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Addr:  Received : AAAAAAA0 at 120 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Data:  Received : 55555555 at 120 ns
+%% Log   PASSED  in axi4litemaster_1 Axi4LiteMaster: WriteResponse Scoreboard,    Received: 0   Item Number: 1 at 130 ns
+
+%% Log   ALWAYS  in TB Master Proc, MasterReadAddressAsync,  Addr: 1111_1110 at 150 ns
+%% Log   INFO    in axi4litemaster_1 Axi4LiteMaster, Read Address.  ARAddr: 11111110  ARProt: 000  Operation# 1 at 150 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: 2222_2222, Try # 1 at 150 ns
+%% Log   INFO    in axi4liteslave_1 Axi4LiteSlave, Read Address.  ARAddr: 11111110  ARProt: 000  Operation# 1 at 160 ns
+%% Log   INFO    in axi4liteslave_1 Axi4LiteSlave, Read Data.  RData: 22222222  RResp: 0  Operation# 1 at 160 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: 2222_2222, Try # 2 at 160 ns
+%% Log   PASSED  in TB Slave Proc, Slave Read Addr:  Received : 11111110 at 160 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: 2222_2222, Try # 3 at 170 ns
+%% Log   INFO    in axi4litemaster_1 Axi4LiteMaster, Read Data: 22222222  Read Address: 11111110  Prot: 0 at 170 ns
+%% Log   PASSED  in TB Master Proc, Master Read Data:  Received : 22222222 at 170 ns
+
+
+%% Log   ALWAYS  in TB Master Proc, Write and Read with 1 Byte, and ByteAddr = 0, 1, 2, 3 at 190 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteAddressAsync,  Addr: AAAA_AAA0 at 190 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteAddressAsync,  Addr: AAAA_AAA1 at 190 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteAddressAsync,  Addr: AAAA_AAA2 at 190 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteAddressAsync,  Addr: AAAA_AAA3 at 190 ns
+%% Log   ALWAYS  in TB Master Proc, NoOp 2 at 190 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteDataAsync, Data: 11 at 210 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteDataAsync, Data: 22 at 210 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteDataAsync, Data: 33 at 210 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteDataAsync, Data: 44 at 210 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Addr:  Received : AAAAAAA0 at 220 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Data:  Received : 00000011 at 220 ns
+%% Log   PASSED  in axi4litemaster_1 Axi4LiteMaster: WriteResponse Scoreboard,    Received: 0   Item Number: 2 at 230 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Addr:  Received : AAAAAAA1 at 230 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Data:  Received : 00002200 at 230 ns
+%% Log   PASSED  in axi4litemaster_1 Axi4LiteMaster: WriteResponse Scoreboard,    Received: 0   Item Number: 3 at 240 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Addr:  Received : AAAAAAA2 at 240 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Data:  Received : 00330000 at 240 ns
+%% Log   PASSED  in axi4litemaster_1 Axi4LiteMaster: WriteResponse Scoreboard,    Received: 0   Item Number: 4 at 250 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Addr:  Received : AAAAAAA3 at 250 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Data:  Received : 44000000 at 250 ns
+%% Log   PASSED  in axi4litemaster_1 Axi4LiteMaster: WriteResponse Scoreboard,    Received: 0   Item Number: 5 at 260 ns
+
+%% Log   ALWAYS  in TB Master Proc, MasterReadAddressAsync,  Addr: 1111_1110 at 290 ns
+%% Log   ALWAYS  in TB Master Proc, MasterReadAddressAsync,  Addr: 1111_1111 at 290 ns
+%% Log   ALWAYS  in TB Master Proc, MasterReadAddressAsync,  Addr: 1111_1112 at 290 ns
+%% Log   ALWAYS  in TB Master Proc, MasterReadAddressAsync,  Addr: 1111_1113 at 290 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: AA, Try # 1 at 290 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: AA, Try # 2 at 300 ns
+%% Log   PASSED  in TB Slave Proc, Slave Read Addr:  Received : 11111110 at 300 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: AA, Try # 3 at 310 ns
+%% Log   PASSED  in TB Slave Proc, Slave Read Addr:  Received : 11111111 at 310 ns
+%% Log   PASSED  in TB Master Proc, Master Read Data:  Received : AA at 310 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: BB, Try # 1 at 310 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: BB, Try # 2 at 320 ns
+%% Log   PASSED  in TB Slave Proc, Slave Read Addr:  Received : 11111112 at 320 ns
+%% Log   PASSED  in TB Master Proc, Master Read Data:  Received : BB at 320 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: CC, Try # 1 at 320 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: CC, Try # 2 at 330 ns
+%% Log   PASSED  in TB Slave Proc, Slave Read Addr:  Received : 11111113 at 330 ns
+%% Log   PASSED  in TB Master Proc, Master Read Data:  Received : CC at 330 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: DD, Try # 1 at 330 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: DD, Try # 2 at 340 ns
+%% Log   PASSED  in TB Master Proc, Master Read Data:  Received : DD at 340 ns
+
+
+%% Log   ALWAYS  in TB Master Proc, Write and Read with 2 Bytes, and ByteAddr = 0, 1, 2 at 340 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteAddressAsync,  Addr: BBBB_BBB0 at 340 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteAddressAsync,  Addr: BBBB_BBB1 at 340 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteAddressAsync,  Addr: BBBB_BBB2 at 340 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteDataAsync, Data: 2211 at 340 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteDataAsync, Data: 33_22 at 340 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteDataAsync, Data: 4433 at 340 ns
+
+%% Log   ALWAYS  in TB Master Proc, MasterReadAddressAsync,  Addr: 1111_1110 at 340 ns
+%% Log   ALWAYS  in TB Master Proc, MasterReadAddressAsync,  Addr: 1111_1111 at 340 ns
+%% Log   ALWAYS  in TB Master Proc, MasterReadAddressAsync,  Addr: 1111_1112 at 340 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: BBAA, Try # 1 at 340 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: BBAA, Try # 2 at 350 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Addr:  Received : BBBBBBB0 at 350 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Data:  Received : 00002211 at 350 ns
+%% Log   PASSED  in axi4litemaster_1 Axi4LiteMaster: WriteResponse Scoreboard,    Received: 0   Item Number: 6 at 360 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: BBAA, Try # 3 at 360 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Addr:  Received : BBBBBBB1 at 360 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Data:  Received : 00332200 at 360 ns
+%% Log   PASSED  in axi4litemaster_1 Axi4LiteMaster: WriteResponse Scoreboard,    Received: 0   Item Number: 7 at 370 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: BBAA, Try # 4 at 370 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Addr:  Received : BBBBBBB2 at 370 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Data:  Received : 44330000 at 370 ns
+%% Log   PASSED  in TB Slave Proc, Slave Read Addr:  Received : 11111110 at 370 ns
+%% Log   PASSED  in TB Slave Proc, Slave Read Addr:  Received : 11111111 at 370 ns
+%% Log   PASSED  in TB Slave Proc, Slave Read Addr:  Received : 11111112 at 370 ns
+%% Log   PASSED  in axi4litemaster_1 Axi4LiteMaster: WriteResponse Scoreboard,    Received: 0   Item Number: 8 at 380 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: BBAA, Try # 5 at 380 ns
+%% Log   PASSED  in TB Master Proc, Master Read Data:  Received : BBAA at 380 ns
+%% Log   ALWAYS  in TB Master Proc, MasterReadData at 380 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: CCBB, Try # 1 at 380 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: CCBB, Try # 2 at 390 ns
+%% Log   PASSED  in TB Master Proc, Master Read Data:  Received : CCBB at 390 ns
+%% Log   ALWAYS  in TB Master Proc, MasterReadData at 390 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: DDCC, Try # 1 at 390 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: DDCC, Try # 2 at 400 ns
+%% Log   PASSED  in TB Master Proc, Master Read Data:  Received : DDCC at 400 ns
+
+
+%% Log   ALWAYS  in TB Master Proc, Write and Read with 3 Bytes and ByteAddr = 0. 1 at 400 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteAddressAsync,  Addr: CCCC_CCC0 at 400 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteDataAsync, Data: 33_2211 at 400 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteAddressAsync,  Addr: CCCC_CCC1 at 400 ns
+%% Log   ALWAYS  in TB Master Proc, MasterWriteDataAsync, Data: 4433_22 at 400 ns
+
+%% Log   ALWAYS  in TB Master Proc, MasterReadAddressAsync,  Addr: 1111_1110 at 400 ns
+%% Log   ALWAYS  in TB Master Proc, MasterReadAddressAsync,  Addr: 1111_1111 at 400 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: CC_BBAA, Try # 1 at 400 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: CC_BBAA, Try # 2 at 410 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Addr:  Received : CCCCCCC0 at 410 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Data:  Received : 00332211 at 410 ns
+%% Log   PASSED  in axi4litemaster_1 Axi4LiteMaster: WriteResponse Scoreboard,    Received: 0   Item Number: 9 at 420 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: CC_BBAA, Try # 3 at 420 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Addr:  Received : CCCCCCC1 at 420 ns
+%% Log   PASSED  in TB Slave Proc, Slave Write Data:  Received : 44332200 at 420 ns
+%% Log   PASSED  in TB Slave Proc, Slave Read Addr:  Received : 11111110 at 420 ns
+%% Log   PASSED  in TB Slave Proc, Slave Read Addr:  Received : 11111111 at 420 ns
+%% Log   PASSED  in axi4litemaster_1 Axi4LiteMaster: WriteResponse Scoreboard,    Received: 0   Item Number: 10 at 430 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: CC_BBAA, Try # 4 at 430 ns
+%% Log   PASSED  in TB Master Proc, Master Read Data:  Received : CCBBAA at 430 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: DDCC_BB, Try # 1 at 430 ns
+%% Log   ALWAYS  in TB Master Proc, MasterTryReadData, Data: DDCC_BB, Try # 2 at 440 ns
+%% Log   PASSED  in TB Master Proc, Master Read Data:  Received : DDCCBB at 440 ns

@@ -42,12 +42,10 @@ library ieee ;
   use ieee.numeric_std_unsigned.all ;
 
 library osvvm ;
-    context osvvm.OsvvmContext ;
+  context osvvm.OsvvmContext ;
     
-  use work.Axi4CommonPkg.all ; 
-  use work.Axi4LiteMasterTransactionPkg.all ; 
-  use work.Axi4LiteSlaveTransactionPkg.all ; 
-  use work.Axi4LiteInterfacePkg.all ; 
+library OSVVM_AXI4 ;
+  context OSVVM_AXI4.Axi4LiteContext ; 
 
 entity TbAxi4Lite is
 end entity TbAxi4Lite ; 
@@ -65,16 +63,16 @@ architecture TestHarness of TbAxi4Lite is
 
   -- Testbench Transaction Interface
   subtype MasterTransactionRecType is Axi4LiteMasterTransactionRecType(
-    Address(SizeOfTransaction(AXI_ADDR_WIDTH)-1 downto 0), 
-    DataToModel(SizeOfTransaction(AXI_DATA_WIDTH)-1 downto 0),
-    DataFromModel(SizeOfTransaction(AXI_DATA_WIDTH)-1 downto 0)
+    Address(AXI_ADDR_WIDTH-1 downto 0), 
+    DataToModel(AXI_DATA_WIDTH-1 downto 0),
+    DataFromModel(AXI_DATA_WIDTH-1 downto 0)
   ) ;  
   signal AxiMasterTransRec   : MasterTransactionRecType ;
   
   subtype SlaveTransactionRecType is Axi4LiteSlaveTransactionRecType(
-    Address(SizeOfTransaction(AXI_ADDR_WIDTH)-1 downto 0), 
-    DataToModel(SizeOfTransaction(AXI_DATA_WIDTH)-1 downto 0),
-    DataFromModel(SizeOfTransaction(AXI_DATA_WIDTH)-1 downto 0)
+    Address(AXI_ADDR_WIDTH-1 downto 0), 
+    DataToModel(AXI_DATA_WIDTH-1 downto 0),
+    DataFromModel(AXI_DATA_WIDTH-1 downto 0)
   ) ;  
   signal AxiSlaveTransRec    : SlaveTransactionRecType ;
   
@@ -87,44 +85,6 @@ architecture TestHarness of TbAxi4Lite is
     ReadData( RData(AXI_DATA_WIDTH-1 downto 0) )
   ) ;
 
-  component Axi4LiteMaster is
-  port (
-    -- Globals
-    Clk         : in   std_logic ;
-    nReset      : in   std_logic ;
-
-    -- Testbench Transaction Interface
-    TransRec    : inout Axi4LiteMasterTransactionRecType ;
-
-    -- AXI Master Functional Interface
-    AxiLiteBus  : inout Axi4LiteRecType 
-  ) ;
-  end component Axi4LiteMaster ;
-
-  component Axi4LiteSlave is
-  port (
-    -- Globals
-    Clk         : in   std_logic ;
-    nReset      : in   std_logic ;
-
-    -- Testbench Transaction Interface
-    TransRec    : inout Axi4LiteSlaveTransactionRecType ;
-
-    -- AXI Master Functional Interface
-    AxiLiteBus  : inout Axi4LiteRecType 
-  ) ;
-  end component Axi4LiteSlave ;
-
-  component Axi4LiteMonitor is
-  port (
-    -- Globals
-    Clk         : in   std_logic ;
-    nReset      : in   std_logic ;
-
-    -- AXI Master Functional Interface
-    AxiLiteBus  : in    Axi4LiteRecType 
-  ) ;
-  end component Axi4LiteMonitor ;
 
   component TestCtrl is
     generic (

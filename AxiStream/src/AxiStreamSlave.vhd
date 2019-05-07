@@ -20,9 +20,10 @@
 --  Revision History:
 --    Date       Version    Description
 --    05/2018    2018.05    First Release
+--    05/2019    2019.05    Removed generics for DEFAULT_ID, DEFAULT_DEST, DEFAULT_USER
 --
 --
--- Copyright 2108 SynthWorks Design Inc
+-- Copyright 2018 SynthWorks Design Inc
 --
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -51,10 +52,6 @@ library osvvm ;
 
 entity AxiStreamSlave is
   generic (
-    DEFAULT_ID     : std_logic_vector ; 
-    DEFAULT_DEST   : std_logic_vector ; 
-    DEFAULT_USER   : std_logic_vector ; 
-
     tperiod_Clk     : time := 10 ns ;
     
     tpd_Clk_TReady : time := 2 ns  
@@ -97,12 +94,13 @@ architecture SimpleMaster of AxiStreamSlave is
   signal ReceiveReadyBeforeValid : boolean := TRUE ; 
   signal ReceiveReadyDelayCycles : integer := 0 ;
 
---  signal IdSet   : boolean := FALSE ; 
---  signal DestSet : boolean := FALSE ; 
---  signal UserSet : boolean := FALSE ; 
-  signal ID      : TID'subtype := DEFAULT_ID ;
-  signal Dest    : TDest'subtype := DEFAULT_DEST ;
-  signal User    : TUser'subtype := DEFAULT_USER;
+--!  For future checking
+--  signal ID      : TID'subtype   := (others => '0') ;
+--  signal Dest    : TDest'subtype := (others => '0') ;
+--  signal User    : TUser'subtype := (others => '0') ;
+--  signal ID      : TID'subtype   := DEFAULT_ID ;
+--  signal Dest    : TDest'subtype := DEFAULT_DEST ;
+--  signal User    : TUser'subtype := DEFAULT_USER;
 
 begin
 
@@ -179,18 +177,19 @@ begin
 
       when RECEIVE_READY_DELAY_CYCLES =>       
         ReceiveReadyDelayCycles <= FromTransaction(TransRec.DataToModel) ;
-        
-      when SET_ID =>                      
-        ID       <= FromTransaction(TransRec.DataToModel, ID'length) ;
-        -- IdSet    <= TRUE ; 
-        
-      when SET_DEST => 
-        Dest     <= FromTransaction(TransRec.DataToModel, Dest'length) ;
-        -- DestSet  <= TRUE ; 
-        
-      when SET_USER =>
-        User     <= FromTransaction(TransRec.DataToModel, User'length) ;
-        -- UserSet  <= TRUE ; 
+    
+--! Currently not used    
+--      when SET_ID =>                      
+--        ID       <= FromTransaction(TransRec.DataToModel, ID'length) ;
+--        -- IdSet    <= TRUE ; 
+--        
+--      when SET_DEST => 
+--        Dest     <= FromTransaction(TransRec.DataToModel, Dest'length) ;
+--        -- DestSet  <= TRUE ; 
+--        
+--      when SET_USER =>
+--        User     <= FromTransaction(TransRec.DataToModel, User'length) ;
+--        -- UserSet  <= TRUE ; 
         
       -- The End -- Done  
         
@@ -209,12 +208,6 @@ begin
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   ReceiveHandler : process
-    variable ID   :   TID'subtype := (others => '0') ;
-    variable Dest : TDest'subtype := (others => '0') ;
-    variable User : TUser'subtype := (others => '0') ;
-    variable Data : TData'subtype := (others => '1') ;
-    variable Strb : TStrb'subtype := (others => '1') ;
-    variable Keep : TKeep'subtype := (others => '1') ;
   begin
     -- Initialize
     TReady  <= '0' ;

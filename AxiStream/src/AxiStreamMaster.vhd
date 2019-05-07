@@ -45,7 +45,6 @@ library osvvm ;
   context osvvm.OsvvmContext ;
   use osvvm.ScoreboardPkg_slv.all ;
   
---  use work.Axi4LiteCommonTransactionPkg.all ; 
   use work.AxiStreamTransactionPkg.all ; 
   use work.Axi4CommonPkg.all ; 
 
@@ -101,7 +100,7 @@ architecture SimpleMaster of AxiStreamMaster is
 
   signal TransmitRequestCount, TransmitDoneCount      : integer := 0 ;   
 
-  signal TransmitReadyTimeOut : integer := 25 ; 
+  signal TransmitReadyTimeOut : integer := integer'right ; 
 
   signal ID      : TID'subtype := DEFAULT_ID ;
   signal Dest    : TDest'subtype := DEFAULT_DEST ;

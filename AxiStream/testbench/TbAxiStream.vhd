@@ -44,21 +44,12 @@ library ieee ;
 library osvvm ;
     context osvvm.OsvvmContext ;
     
-  use work.Axi4CommonPkg.all ; 
-  use work.AxiStreamTransactionPkg.all ; 
+library osvvm_AXI4 ;
+    context osvvm_AXI4.AxiStreamContext ;
 
 entity TbAxiStream is
 end entity TbAxiStream ; 
 architecture TestHarness of TbAxiStream is
-  constant AXI_DATA_WIDTH   : integer := 32 ; 
-  constant AXI_BYTE_WIDTH   : integer := AXI_DATA_WIDTH/8 ; 
-  constant TID_MAX_WIDTH    : integer := 8 ;
-  constant TDEST_MAX_WIDTH  : integer := 4 ;
-  constant TUSER_MAX_WIDTH  : integer := 1 * AXI_BYTE_WIDTH ;
-  
-  constant DEFAULT_ID     : std_logic_vector(TID_MAX_WIDTH-1 downto 0) := B"0000_0000" ; 
-  constant DEFAULT_DEST   : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) := "0000" ; 
-  constant DEFAULT_USER   : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) := "0000" ; 
 
   constant tperiod_Clk : time := 10 ns ; 
   constant tpd         : time := 2 ns ; 
@@ -66,93 +57,52 @@ architecture TestHarness of TbAxiStream is
   signal Clk       : std_logic ;
   signal nReset    : std_logic ;
   
-  signal TValid    : std_logic ;
-  signal TReady    : std_logic ; 
-  signal TID       : std_logic_vector(TID_MAX_WIDTH-1 downto 0) ; 
-  signal TDest     : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) ; 
-  signal TUser     : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) ; 
-  signal TData     : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ; 
-  signal TStrb     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
-  signal TKeep     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
-  signal TLast     : std_logic ; 
+  -- Create signals and transaction interface for AxiStream TX model
+  package AxiStreamPkg is new osvvm_axi4.AxiStreamGenericSignalsPkg
+    generic map (
+      AXI_DATA_WIDTH   => 32, 
+      AXI_BYTE_WIDTH   => 4, 
+      TID_MAX_WIDTH    => 8,
+      TDEST_MAX_WIDTH  => 4,
+      TUSER_MAX_WIDTH  => 4
+    ) ;  
 
-  -- Testbench Transaction Interface
-  subtype TransactionRecType is AxiStreamTransactionRecType(
-    DataToModel(SizeOfTransaction(AXI_DATA_WIDTH)-1 downto 0),
-    DataFromModel(SizeOfTransaction(AXI_DATA_WIDTH)-1 downto 0)
-  ) ;  
+  use AxiStreamPkg.all ;
+  
+--  constant AXI_DATA_WIDTH   : integer := 32 ; 
+--  constant AXI_BYTE_WIDTH   : integer := AXI_DATA_WIDTH/8 ; 
+--  constant TID_MAX_WIDTH    : integer := 8 ;
+--  constant TDEST_MAX_WIDTH  : integer := 4 ;
+--  constant TUSER_MAX_WIDTH  : integer := 1 * AXI_BYTE_WIDTH ;
+--  
+--  constant DEFAULT_ID     : std_logic_vector(TID_MAX_WIDTH-1 downto 0) := B"0000_0000" ; 
+--  constant DEFAULT_DEST   : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) := "0000" ; 
+--  constant DEFAULT_USER   : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) := "0000" ; 
+  
+--    signal TValid    : std_logic ;
+--    signal TReady    : std_logic ; 
+--    signal TID       : std_logic_vector(TID_MAX_WIDTH-1 downto 0) ; 
+--    signal TDest     : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) ; 
+--    signal TUser     : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) ; 
+--    signal TData     : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ; 
+--    signal TStrb     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
+--    signal TKeep     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
+--    signal TLast     : std_logic ; 
+--   
+--    -- Testbench Transaction Interface
+--    subtype TransactionRecType is AxiStreamTransactionRecType(
+--      DataToModel(AXI_DATA_WIDTH-1 downto 0),
+--      DataFromModel(XI_DATA_WIDTH-1 downto 0)
+--    ) ;  
+--    signal AxiStreamMasterTransRec : TransactionRecType ;
+--    signal AxiStreamSlaveTransRec : TransactionRecType ;
+  
+  -- MTI fails with the following ...
+  -- alias AxiStreamMasterTransRec : TransactionRecType is TransRec ; 
+  -- however it is ok with:
   signal AxiStreamMasterTransRec : TransactionRecType ;
   signal AxiStreamSlaveTransRec : TransactionRecType ;
   
-
-  component AxiStreamMaster is
-    generic (
-      DEFAULT_ID     : std_logic_vector ; 
-      DEFAULT_DEST   : std_logic_vector ; 
-      DEFAULT_USER   : std_logic_vector ; 
-
-      tperiod_Clk     : time := 10 ns ;
-      
-      tpd_Clk_TValid : time := 2 ns ; 
-      tpd_Clk_TID    : time := 2 ns ; 
-      tpd_Clk_TDest  : time := 2 ns ; 
-      tpd_Clk_TUser  : time := 2 ns ; 
-      tpd_Clk_TData  : time := 2 ns ; 
-      tpd_Clk_TStrb  : time := 2 ns ; 
-      tpd_Clk_TKeep  : time := 2 ns ; 
-      tpd_Clk_TLast  : time := 2 ns 
-    ) ;
-    port (
-      -- Globals
-      Clk       : in  std_logic ;
-      nReset    : in  std_logic ;
-      
-      -- AXI Master Functional Interface
-      TValid    : out std_logic ;
-      TReady    : in  std_logic ; 
-      TID       : out std_logic_vector ; 
-      TDest     : out std_logic_vector ; 
-      TUser     : out std_logic_vector ; 
-      TData     : out std_logic_vector ; 
-      TStrb     : out std_logic_vector ; 
-      TKeep     : out std_logic_vector ; 
-      TLast     : out std_logic ; 
-
-      -- Testbench Transaction Interface
-      TransRec  : inout AxiStreamTransactionRecType 
-    ) ;
-  end component AxiStreamMaster ;
-  
-  component AxiStreamSlave is
-    generic (
-      DEFAULT_ID     : std_logic_vector ; 
-      DEFAULT_DEST   : std_logic_vector ; 
-      DEFAULT_USER   : std_logic_vector ; 
-
-      tperiod_Clk     : time := 10 ns ;
-      
-      tpd_Clk_TReady : time := 2 ns  
-    ) ;
-    port (
-      -- Globals
-      Clk       : in  std_logic ;
-      nReset    : in  std_logic ;
-      
-      -- AXI Master Functional Interface
-      TValid    : in  std_logic ;
-      TReady    : out std_logic ; 
-      TID       : in  std_logic_vector ; 
-      TDest     : in  std_logic_vector ; 
-      TUser     : in  std_logic_vector ; 
-      TData     : in  std_logic_vector ; 
-      TStrb     : in  std_logic_vector ; 
-      TKeep     : in  std_logic_vector ; 
-      TLast     : in  std_logic ; 
-
-      -- Testbench Transaction Interface
-      TransRec  : inout AxiStreamTransactionRecType 
-    ) ;
-  end component AxiStreamSlave ;
 
   component TestCtrl is
     port (
@@ -224,10 +174,6 @@ begin
   
   AxiStreamSlave_1 : AxiStreamSlave
     generic map (
-      DEFAULT_ID     => DEFAULT_ID  , 
-      DEFAULT_DEST   => DEFAULT_DEST, 
-      DEFAULT_USER   => DEFAULT_USER, 
-
       tperiod_Clk    => tperiod_Clk,
 
       tpd_Clk_TReady => tpd  

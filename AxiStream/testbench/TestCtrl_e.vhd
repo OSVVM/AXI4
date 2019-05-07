@@ -46,7 +46,8 @@ library ieee ;
 library OSVVM ; 
   context OSVVM.OsvvmContext ; 
 
-use work.AxiStreamTransactionPkg.all ; 
+library osvvm_AXI4 ;
+    context osvvm_AXI4.AxiStreamContext ;
 
 entity TestCtrl is
   port (

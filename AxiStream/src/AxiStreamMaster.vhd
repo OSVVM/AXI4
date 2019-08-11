@@ -134,8 +134,6 @@ begin
     variable Data : TData'subtype ; 
     variable Operation : TransRec.Operation'subtype ;
     variable NoOpCycles : integer ;
-    
-
   begin
     WaitForTransaction(
        Clk      => Clk,

@@ -235,7 +235,7 @@ begin
         INFO
       ) ;
 
-    -- Signal completion
+      -- Signal completion
       increment(ReceiveCount) ;
       wait for 0 ns ;
     end loop ReceiveLoop ; 

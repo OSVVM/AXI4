@@ -248,6 +248,8 @@ begin
         
         if IsAxiWriteData(Operation) then 
           -- Queue Write Data 
+--! Issue:  This prevents WriteData Cycles before WriteAddress Cycles!
+--! Issue:  Need to add ByteAddress to WriteData Transactions.  
           (WriteAddress, WriteProt) := WriteAddressTransactionFifo.Pop ;
           WriteByteAddr := CalculateAxiByteAddress(WriteAddress, AXI_DATA_BYTE_WIDTH);
           WriteStrb     := CalculateAxiWriteStrobe(WriteByteAddr, TransRec.DataBytes, AXI_DATA_BYTE_WIDTH) ; 
@@ -440,6 +442,7 @@ begin
 
       -- Signal completion
       Increment(WriteAddressDoneCount) ;
+      wait for 0 ns ; 
     end loop WriteAddressLoop ; 
   end process WriteAddressHandler ;
 
@@ -496,6 +499,7 @@ begin
 
         -- Signal completion
         Increment(WriteDataDoneCount) ;
+        wait for 0 ns ;
       else
       -- NoOp Cycle let a clock pass
 --        Increment(WriteDataNoOpCount) ;
@@ -544,6 +548,7 @@ begin
       
       -- Signal Completion
       increment(WriteResponseReceiveCount) ;
+      wait for 0 ns ;
     end loop WriteResponseOperation ;
   end process WriteResponseHandler ;
 
@@ -614,6 +619,7 @@ begin
 
       -- Signal completion
       Increment(ReadAddressDoneCount) ;
+      wait for 0 ns; 
     end loop AddressReadLoop ; 
   end process ReadAddressHandler ;
 

@@ -5,7 +5,8 @@
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
 --  Contributor(s):
---     Jim Lewis      jim@synthworks.com
+--     Jim Lewis       jim@synthworks.com
+--     Patrick lehmann Patrick.Lehmann@plc2.de
 --
 --
 --  Description:
@@ -22,7 +23,7 @@
 --    05/2018    2018.05    First Release
 --
 --
--- Copyright 2108 SynthWorks Design Inc
+-- Copyright 2018 SynthWorks Design Inc
 --
 -- Licensed under the Apache License, Version 2.0 (the "License");
 -- you may not use this file except in compliance with the License.
@@ -146,7 +147,14 @@ begin
     case Operation is
       when SEND =>
         Data     := FromTransaction(TransRec.DataToModel, Data'length) ;
-        TransmitFifo.Push(Data) ; 
+        TransmitFifo.Push('0' & Data) ; 
+        Increment(TransmitRequestCount) ;
+        WaitForToggle(TransmitDoneCount) ;
+        wait for 0 ns ;
+
+      when SEND_LAST =>
+        Data     := FromTransaction(TransRec.DataToModel, Data'length) ;
+        TransmitFifo.Push('1' & Data) ; 
         Increment(TransmitRequestCount) ;
         WaitForToggle(TransmitDoneCount) ;
         wait for 0 ns ; 
@@ -200,6 +208,7 @@ begin
     variable Data : TData'subtype := (others => '1') ;
     variable Strb : TStrb'subtype := (others => '1') ;
     variable Keep : TKeep'subtype := (others => '1') ;
+    variable Last : TKeep'subtype := '0' ;
   begin
     -- Initialize
     TValid  <= '0' ;
@@ -219,7 +228,7 @@ begin
       
       -- Get Transaction
       -- (ID, Dest, User, Data, Strb, Keep) := TransmitFifo.Pop ;
-      Data := TransmitFifo.Pop ;
+      (Last, Data) := TransmitFifo.Pop ;
 
       -- Do Transaction
       TID     <= ID   after tpd_Clk_tid ;
@@ -228,6 +237,7 @@ begin
       TData   <= Data after tpd_Clk_TData ;
       TStrb   <= Strb after tpd_Clk_TStrb ;
       TKeep   <= Keep after tpd_Clk_TKeep ;
+      TLast   <= Last after tpd_Clk_TLast ;
 
       Log(ModelID, 
         "Axi Stream Send." &
@@ -236,6 +246,7 @@ begin
         "  TData: "     & to_hstring(Data) &
         "  TStrb: "     & to_string( Strb) &
         "  TKeep: "     & to_string( Keep) &
+        "  TLast: "     & to_string( Last) &
         "  Operation# " & to_string( TransmitDoneCount + 1),
         INFO
       ) ;
@@ -259,6 +270,7 @@ begin
       TData   <= not Data  after tpd_Clk_TData ;
       TStrb   <= (TStrb'range => '1') after tpd_Clk_TStrb ;
       TKeep   <= (TKeep'range => '1') after tpd_Clk_TKeep ;
+      TLast   <= '0' after tpd_Clk_TLast ;
 
       -- Signal completion
       Increment(TransmitDoneCount) ;

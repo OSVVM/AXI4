@@ -5,7 +5,8 @@
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
 --  Contributor(s):
---     Jim Lewis      jim@synthworks.com
+--     Jim Lewis       jim@synthworks.com
+--     Patrick lehmann Patrick.Lehmann@plc2.de
 --
 --
 --  Description:
@@ -53,7 +54,7 @@ package AxiStreamTransactionPkg is
   -- Model AXI Lite Operations
   type AxiStreamUnresolvedOperationType is (
     --  bus operations
-    SEND,            -- Master
+    SEND, SEND_LAST, -- Master
     GET, TRY_GET,    -- Slave
     -- Model Directives
     NO_OP, 
@@ -90,6 +91,13 @@ package AxiStreamTransactionPkg is
 
   ------------------------------------------------------------
   procedure Send (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut AxiStreamTransactionRecType ;
+             iData       : In    std_logic_vector ;
+             StatusMsgOn : In    boolean := false
+  ) ;
+  ------------------------------------------------------------
+  procedure SendLast (
   ------------------------------------------------------------
     signal   TransRec    : InOut AxiStreamTransactionRecType ;
              iData       : In    std_logic_vector ;
@@ -182,6 +190,29 @@ package body AxiStreamTransactionPkg is
 
     -- Put values in record
     TransRec.Operation                            <= SEND ;
+    TransRec.DataToModel(iData'length-1 downto 0) <= ToTransaction(iData) ;
+    TransRec.DataBytes                            <= ByteCount ;
+    TransRec.StatusMsgOn                          <= StatusMsgOn ;
+    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
+  end procedure Send ;
+
+  ------------------------------------------------------------
+  procedure SendLast (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut AxiStreamTransactionRecType ;
+             iData       : In    std_logic_vector ;
+             StatusMsgOn : In    boolean := false
+  ) is
+    variable ByteCount : integer ;
+  begin
+    ByteCount := iData'length / 8 ;
+
+    -- Parameter Checks
+--    AlertIf(TransRec.AlertLogID, iData'length mod 8 /= 0, "Send, Data not on a byte boundary", FAILURE) ;
+    -- AlertIf(TransRec.AlertLogID, iData'length > TransRec.AxiDataWidth, "Send, Data length too large", FAILURE) ;
+
+    -- Put values in record
+    TransRec.Operation                            <= SEND_LAST ;
     TransRec.DataToModel(iData'length-1 downto 0) <= ToTransaction(iData) ;
     TransRec.DataBytes                            <= ByteCount ;
     TransRec.StatusMsgOn                          <= StatusMsgOn ;

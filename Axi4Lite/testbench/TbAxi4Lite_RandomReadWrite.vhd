@@ -18,25 +18,28 @@
 --        http://www.SynthWorks.com
 --
 --  Revision History:
---    Date       Version    Description
---    09/2017:   2017       Initial revision
+--    Date      Version    Description
+--    09/2017   2017       Initial revision
+--    01/2020   2020.01    Updated license notice
 --
 --
--- Copyright 2017 SynthWorks Design Inc
---
--- Licensed under the Apache License, Version 2.0 (the "License");
--- you may not use this file except in compliance with the License.
--- You may obtain a copy of the License at
---
---     http://www.apache.org/licenses/LICENSE-2.0
---
--- Unless required by applicable law or agreed to in writing, software
--- distributed under the License is distributed on an "AS IS" BASIS,
--- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
--- See the License for the specific language governing permissions and
--- limitations under the License.
---
---
+--  This file is part of OSVVM.
+--  
+--  Copyright (c) 2017 - 2020 by SynthWorks Design Inc.  
+--  
+--  Licensed under the Apache License, Version 2.0 (the "License");
+--  you may not use this file except in compliance with the License.
+--  You may obtain a copy of the License at
+--  
+--      https://www.apache.org/licenses/LICENSE-2.0
+--  
+--  Unless required by applicable law or agreed to in writing, software
+--  distributed under the License is distributed on an "AS IS" BASIS,
+--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--  See the License for the specific language governing permissions and
+--  limitations under the License.
+--  
+
 architecture RandomReadWrite of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
@@ -70,8 +73,8 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
---    TranscriptOpen("./results/TbAxi4Lite_RandomReadWrite.txt") ;
---    SetTranscriptMirror(TRUE) ; 
+    TranscriptOpen("./results/TbAxi4Lite_RandomReadWrite.txt") ;
+    SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
     wait until nReset = '1' ;  
@@ -82,8 +85,9 @@ begin
     AlertIf(now >= 1 ms, "Test finished due to timeout") ;
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
---    TranscriptClose ; 
---    AlertIfDiff("./results/TbAxi4Lite_RandomReadWrite.txt", "../sim_shared/validated_results/TbAxi4Lite_RandomReadWrite.txt", "") ; 
+    TranscriptClose ; 
+    -- Printing differs in different simulators due to differences in process order execution
+    -- AlertIfDiff("./results/TbAxi4Lite_RandomReadWrite.txt", "../sim_shared/validated_results/TbAxi4Lite_RandomReadWrite.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 

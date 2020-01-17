@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4Lite_ReadWriteAsync1.vhd
+--  File Name:         TbAxi4Lite_MasterReadWriteAsync1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -18,26 +18,29 @@
 --        http://www.SynthWorks.com
 --
 --  Revision History:
---    Date       Version    Description
---    05/2018:   2018       Initial revision
+--    Date      Version    Description
+--    05/2018   2018       Initial revision
+--    01/2020   2020.01    Updated license notice
 --
 --
--- Copyright 2018 SynthWorks Design Inc
---
--- Licensed under the Apache License, Version 2.0 (the "License");
--- you may not use this file except in compliance with the License.
--- You may obtain a copy of the License at
---
---     http://www.apache.org/licenses/LICENSE-2.0
---
--- Unless required by applicable law or agreed to in writing, software
--- distributed under the License is distributed on an "AS IS" BASIS,
--- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
--- See the License for the specific language governing permissions and
--- limitations under the License.
---
---
-architecture ReadWriteAsync1 of TestCtrl is
+--  This file is part of OSVVM.
+--  
+--  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.  
+--  
+--  Licensed under the Apache License, Version 2.0 (the "License");
+--  you may not use this file except in compliance with the License.
+--  You may obtain a copy of the License at
+--  
+--      https://www.apache.org/licenses/LICENSE-2.0
+--  
+--  Unless required by applicable law or agreed to in writing, software
+--  distributed under the License is distributed on an "AS IS" BASIS,
+--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--  See the License for the specific language governing permissions and
+--  limitations under the License.
+--  
+
+architecture MasterReadWriteAsync1 of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
   signal TbMasterID : AlertLogIDType ; 
@@ -52,7 +55,7 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4Lite_ReadWriteAsync1") ;
+    SetAlertLogName("TbAxi4Lite_MasterReadWriteAsync1") ;
     TbMasterID <= GetAlertLogID("TB Master Proc") ;
     TbSlaveID <= GetAlertLogID("TB Slave Proc") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
@@ -60,7 +63,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4Lite_ReadWriteAsync1.txt") ;
+    TranscriptOpen("./results/TbAxi4Lite_MasterReadWriteAsync1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -74,7 +77,8 @@ begin
     
     
     TranscriptClose ; 
-    -- AlertIfDiff("./results/TbAxi4Lite_ReadWriteAsync1.txt", "../sim_shared/validated_results/TbAxi4Lite_ReadWriteAsync1.txt", "") ; 
+    -- Printing differs in different simulators due to differences in process order execution
+    -- AlertIfDiff("./results/TbAxi4Lite_MasterReadWriteAsync1.txt", "../sim_shared/validated_results/TbAxi4Lite_MasterReadWriteAsync1.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 
@@ -284,12 +288,12 @@ begin
   end process AxiSlaveProc ;
 
 
-end ReadWriteAsync1 ;
+end MasterReadWriteAsync1 ;
 
-Configuration TbAxi4Lite_ReadWriteAsync1 of TbAxi4Lite is
+Configuration TbAxi4Lite_MasterReadWriteAsync1 of TbAxi4Lite is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(ReadWriteAsync1) ; 
+      use entity work.TestCtrl(MasterReadWriteAsync1) ; 
     end for ; 
   end for ; 
-end TbAxi4Lite_ReadWriteAsync1 ; 
+end TbAxi4Lite_MasterReadWriteAsync1 ; 

@@ -1,12 +1,12 @@
 --
 --  File Name:         Axi4LiteContext.vhd
 --  Design Unit Name:  Axi4LiteContext
---  Revision:          STANDARD VERSION
+--  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
 --
 --  Description
---      Context Declaration for Axi4Lite packages
+--      Context Declaration for using Axi4Lite models
 --
 --  Developed by/for:
 --        SynthWorks Design Inc.
@@ -17,42 +17,40 @@
 --  Latest standard version available at:
 --        http://www.SynthWorks.com/downloads
 --
---  Revision History:      
+--  Revision History:
 --    Date      Version    Description
 --    03/2019   2019.03    Initial Revision
+--    01/2020   2020.01    Updated license notice
 --
 --
---  Copyright (c) 2019 by SynthWorks Design Inc.  All rights reserved.
+--  This file is part of OSVVM.
 --
---  Verbatim copies of this source file may be used and
---  distributed without restriction.
+--  Copyright (c) 2019 - 2020 by SynthWorks Design Inc.
 --
---  This source file is free software; you can redistribute it
---  and/or modify it under the terms of the ARTISTIC License
---  as published by The Perl Foundation; either version 2.0 of
---  the License, or (at your option) any later version.
+--  Licensed under the Apache License, Version 2.0 (the "License");
+--  you may not use this file except in compliance with the License.
+--  You may obtain a copy of the License at
 --
---  This source is distributed in the hope that it will be
---  useful, but WITHOUT ANY WARRANTY; without even the implied
---  warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
---  PURPOSE. See the Artistic License for details.
+--      https://www.apache.org/licenses/LICENSE-2.0
 --
---  You should have received a copy of the license with this source.
---  If not download it from,
---     http://www.perlfoundation.org/artistic_license_2_0
---
+--  Unless required by applicable law or agreed to in writing, software
+--  distributed under the License is distributed on an "AS IS" BASIS,
+--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--  See the License for the specific language governing permissions and
+--  limitations under the License.
 --
 
+
 context Axi4LiteContext is
-    library osvvm_axi4 ;  
-    
-    use osvvm_axi4.Axi4CommonPkg.all ; 
-    use osvvm_axi4.Axi4LiteInterfacePkg.all ; 
-    
-    use osvvm_axi4.Axi4LiteMasterTransactionPkg.all ; 
+    library osvvm_axi4 ;
+
+    use osvvm_axi4.Axi4CommonPkg.all ;
+    use osvvm_axi4.Axi4LiteInterfacePkg.all ;
+
+    use osvvm_axi4.Axi4LiteMasterTransactionPkg.all ;
     use osvvm_axi4.Axi4LiteSlaveTransactionPkg.all ;
-    use osvvm_axi4.Axi4LiteMasterComponentPkg.all ; 
+    use osvvm_axi4.Axi4LiteMasterComponentPkg.all ;
     use osvvm_axi4.Axi4LiteSlaveComponentPkg.all ;
     use osvvm_axi4.Axi4LiteMonitorComponentPkg.all ;
 
-end context Axi4LiteContext ; 
+end context Axi4LiteContext ;

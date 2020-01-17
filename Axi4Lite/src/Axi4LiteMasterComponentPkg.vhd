@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Simple AXI Lite Master Model
+--      Package for AXI Lite Master Component
 --
 --
 --  Developed by:
@@ -18,24 +18,28 @@
 --        http://www.SynthWorks.com
 --
 --  Revision History:
---    Date       Version    Description
---    03/2019:   2019       Initial revision
+--    Date      Version    Description
+--    03/2019   2019       Initial revision
+--    01/2020   2020.01    Updated license notice
 --
 --
--- Copyright 2019 SynthWorks Design Inc
---
--- Licensed under the Apache License, Version 2.0 (the "License");
--- you may not use this file except in compliance with the License.
--- You may obtain a copy of the License at
---
---     http://www.apache.org/licenses/LICENSE-2.0
---
--- Unless required by applicable law or agreed to in writing, software
--- distributed under the License is distributed on an "AS IS" BASIS,
--- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
--- See the License for the specific language governing permissions and
--- limitations under the License.
---
+--  This file is part of OSVVM.
+--  
+--  Copyright (c) 2019 - 2020 by SynthWorks Design Inc.  
+--  
+--  Licensed under the Apache License, Version 2.0 (the "License");
+--  you may not use this file except in compliance with the License.
+--  You may obtain a copy of the License at
+--  
+--      https://www.apache.org/licenses/LICENSE-2.0
+--  
+--  Unless required by applicable law or agreed to in writing, software
+--  distributed under the License is distributed on an "AS IS" BASIS,
+--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--  See the License for the specific language governing permissions and
+--  limitations under the License.
+--  
+
 library ieee ;
   use ieee.std_logic_1164.all ;
   use ieee.numeric_std.all ;
@@ -77,7 +81,7 @@ package Axi4LiteMasterComponentPkg is
       nReset      : in   std_logic ;
 
       -- Testbench Transaction Interface
-      TransRec    : inout Axi4LiteMasterTransactionRecType ;
+      TransRec    : inout MasterTransactionRecType ;
 
       -- AXI Master Functional Interface
       AxiLiteBus  : inout Axi4LiteRecType 

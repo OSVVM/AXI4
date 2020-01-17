@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4Lite_ReadWriteAsync2.vhd
+--  File Name:         TbAxi4Lite_MasterReadWriteAsync2.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -18,26 +18,29 @@
 --        http://www.SynthWorks.com
 --
 --  Revision History:
---    Date       Version    Description
---    05/2018:   2018       Initial revision
+--    Date      Version    Description
+--    05/2018   2018       Initial revision
+--    01/2020   2020.01    Updated license notice
 --
 --
--- Copyright 2018 SynthWorks Design Inc
---
--- Licensed under the Apache License, Version 2.0 (the "License");
--- you may not use this file except in compliance with the License.
--- You may obtain a copy of the License at
---
---     http://www.apache.org/licenses/LICENSE-2.0
---
--- Unless required by applicable law or agreed to in writing, software
--- distributed under the License is distributed on an "AS IS" BASIS,
--- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
--- See the License for the specific language governing permissions and
--- limitations under the License.
---
---
-architecture ReadWriteAsync2 of TestCtrl is
+--  This file is part of OSVVM.
+--  
+--  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.  
+--  
+--  Licensed under the Apache License, Version 2.0 (the "License");
+--  you may not use this file except in compliance with the License.
+--  You may obtain a copy of the License at
+--  
+--      https://www.apache.org/licenses/LICENSE-2.0
+--  
+--  Unless required by applicable law or agreed to in writing, software
+--  distributed under the License is distributed on an "AS IS" BASIS,
+--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--  See the License for the specific language governing permissions and
+--  limitations under the License.
+--  
+
+architecture MasterReadWriteAsync2 of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
   signal TbMasterID : AlertLogIDType ; 
@@ -52,14 +55,14 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4Lite_ReadWriteAsync2") ;
+    SetAlertLogName("TbAxi4Lite_MasterReadWriteAsync2") ;
     TbMasterID <= GetAlertLogID("TB Master Proc") ;
     TbSlaveID <= GetAlertLogID("TB Slave Proc") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4Lite_ReadWriteAsync2.txt") ;
+    TranscriptOpen("./results/TbAxi4Lite_MasterReadWriteAsync2.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -72,7 +75,8 @@ begin
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
-    -- AlertIfDiff("./results/TbAxi4Lite_ReadWriteAsync2.txt", "../sim_shared/validated_results/TbAxi4Lite_ReadWriteAsync2.txt", "") ; 
+    -- Printing differs in different simulators due to differences in process order execution
+    -- AlertIfDiff("./results/TbAxi4Lite_MasterReadWriteAsync2.txt", "../sim_shared/validated_results/TbAxi4Lite_MasterReadWriteAsync2.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 
@@ -128,14 +132,14 @@ begin
     -- Allow Write Address to get two clocks ahead of Write Data
     log(TbMasterID, "NoOp 2") ;
     NoOp(AxiMasterTransRec, 2) ; 
-    log(TbMasterID, "MasterWriteDataAsync, Data: 11") ;
-    MasterWriteDataAsync   (AxiMasterTransRec, X"11" ) ;
-    log(TbMasterID, "MasterWriteDataAsync, Data: 22") ;
-    MasterWriteDataAsync   (AxiMasterTransRec, X"22" ) ;
-    log(TbMasterID, "MasterWriteDataAsync, Data: 33") ;
-    MasterWriteDataAsync   (AxiMasterTransRec, X"33" ) ;
-    log(TbMasterID, "MasterWriteDataAsync, Data: 44") ;
-    MasterWriteDataAsync   (AxiMasterTransRec, X"44" ) ;
+    log(TbMasterID, "MasterWriteDataAsync, ByteAddr: 00, Data: 11") ;
+    MasterWriteDataAsync   (AxiMasterTransRec, X"00", X"11" ) ;
+    log(TbMasterID, "MasterWriteDataAsync, ByteAddr: 01, Data: 22") ;
+    MasterWriteDataAsync   (AxiMasterTransRec, X"01", X"22" ) ;
+    log(TbMasterID, "MasterWriteDataAsync, ByteAddr: 02, Data: 33") ;
+    MasterWriteDataAsync   (AxiMasterTransRec, X"02", X"33" ) ;
+    log(TbMasterID, "MasterWriteDataAsync, ByteAddr: 03, Data: 44") ;
+    MasterWriteDataAsync   (AxiMasterTransRec, X"03", X"44" ) ;
     NoOp(AxiMasterTransRec, 8) ; 
     
     print("") ;  
@@ -193,12 +197,12 @@ begin
     MasterWriteAddressAsync(AxiMasterTransRec, X"BBBB_BBB1") ;
     log(TbMasterID, "MasterWriteAddressAsync,  Addr: BBBB_BBB2") ;
     MasterWriteAddressAsync(AxiMasterTransRec, X"BBBB_BBB2") ;
-    log(TbMasterID, "MasterWriteDataAsync, Data: 2211") ;
-    MasterWriteDataAsync   (AxiMasterTransRec, X"2211" ) ;
-    log(TbMasterID, "MasterWriteDataAsync, Data: 33_22") ;
-    MasterWriteDataAsync   (AxiMasterTransRec, X"33_22" ) ;
-    log(TbMasterID, "MasterWriteDataAsync, Data: 4433") ;
-    MasterWriteDataAsync   (AxiMasterTransRec, X"4433" ) ;
+    log(TbMasterID, "MasterWriteDataAsync, ByteAddr: 00, Data: 2211") ;
+    MasterWriteDataAsync   (AxiMasterTransRec, X"00", X"2211" ) ;
+    log(TbMasterID, "MasterWriteDataAsync, ByteAddr: 01, Data: 33_22") ;
+    MasterWriteDataAsync   (AxiMasterTransRec, X"01", X"33_22" ) ;
+    log(TbMasterID, "MasterWriteDataAsync, ByteAddr: 02, Data: 4433") ;
+    MasterWriteDataAsync   (AxiMasterTransRec, X"02", X"4433" ) ;
 
     print("") ;  
     log(TbMasterID, "MasterReadAddressAsync,  Addr: 1111_1110") ;
@@ -241,12 +245,12 @@ begin
     log(TbMasterID, "Write and Read with 3 Bytes and ByteAddr = 0. 1") ;
     log(TbMasterID, "MasterWriteAddressAsync,  Addr: CCCC_CCC0") ;
     MasterWriteAddressAsync(AxiMasterTransRec, X"CCCC_CCC0") ;
-    log(TbMasterID, "MasterWriteDataAsync, Data: 33_2211") ;
-    MasterWriteDataAsync   (AxiMasterTransRec, X"33_2211" ) ;
+    log(TbMasterID, "MasterWriteDataAsync, ByteAddr: 00, Data: 33_2211") ;
+    MasterWriteDataAsync   (AxiMasterTransRec, X"00", X"33_2211" ) ;
     log(TbMasterID, "MasterWriteAddressAsync,  Addr: CCCC_CCC1") ;
     MasterWriteAddressAsync(AxiMasterTransRec, X"CCCC_CCC1") ;
-    log(TbMasterID, "MasterWriteDataAsync, Data: 4433_22") ;
-    MasterWriteDataAsync   (AxiMasterTransRec, X"4433_22" ) ;
+    log(TbMasterID, "MasterWriteDataAsync, ByteAddr: 01, Data: 4433_22") ;
+    MasterWriteDataAsync   (AxiMasterTransRec, X"01", X"4433_22" ) ;
 
     print("") ;  
     log(TbMasterID, "MasterReadAddressAsync,  Addr: 1111_1110") ;
@@ -369,12 +373,12 @@ begin
   end process AxiSlaveProc ;
 
 
-end ReadWriteAsync2 ;
+end MasterReadWriteAsync2 ;
 
-Configuration TbAxi4Lite_ReadWriteAsync2 of TbAxi4Lite is
+Configuration TbAxi4Lite_MasterReadWriteAsync2 of TbAxi4Lite is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(ReadWriteAsync2) ; 
+      use entity work.TestCtrl(MasterReadWriteAsync2) ; 
     end for ; 
   end for ; 
-end TbAxi4Lite_ReadWriteAsync2 ; 
+end TbAxi4Lite_MasterReadWriteAsync2 ; 

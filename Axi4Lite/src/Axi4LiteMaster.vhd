@@ -18,25 +18,28 @@
 --        http://www.SynthWorks.com
 --
 --  Revision History:
---    Date       Version    Description
---    09/2017:   2017       Initial revision
---    04/2018    2018.04    First Release
+--    Date      Version    Description
+--    09/2017   2017       Initial revision
+--    04/2018   2018.04    First Release
+--    01/2020   2020.01    Updated license notice
 --
 --
--- Copyright 2017-2018 SynthWorks Design Inc
---
--- Licensed under the Apache License, Version 2.0 (the "License");
--- you may not use this file except in compliance with the License.
--- You may obtain a copy of the License at
---
---     http://www.apache.org/licenses/LICENSE-2.0
---
--- Unless required by applicable law or agreed to in writing, software
--- distributed under the License is distributed on an "AS IS" BASIS,
--- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
--- See the License for the specific language governing permissions and
--- limitations under the License.
---
+--  This file is part of OSVVM.
+--  
+--  Copyright (c) 2017 - 2020 by SynthWorks Design Inc.  
+--  
+--  Licensed under the Apache License, Version 2.0 (the "License");
+--  you may not use this file except in compliance with the License.
+--  You may obtain a copy of the License at
+--  
+--      https://www.apache.org/licenses/LICENSE-2.0
+--  
+--  Unless required by applicable law or agreed to in writing, software
+--  distributed under the License is distributed on an "AS IS" BASIS,
+--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--  See the License for the specific language governing permissions and
+--  limitations under the License.
+--  
 library ieee ;
   use ieee.std_logic_1164.all ;
   use ieee.numeric_std.all ;
@@ -78,7 +81,7 @@ port (
   nReset      : in   std_logic ;
 
   -- Testbench Transaction Interface
-  TransRec    : inout Axi4LiteMasterTransactionRecType ;
+  TransRec    : inout MasterTransactionRecType ;
 
   -- AXI Master Functional Interface
   AxiLiteBus  : inout Axi4LiteRecType 
@@ -120,7 +123,7 @@ architecture SimpleMaster of Axi4LiteMaster is
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ; 
   
   shared variable WriteAddressFifo            : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
-  shared variable WriteAddressTransactionFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
+--  shared variable WriteAddressTransactionFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
   shared variable WriteDataFifo               : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
   shared variable ReadAddressFifo             : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
   shared variable ReadAddressTransactionFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
@@ -163,10 +166,6 @@ begin
   Initialize : process
     variable ID : AlertLogIDType ; 
   begin
-    -- Transaction Interface
-    TransRec.AxiAddrWidth   <= AXI_ADDR_WIDTH ; 
-    TransRec.AxiDataWidth   <= AXI_DATA_WIDTH ; 
-    
     -- Alerts 
     ID                      := GetAlertLogID(MODEL_INSTANCE_NAME) ; 
     ModelID                 <= ID ; 
@@ -178,8 +177,8 @@ begin
     -- FIFOS.  FIFOS share main ID as they only generate errors if the model uses them wrong  
     WriteAddressFifo.SetAlertLogID(ID); 
     WriteAddressFifo.SetName(            MODEL_INSTANCE_NAME & ": WriteAddressFIFO"); 
-    WriteAddressTransactionFifo.SetAlertLogID(ID); 
-    WriteAddressTransactionFifo.SetName( MODEL_INSTANCE_NAME & ": WriteAddressTransactionFifo"); 
+--    WriteAddressTransactionFifo.SetAlertLogID(ID); 
+--    WriteAddressTransactionFifo.SetName( MODEL_INSTANCE_NAME & ": WriteAddressTransactionFifo"); 
     WriteDataFifo.SetAlertLogID(ID); 
     WriteDataFifo.SetName(               MODEL_INSTANCE_NAME & ": WriteDataFifo"); 
     ReadAddressFifo.SetAlertLogID(ID); 
@@ -210,10 +209,11 @@ begin
     variable ReadProt      : ARProt'subtype ;
     variable ReadData      : RData'subtype ; 
     variable ExpectedData  : RData'subtype ; 
-    variable NoOpCycles    : integer ; 
+    variable WaitClockCycles    : integer ; 
     variable Operation     : TransRec.Operation'subtype ; 
     variable ReadDataTransactionCount : integer := 1 ; 
 
+    variable ByteCount     : integer ;
   begin
     WaitForTransaction(
        Clk      => Clk,
@@ -225,9 +225,10 @@ begin
 
     case Operation is
       when WRITE | ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
-        if IsAxiWriteAddress(Operation) then 
+        if IsWriteAddress(Operation) then 
           -- Queue Write Address
           WriteAddress  := FromTransaction(TransRec.Address) ;
+          AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Write Address length does not match", FAILURE) ;
           if UseWriteProtFromModel then
             WriteProt   := ModelWriteProt ;
           else
@@ -236,7 +237,7 @@ begin
           
           -- Initiate Write Address
           WriteAddressFifo.Push(WriteAddress & WriteProt) ; 
-          WriteAddressTransactionFifo.Push(WriteAddress & WriteProt);
+--          WriteAddressTransactionFifo.Push(WriteAddress & WriteProt);
           Increment(WriteAddressRequestCount) ;
 
           -- Queue Write Response 
@@ -246,19 +247,23 @@ begin
           Increment(WriteResponseExpectCount) ;
         end if ; 
         
-        if IsAxiWriteData(Operation) then 
+        if IsWriteData(Operation) then 
           -- Queue Write Data 
---! Issue:  This prevents WriteData Cycles before WriteAddress Cycles!
---! Issue:  Need to add ByteAddress to WriteData Transactions.  
-          (WriteAddress, WriteProt) := WriteAddressTransactionFifo.Pop ;
+--          (WriteAddress, WriteProt) := WriteAddressTransactionFifo.Pop ;
+          WriteAddress  := FromTransaction(TransRec.Address) ; -- WriteDataAsync
+          ByteCount := TransRec.DataWidth / 8 ;
           WriteByteAddr := CalculateAxiByteAddress(WriteAddress, AXI_DATA_BYTE_WIDTH);
-          WriteStrb     := CalculateAxiWriteStrobe(WriteByteAddr, TransRec.DataBytes, AXI_DATA_BYTE_WIDTH) ; 
+          WriteStrb     := CalculateAxiWriteStrobe(WriteByteAddr, ByteCount, AXI_DATA_BYTE_WIDTH) ; 
           WriteData     := FromTransaction(TransRec.DataToModel) ;
-          if TransRec.DataBytes /= AXI_DATA_BYTE_WIDTH then 
+          AlertIf(ModelID, TransRec.DataWidth mod 8 /= 0, "Master Write, Data not on a byte boundary", FAILURE) ;
+          AlertIf(ModelID, TransRec.DataWidth > AXI_DATA_WIDTH, "Master Write, Data length too large", FAILURE) ;
+
+          if ByteCount /= AXI_DATA_BYTE_WIDTH then 
             AlignAxiWriteData(WriteData, WriteByteAddr) ; 
-            AlertIf(ModelID, AXI_DATA_BYTE_WIDTH - WriteByteAddr < TransRec.DataBytes, 
+            AlertIf(ModelID, AXI_DATA_BYTE_WIDTH - WriteByteAddr < ByteCount, 
               "Master Write, Byte Address not consistent with number of bytes sent", FAILURE) ; 
           end if ; 
+
           -- Initiate Write Data
           WriteDataFifo.Push('0' & WriteData & WriteStrb) ; 
           Increment(WriteDataRequestCount) ;
@@ -267,12 +272,12 @@ begin
         -- Transaction wait time and allow RequestCounts a delta cycle to update
         wait for 0 ns ;  wait for 0 ns ; 
         
-        if IsAxiBlockOnWriteAddress(Operation) and 
+        if IsBlockOnWriteAddress(Operation) and 
             WriteAddressRequestCount /= WriteAddressDoneCount then 
           -- Block until both write address done.        
           wait until WriteAddressRequestCount = WriteAddressDoneCount ;
         end if ; 
-        if IsAxiBlockOnWriteData(Operation) and 
+        if IsBlockOnWriteData(Operation) and 
             WriteDataRequestCount /= WriteDataDoneCount then 
           -- Block until both write data done.        
           wait until WriteDataRequestCount = WriteDataDoneCount ;
@@ -280,9 +285,10 @@ begin
 
 
       when READ | READ_CHECK | ASYNC_READ_ADDRESS | READ_DATA | READ_DATA_CHECK | TRY_READ_DATA =>
-        if IsAxiReadAddress(Operation) then
+        if IsReadAddress(Operation) then
           -- Queue Read Address ; 
           ReadAddress   :=  FromTransaction(TransRec.Address) ;
+          AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Read Address length does not match", FAILURE) ;
           if UseReadProtFromModel then
             ReadProt    := ModelReadProt ;
           else
@@ -296,10 +302,10 @@ begin
           Increment(ReadDataExpectCount) ;
         end if ; 
 
-        if IsAxiTryReadData(Operation) and ReadDataFifo.Empty then
+        if IsTryReadData(Operation) and ReadDataFifo.Empty then
           -- ReadDataReceiveCount < ReadDataTransactionCount then 
             TransRec.ModelBool <= FALSE ; 
-        elsif IsAxiReadData(Operation) then
+        elsif IsReadData(Operation) then
           if ReadDataFifo.Empty then 
             WaitForToggle(ReadDataReceiveCount) ;
           end if ; 
@@ -310,14 +316,17 @@ begin
           (ReadAddress, ReadProt) := ReadAddressTransactionFifo.Pop ;
           ReadByteAddr  :=  CalculateAxiByteAddress(ReadAddress, RData'length/8);
           ReadData := ReadDataFifo.Pop ;
-          if TransRec.DataBytes /= AXI_DATA_BYTE_WIDTH then 
-            AlignAxiReadData(ReadData, ReadByteAddr, TransRec.DataBytes) ; 
-            AlertIf(ModelID, AXI_DATA_BYTE_WIDTH - ReadByteAddr < TransRec.DataBytes, 
+          ByteCount := TransRec.DataWidth / 8 ;
+          AlertIf(ModelID, TransRec.DataWidth mod 8 /= 0, "Master Read, Data not on a byte boundary", FAILURE) ;
+          AlertIf(ModelID, TransRec.DataWidth > AXI_DATA_WIDTH, "Master Read, Data length too large", FAILURE) ;
+          if ByteCount /= AXI_DATA_BYTE_WIDTH then 
+            AlignAxiReadData(ReadData, ReadByteAddr, ByteCount) ; 
+            AlertIf(ModelID, AXI_DATA_BYTE_WIDTH - ReadByteAddr < ByteCount, 
               "Master Read, Byte Address not consistent with number of bytes expected", FAILURE) ; 
           end if ; 
           TransRec.DataFromModel <= ToTransaction(ReadData) ;
 
-          if IsAxiReadCheck(TransRec.Operation) then
+          if IsReadCheck(TransRec.Operation) then
             ExpectedData := FromTransaction(TransRec.DataToModel) ;
             AffirmIf( DataCheckID, ReadData = ExpectedData,
               "Read Data: " & to_hstring(ReadData) & 
@@ -339,9 +348,9 @@ begin
         -- Transaction wait time 
         wait for 0 ns ;  wait for 0 ns ; 
       
-      when NO_OP =>
-        NoOpCycles := FromTransaction(TransRec.DataToModel) ;
-        wait for (NoOpCycles * tperiod_Clk) - 1 ns ;
+      when WAIT_CLOCK =>
+        WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
+        wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
         wait until Clk = '1' ;
 
       when GET_ERRORS =>

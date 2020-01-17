@@ -18,26 +18,29 @@
 --        http://www.SynthWorks.com
 --
 --  Revision History:
---    Date       Version    Description
---    05/2018:   2018       Initial revision
+--    Date      Version    Description
+--    05/2018   2018       Initial revision
+--    01/2020   2020.01    Updated license notice
 --
 --
--- Copyright 2018 SynthWorks Design Inc
---
--- Licensed under the Apache License, Version 2.0 (the "License");
--- you may not use this file except in compliance with the License.
--- You may obtain a copy of the License at
---
---     http://www.apache.org/licenses/LICENSE-2.0
---
--- Unless required by applicable law or agreed to in writing, software
--- distributed under the License is distributed on an "AS IS" BASIS,
--- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
--- See the License for the specific language governing permissions and
--- limitations under the License.
---
---
-architecture ReadWriteAsync3 of TestCtrl is
+--  This file is part of OSVVM.
+--  
+--  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.  
+--  
+--  Licensed under the Apache License, Version 2.0 (the "License");
+--  you may not use this file except in compliance with the License.
+--  You may obtain a copy of the License at
+--  
+--      https://www.apache.org/licenses/LICENSE-2.0
+--  
+--  Unless required by applicable law or agreed to in writing, software
+--  distributed under the License is distributed on an "AS IS" BASIS,
+--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--  See the License for the specific language governing permissions and
+--  limitations under the License.
+--  
+
+architecture MasterReadWriteAsync3 of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
   signal TestStart : integer_barrier := 1 ;
@@ -76,6 +79,7 @@ begin
     
     
     TranscriptClose ; 
+    -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4Lite_MasterReadWriteAsync3.txt", "../sim_shared/validated_results/TbAxi4Lite_MasterReadWriteAsync3.txt", "") ; 
     
     print("") ;
@@ -160,8 +164,8 @@ begin
     -- 5.3, 16 bit Write Data
     log(TbMasterID, "Testing 16 Bit Write Data Asynchronous Transaction", INFO) ; 
     MasterWriteDataAsync(AxiMasterTransRec, X"2211" ) ;
-    MasterWriteDataAsync(AxiMasterTransRec, X"33_22" ) ;
-    MasterWriteDataAsync(AxiMasterTransRec, X"4433" ) ;
+    MasterWriteDataAsync(AxiMasterTransRec, X"01", X"33_22" ) ;
+    MasterWriteDataAsync(AxiMasterTransRec, X"02", X"4433" ) ;
 
     blankline(2);
 
@@ -186,7 +190,7 @@ begin
     -- 5.4, 24 bit Write Data
     log(TbMasterID, "Testing 24 Bit Write Data Asynchronous Transaction", INFO) ;
     MasterWriteDataAsync(AxiMasterTransRec, X"33_2211" ) ;
-    MasterWriteDataAsync(AxiMasterTransRec, X"4433_22" ) ;
+    MasterWriteDataAsync(AxiMasterTransRec, X"01", X"4433_22" ) ;
 
     NoOp(AxiMasterTransRec, 1) ; 
     blankline(2);
@@ -316,12 +320,12 @@ begin
   end process AxiSlaveProc ;
 
 
-end ReadWriteAsync3 ;
+end MasterReadWriteAsync3 ;
 
 Configuration TbAxi4Lite_MasterReadWriteAsync3 of TbAxi4Lite is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(ReadWriteAsync3) ; 
+      use entity work.TestCtrl(MasterReadWriteAsync3) ; 
     end for ; 
   end for ; 
 end TbAxi4Lite_MasterReadWriteAsync3 ; 

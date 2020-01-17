@@ -18,24 +18,28 @@
 --        http://www.SynthWorks.com
 --
 --  Revision History:
---    Date       Version    Description
---    04/2018:   2018       Initial revision
+--    Date      Version    Description
+--    04/2018   2018       Initial revision
+--    01/2020   2020.01    Updated license notice
 --
 --
--- Copyright 2018 SynthWorks Design Inc
---
--- Licensed under the Apache License, Version 2.0 (the "License");
--- you may not use this file except in compliance with the License.
--- You may obtain a copy of the License at
---
---     http://www.apache.org/licenses/LICENSE-2.0
---
--- Unless required by applicable law or agreed to in writing, software
--- distributed under the License is distributed on an "AS IS" BASIS,
--- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
--- See the License for the specific language governing permissions and
--- limitations under the License.
---
+--  This file is part of OSVVM.
+--  
+--  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.  
+--  
+--  Licensed under the Apache License, Version 2.0 (the "License");
+--  you may not use this file except in compliance with the License.
+--  You may obtain a copy of the License at
+--  
+--      https://www.apache.org/licenses/LICENSE-2.0
+--  
+--  Unless required by applicable law or agreed to in writing, software
+--  distributed under the License is distributed on an "AS IS" BASIS,
+--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+--  See the License for the specific language governing permissions and
+--  limitations under the License.
+--  
+
 library ieee ;
   use ieee.std_logic_1164.all ;
   use ieee.numeric_std.all ;
@@ -62,12 +66,12 @@ architecture TestHarness of TbAxi4Lite is
   signal nReset      : std_logic ;
 
   -- Testbench Transaction Interface
-  subtype MasterTransactionRecType is Axi4LiteMasterTransactionRecType(
+  subtype LocalMasterTransactionRecType is MasterTransactionRecType(
     Address(AXI_ADDR_WIDTH-1 downto 0), 
     DataToModel(AXI_DATA_WIDTH-1 downto 0),
     DataFromModel(AXI_DATA_WIDTH-1 downto 0)
   ) ;  
-  signal AxiMasterTransRec   : MasterTransactionRecType ;
+  signal AxiMasterTransRec   : LocalMasterTransactionRecType ;
   
   subtype SlaveTransactionRecType is Axi4LiteSlaveTransactionRecType(
     Address(AXI_ADDR_WIDTH-1 downto 0), 
@@ -122,7 +126,7 @@ architecture TestHarness of TbAxi4Lite is
       nReset              : In    std_logic ;
 
       -- Transaction Interfaces
-      AxiMasterTransRec   : inout Axi4LiteMasterTransactionRecType ;
+      AxiMasterTransRec   : inout MasterTransactionRecType ;
       AxiSlaveTransRec    : inout Axi4LiteSlaveTransactionRecType 
 
     ) ;
@@ -158,28 +162,28 @@ begin
 
     -- AXI Master Functional Interface
 --    AxiLiteBus  => AxiLiteBus 
-      AxiLiteBus.WriteAddress.AWValid      => AWValid ;
-      AxiLiteBus.WriteAddress.AWReady      => AWReady ;
-      AxiLiteBus.WriteAddress.AWProt       => AWProt  ;
-      AxiLiteBus.WriteAddress.AWAddr       => AWAddr  ;
+      AxiLiteBus.WriteAddress.AWValid      => AWValid ,
+      AxiLiteBus.WriteAddress.AWReady      => AWReady ,
+      AxiLiteBus.WriteAddress.AWProt       => AWProt  ,
+      AxiLiteBus.WriteAddress.AWAddr       => AWAddr  ,
 
-      AxiLiteBus.WriteData.WValid          => WValid  ;
-      AxiLiteBus.WriteData.WReady          => WReady  ;
-      AxiLiteBus.WriteData.WData           => WData   ;
-      AxiLiteBus.WriteData.WStrb           => WStrb   ;
+      AxiLiteBus.WriteData.WValid          => WValid  ,
+      AxiLiteBus.WriteData.WReady          => WReady  ,
+      AxiLiteBus.WriteData.WData           => WData   ,
+      AxiLiteBus.WriteData.WStrb           => WStrb   ,
 
-      AxiLiteBus.WriteResponse.BValid      => BValid  ;
-      AxiLiteBus.WriteResponse.BReady      => BReady  ;
-      AxiLiteBus.WriteResponse.BResp       => BResp   ;
+      AxiLiteBus.WriteResponse.BValid      => BValid  ,
+      AxiLiteBus.WriteResponse.BReady      => BReady  ,
+      AxiLiteBus.WriteResponse.BResp       => BResp   ,
 
-      AxiLiteBus.ReadAddress.ARValid       => ARValid ;
-      AxiLiteBus.ReadAddress.ARReady       => ARReady ;
-      AxiLiteBus.ReadAddress.ARProt        => ARProt  ;
-      AxiLiteBus.ReadAddress.ARAddr        => ARAddr  ;
+      AxiLiteBus.ReadAddress.ARValid       => ARValid ,
+      AxiLiteBus.ReadAddress.ARReady       => ARReady ,
+      AxiLiteBus.ReadAddress.ARProt        => ARProt  ,
+      AxiLiteBus.ReadAddress.ARAddr        => ARAddr  ,
 
-      AxiLiteBus.ReadData.RValid           => RValid  ;
-      AxiLiteBus.ReadData.RReady           => RReady  ;
-      AxiLiteBus.ReadData.RData            => RData   ;
+      AxiLiteBus.ReadData.RValid           => RValid  ,
+      AxiLiteBus.ReadData.RReady           => RReady  ,
+      AxiLiteBus.ReadData.RData            => RData   ,
       AxiLiteBus.ReadData.RResp            => RResp   
   ) ;
 

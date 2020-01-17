@@ -1,5 +1,5 @@
 #  File Name:         testbench.pro
-#  Revision:          STANDARD VERSION
+#  Revision:          OSVVM MODELS STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
 #  Contributor(s):

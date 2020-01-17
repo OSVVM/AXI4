@@ -14,9 +14,6 @@
 --        11898 SW 128th Ave.  Tigard, Or  97223
 --        http://www.SynthWorks.com
 --
---  Latest standard version available at:
---        http://www.SynthWorks.com/downloads
---
 --  Revision History:
 --    Date      Version    Description
 --    03/2019   2019.03    Initial Revision
@@ -39,7 +36,6 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --
-
 
 context Axi4LiteContext is
     library osvvm_axi4 ;

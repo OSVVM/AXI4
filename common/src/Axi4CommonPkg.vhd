@@ -64,8 +64,8 @@ package Axi4CommonPkg is
   function from_Axi4RespType (a: Axi4RespType) return Axi4RespEnumType ;
   function to_Axi4RespType (a: Axi4RespEnumType) return Axi4RespType ;
   
-  subtype  TransactionType is std_logic_vector_max_c ;
-  function SizeOfTransaction (AxiSize : integer) return integer ;
+--  subtype  TransactionType is std_logic_vector_max_c ;
+--  function SizeOfTransaction (AxiSize : integer) return integer ;
 
   ------------------------------------------------------------
   procedure DoAxiValidHandshake (
@@ -151,7 +151,7 @@ package body Axi4CommonPkg is
   begin
     return RESP_TYPE_TB_TABLE(to_integer(a)) ;
   end function from_Axi4RespType ;
-
+  
   ------------------------------------------------------------
   type RespType_indexby_TbRespType is array (Axi4RespEnumType) of Axi4RespType;
   constant TB_TO_RESP_TYPE_TABLE : RespType_indexby_TbRespType := (
@@ -166,10 +166,10 @@ package body Axi4CommonPkg is
   end function to_Axi4RespType ;
 
   
-  function SizeOfTransaction (AxiSize : integer) return integer is
-  begin
-    return AxiSize ;
-  end function SizeOfTransaction ;
+--  function SizeOfTransaction (AxiSize : integer) return integer is
+--  begin
+--    return AxiSize ;
+--  end function SizeOfTransaction ;
 
   ------------------------------------------------------------
   procedure DoAxiValidHandshake (

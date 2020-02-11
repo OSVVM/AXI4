@@ -89,6 +89,31 @@ architecture TestHarness of TbAxi4Lite is
     ReadData( RData(AXI_DATA_WIDTH-1 downto 0) )
   ) ;
 
+  -- Aliases to make access to record elements convenient 
+  -- This is only needed for model use them
+  alias AWValid : std_logic        is AxiLiteBus.WriteAddress.AWValid ;
+  alias AWReady : std_logic        is AxiLiteBus.WriteAddress.AWReady ;
+  alias AWProt  : Axi4ProtType     is AxiLiteBus.WriteAddress.AWProt ;
+  alias AWAddr  : std_logic_vector is AxiLiteBus.WriteAddress.AWAddr ;
+
+  alias WValid  : std_logic        is AxiLiteBus.WriteData.WValid ;
+  alias WReady  : std_logic        is AxiLiteBus.WriteData.WReady ;
+  alias WData   : std_logic_vector is AxiLiteBus.WriteData.WData ;
+  alias WStrb   : std_logic_vector is AxiLiteBus.WriteData.WStrb ;
+
+  alias BValid  : std_logic        is AxiLiteBus.WriteResponse.BValid ;
+  alias BReady  : std_logic        is AxiLiteBus.WriteResponse.BReady ;
+  alias BResp   : Axi4RespType     is AxiLiteBus.WriteResponse.BResp ;
+
+  alias ARValid : std_logic        is AxiLiteBus.ReadAddress.ARValid ;
+  alias ARReady : std_logic        is AxiLiteBus.ReadAddress.ARReady ;
+  alias ARProt  : Axi4ProtType     is AxiLiteBus.ReadAddress.ARProt ;
+  alias ARAddr  : std_logic_vector is AxiLiteBus.ReadAddress.ARAddr ;
+
+  alias RValid  : std_logic        is AxiLiteBus.ReadData.RValid ;
+  alias RReady  : std_logic        is AxiLiteBus.ReadData.RReady ;
+  alias RData   : std_logic_vector is AxiLiteBus.ReadData.RData ;
+  alias RResp   : Axi4RespType     is AxiLiteBus.ReadData.RResp ;
 
   component TestCtrl is
     generic (
@@ -124,6 +149,43 @@ begin
     Period      => 7 * tperiod_Clk,
     tpd         => tpd
   ) ;
+  
+  -- Behavioral model.  Replaces DUT for labs
+  Axi4LiteSlave_1 : Axi4LiteSlave 
+  port map ( 
+    -- Globals
+    Clk         => Clk,
+    nReset      => nReset,
+
+    -- Testbench Transaction Interface
+    TransRec    => AxiSlaveTransRec,
+
+    -- AXI Master Functional Interface
+--    AxiLiteBus  => AxiLiteBus 
+      AxiLiteBus.WriteAddress.AWValid      => AWValid ,
+      AxiLiteBus.WriteAddress.AWReady      => AWReady ,
+      AxiLiteBus.WriteAddress.AWProt       => AWProt  ,
+      AxiLiteBus.WriteAddress.AWAddr       => AWAddr  ,
+
+      AxiLiteBus.WriteData.WValid          => WValid  ,
+      AxiLiteBus.WriteData.WReady          => WReady  ,
+      AxiLiteBus.WriteData.WData           => WData   ,
+      AxiLiteBus.WriteData.WStrb           => WStrb   ,
+
+      AxiLiteBus.WriteResponse.BValid      => BValid  ,
+      AxiLiteBus.WriteResponse.BReady      => BReady  ,
+      AxiLiteBus.WriteResponse.BResp       => BResp   ,
+
+      AxiLiteBus.ReadAddress.ARValid       => ARValid ,
+      AxiLiteBus.ReadAddress.ARReady       => ARReady ,
+      AxiLiteBus.ReadAddress.ARProt        => ARProt  ,
+      AxiLiteBus.ReadAddress.ARAddr        => ARAddr  ,
+
+      AxiLiteBus.ReadData.RValid           => RValid  ,
+      AxiLiteBus.ReadData.RReady           => RReady  ,
+      AxiLiteBus.ReadData.RData            => RData   ,
+      AxiLiteBus.ReadData.RResp            => RResp   
+  ) ;
 
   Axi4LiteMaster_1 : Axi4LiteMaster 
   port map ( 
@@ -139,19 +201,6 @@ begin
   ) ;
 
   
-  Axi4LiteSlave_1 : Axi4LiteSlave 
-  port map ( 
-    -- Globals
-    Clk         => Clk,
-    nReset      => nReset,
-
-    -- Testbench Transaction Interface
-    TransRec    => AxiSlaveTransRec,
-
-    -- AXI Master Functional Interface
-    AxiLiteBus  => AxiLiteBus 
-  ) ;
-
   Axi4LiteMonitor_1 : Axi4LiteMonitor 
   port map ( 
     -- Globals

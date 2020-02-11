@@ -5,11 +5,9 @@ Models
 
 **Axi4LiteMaster.vhd**
 
-  AXI-Lite 4 Master Models
-  Current action list
-  - Add Byte Enables
-  - Add variations to Ready signaling - independent vs dependent on Valid
-  - non-blocking MasterWrite and MasterRead operations
+  AXI-Lite 4 Master Model
+  
+  **Note this model depends on library osvvm_common**
   
 **Axi4LiteSlave_Transactor.vhd**
 
@@ -21,4 +19,6 @@ Currently a place holder for an AXI-Lite 4 Monitor
 
 ## Release History
 Date        Revision    Comments
+- Feb-2020 - **2020.02**   Refactored master transaction package s.t. 
+                           it now uses common package from osvvm_common    
 - Apr-2018 - **2018.04**   Initial public release    

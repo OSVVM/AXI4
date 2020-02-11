@@ -129,17 +129,17 @@ package Axi4LiteSlaveTransactionPkg is
     Operation          : Axi4SlaveOperationType ;
     Options            : Axi4SlaveOptionsType ;
     Prot               : integer_max ;
-    Address            : TransactionType ;
-    DataToModel        : TransactionType ;
-    DataFromModel      : TransactionType ;
+    Address            : std_logic_vector_max_c ;
+    DataToModel        : std_logic_vector_max_c ;
+    DataFromModel      : std_logic_vector_max_c ;
     DataBytes          : integer_max ;
-    Resp               : Axi4RespEnumType ;
-    Strb               : integer_max ;
     AlertLogID         : resolved_max AlertLogIDType ;
     StatusMsgOn        : boolean_max ;
     OptionInt          : integer_max ;
     OptionBool         : boolean_max ;
     ModelBool          : boolean_max ;
+    Resp               : Axi4RespEnumType ;
+    Strb               : integer_max ;
   end record Axi4LiteSlaveTransactionRecType ;
 
 --!TODO add VHDL-2018 Interfaces

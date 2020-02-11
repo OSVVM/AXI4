@@ -162,10 +162,10 @@ begin
 
     -- AXI Master Functional Interface
 --    AxiLiteBus  => AxiLiteBus 
-      AxiLiteBus.WriteAddress.AWValid      => AWValid ,
-      AxiLiteBus.WriteAddress.AWReady      => AWReady ,
-      AxiLiteBus.WriteAddress.AWProt       => AWProt  ,
-      AxiLiteBus.WriteAddress.AWAddr       => AWAddr  ,
+      AxiLiteBus.WriteAddress.AWValid      => AxiLiteBus.WriteAddress.AWValid ,
+      AxiLiteBus.WriteAddress.AWReady      => AxiLiteBus.WriteAddress.AWReady ,
+      AxiLiteBus.WriteAddress.AWProt       => AxiLiteBus.WriteAddress.AWProt  ,
+      AxiLiteBus.WriteAddress.AWAddr       => AxiLiteBus.WriteAddress.AWAddr  ,
 
       AxiLiteBus.WriteData.WValid          => WValid  ,
       AxiLiteBus.WriteData.WReady          => WReady  ,

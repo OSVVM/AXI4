@@ -43,6 +43,7 @@ context Axi4LiteContext is
     use osvvm_axi4.Axi4CommonPkg.all ;
     use osvvm_axi4.Axi4LiteInterfacePkg.all ;
 
+    use osvvm_axi4.Axi4LiteMasterOptionsTypePkg.all ; 
     use osvvm_axi4.Axi4LiteMasterTransactionPkg.all ;
     use osvvm_axi4.Axi4LiteSlaveTransactionPkg.all ;
     use osvvm_axi4.Axi4LiteMasterComponentPkg.all ;

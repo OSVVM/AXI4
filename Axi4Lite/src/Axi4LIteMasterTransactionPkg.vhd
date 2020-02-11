@@ -10,7 +10,7 @@
 --
 --  Description:
 --      Defines types, constants, and subprograms used by
---      OSVVM Axi4 Lite Master Transaction Based Models (aka: TBM, TLM, VVC)
+--      OSVVM Address Master Transaction Based Models (aka: TBM, TLM, VVC)
 --
 --
 --  Developed by:
@@ -49,14 +49,16 @@ library ieee ;
 library osvvm ;
     context osvvm.OsvvmContext ;
 
-  use work.Axi4CommonPkg.all ;
-
 package Axi4LiteMasterTransactionPkg is
 
-  -- Model AXI Lite Operations
+  -- Address Master Common Operations
   type UnresolvedMasterOperationType is (
     -- Model Directives
-    WAIT_CLOCK, GET_ERRORS, SET_MODEL_OPTIONS,
+    WAIT_CLOCK, 
+    GET_ALERTLOG_ID, 
+    GET_TRANSACTION_COUNT, GET_WRITE_TRANSACTION_COUNT, GET_READ_TRANSACTION_COUNT,
+    SET_MODEL_OPTIONS, GET_MODEL_OPTIONS,
+    GET_ERRORS, -- Deprecate
     --  bus operations
     --                       -- Master
     --                       ----------------------------
@@ -69,11 +71,9 @@ package Axi4LiteMasterTransactionPkg is
     ASYNC_WRITE_DATA,        -- Non-blocking (Tx Data)
     ASYNC_READ_ADDRESS,      -- Non-blocking (Tx Addr)
     READ_DATA,               -- Blocking (Rx Data)
-    TRY_READ_DATA,           -- Non-blocking try & get
---! TODO - add transaction for READ_DATA_CHECK
     READ_DATA_CHECK,         -- Blocking (Tx Data)
---! TODO - add transaction and master behavior for TRY_READ_DATA_CHECK
-    -- TRY_READ_DATA_CHECK,     -- Non-blocking read check
+    TRY_READ_DATA,           -- Non-blocking try & get
+    TRY_READ_DATA_CHECK,     -- Non-blocking read check
     THE_END
   ) ;
   type UnresolvedMasterOperationVectorType is array (natural range <>) of UnresolvedMasterOperationType ;
@@ -82,7 +82,7 @@ package Axi4LiteMasterTransactionPkg is
   function resolved_max ( s : UnresolvedMasterOperationVectorType) return UnresolvedMasterOperationType ;
   subtype MasterOperationType is resolved_max UnresolvedMasterOperationType ;
 
-  -- AXI Model Options
+  -- AXI4 Model Options
   type Axi4UnresolvedMasterOptionsType is (
     --
     -- Master Ready TimeOut Checks
@@ -102,10 +102,13 @@ package Axi4LiteMasterTransactionPkg is
     READ_DATA_READY_DELAY_CYCLES,
     --
     -- Master PROT Settings
-    SET_READ_PROT,
-    USE_READ_PROT_FROM_MODEL,
-    SET_WRITE_PROT,
-    USE_WRITE_PROT_FROM_MODEL,
+    READ_PROT,
+    WRITE_PROT,
+    
+    -- Master RESP Settings
+    WRITE_RESP,
+    READ_RESP,
+
     --
     -- The End -- Done
     THE_END
@@ -118,23 +121,23 @@ package Axi4LiteMasterTransactionPkg is
 
   -- Record creates a channel for communicating transactions to the model.
   type MasterTransactionRecType is record
+    -- All Address Bus Masters
     Rdy                : bit_max ;
     Ack                : bit_max ;
     Operation          : MasterOperationType ;
-    Options            : Axi4LiteMasterOptionsType ;
-    Prot               : integer_max ;
-    Address            : TransactionType ;
+    Address            : std_logic_vector_max_c ;
     AddrWidth          : integer_max ;
-    DataToModel        : TransactionType ;
-    DataFromModel      : TransactionType ;
+    DataToModel        : std_logic_vector_max_c ;
+    DataFromModel      : std_logic_vector_max_c ;
     DataWidth          : integer_max ;
-    Resp               : Axi4RespEnumType ;
-    Strb               : integer_max ;
-    AlertLogID         : resolved_max AlertLogIDType ;
     StatusMsgOn        : boolean_max ;
-    OptionInt          : integer_max ;
-    OptionBool         : boolean_max ;
-    ModelBool          : boolean_max ;
+    -- Model Options 
+    Options            : Axi4LiteMasterOptionsType ;
+    -- Optional parameter handling
+    BoolFromModel      : boolean_max ;
+    IntFromModel       : integer_max ; 
+    BoolToModel        : boolean_max ; 
+    IntToModel         : integer_max ;
   end record MasterTransactionRecType ;
 
 --!TODO add VHDL-2018 Interfaces
@@ -142,7 +145,7 @@ package Axi4LiteMasterTransactionPkg is
 
   ------------------------------------------------------------
   procedure WaitForClock (
-  -- Directive:  Do nothing for NumberOfClocks number of clocks
+  -- Directive:  Wait for NumberOfClocks number of clocks
   ------------------------------------------------------------
     signal   TransRec        : InOut MasterTransactionRecType ;
              NumberOfClocks  : In    natural := 1
@@ -151,12 +154,40 @@ package Axi4LiteMasterTransactionPkg is
   alias NoOp is WaitForClock [MasterTransactionRecType, natural] ;
 
   ------------------------------------------------------------
+  procedure GetAlertLogID (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+    variable AlertLogID  : Out   AlertLogIDType
+  ) ;
+
+  ------------------------------------------------------------
   procedure GetErrors (
   -- Error reporting for testbenches that do not use AlertLogPkg
   -- Returns error count.  If an error count /= 0, also print it
   ------------------------------------------------------------
     signal   TransRec    : InOut MasterTransactionRecType ;
     variable ErrCnt      : Out   natural
+  ) ;
+
+  ------------------------------------------------------------
+  procedure GetTransactionCount (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+    variable Count       : Out   integer
+  ) ;
+
+  ------------------------------------------------------------
+  procedure GetWriteTransactionCount (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+    variable Count       : Out   integer
+  ) ;
+
+  ------------------------------------------------------------
+  procedure GetReadTransactionCount (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+    variable Count       : Out   integer
   ) ;
 
   ------------------------------------------------------------
@@ -246,6 +277,15 @@ package Axi4LiteMasterTransactionPkg is
   ) ;
 
   ------------------------------------------------------------
+  procedure MasterReadDataCheck (
+  -- Do CPU Read Data Cycle and check received Data
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+             iData       : In    std_logic_vector ;
+             StatusMsgOn : In    boolean := false
+  ) ;
+
+  ------------------------------------------------------------
   procedure MasterTryReadData (
   -- Try to Get CPU Read Data Cycle
   -- If data is available, get it and return available TRUE.
@@ -253,6 +293,18 @@ package Axi4LiteMasterTransactionPkg is
   ------------------------------------------------------------
     signal   TransRec    : InOut MasterTransactionRecType ;
     variable oData       : Out   std_logic_vector ;
+    variable Available   : Out   boolean ;
+             StatusMsgOn : In    boolean := false
+  ) ;
+
+  ------------------------------------------------------------
+  procedure MasterTryReadDataCheck (
+  -- Try to Get CPU Read Data Cycle
+  -- If data is available, check it and return available TRUE.
+  -- Otherwise Return Available FALSE.
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+             iData       : In    std_logic_vector ;
     variable Available   : Out   boolean ;
              StatusMsgOn : In    boolean := false
   ) ;
@@ -267,30 +319,6 @@ package Axi4LiteMasterTransactionPkg is
              BitValue    : In    std_logic ;
              StatusMsgOn : In    boolean := false ;
              WaitTime    : In    natural := 10
-  ) ;
-
-  ------------------------------------------------------------
-  procedure SetModelOptions (
-  ------------------------------------------------------------
-    signal   TransRec    : InOut MasterTransactionRecType ;
-    constant Option      : In    Axi4LiteMasterOptionsType ;
-    constant OptVal      : In    boolean
-  ) ;
-
-  ------------------------------------------------------------
-  procedure SetModelOptions (
-  ------------------------------------------------------------
-    signal   TransRec    : InOut MasterTransactionRecType ;
-    constant Option      : In    Axi4LiteMasterOptionsType ;
-    constant OptVal      : In    integer
-  ) ;
-
-  ------------------------------------------------------------
-  procedure SetModelOptions (
-  ------------------------------------------------------------
-    signal   TransRec    : InOut MasterTransactionRecType ;
-    constant Option      : In    Axi4LiteMasterOptionsType ;
-    constant OptVal      : In    Axi4RespEnumType
   ) ;
 
   ------------------------------------------------------------
@@ -341,6 +369,34 @@ package Axi4LiteMasterTransactionPkg is
     constant Operation     : in MasterOperationType
   ) return boolean ;
 
+  --
+  --  Extensions to support model customizations
+  -- 
+  
+  ------------------------------------------------------------
+  procedure SetModelOptions (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+    constant Option      : In    Axi4LiteMasterOptionsType ;
+    constant OptVal      : In    boolean
+  ) ;
+
+  ------------------------------------------------------------
+  procedure SetModelOptions (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+    constant Option      : In    Axi4LiteMasterOptionsType ;
+    constant OptVal      : In    integer
+  ) ;
+
+  ------------------------------------------------------------
+  procedure SetModelOptions (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+    constant Option      : In    Axi4LiteMasterOptionsType ;
+    constant OptVal      : In    std_logic_vector
+  ) ;
+
 end package Axi4LiteMasterTransactionPkg ;
 
 -- /////////////////////////////////////////////////////////////////////////////////////////
@@ -360,7 +416,7 @@ package body Axi4LiteMasterTransactionPkg is
 
   ------------------------------------------------------------
   procedure WaitForClock (
-  -- Directive:  Do nothing for NumberOfClocks number of clocks
+  -- Directive:  Wait for NumberOfClocks number of clocks in the model
   ------------------------------------------------------------
     signal   TransRec        : InOut MasterTransactionRecType ;
              NumberOfClocks  : In    natural := 1
@@ -372,6 +428,20 @@ package body Axi4LiteMasterTransactionPkg is
   end procedure WaitForClock ;
 
   ------------------------------------------------------------
+  procedure GetAlertLogID (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+    variable AlertLogID  : Out   AlertLogIDType
+  ) is
+  begin
+    TransRec.Operation     <= GET_ALERTLOG_ID ;
+    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
+
+    -- Return AlertLogID
+    AlertLogID := AlertLogIDType(TransRec.IntFromModel) ;
+  end procedure GetAlertLogID ;
+
+  ------------------------------------------------------------
   procedure GetErrors (
   -- Error reporting for testbenches that do not use AlertLogPkg
   -- Returns error count.  If an error count /= 0, also print it
@@ -379,13 +449,54 @@ package body Axi4LiteMasterTransactionPkg is
     signal   TransRec    : InOut MasterTransactionRecType ;
     variable ErrCnt      : Out   natural
   ) is
+    variable ModelID : AlertLogIDType ;
   begin
-    TransRec.Operation     <= GET_ERRORS ;
+    GetAlertLogID(TransRec, ModelID) ;
+    ReportNonZeroAlerts(AlertLogID => ModelID) ;
+    ErrCnt := GetAlertCount(AlertLogID => ModelID) ;
+  end procedure GetErrors ;
+
+  ------------------------------------------------------------
+  procedure GetTransactionCount (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+    variable Count       : Out   integer
+  ) is
+  begin
+    TransRec.Operation     <= GET_TRANSACTION_COUNT ;
     RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
 
-    -- Return Error Count
-    ErrCnt := FromTransaction(TransRec.DataFromModel) ;
-  end procedure GetErrors ;
+    -- Return AlertLogID
+    Count := TransRec.IntFromModel ;
+  end procedure GetTransactionCount ;
+
+  ------------------------------------------------------------
+  procedure GetWriteTransactionCount (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+    variable Count       : Out   integer
+  ) is
+  begin
+    TransRec.Operation     <= GET_WRITE_TRANSACTION_COUNT ;
+    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
+
+    -- Return AlertLogID
+    Count := TransRec.IntFromModel ;
+  end procedure GetWriteTransactionCount ;
+
+  ------------------------------------------------------------
+  procedure GetReadTransactionCount (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+    variable Count       : Out   integer
+  ) is
+  begin
+    TransRec.Operation     <= GET_READ_TRANSACTION_COUNT ;
+    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
+
+    -- Return AlertLogID
+    Count := TransRec.IntFromModel ;
+  end procedure GetReadTransactionCount ;
 
   ------------------------------------------------------------
   procedure MasterWrite (
@@ -401,7 +512,6 @@ package body Axi4LiteMasterTransactionPkg is
     TransRec.Operation        <= WRITE ;
     TransRec.Address          <= ToTransaction(iAddr) ;
     TransRec.AddrWidth        <= iAddr'length ;
-    TransRec.Prot             <= 0 ;
     TransRec.DataToModel      <= ToTransaction(Extend(iData, TransRec.DataToModel'length)) ;
     TransRec.DataWidth        <= iData'length ;
     TransRec.StatusMsgOn      <= StatusMsgOn ;
@@ -423,7 +533,6 @@ package body Axi4LiteMasterTransactionPkg is
     TransRec.Operation        <= ASYNC_WRITE ;
     TransRec.Address          <= ToTransaction(iAddr) ;
     TransRec.AddrWidth        <= iAddr'length ;
-    TransRec.Prot             <= 0 ;
     TransRec.DataToModel      <= ToTransaction(Extend(iData, TransRec.DataToModel'length)) ;
     TransRec.DataWidth        <= iData'length ;
     TransRec.StatusMsgOn      <= StatusMsgOn ;
@@ -444,7 +553,6 @@ package body Axi4LiteMasterTransactionPkg is
     TransRec.Operation        <= ASYNC_WRITE_ADDRESS ;
     TransRec.Address          <= ToTransaction(iAddr) ;
     TransRec.AddrWidth        <= iAddr'length ;
-    TransRec.Prot             <= 0 ;
     TransRec.DataToModel      <= (TransRec.DataToModel'range => 'X') ;
     TransRec.DataWidth        <= 0 ;
     TransRec.StatusMsgOn      <= StatusMsgOn ;
@@ -466,7 +574,6 @@ package body Axi4LiteMasterTransactionPkg is
     TransRec.Operation        <= ASYNC_WRITE_DATA ;
     TransRec.Address          <= ToTransaction(iAddr, TransRec.Address'length) ;
     TransRec.AddrWidth        <= iAddr'length ;
-    TransRec.Prot             <= 0 ;
     TransRec.DataToModel      <= ToTransaction(iData, TransRec.DataToModel'length) ;
     TransRec.DataWidth        <= iData'length ;
     TransRec.StatusMsgOn      <= StatusMsgOn ;
@@ -500,7 +607,6 @@ package body Axi4LiteMasterTransactionPkg is
     TransRec.Address            <= ToTransaction(iAddr) ;
     TransRec.AddrWidth          <= iAddr'length ;
     TransRec.DataWidth          <= oData'length ;
-    TransRec.Prot               <= 0 ;
     TransRec.StatusMsgOn        <= StatusMsgOn ;
     -- Start Transaction
     RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
@@ -522,7 +628,6 @@ package body Axi4LiteMasterTransactionPkg is
     TransRec.Operation          <= READ_CHECK ;
     TransRec.Address            <= ToTransaction(iAddr) ;
     TransRec.AddrWidth          <= iAddr'length ;
-    TransRec.Prot               <= 0 ;
     TransRec.DataToModel        <= ToTransaction(Extend(iData, TransRec.DataToModel'length)) ;
     TransRec.DataWidth          <= iData'length ;
     TransRec.StatusMsgOn        <= StatusMsgOn ;
@@ -543,7 +648,6 @@ package body Axi4LiteMasterTransactionPkg is
     TransRec.Operation          <= ASYNC_READ_ADDRESS ;
     TransRec.Address            <= ToTransaction(iAddr) ;
     TransRec.AddrWidth          <= iAddr'length ;
-    TransRec.Prot               <= 0 ;
     TransRec.DataToModel        <= (TransRec.DataToModel'range => 'X') ;
     TransRec.DataWidth          <= 0 ;
     TransRec.StatusMsgOn        <= StatusMsgOn ;
@@ -564,13 +668,31 @@ package body Axi4LiteMasterTransactionPkg is
     TransRec.Operation          <= READ_DATA ;
     TransRec.Address            <= (TransRec.Address'range => 'X') ;
     TransRec.DataWidth          <= oData'length ;
-    TransRec.Prot               <= 0 ;
     TransRec.StatusMsgOn        <= StatusMsgOn ;
     -- Start Transaction
     RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
     -- Return Results
     oData := Reduce(FromTransaction(TransRec.DataFromModel), oData'Length) ;
   end procedure MasterReadData ;
+
+  ------------------------------------------------------------
+  procedure MasterReadDataCheck (
+  -- Do CPU Read Data Cycle and check received Data
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+             iData       : In    std_logic_vector ;
+             StatusMsgOn : In    boolean := false
+  ) is
+  begin
+    -- Put values in record
+    TransRec.Operation          <= READ_DATA_CHECK ;
+    TransRec.Address            <= (TransRec.Address'range => 'X') ;
+    TransRec.DataToModel        <= ToTransaction(Extend(iData, TransRec.DataToModel'length)) ;
+    TransRec.DataWidth          <= iData'length ;
+    TransRec.StatusMsgOn        <= StatusMsgOn ;
+    -- Start Transaction
+    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
+  end procedure MasterReadDataCheck ;
 
   ------------------------------------------------------------
   procedure MasterTryReadData (
@@ -588,14 +710,36 @@ package body Axi4LiteMasterTransactionPkg is
     TransRec.Operation          <= TRY_READ_DATA ;
     TransRec.Address            <= (TransRec.Address'range => 'X') ;
     TransRec.DataWidth          <= oData'length ;
-    TransRec.Prot               <= 0 ;
     TransRec.StatusMsgOn        <= StatusMsgOn ;
     -- Start Transaction
     RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
     -- Return Results
     oData := Reduce(FromTransaction(TransRec.DataFromModel), oData'Length) ;
-    Available := TransRec.ModelBool ;
+    Available := TransRec.BoolFromModel ;
   end procedure MasterTryReadData ;
+
+  ------------------------------------------------------------
+  procedure MasterTryReadDataCheck (
+  -- Try to Get CPU Read Data Cycle
+  -- If data is available, check it and return available TRUE.
+  -- Otherwise Return Available FALSE.
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+             iData       : In    std_logic_vector ;
+    variable Available   : Out   boolean ;
+             StatusMsgOn : In    boolean := false
+  ) is
+  begin
+    -- Put values in record
+    TransRec.Operation          <= TRY_READ_DATA ;
+    TransRec.Address            <= (TransRec.Address'range => 'X') ;
+    TransRec.DataToModel        <= ToTransaction(Extend(iData, TransRec.DataToModel'length)) ;
+    TransRec.DataWidth          <= iData'length ;
+    TransRec.StatusMsgOn        <= StatusMsgOn ;
+    -- Start Transaction
+    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
+    Available := TransRec.BoolFromModel ;
+  end procedure MasterTryReadDataCheck ;
 
   ------------------------------------------------------------
   procedure MasterReadPoll (
@@ -609,6 +753,7 @@ package body Axi4LiteMasterTransactionPkg is
              WaitTime    : In    natural := 10
   ) is
     variable iData    : std_logic_vector(TransRec.DataFromModel'range) ;
+    variable ModelID  : AlertLogIDType ;
   begin
     loop
       WaitForClock(TransRec, WaitTime) ;
@@ -616,51 +761,10 @@ package body Axi4LiteMasterTransactionPkg is
       exit when iData(Index) = BitValue ;
     end loop ;
 
-    Log(TransRec.AlertLogID, "CpuPoll: address" & to_hstring(iAddr) &
+    GetAlertLogID(TransRec, ModelID) ;
+    Log(ModelID, "CpuPoll: address" & to_hstring(iAddr) &
       "  Data: " & to_hstring(FromTransaction(TransRec.DataFromModel)), INFO, StatusMsgOn) ;
   end procedure MasterReadPoll ;
-
-  ------------------------------------------------------------
-  procedure SetModelOptions (
-  ------------------------------------------------------------
-    signal   TransRec    : InOut MasterTransactionRecType ;
-    constant Option      : In    Axi4LiteMasterOptionsType ;
-    constant OptVal      : In    boolean
-  ) is
-  begin
-    TransRec.Operation     <= SET_MODEL_OPTIONS ;
-    TransRec.Options       <= Option ;
-    TransRec.OptionBool    <= OptVal ;
-    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
-  end procedure SetModelOptions ;
-
-  ------------------------------------------------------------
-  procedure SetModelOptions (
-  ------------------------------------------------------------
-    signal   TransRec    : InOut MasterTransactionRecType ;
-    constant Option      : In    Axi4LiteMasterOptionsType ;
-    constant OptVal      : In    integer
-  ) is
-  begin
-    TransRec.Operation     <= SET_MODEL_OPTIONS ;
-    TransRec.Options       <= Option ;
-    TransRec.OptionInt     <= OptVal ;
-    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
-  end procedure SetModelOptions ;
-
-  ------------------------------------------------------------
-  procedure SetModelOptions (
-  ------------------------------------------------------------
-    signal   TransRec    : InOut MasterTransactionRecType ;
-    constant Option      : In    Axi4LiteMasterOptionsType ;
-    constant OptVal      : In    Axi4RespEnumType
-  ) is
-  begin
-    TransRec.Operation     <= SET_MODEL_OPTIONS ;
-    TransRec.Options       <= Option ;
-    TransRec.Resp          <= OptVal ;
-    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
-  end procedure SetModelOptions ;
 
   ------------------------------------------------------------
   function IsWriteAddress (
@@ -727,7 +831,8 @@ package body Axi4LiteMasterTransactionPkg is
       (Operation = READ_CHECK) or
       (Operation = READ_DATA) or
       (Operation = TRY_READ_DATA) or
-      (Operation = READ_DATA_CHECK) ;
+      (Operation = READ_DATA_CHECK) or
+      (Operation = TRY_READ_DATA_CHECK) ;
   end function IsReadData ;
 
   ------------------------------------------------------------
@@ -736,7 +841,7 @@ package body Axi4LiteMasterTransactionPkg is
     constant Operation     : in MasterOperationType
   ) return boolean is
   begin
-    return (Operation = TRY_READ_DATA)  ;
+    return (Operation = TRY_READ_DATA) or (Operation = TRY_READ_DATA_CHECK)  ;
   end function IsTryReadData ;
 
   ------------------------------------------------------------
@@ -747,7 +852,53 @@ package body Axi4LiteMasterTransactionPkg is
   begin
     return
       (Operation = READ_CHECK) or
-      (Operation = READ_DATA_CHECK) ;
+      (Operation = READ_DATA_CHECK) or
+      (Operation = TRY_READ_DATA_CHECK) ;
   end function IsReadCheck ;
 
+  --
+  --  Extensions to support model customizations
+  -- 
+  
+  ------------------------------------------------------------
+  procedure SetModelOptions (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+    constant Option      : In    Axi4LiteMasterOptionsType ;
+    constant OptVal      : In    boolean
+  ) is
+  begin
+    TransRec.Operation     <= SET_MODEL_OPTIONS ;
+    TransRec.Options       <= Option ;
+    TransRec.BoolToModel   <= OptVal ;
+    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
+  end procedure SetModelOptions ;
+
+  ------------------------------------------------------------
+  procedure SetModelOptions (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+    constant Option      : In    Axi4LiteMasterOptionsType ;
+    constant OptVal      : In    integer
+  ) is
+  begin
+    TransRec.Operation     <= SET_MODEL_OPTIONS ;
+    TransRec.Options       <= Option ;
+    TransRec.IntToModel    <= OptVal ;
+    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
+  end procedure SetModelOptions ;
+
+  ------------------------------------------------------------
+  procedure SetModelOptions (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut MasterTransactionRecType ;
+    constant Option      : In    Axi4LiteMasterOptionsType ;
+    constant OptVal      : In    std_logic_vector
+  ) is
+  begin
+    TransRec.Operation     <= SET_MODEL_OPTIONS ;
+    TransRec.Options       <= Option ;
+    TransRec.IntToModel    <= to_integer(OptVal) ;
+    RequestTransaction(Rdy => TransRec.Rdy, Ack => TransRec.Ack) ;
+  end procedure SetModelOptions ;
 end package body Axi4LiteMasterTransactionPkg ;

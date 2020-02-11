@@ -39,7 +39,7 @@
 #  
 library osvvm_TbAxi4Lite
 analyze TestCtrl_e.vhd
-analyze TbAxi4Lite_map_records.vhd
+analyze TbAxi4Lite.vhd
 analyze TbAxi4Lite_BasicReadWrite.vhd
 analyze TbAxi4Lite_MasterReadWriteAsync1.vhd
 analyze TbAxi4Lite_MasterReadWriteAsync2.vhd

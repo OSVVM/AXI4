@@ -37,8 +37,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
+library osvvm_common
 library osvvm_axi4
 analyze ./src/Axi4LiteSlaveTransactionPkg.vhd
+analyze ./src/Axi4LiteMasterOptionsTypePkg.vhd
 analyze ./src/Axi4LiteMasterTransactionPkg.vhd
 analyze ./src/Axi4LiteMasterComponentPkg.vhd
 analyze ./src/Axi4LiteSlaveComponentPkg.vhd

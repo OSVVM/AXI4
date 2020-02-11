@@ -84,7 +84,7 @@ begin
     -- AlertIfDiff("./results/TbAxi4Lite_TimeOut.txt", "../sim_shared/validated_results/TbAxi4Lite_TimeOut.txt", "") ; 
     
     print("") ;
-    ReportAlerts(ExternalErrors => (FAILURE => -10, ERROR => -2, WARNING => 0)) ; 
+    ReportAlerts(ExternalErrors => (FAILURE => -10, ERROR => -4, WARNING => 0)) ; 
     print("") ;
     std.env.stop ; 
     wait ; 

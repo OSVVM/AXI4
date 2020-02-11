@@ -56,24 +56,24 @@ library osvvm ;
 package Axi4LiteMasterComponentPkg is
   component Axi4LiteMaster is
     generic (
-      tperiod_Clk     : time := 10 ns ;
+      MODEL_ID_NAME   : string :="" ; 
+      tperiod_Clk     : time   := 10 ns ;
       
-      tpd_Clk_AWValid : time := 2 ns ; 
-      tpd_Clk_AWProt  : time := 2 ns ; 
-      tpd_Clk_AWAddr  : time := 2 ns ; 
+      tpd_Clk_AWValid : time   := 2 ns ; 
+      tpd_Clk_AWProt  : time   := 2 ns ; 
+      tpd_Clk_AWAddr  : time   := 2 ns ; 
 
-      tpd_Clk_WValid  : time := 2 ns ; 
-      tpd_Clk_WData   : time := 2 ns ; 
-      tpd_Clk_WStrb   : time := 2 ns ; 
+      tpd_Clk_WValid  : time   := 2 ns ; 
+      tpd_Clk_WData   : time   := 2 ns ; 
+      tpd_Clk_WStrb   : time   := 2 ns ; 
 
-      tpd_Clk_BReady  : time := 2 ns ; 
+      tpd_Clk_BReady  : time   := 2 ns ; 
 
-      tpd_Clk_ARValid : time := 2 ns ; 
-      tpd_Clk_ARProt  : time := 2 ns ; 
-      tpd_Clk_ARAddr  : time := 2 ns ; 
+      tpd_Clk_ARValid : time   := 2 ns ; 
+      tpd_Clk_ARProt  : time   := 2 ns ; 
+      tpd_Clk_ARAddr  : time   := 2 ns ; 
 
-      tpd_Clk_RReady  : time := 2 ns  
-      
+      tpd_Clk_RReady  : time   := 2 ns  
     ) ;
     port (
       -- Globals

@@ -49,31 +49,30 @@ library osvvm ;
   context osvvm.OsvvmContext ;
   use osvvm.ScoreboardPkg_slv.all ;
   
---  use work.Axi4LiteCommonTransactionPkg.all ; 
   use work.Axi4LiteMasterTransactionPkg.all ; 
   use work.Axi4LiteInterfacePkg.all ; 
   use work.Axi4CommonPkg.all ; 
 
 entity Axi4LiteMaster is
 generic (
-  tperiod_Clk     : time := 10 ns ;
+  MODEL_ID_NAME   : string :="" ; 
+  tperiod_Clk     : time   := 10 ns ;
   
-  tpd_Clk_AWValid : time := 2 ns ; 
-  tpd_Clk_AWProt  : time := 2 ns ; 
-  tpd_Clk_AWAddr  : time := 2 ns ; 
+  tpd_Clk_AWValid : time   := 2 ns ; 
+  tpd_Clk_AWProt  : time   := 2 ns ; 
+  tpd_Clk_AWAddr  : time   := 2 ns ; 
 
-  tpd_Clk_WValid  : time := 2 ns ; 
-  tpd_Clk_WData   : time := 2 ns ; 
-  tpd_Clk_WStrb   : time := 2 ns ; 
+  tpd_Clk_WValid  : time   := 2 ns ; 
+  tpd_Clk_WData   : time   := 2 ns ; 
+  tpd_Clk_WStrb   : time   := 2 ns ; 
 
-  tpd_Clk_BReady  : time := 2 ns ; 
+  tpd_Clk_BReady  : time   := 2 ns ; 
 
-  tpd_Clk_ARValid : time := 2 ns ; 
-  tpd_Clk_ARProt  : time := 2 ns ; 
-  tpd_Clk_ARAddr  : time := 2 ns ; 
+  tpd_Clk_ARValid : time   := 2 ns ; 
+  tpd_Clk_ARProt  : time   := 2 ns ; 
+  tpd_Clk_ARAddr  : time   := 2 ns ; 
 
-  tpd_Clk_RReady  : time := 2 ns  
-  
+  tpd_Clk_RReady  : time   := 2 ns  
 ) ;
 port (
   -- Globals
@@ -119,17 +118,19 @@ architecture SimpleMaster of Axi4LiteMaster is
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
 
 
-  constant MODEL_INSTANCE_NAME : string     := PathTail(to_lower(Axi4LiteMaster'PATH_NAME)) & " Axi4LiteMaster" ;
+  constant MODEL_INSTANCE_NAME : string := 
+    -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
+    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4LiteMaster'PATH_NAME))) ;
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ; 
   
   shared variable WriteAddressFifo            : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
---  shared variable WriteAddressTransactionFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
   shared variable WriteDataFifo               : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
   shared variable ReadAddressFifo             : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
   shared variable ReadAddressTransactionFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
   shared variable ReadDataFifo                : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
 
   shared variable WriteResponseScoreboard     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
+  shared variable ReadResponseScoreboard      : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
   
   signal WriteAddressRequestCount, WriteAddressDoneCount      : integer := 0 ; 
   signal WriteDataRequestCount,    WriteDataDoneCount         : integer := 0 ; 
@@ -143,14 +144,15 @@ architecture SimpleMaster of Axi4LiteMaster is
          WriteResponseValidTimeOut, ReadDataValidTimeOut : integer := 25 ; 
          
   signal WriteResponseReadyBeforeValid  : boolean := TRUE ; 
-  signal WriteResponseReadyDelayCycles  : integer := 0 ; 
   signal ReadDataReadyBeforeValid       : boolean := TRUE ; 
+  signal WriteResponseReadyDelayCycles  : integer := 0 ; 
   signal ReadDataReadyDelayCycles       : integer := 0 ; 
   
-  signal UseWriteProtFromModel : boolean := FALSE ; 
-  signal ModelWriteProt : Axi4ProtType ;
-  signal UseReadProtFromModel : boolean := FALSE ; 
-  signal ModelReadProt : Axi4ProtType ;
+  signal ModelWriteProt : Axi4ProtType := (others => '0') ;
+  signal ModelReadProt  : Axi4ProtType := (others => '0') ;
+
+  signal ModelWriteResp : Axi4RespType := to_Axi4RespType(OKAY) ;
+  signal ModelReadResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
 
 begin
 
@@ -169,7 +171,6 @@ begin
     -- Alerts 
     ID                      := GetAlertLogID(MODEL_INSTANCE_NAME) ; 
     ModelID                 <= ID ; 
-    TransRec.AlertLogID     <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Transaction", ID ) ;
     ProtocolID              <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
     DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
     BusFailedID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
@@ -177,8 +178,6 @@ begin
     -- FIFOS.  FIFOS share main ID as they only generate errors if the model uses them wrong  
     WriteAddressFifo.SetAlertLogID(ID); 
     WriteAddressFifo.SetName(            MODEL_INSTANCE_NAME & ": WriteAddressFIFO"); 
---    WriteAddressTransactionFifo.SetAlertLogID(ID); 
---    WriteAddressTransactionFifo.SetName( MODEL_INSTANCE_NAME & ": WriteAddressTransactionFifo"); 
     WriteDataFifo.SetAlertLogID(ID); 
     WriteDataFifo.SetName(               MODEL_INSTANCE_NAME & ": WriteDataFifo"); 
     ReadAddressFifo.SetAlertLogID(ID); 
@@ -188,7 +187,8 @@ begin
     ReadDataFifo.SetAlertLogID(ID); 
     ReadDataFifo.SetName(                MODEL_INSTANCE_NAME & ": ReadDataFifo"); 
     
-    WriteResponseScoreboard.SetAlertLogID(     MODEL_INSTANCE_NAME & ": WriteResponse Scoreboard", ID); 
+    WriteResponseScoreboard.SetAlertLogID( MODEL_INSTANCE_NAME & ": WriteResponse Scoreboard", ID); 
+    ReadResponseScoreboard.SetAlertLogID(  MODEL_INSTANCE_NAME & ": ReadResponse Scoreboard",  ID); 
     wait ; 
   end process Initialize ;
 
@@ -200,10 +200,8 @@ begin
   TransactionDispatcher : process
     variable WriteAddress  : AWAddr'subtype ; 
     variable WriteByteAddr : integer ; 
-    variable WriteProt     : AWProt'subtype ;
     variable WriteData     : WData'subtype ; 
     variable WriteStrb     : WStrb'subtype ;
-    variable WriteResp     : BResp'subtype ; 
     variable ReadAddress   : ARAddr'subtype ; 
     variable ReadByteAddr  : integer ; 
     variable ReadProt      : ARProt'subtype ;
@@ -224,34 +222,49 @@ begin
     Operation := TransRec.Operation ; 
 
     case Operation is
+      -- Execute Standard Directive Transactions
+      when WAIT_CLOCK =>
+        WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
+        wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
+        wait until Clk = '1' ;
+
+      when GET_ALERTLOG_ID =>
+        TransRec.IntFromModel <= integer(ModelID) ;
+        wait until Clk = '1' ;
+
+      when GET_TRANSACTION_COUNT =>
+        TransRec.IntFromModel <= WriteAddressDoneCount + ReadAddressDoneCount ;
+        wait until Clk = '1' ;
+
+      when GET_WRITE_TRANSACTION_COUNT =>
+        TransRec.IntFromModel <= WriteAddressDoneCount ;
+        wait until Clk = '1' ;
+
+      when GET_READ_TRANSACTION_COUNT =>
+        TransRec.IntFromModel <= ReadAddressDoneCount ;
+        wait until Clk = '1' ;    
+
+
+      -- Model Transaction Dispatch
       when WRITE | ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
         if IsWriteAddress(Operation) then 
           -- Queue Write Address
           WriteAddress  := FromTransaction(TransRec.Address) ;
           AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Write Address length does not match", FAILURE) ;
-          if UseWriteProtFromModel then
-            WriteProt   := ModelWriteProt ;
-          else
-            WriteProt   := to_slv(TransRec.Prot, AWProt'length) ;
-          end if ; 
           
           -- Initiate Write Address
-          WriteAddressFifo.Push(WriteAddress & WriteProt) ; 
---          WriteAddressTransactionFifo.Push(WriteAddress & WriteProt);
+          WriteAddressFifo.Push(WriteAddress & ModelWriteProt) ; 
           Increment(WriteAddressRequestCount) ;
 
           -- Queue Write Response 
-          WriteResp     := to_Axi4RespType(TransRec.Resp) ;
-
-          WriteResponseScoreboard.Push(WriteResp) ;
+          WriteResponseScoreboard.Push(ModelWriteResp) ;
           Increment(WriteResponseExpectCount) ;
         end if ; 
         
         if IsWriteData(Operation) then 
           -- Queue Write Data 
---          (WriteAddress, WriteProt) := WriteAddressTransactionFifo.Pop ;
           WriteAddress  := FromTransaction(TransRec.Address) ; -- WriteDataAsync
-          ByteCount := TransRec.DataWidth / 8 ;
+          ByteCount     := TransRec.DataWidth / 8 ;
           WriteByteAddr := CalculateAxiByteAddress(WriteAddress, AXI_DATA_BYTE_WIDTH);
           WriteStrb     := CalculateAxiWriteStrobe(WriteByteAddr, ByteCount, AXI_DATA_BYTE_WIDTH) ; 
           WriteData     := FromTransaction(TransRec.DataToModel) ;
@@ -265,7 +278,7 @@ begin
           end if ; 
 
           -- Initiate Write Data
-          WriteDataFifo.Push('0' & WriteData & WriteStrb) ; 
+          WriteDataFifo.Push(WriteData & WriteStrb) ; 
           Increment(WriteDataRequestCount) ;
         end if ; 
         
@@ -289,30 +302,25 @@ begin
           -- Queue Read Address ; 
           ReadAddress   :=  FromTransaction(TransRec.Address) ;
           AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Read Address length does not match", FAILURE) ;
-          if UseReadProtFromModel then
-            ReadProt    := ModelReadProt ;
-          else
-            ReadProt    :=  to_slv(TransRec.Prot, ARProt'length) ;
-          end if ; 
-          ReadAddressFifo.Push(ReadAddress & ReadProt);
-          ReadAddressTransactionFifo.Push(ReadAddress & ReadProt);
+          ReadAddressFifo.Push(ReadAddress & ModelReadProt);
+          ReadAddressTransactionFifo.Push(ReadAddress & ModelReadProt);
           Increment(ReadAddressRequestCount) ;
 
           -- Expect a Read Data Cycle - one read data cycle for each address issued.
+          ReadResponseScoreboard.Push(ModelReadResp) ;
           Increment(ReadDataExpectCount) ;
         end if ; 
 
         if IsTryReadData(Operation) and ReadDataFifo.Empty then
           -- ReadDataReceiveCount < ReadDataTransactionCount then 
-            TransRec.ModelBool <= FALSE ; 
+            TransRec.BoolFromModel <= FALSE ; 
         elsif IsReadData(Operation) then
           if ReadDataFifo.Empty then 
             WaitForToggle(ReadDataReceiveCount) ;
           end if ; 
-          TransRec.ModelBool <= TRUE ; 
+          TransRec.BoolFromModel <= TRUE ; 
           
           -- Get Read Data and Check
---!! TODO:  expand st. checks more than just READ_CHECK   
           (ReadAddress, ReadProt) := ReadAddressTransactionFifo.Pop ;
           ReadByteAddr  :=  CalculateAxiByteAddress(ReadAddress, RData'length/8);
           ReadData := ReadDataFifo.Pop ;
@@ -347,45 +355,61 @@ begin
         
         -- Transaction wait time 
         wait for 0 ns ;  wait for 0 ns ; 
-      
-      when WAIT_CLOCK =>
-        WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
-        wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
-        wait until Clk = '1' ;
 
-      when GET_ERRORS =>
-        -- Report and Get Errors
-        print("") ;
-        ReportNonZeroAlerts(AlertLogID => ModelID) ;
-        TransRec.DataFromModel <= ToTransaction(GetAlertCount(AlertLogID => ModelID), TransRec.DataFromModel'length) ;
-        wait until Clk = '1' ;
 
+      -- Model Configuration Options
       when SET_MODEL_OPTIONS =>
         -- Set Model Options
         case TransRec.Options is
           -- Master Ready TimeOut Checks
-          when WRITE_ADDRESS_READY_TIME_OUT =>        WriteAddressReadyTimeOut      <= TransRec.OptionInt ; 
-          when WRITE_DATA_READY_TIME_OUT =>           WriteDataReadyTimeOut         <= TransRec.OptionInt ;
-          when READ_ADDRESS_READY_TIME_OUT =>         ReadAddressReadyTimeOut       <= TransRec.OptionInt ;
+          when WRITE_ADDRESS_READY_TIME_OUT =>        WriteAddressReadyTimeOut      <= TransRec.IntToModel ; 
+          when WRITE_DATA_READY_TIME_OUT =>           WriteDataReadyTimeOut         <= TransRec.IntToModel ;
+          when READ_ADDRESS_READY_TIME_OUT =>         ReadAddressReadyTimeOut       <= TransRec.IntToModel ;
           -- Master Valid TimeOut Checks                                            
-          when WRITE_RESPONSE_VALID_TIME_OUT =>       WriteResponseValidTimeOut     <= TransRec.OptionInt ;
-          when READ_DATA_VALID_TIME_OUT =>            ReadDataValidTimeOut          <= TransRec.OptionInt ;
+          when WRITE_RESPONSE_VALID_TIME_OUT =>       WriteResponseValidTimeOut     <= TransRec.IntToModel ;
+          when READ_DATA_VALID_TIME_OUT =>            ReadDataValidTimeOut          <= TransRec.IntToModel ;
           -- Master Ready Before Valid
-          when WRITE_RESPONSE_READY_BEFORE_VALID =>   WriteResponseReadyBeforeValid <= TransRec.OptionBool ;
-          when READ_DATA_READY_BEFORE_VALID =>        ReadDataReadyBeforeValid      <= TransRec.OptionBool ;
+          when WRITE_RESPONSE_READY_BEFORE_VALID =>   WriteResponseReadyBeforeValid <= TransRec.BoolToModel ;
+          when READ_DATA_READY_BEFORE_VALID =>        ReadDataReadyBeforeValid      <= TransRec.BoolToModel ;
           -- Master Ready Delay Cycles                
-          when WRITE_RESPONSE_READY_DELAY_CYCLES =>   WriteResponseReadyDelayCycles <= TransRec.OptionInt ;
-          when READ_DATA_READY_DELAY_CYCLES =>        ReadDataReadyDelayCycles      <= TransRec.OptionInt ;
+          when WRITE_RESPONSE_READY_DELAY_CYCLES =>   WriteResponseReadyDelayCycles <= TransRec.IntToModel ;
+          when READ_DATA_READY_DELAY_CYCLES =>        ReadDataReadyDelayCycles      <= TransRec.IntToModel ;
           -- Master PROT Settings
-          when SET_WRITE_PROT =>                      
-            ModelWriteProt           <= to_slv(TransRec.Prot, 3) ; 
-            UseWriteProtFromModel    <= TRUE ; 
-          when USE_WRITE_PROT_FROM_MODEL =>           UseWriteProtFromModel    <= TransRec.OptionBool ; 
-          when SET_READ_PROT =>
-            ModelReadProt            <= to_slv(TransRec.Prot,3) ; 
-            UseReadProtFromModel     <= TRUE ; 
-          when USE_READ_PROT_FROM_MODEL =>            UseReadProtFromModel     <= TransRec.OptionBool ; 
+          when WRITE_PROT =>                          ModelWriteProt <= to_slv(TransRec.IntToModel, ModelWriteProt'length) ; 
+          when READ_PROT =>                           ModelReadProt  <= to_slv(TransRec.IntToModel, ModelReadProt'length) ; 
+          -- Master RESP Settings
+          when WRITE_RESP =>                          ModelWriteResp <= to_slv(TransRec.IntToModel, ModelWriteResp'length) ; 
+          when READ_RESP =>                           ModelReadResp  <= to_slv(TransRec.IntToModel, ModelReadResp'length) ; 
           --
+          -- The End -- Done  
+          when others => 
+            Alert(ModelID, "Unknown model option", FAILURE) ;
+        end case ;
+        wait for 0 ns ;  wait for 0 ns ; 
+
+
+      when GET_MODEL_OPTIONS =>
+        -- Set Model Options
+        case TransRec.Options is
+          -- Master Ready TimeOut Checks
+          when WRITE_ADDRESS_READY_TIME_OUT =>        TransRec.IntFromModel  <= WriteAddressReadyTimeOut ; 
+          when WRITE_DATA_READY_TIME_OUT =>           TransRec.IntFromModel  <= WriteDataReadyTimeOut ;
+          when READ_ADDRESS_READY_TIME_OUT =>         TransRec.IntFromModel  <= ReadAddressReadyTimeOut ;
+          -- Master Valid TimeOut Checks                                             
+          when WRITE_RESPONSE_VALID_TIME_OUT =>       TransRec.IntFromModel  <= WriteResponseValidTimeOut ;
+          when READ_DATA_VALID_TIME_OUT =>            TransRec.IntFromModel  <= ReadDataValidTimeOut ;
+          -- Master Ready Before Valid                                       
+          when WRITE_RESPONSE_READY_BEFORE_VALID =>   TransRec.BoolFromModel <= WriteResponseReadyBeforeValid ;
+          when READ_DATA_READY_BEFORE_VALID =>        TransRec.BoolFromModel <= ReadDataReadyBeforeValid ;
+          -- Master Ready Delay Cycles                                       
+          when WRITE_RESPONSE_READY_DELAY_CYCLES =>   TransRec.IntFromModel  <= WriteResponseReadyDelayCycles ;
+          when READ_DATA_READY_DELAY_CYCLES =>        TransRec.IntFromModel  <= ReadDataReadyDelayCycles ;
+          -- Master PROT Settings
+          when WRITE_PROT =>                          TransRec.IntFromModel  <= to_integer(ModelWriteProt) ; 
+          when READ_PROT =>                           TransRec.IntFromModel  <= to_integer(ModelReadProt) ; 
+          -- Master RESP Settings
+          when WRITE_RESP =>                          TransRec.IntFromModel  <= to_integer(ModelWriteResp) ; 
+          when READ_RESP =>                           TransRec.IntFromModel  <= to_integer(ModelReadResp) ; 
           -- The End -- Done  
           when others => 
             Alert(ModelID, "Unknown model option", FAILURE) ;
@@ -397,8 +421,6 @@ begin
         wait for 0 ns ;  wait for 0 ns ; 
     end case ;
 
-    -- Wait for 1 delta cycle, required if a wait is not in all case branches above
-    wait for 0 ns ;
   end process TransactionDispatcher ;
 
 
@@ -463,7 +485,6 @@ begin
   WriteDataHandler : process
     variable WriteData : WData'subtype ; 
     variable WriteStrb : WStrb'subtype ;
-    variable WriteNoOp : std_logic ; 
   begin
     -- initialize
     WValid <= '0' ; 
@@ -475,46 +496,39 @@ begin
       if WriteDataFifo.Empty then
          WaitForToggle(WriteDataRequestCount) ;
       end if ;
-      (WriteNoOp, WriteData, WriteStrb) := WriteDataFifo.Pop ;
+      (WriteData, WriteStrb) := WriteDataFifo.Pop ;
       
-      if not WriteNoOp then 
-        -- Do Transaction
-        WData  <= WriteData after tpd_clk_WStrb ;
-        WStrb  <= WriteStrb after tpd_Clk_WData ;
-        
-        Log(ModelID, 
-          "Write Data." &
-          "  WData: "  & to_hstring(WriteData) &
-          "  WStrb: "  & to_string(WriteStrb) &
-          "  Operation# " & to_string(WriteDataDoneCount + 1),
-          INFO
-        ) ;
+      -- Do Transaction
+      WData  <= WriteData after tpd_clk_WStrb ;
+      WStrb  <= WriteStrb after tpd_Clk_WData ;
+      
+      Log(ModelID, 
+        "Write Data." &
+        "  WData: "  & to_hstring(WriteData) &
+        "  WStrb: "  & to_string(WriteStrb) &
+        "  Operation# " & to_string(WriteDataDoneCount + 1),
+        INFO
+      ) ;
 
-        ---------------------
-        DoAxiValidHandshake (
-        ---------------------
-          Clk            =>  Clk, 
-          Valid          =>  WValid, 
-          Ready          =>  WReady, 
-          tpd_Clk_Valid  =>  tpd_Clk_WValid,
-          AlertLogID     =>  BusFailedID,
-          TimeOutMessage =>  "Write Data # " & to_string(WriteDataDoneCount + 1),
-          TimeOutPeriod  =>  WriteDataReadyTimeOut * tperiod_Clk
-        ) ;
+      ---------------------
+      DoAxiValidHandshake (
+      ---------------------
+        Clk            =>  Clk, 
+        Valid          =>  WValid, 
+        Ready          =>  WReady, 
+        tpd_Clk_Valid  =>  tpd_Clk_WValid,
+        AlertLogID     =>  BusFailedID,
+        TimeOutMessage =>  "Write Data # " & to_string(WriteDataDoneCount + 1),
+        TimeOutPeriod  =>  WriteDataReadyTimeOut * tperiod_Clk
+      ) ;
 
-        -- State after operation
-        WData  <= not WriteData after tpd_Clk_WData ;
-        WStrb  <= (WStrb'range => '1') after tpd_clk_WStrb ; -- allow writes
+      -- State after operation
+      WData  <= not WriteData after tpd_Clk_WData ;
+      WStrb  <= (WStrb'range => '1') after tpd_clk_WStrb ; -- allow writes
 
-        -- Signal completion
-        Increment(WriteDataDoneCount) ;
-        wait for 0 ns ;
-      else
-      -- NoOp Cycle let a clock pass
---        Increment(WriteDataNoOpCount) ;
-        alert(ModelID, "Unimplemented Feature", FAILURE) ;
-        wait until Clk = '1' ; 
-      end if ; 
+      -- Signal completion
+      Increment(WriteDataDoneCount) ;
+      wait for 0 ns ;
     end loop WriteDataLoop ;
   end process WriteDataHandler ;
 
@@ -666,6 +680,7 @@ begin
 
       -- capture data
       ReadDataFifo.push(RData) ;
+      ReadResponseScoreboard.Check(RResp) ;
 
   --!TODO factor in data checking here or keep it in transaction handler?
 

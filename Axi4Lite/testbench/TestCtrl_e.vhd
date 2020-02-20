@@ -63,7 +63,7 @@ entity TestCtrl is
     nReset              : In    std_logic ;
 
     -- Transaction Interfaces
-    AxiMasterTransRec   : inout MasterTransactionRecType ;
+    AxiMasterTransRec   : inout AddressBusMasterTransactionRecType ;
     AxiSlaveTransRec    : inout Axi4LiteSlaveTransactionRecType 
 
   ) ;

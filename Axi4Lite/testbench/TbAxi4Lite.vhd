@@ -66,19 +66,19 @@ architecture TestHarness of TbAxi4Lite is
   signal nReset      : std_logic ;
 
   -- Testbench Transaction Interface
-  subtype LocalMasterTransactionRecType is MasterTransactionRecType(
+  subtype LocalMasterTransactionRecType is AddressBusMasterTransactionRecType(
     Address(AXI_ADDR_WIDTH-1 downto 0), 
     DataToModel(AXI_DATA_WIDTH-1 downto 0),
     DataFromModel(AXI_DATA_WIDTH-1 downto 0)
   ) ;  
   signal AxiMasterTransRec   : LocalMasterTransactionRecType ;
   
-  subtype SlaveTransactionRecType is Axi4LiteSlaveTransactionRecType(
+  subtype LocalSlaveTransactionRecType is AddressBusSlaveTransactionRecType(
     Address(AXI_ADDR_WIDTH-1 downto 0), 
     DataToModel(AXI_DATA_WIDTH-1 downto 0),
     DataFromModel(AXI_DATA_WIDTH-1 downto 0)
   ) ;  
-  signal AxiSlaveTransRec    : SlaveTransactionRecType ;
+  signal AxiSlaveTransRec    : LocalSlaveTransactionRecType ;
   
 
   -- AXI Master Functional Interface
@@ -126,8 +126,8 @@ architecture TestHarness of TbAxi4Lite is
       nReset              : In    std_logic ;
 
       -- Transaction Interfaces
-      AxiMasterTransRec   : inout MasterTransactionRecType ;
-      AxiSlaveTransRec    : inout Axi4LiteSlaveTransactionRecType 
+      AxiMasterTransRec   : inout AddressBusMasterTransactionRecType ;
+      AxiSlaveTransRec    : inout AddressBusSlaveTransactionRecType 
 
     ) ;
   end component TestCtrl ;

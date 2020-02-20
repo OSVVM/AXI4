@@ -37,6 +37,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
+# OSVVM Common
+include ../../common/common.pro
 include ./Axi4.pro
 include ./Axi4Lite/testbench/testbench.pro
 include ./AxiStream/testbench/testbench.pro

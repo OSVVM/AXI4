@@ -20,8 +20,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    09/2017   2017       Initial revision
---    01/2020   2020.01    Updated license notice
+--    01/2020   2020.02    Refactored from Axi4LiteMasterTransactionPkg.vhd
 --
 --
 --  This file is part of OSVVM.
@@ -52,7 +51,7 @@ library osvvm ;
 package Axi4LiteMasterOptionsTypePkg is
 
   -- AXI4 Model Options
-  type Axi4UnresolvedMasterOptionsType is (
+  type Axi4LiteUnresolvedMasterOptionsType is (
     --
     -- Master Ready TimeOut Checks
     WRITE_ADDRESS_READY_TIME_OUT,
@@ -73,19 +72,18 @@ package Axi4LiteMasterOptionsTypePkg is
     -- Master PROT Settings
     READ_PROT,
     WRITE_PROT,
-    
+    --
     -- Master RESP Settings
     WRITE_RESP,
     READ_RESP,
-
     --
     -- The End -- Done
     THE_END
   ) ;
-  type Axi4UnresolvedMasterOptionsVectorType is array (natural range <>) of Axi4UnresolvedMasterOptionsType ;
-  -- alias resolved_max is maximum[ Axi4UnresolvedMasterOptionsVectorType return Axi4UnresolvedMasterOptionsType] ;
-  function resolved_max(A : Axi4UnresolvedMasterOptionsVectorType) return Axi4UnresolvedMasterOptionsType ;
-  subtype Axi4LiteMasterOptionsType is resolved_max Axi4UnresolvedMasterOptionsType ;
+  type Axi4LiteUnresolvedMasterOptionsVectorType is array (natural range <>) of Axi4LiteUnresolvedMasterOptionsType ;
+  -- alias resolved_max is maximum[ Axi4LiteUnresolvedMasterOptionsVectorType return Axi4LiteUnresolvedMasterOptionsType] ;
+  function resolved_max(A : Axi4LiteUnresolvedMasterOptionsVectorType) return Axi4LiteUnresolvedMasterOptionsType ;
+  subtype Axi4LiteMasterOptionsType is resolved_max Axi4LiteUnresolvedMasterOptionsType ;
 
 
 end package Axi4LiteMasterOptionsTypePkg ;
@@ -95,7 +93,7 @@ end package Axi4LiteMasterOptionsTypePkg ;
 
 package body Axi4LiteMasterOptionsTypePkg is
 
-  function resolved_max ( A : Axi4UnresolvedMasterOptionsVectorType) return Axi4UnresolvedMasterOptionsType is
+  function resolved_max ( A : Axi4LiteUnresolvedMasterOptionsVectorType) return Axi4LiteUnresolvedMasterOptionsType is
   begin
     return maximum(A) ;
   end function resolved_max ;

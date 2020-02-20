@@ -49,6 +49,7 @@ library osvvm ;
   context osvvm.OsvvmContext ;
   use osvvm.ScoreboardPkg_slv.all ;
   
+  use work.Axi4LiteMasterOptionsTypePkg.all ; 
   use work.Axi4LiteMasterTransactionPkg.all ; 
   use work.Axi4LiteInterfacePkg.all ; 
   use work.Axi4CommonPkg.all ; 
@@ -80,7 +81,7 @@ port (
   nReset      : in   std_logic ;
 
   -- Testbench Transaction Interface
-  TransRec    : inout MasterTransactionRecType ;
+  TransRec    : inout AddressBusMasterTransactionRecType ;
 
   -- AXI Master Functional Interface
   AxiLiteBus  : inout Axi4LiteRecType 
@@ -198,6 +199,9 @@ begin
   --    Dispatches transactions to
   ------------------------------------------------------------
   TransactionDispatcher : process
+    variable WaitClockCycles    : integer ; 
+    variable ReadDataTransactionCount : integer := 1 ; 
+    variable ByteCount     : integer ;
     variable WriteAddress  : AWAddr'subtype ; 
     variable WriteByteAddr : integer ; 
     variable WriteData     : WData'subtype ; 
@@ -207,11 +211,7 @@ begin
     variable ReadProt      : ARProt'subtype ;
     variable ReadData      : RData'subtype ; 
     variable ExpectedData  : RData'subtype ; 
-    variable WaitClockCycles    : integer ; 
     variable Operation     : TransRec.Operation'subtype ; 
-    variable ReadDataTransactionCount : integer := 1 ; 
-
-    variable ByteCount     : integer ;
   begin
     WaitForTransaction(
        Clk      => Clk,

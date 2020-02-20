@@ -1,6 +1,6 @@
 --
---  File Name:         AddressBusMasterTransactionCommonPkg.vhd
---  Design Unit Name:  AddressBusMasterTransactionCommonPkg
+--  File Name:         Axi4LiteMasterTransactionPkg.vhd
+--  Design Unit Name:  Axi4LiteMasterTransactionPkg
 --  Revision:          STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---    Instance of Generic Package ScoreboardGenericPkg for integer
+--    Instance of AddressBusMasterTransactionGenericPkg for Axi4LiteMasterOptionsType
 --
 --  Developed for:
 --        SynthWorks Design Inc.
@@ -19,7 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    01/2020   2020.02    Instance of AddressBusMasterTransactionGenericPkg
+--    01/2020   2020.02    Refactored old Axi4LiteMasterTransactionPkg to AddressBusMasterTransactionGenericPkg
 --
 --
 --  This file is part of OSVVM.
@@ -43,7 +43,7 @@ use work.Axi4LiteMasterOptionsTypePkg.all ;
 
 library OSVVM_Common ;
 
-package AddressBusMasterTransactionCommonPkg is new OSVVM_Common.AddressBusMasterTransactionGenericPkg
+package Axi4LiteMasterTransactionPkg is new OSVVM_Common.AddressBusMasterTransactionGenericPkg
   generic map (
-    ModelOptionsType    => Axi4UnresolvedMasterOptionsType    
+    ModelOptionsType    => Axi4LiteMasterOptionsType    
   ) ;  

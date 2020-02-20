@@ -39,6 +39,7 @@
 #
 library osvvm_common
 library osvvm_axi4
+analyze ./src/Axi4LiteSlaveOptionsTypePkg.vhd
 analyze ./src/Axi4LiteSlaveTransactionPkg.vhd
 analyze ./src/Axi4LiteMasterOptionsTypePkg.vhd
 analyze ./src/Axi4LiteMasterTransactionPkg.vhd
@@ -49,3 +50,5 @@ analyze ./src/Axi4LiteContext.vhd
 analyze ./src/Axi4LiteMaster.vhd
 analyze ./src/Axi4LiteMonitor_dummy.vhd
 analyze ./src/Axi4LiteSlave_Transactor.vhd
+
+analyze ./src/Axi4LiteVersionCompatibilityPkg.vhd

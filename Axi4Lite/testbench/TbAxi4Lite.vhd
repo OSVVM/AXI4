@@ -91,29 +91,70 @@ architecture TestHarness of TbAxi4Lite is
 
   -- Aliases to make access to record elements convenient 
   -- This is only needed for model use them
-  alias AWValid : std_logic        is AxiLiteBus.WriteAddress.AWValid ;
-  alias AWReady : std_logic        is AxiLiteBus.WriteAddress.AWReady ;
-  alias AWProt  : Axi4ProtType     is AxiLiteBus.WriteAddress.AWProt ;
-  alias AWAddr  : std_logic_vector is AxiLiteBus.WriteAddress.AWAddr ;
+  -- Write Address
+  alias  AWAddr    : std_logic_vector is AxiLiteBus.WriteAddress.AWAddr ;
+  alias  AWProt    : Axi4ProtType     is AxiLiteBus.WriteAddress.AWProt ;
+  alias  AWValid   : std_logic        is AxiLiteBus.WriteAddress.AWValid ;
+  alias  AWReady   : std_logic        is AxiLiteBus.WriteAddress.AWReady ;
+  -- Axi4 Full
+  alias  AWID      : std_logic_vector is AxiLiteBus.WriteAddress.AWID ;
+  alias  AWLen     : std_logic_vector is AxiLiteBus.WriteAddress.AWLen ; 
+  alias  AWSize    : std_logic_vector is AxiLiteBus.WriteAddress.AWSize ;
+  alias  AWBurst   : std_logic_vector is AxiLiteBus.WriteAddress.AWBurst ;
+  alias  AWLock    : std_logic        is AxiLiteBus.WriteAddress.AWLock ;
+  alias  AWCache   : std_logic_vector is AxiLiteBus.WriteAddress.AWCache ;
+  alias  AWQOS     : std_logic_vector is AxiLiteBus.WriteAddress.AWQOS ;
+  alias  AWRegion  : std_logic_vector is AxiLiteBus.WriteAddress.AWRegion ;
+  alias  AWUser    : std_logic_vector is AxiLiteBus.WriteAddress.AWUser ;
 
-  alias WValid  : std_logic        is AxiLiteBus.WriteData.WValid ;
-  alias WReady  : std_logic        is AxiLiteBus.WriteData.WReady ;
-  alias WData   : std_logic_vector is AxiLiteBus.WriteData.WData ;
-  alias WStrb   : std_logic_vector is AxiLiteBus.WriteData.WStrb ;
+  -- Write Data
+  alias  WData     : std_logic_vector is AxiLiteBus.WriteData.WData ;
+  alias  WStrb     : std_logic_vector is AxiLiteBus.WriteData.WStrb ;
+  alias  WValid    : std_logic        is AxiLiteBus.WriteData.WValid ;
+  alias  WReady    : std_logic        is AxiLiteBus.WriteData.WReady ;
+  -- AXI4 Full
+  alias  WLast     : std_logic        is AxiLiteBus.WriteData.WLast ;
+  alias  WUser     : std_logic_vector is AxiLiteBus.WriteData.WUser ;
+  -- AXI3
+  alias  WID       : std_logic_vector is AxiLiteBus.WriteData.WID ;
 
-  alias BValid  : std_logic        is AxiLiteBus.WriteResponse.BValid ;
-  alias BReady  : std_logic        is AxiLiteBus.WriteResponse.BReady ;
-  alias BResp   : Axi4RespType     is AxiLiteBus.WriteResponse.BResp ;
+  -- Write Response
+  alias  BResp     : Axi4RespType     is AxiLiteBus.WriteResponse.BResp ;
+  alias  BValid    : std_logic        is AxiLiteBus.WriteResponse.BValid ;
+  alias  BReady    : std_logic        is AxiLiteBus.WriteResponse.BReady ;
+  -- AXI4 Full
+  alias  BID       : std_logic_vector is AxiLiteBus.WriteResponse.BID ;
+  alias  BUser     : std_logic_vector is AxiLiteBus.WriteResponse.BUser ;
 
-  alias ARValid : std_logic        is AxiLiteBus.ReadAddress.ARValid ;
-  alias ARReady : std_logic        is AxiLiteBus.ReadAddress.ARReady ;
-  alias ARProt  : Axi4ProtType     is AxiLiteBus.ReadAddress.ARProt ;
-  alias ARAddr  : std_logic_vector is AxiLiteBus.ReadAddress.ARAddr ;
+  -- Read Address
+  alias  ARAddr    : std_logic_vector is AxiLiteBus.ReadAddress.ARAddr ;
+  alias  ARProt    : Axi4ProtType     is AxiLiteBus.ReadAddress.ARProt ;
+  alias  ARValid   : std_logic        is AxiLiteBus.ReadAddress.ARValid ;
+  alias  ARReady   : std_logic        is AxiLiteBus.ReadAddress.ARReady ;
+  -- Axi4 Full
+  alias  ARID      : std_logic_vector is AxiLiteBus.ReadAddress.ARID ;
+  -- BurstLength = AxLen+1.  AXI4: 7:0,  AXI3: 3:0
+  alias  ARLen     : std_logic_vector is AxiLiteBus.ReadAddress.ARLen ;
+  -- #Bytes in transfer = 2**AxSize
+  alias  ARSize    : std_logic_vector is AxiLiteBus.ReadAddress.ARSize ;
+  -- AxBurst = (Fixed, Incr, Wrap, NotDefined)
+  alias  ARBurst   : std_logic_vector is AxiLiteBus.ReadAddress.ARBurst ;
+  alias  ARLock    : std_logic is AxiLiteBus.ReadAddress.ARLock ;
+  -- AxCache One-hot (Write-Allocate, Read-Allocate, Modifiable, Bufferable)
+  alias  ARCache   : std_logic_vector is AxiLiteBus.ReadAddress.ARCache  ;
+  alias  ARQOS     : std_logic_vector is AxiLiteBus.ReadAddress.ARQOS    ;
+  alias  ARRegion  : std_logic_vector is AxiLiteBus.ReadAddress.ARRegion ;
+  alias  ARUser    : std_logic_vector is AxiLiteBus.ReadAddress.ARUser   ;
 
-  alias RValid  : std_logic        is AxiLiteBus.ReadData.RValid ;
-  alias RReady  : std_logic        is AxiLiteBus.ReadData.RReady ;
-  alias RData   : std_logic_vector is AxiLiteBus.ReadData.RData ;
-  alias RResp   : Axi4RespType     is AxiLiteBus.ReadData.RResp ;
+  -- Read Data
+  alias  RData     : std_logic_vector is AxiLiteBus.ReadData.RData ;
+  alias  RResp     : Axi4RespType     is AxiLiteBus.ReadData.RResp ;
+  alias  RValid    : std_logic        is AxiLiteBus.ReadData.RValid ;
+  alias  RReady    : std_logic        is AxiLiteBus.ReadData.RReady ;
+  -- AXI4 Full
+  alias  RID       : std_logic_vector is AxiLiteBus.ReadData.RID   ;
+  alias  RLast     : std_logic        is AxiLiteBus.ReadData.RLast ;
+  alias  RUser     : std_logic_vector is AxiLiteBus.ReadData.RUser ;
 
   component TestCtrl is
     generic (
@@ -162,29 +203,34 @@ begin
 
     -- AXI Master Functional Interface
 --    AxiLiteBus  => AxiLiteBus 
-      AxiLiteBus.WriteAddress.AWValid      => AxiLiteBus.WriteAddress.AWValid ,
-      AxiLiteBus.WriteAddress.AWReady      => AxiLiteBus.WriteAddress.AWReady ,
-      AxiLiteBus.WriteAddress.AWProt       => AxiLiteBus.WriteAddress.AWProt  ,
-      AxiLiteBus.WriteAddress.AWAddr       => AxiLiteBus.WriteAddress.AWAddr  ,
+    -- Mapping aliases on Left Hand Side (most similar to basic design)
+    AxiLiteBus.WriteAddress.AWAddr       => AWAddr  ,
+    AxiLiteBus.WriteAddress.AWProt       => AWProt  ,
+    AxiLiteBus.WriteAddress.AWValid      => AWValid ,
+    AxiLiteBus.WriteAddress.AWReady      => AWReady ,
+    AxiLiteBus.WriteAddress.AWID         => AWID    ,
+    AxiLiteBus.WriteAddress.AWLen        => AWLen   ,
+    AxiLiteBus.WriteAddress.AWSize       => AWSize  ,
+    AxiLiteBus.WriteAddress.AWBurst      => AWBurst ,
+    AxiLiteBus.WriteAddress.AWLock       => AWLock  ,
+    AxiLiteBus.WriteAddress.AWCache      => AWCache ,
+    AxiLiteBus.WriteAddress.AWQOS        => AWQOS   ,
+    AxiLiteBus.WriteAddress.AWRegion     => AWRegion,
+    AxiLiteBus.WriteAddress.AWUser       => AWUser  ,
 
-      AxiLiteBus.WriteData.WValid          => WValid  ,
-      AxiLiteBus.WriteData.WReady          => WReady  ,
-      AxiLiteBus.WriteData.WData           => WData   ,
-      AxiLiteBus.WriteData.WStrb           => WStrb   ,
+    -- Mapping record elements on Left Hand Side (easiest way to connect Master to Slave DUT)
+    AxiLiteBus.WriteData.WData           => AxiLiteBus.WriteData.WData   ,
+    AxiLiteBus.WriteData.WStrb           => AxiLiteBus.WriteData.WStrb   ,
+    AxiLiteBus.WriteData.WValid          => AxiLiteBus.WriteData.WValid  ,
+    AxiLiteBus.WriteData.WReady          => AxiLiteBus.WriteData.WReady  ,
+    AxiLiteBus.WriteData.WLast           => AxiLiteBus.WriteData.WLast  ,
+    AxiLiteBus.WriteData.WUser           => AxiLiteBus.WriteData.WUser  ,
+    AxiLiteBus.WriteData.WID             => AxiLiteBus.WriteData.WID  ,
 
-      AxiLiteBus.WriteResponse.BValid      => BValid  ,
-      AxiLiteBus.WriteResponse.BReady      => BReady  ,
-      AxiLiteBus.WriteResponse.BResp       => BResp   ,
-
-      AxiLiteBus.ReadAddress.ARValid       => ARValid ,
-      AxiLiteBus.ReadAddress.ARReady       => ARReady ,
-      AxiLiteBus.ReadAddress.ARProt        => ARProt  ,
-      AxiLiteBus.ReadAddress.ARAddr        => ARAddr  ,
-
-      AxiLiteBus.ReadData.RValid           => RValid  ,
-      AxiLiteBus.ReadData.RReady           => RReady  ,
-      AxiLiteBus.ReadData.RData            => RData   ,
-      AxiLiteBus.ReadData.RResp            => RResp   
+    -- Mapping bus subrecords on left hand side (because it is easy)
+    AxiLiteBus.WriteResponse             => AxiLiteBus.WriteResponse ,
+    AxiLiteBus.ReadAddress               => AxiLiteBus.ReadAddress ,
+    AxiLiteBus.ReadData                  => AxiLiteBus.ReadData 
   ) ;
 
   Axi4LiteMaster_1 : Axi4LiteMaster 

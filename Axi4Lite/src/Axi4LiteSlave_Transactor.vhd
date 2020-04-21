@@ -52,6 +52,7 @@ library osvvm ;
   use work.Axi4LiteSlaveOptionsTypePkg.all ;
   use work.Axi4LiteSlaveTransactionPkg.all ;
   use work.Axi4LiteInterfacePkg.all ;
+  use work.Axi4LiteMasterPkg.all ;
   use work.Axi4CommonPkg.all ;
 
 entity Axi4LiteSlave is
@@ -480,10 +481,10 @@ begin
     -- Log this operation
     Log(ModelID,
       "Write Operation." &
-      "  AWAddr: "  & to_hstring(WriteAddr) &
-      "  AWProt: "  & to_string(WriteProt) &
-      "  WData: "  & to_hstring(WriteData) &
-      "  WStrb: "  & to_string(WriteStrb) &
+      "  AWAddr: "    & to_hstring(WriteAddr) &
+      "  AWProt: "    & to_string(WriteProt) &
+      "  WData: "     & to_hstring(WriteData) &
+      "  WStrb: "     & to_string(WriteStrb) &
       "  Operation# " & to_string(WriteReceiveCount),
       DEBUG
     ) ;

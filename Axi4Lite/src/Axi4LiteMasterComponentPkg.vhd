@@ -66,6 +66,7 @@ package Axi4LiteMasterComponentPkg is
       tpd_Clk_WValid  : time   := 2 ns ; 
       tpd_Clk_WData   : time   := 2 ns ; 
       tpd_Clk_WStrb   : time   := 2 ns ; 
+      tpd_Clk_WLast   : time   := 2 ns ;
 
       tpd_Clk_BReady  : time   := 2 ns ; 
 

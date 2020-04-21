@@ -52,30 +52,64 @@ package Axi4LiteMasterOptionsTypePkg is
 
   -- AXI4 Model Options
   type Axi4LiteUnresolvedMasterOptionsType is (
-    --
-    -- Master Ready TimeOut Checks
+    -- Write Address Settings
     WRITE_ADDRESS_READY_TIME_OUT,
-    WRITE_DATA_READY_TIME_OUT,
-    READ_ADDRESS_READY_TIME_OUT,
-    -- Master Valid TimeOut Checks
-    WRITE_RESPONSE_VALID_TIME_OUT,
-    READ_DATA_VALID_TIME_OUT,
-    --
-    -- Master Ready Before Valid
-    WRITE_RESPONSE_READY_BEFORE_VALID,
-    READ_DATA_READY_BEFORE_VALID,
-    --
-    -- Master Ready Delay Cycles
-    WRITE_RESPONSE_READY_DELAY_CYCLES,
-    READ_DATA_READY_DELAY_CYCLES,
-    --
-    -- Master PROT Settings
-    READ_PROT,
+    -- AXI
     WRITE_PROT,
-    --
-    -- Master RESP Settings
-    WRITE_RESP,
-    READ_RESP,
+    -- AXI4 Full
+    WRITE_ADDRESS_ID,
+    WRITE_ADDRESS_SIZE,
+    WRITE_ADDRESS_BURST,
+    WRITE_ADDRESS_LOCK,
+    WRITE_ADDRESS_CACHE,
+    WRITE_ADDRESS_QOS,
+    WRITE_ADDRESS_REGION,
+    WRITE_ADDRESS_USER,
+
+    -- Write Data Settings
+    WRITE_DATA_READY_TIME_OUT,
+    -- AXI
+    -- AXI4 Full
+    WRITE_DATA_LAST,
+    WRITE_DATA_USER,
+    -- AXI3
+    WRITE_DATA_ID,
+
+    -- Write Response Settings
+    WRITE_RESPONSE_VALID_TIME_OUT,
+    WRITE_RESPONSE_READY_BEFORE_VALID,
+    WRITE_RESPONSE_READY_DELAY_CYCLES,
+
+    -- AXI
+    WRITE_RESPONSE_RESP,
+    -- AXI4 Full
+    WRITE_RESPONSE_ID,
+    WRITE_RESPONSE_USER,
+
+    -- Read Address Settings
+    READ_ADDRESS_READY_TIME_OUT,
+    -- AXI
+    READ_PROT,
+    -- AXI4 Full
+    Read_ADDRESS_ID,
+    Read_ADDRESS_SIZE,
+    Read_ADDRESS_BURST,
+    Read_ADDRESS_LOCK,
+    Read_ADDRESS_CACHE,
+    Read_ADDRESS_QOS,
+    Read_ADDRESS_REGION,
+    Read_ADDRESS_USER,
+
+    -- Read Data / Response Settings
+    READ_DATA_VALID_TIME_OUT,
+    READ_DATA_READY_BEFORE_VALID,
+    READ_DATA_READY_DELAY_CYCLES,
+    -- AXI
+    READ_DATA_RESP,
+    -- AXI4 Full
+    READ_DATA_ID,
+    READ_DATA_LAST,
+    READ_DATA_USER,
     --
     -- The End -- Done
     THE_END

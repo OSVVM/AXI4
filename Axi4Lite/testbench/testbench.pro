@@ -48,8 +48,9 @@ analyze TbAxi4Lite_RandomReadWrite.vhd
 analyze TbAxi4Lite_RandomReadWriteByte.vhd
 analyze TbAxi4Lite_TimeOut.vhd
 analyze TbAxi4Lite_WriteOptions.vhd
+analyze TbAxi4Lite_BasicBurst.vhd
 
-simulate TbAxi4Lite_BasicReadWrite
+# simulate TbAxi4Lite_BasicReadWrite
 # simulate TbAxi4Lite_MasterReadWriteAsync1    
 # simulate TbAxi4Lite_MasterReadWriteAsync2    
 # simulate TbAxi4Lite_MasterReadWriteAsync3    
@@ -57,3 +58,4 @@ simulate TbAxi4Lite_BasicReadWrite
 # simulate TbAxi4Lite_RandomReadWriteByte    
 # simulate TbAxi4Lite_TimeOut    
 # simulate TbAxi4Lite_WriteOptions 
+simulate TbAxi4Lite_BasicBurst

@@ -67,14 +67,30 @@ package Axi4LiteInterfacePkg is
 
   -- AXI Write Address Channel
   type Axi4LiteWriteAddressRecType is record
-    AWValid     : std_logic ; 
-    AWReady     : std_logic ; 
+    -- AXI4 Lite
     AWAddr      : std_logic_vector ; 
     AWProt      : Axi4ProtType ;
+    AWValid     : std_logic ; 
+    AWReady     : std_logic ; 
+    -- AXI4 Full
+    -- User Config - AXI recommended 3:0 for master, 7:0 at slave
+    AWID        : std_logic_vector ; 
+    -- BurstLength = AxLen+1.  AXI4: 7:0,  AXI3: 3:0
+    AWLen       : std_logic_vector(7 downto 0) ; 
+    -- #Bytes in transfer = 2**AxSize
+    AWSize      : std_logic_vector(2 downto 0) ; 
+    -- AxBurst Binary Encoded (Fixed, Incr, Wrap, NotDefined)
+    AWBurst     : std_logic_vector(1 downto 0) ; 
+    AWLock      : std_logic ;
+    -- AxCache One-hot (Write-Allocate, Read-Allocate, Modifiable, Bufferable)
+    AWCache     : std_logic_vector(3 downto 0) ;
+    AWQOS       : std_logic_vector(3 downto 0) ;
+    AWRegion    : std_logic_vector(7 downto 0) ;
+    AWUser      : std_logic_vector ; -- User Config
   end record Axi4LiteWriteAddressRecType ; 
   
-  function InitAxi4LiteWriteAddressRec (AddrWidth : natural ) return Axi4LiteWriteAddressRecType ;
-  
+  function InitAxi4LiteWriteAddressRec (WriteAddress : in Axi4LiteWriteAddressRecType ) return Axi4LiteWriteAddressRecType ;
+    
 --
 --!TODO Add VHDL-2018 mode declarations here
 -- Comment out for now, also include `ifdef for language revision
@@ -82,134 +98,215 @@ package Axi4LiteInterfacePkg is
   
   -- AXI Write Data Channel
   type Axi4LiteWriteDataRecType is record
-    WValid      : std_logic ; 
-    WReady      : std_logic ; 
+    -- AXI4 Lite
     WData       : std_logic_vector ; 
     WStrb       : std_logic_vector ; 
+    WValid      : std_logic ; 
+    WReady      : std_logic ; 
+    -- AXI 4 Full
+    WLast       : std_logic ;
+    WUser       : std_logic_vector ;
+    -- AXI3
+    WID         : std_logic_vector ;
   end record Axi4LiteWriteDataRecType ; 
   
-  function InitAxi4LiteWriteDataRec (DataWidth : natural ) return Axi4LiteWriteDataRecType ;
+  function InitAxi4LiteWriteDataRec (WriteData : Axi4LiteWriteDataRecType ) return Axi4LiteWriteDataRecType ;
 
 -- Add VHDL-2018 modes here
 
   
-
   -- AXI Write Response Channel
   type Axi4LiteWriteResponseRecType is record
+    -- AXI4 Lite
     BValid      : std_logic ; 
     BReady      : std_logic ; 
     BResp       : Axi4RespType ; 
+    -- AXI 4 Full
+    BID         : std_logic_vector ;
+    BUser       : std_logic_vector ;
   end record Axi4LiteWriteResponseRecType ; 
   
-  function InitAxi4LiteWriteResponseRec return Axi4LiteWriteResponseRecType ;
+  function InitAxi4LiteWriteResponseRec(WriteResponse : Axi4LiteWriteResponseRecType) return Axi4LiteWriteResponseRecType ;
   
 -- Add VHDL-2018 modes here
 
   
   -- AXI Read Address Channel
   type Axi4LiteReadAddressRecType is record
-    ARValid     : std_logic ; 
-    ARReady     : std_logic ; 
+    -- AXI4 Lite
     ARAddr      : std_logic_vector ; 
     ARProt      : Axi4ProtType ; 
+    ARValid     : std_logic ; 
+    ARReady     : std_logic ; 
+    -- AXI 4 Full
+    -- User Config - AXI recommended 3:0 for master, 7:0 at slave
+    ARID        : std_logic_vector ; 
+    -- BurstLength = AxLen+1.  AXI4: 7:0,  AXI3: 3:0
+    ARLen       : std_logic_vector(7 downto 0) ; 
+    -- #Bytes in transfer = 2**AxSize
+    ARSize      : std_logic_vector(2 downto 0) ; 
+    -- AxBurst Binary Encoded (Fixed, Incr, Wrap, NotDefined)
+    ARBurst     : std_logic_vector(1 downto 0) ; 
+    ARLock      : std_logic ;
+    -- AxCache One-hot (Write-Allocate, Read-Allocate, Modifiable, Bufferable)
+    ARCache     : std_logic_vector(3 downto 0) ;
+    ARQOS       : std_logic_vector(3 downto 0) ;
+    ARRegion    : std_logic_vector(7 downto 0) ;
+    ARUser      : std_logic_vector ; -- User Config
   end record Axi4LiteReadAddressRecType ; 
   
-  function InitAxi4LiteReadAddressRec (AddrWidth : natural) return Axi4LiteReadAddressRecType ;
+  
+  function InitAxi4LiteReadAddressRec (ReadAddress : Axi4LiteReadAddressRecType ) return Axi4LiteReadAddressRecType ;
 
 -- Add VHDL-2018 modes here
 
   -- AXI Read Data Channel
   type Axi4LiteReadDataRecType is record
-    RValid      : std_logic ; 
-    RReady      : std_logic ; 
+    -- AXI4 Lite
     RData       : std_logic_vector ; 
     RResp       : Axi4RespType ;
+    RValid      : std_logic ; 
+    RReady      : std_logic ; 
+    -- AXI 4 Full
+    RID       : std_logic_vector ;
+    RLast     : std_logic ;
+    RUser     : std_logic_vector ;
   end record Axi4LiteReadDataRecType ; 
   
-  function InitAxi4LiteReadDataRec (DataWidth : natural ) return Axi4LiteReadDataRecType ;
+  function InitAxi4LiteReadDataRec (ReadData : Axi4LiteReadDataRecType ) return Axi4LiteReadDataRecType ;
+
   
 -- Add VHDL-2018 modes here
   
-  type Axi4LiteRecType is record
+  type Axi4RecType is record
     WriteAddress   : Axi4LiteWriteAddressRecType ; 
     WriteData      : Axi4LiteWriteDataRecType ; 
     WriteResponse  : Axi4LiteWriteResponseRecType ; 
     ReadAddress    : Axi4LiteReadAddressRecType ; 
     ReadData       : Axi4LiteReadDataRecType ; 
-  end record Axi4LiteRecType ; 
+  end record Axi4RecType ; 
   
-  function InitAxi4LiteRec (AddrWidth : natural ; DataWidth : natural ) return Axi4LiteRecType ;
+  -- Axi4RecType with sized elements
+  -- Get From Above
+
+  -- Axi4Lite Record, Axi4 full elements are null arrays  
+  subtype Axi4LiteRecType is Axi4RecType( 
+    WriteAddress( AWID(0 downto 1), AWUser(0 downto 1) ),
+    WriteData( WUser(0 downto 1), WID(0 downto 1) ),  -- WID only AXI3
+    WriteResponse( BID(0 downto 1), BUser(0 downto 1) ),
+    ReadAddress( ARID(0 downto 1), ARUser(0 downto 1) ),
+    ReadData( RID(0 downto 1), RUser(0 downto 1) )
+  ) ;
+  
+  function InitAxi4LiteRec (AxiBusRec : in Axi4LiteRecType) return Axi4LiteRecType ;
   procedure InitAxi4LiteRec (signal AxiBusRec : out Axi4LiteRecType ) ;
   
 end package Axi4LiteInterfacePkg ;
 package body Axi4LiteInterfacePkg is 
 
--- add function bodies here
-  function InitAxi4LiteWriteAddressRec (AddrWidth : natural ) return Axi4LiteWriteAddressRecType is
+  function InitAxi4LiteWriteAddressRec (WriteAddress : in Axi4LiteWriteAddressRecType ) return Axi4LiteWriteAddressRecType is
   begin
     return (
-      AWValid => 'Z', 
-      AWReady => 'Z', 
-      AWAddr  => (AddrWidth-1 downto 0 => 'Z'), 
-      AWProt  => (others => 'Z')
+      -- AXI4 Lite
+      AWAddr   => (WriteAddress.AWAddr'range => 'Z'), 
+      AWProt   => (WriteAddress.AWProt'range => 'Z'),
+      AWValid  => 'Z', 
+      AWReady  => 'Z', 
+      -- AXI 4 Full
+      AWID     => (WriteAddress.AWID'range => 'Z'),
+      AWLen    => (WriteAddress.AWLen'range => 'Z'), 
+      AWSize   => (WriteAddress.AWSize'range => 'Z'), 
+      AWBurst  => (WriteAddress.AWBurst'range => 'Z'), 
+      AWLock   => 'Z',
+      AWCache  => (WriteAddress.AWCache'range => 'Z'),
+      AWQOS    => (WriteAddress.AWQOS'range => 'Z'),
+      AWRegion => (WriteAddress.AWRegion'range => 'Z'),
+      AWUser   => (WriteAddress.AWUser'range => 'Z')
     ) ;
   end function InitAxi4LiteWriteAddressRec ; 
 
-  function InitAxi4LiteWriteDataRec (DataWidth : natural ) return Axi4LiteWriteDataRecType is
+  function InitAxi4LiteWriteDataRec (WriteData : Axi4LiteWriteDataRecType ) return Axi4LiteWriteDataRecType is
+    constant DataWidth : integer := WriteData.WData'length ; 
   begin
     return (
+      -- AXI4 Lite
+      WData   => (DataWidth-1 downto 0 => 'Z'),  
+      WStrb   => ((DataWidth/8)-1 downto 0 => 'Z'),
       WValid  => 'Z',
       WReady  => 'Z',
-      WData   => (DataWidth-1 downto 0 => 'Z'),  
-      WStrb   => ((DataWidth/8)-1 downto 0 => 'Z') 
+      -- AXI 4 Full
+      WLast   => 'Z',
+      WUser   => (WriteData.WUser'range => 'Z'),
+      -- AXI3
+      WID     => (WriteData.WID'range => 'Z')
     ) ;
   end function InitAxi4LiteWriteDataRec ; 
 
-  function InitAxi4LiteWriteResponseRec return Axi4LiteWriteResponseRecType is
+  function InitAxi4LiteWriteResponseRec(WriteResponse : Axi4LiteWriteResponseRecType) return Axi4LiteWriteResponseRecType is
   begin
     return (
+      -- AXI4 Lite
+      BResp   => (WriteResponse.BResp'range => 'Z'),  
       BValid  => 'Z',
       BReady  => 'Z',
-      BResp   => AXI4_RESP_INIT  
+      -- AXI 4 Full
+      BID     => (WriteResponse.BID'range => 'Z'),
+      BUser   => (WriteResponse.BUser'range => 'Z')
+
     ) ;
   end function InitAxi4LiteWriteResponseRec ; 
 
-  function InitAxi4LiteReadAddressRec (AddrWidth : natural ) return Axi4LiteReadAddressRecType is
+  function InitAxi4LiteReadAddressRec (ReadAddress : Axi4LiteReadAddressRecType ) return Axi4LiteReadAddressRecType is
   begin
     return (
+      -- AXI4 Lite
+      ARAddr  => (ReadAddress.ARAddr'range => 'Z'), 
+      ARProt  => (ReadAddress.ARProt'range => 'Z'),
       ARValid => 'Z', 
       ARReady => 'Z', 
-      ARAddr  => (AddrWidth-1 downto 0 => 'Z'), 
-      ARProt  => (others => 'Z')
+      -- AXI 4 Full
+      ARID     => (ReadAddress.ARID'range => 'Z'),
+      ARLen    => (ReadAddress.ARLen'range => 'Z'), 
+      ARSize   => (ReadAddress.ARSize'range => 'Z'), 
+      ARBurst  => (ReadAddress.ARBurst'range => 'Z'), 
+      ARLock   => 'Z',
+      ARCache  => (ReadAddress.ARCache'range => 'Z'),
+      ARQOS    => (ReadAddress.ARQOS'range => 'Z'),
+      ARRegion => (ReadAddress.ARRegion'range => 'Z'),
+      ARUser   => (ReadAddress.ARUser'range => 'Z')
     ) ;
   end function InitAxi4LiteReadAddressRec ; 
 
-  function InitAxi4LiteReadDataRec (DataWidth : natural ) return Axi4LiteReadDataRecType is
+  function InitAxi4LiteReadDataRec (ReadData : Axi4LiteReadDataRecType ) return Axi4LiteReadDataRecType is
   begin
     return (
+      -- AXI4 Lite
+      RData   => (ReadData.RData'range => 'Z'),  
+      RResp   => (ReadData.RResp'range => 'Z'),  
       RValid  => 'Z',
       RReady  => 'Z',
-      RData   => (DataWidth-1 downto 0 => 'Z'),  
-      RResp   => AXI4_RESP_INIT  
+      -- AXI 4 Full
+      RID     => (ReadData.RID'range => 'Z'),
+      RLast   => 'Z',
+      RUser   => (ReadData.RUser'range => 'Z')
+
     ) ;
   end function InitAxi4LiteReadDataRec ; 
-  
-  function InitAxi4LiteRec (AddrWidth : natural ; DataWidth : natural ) return Axi4LiteRecType is
+    
+  function InitAxi4LiteRec (AxiBusRec : in Axi4LiteRecType) return Axi4LiteRecType is
   begin
     return ( 
-      WriteAddress   => InitAxi4LiteWriteAddressRec(AddrWidth),
-      WriteData      => InitAxi4LiteWriteDataRec(DataWidth),
-      WriteResponse  => InitAxi4LiteWriteResponseRec, 
-      ReadAddress    => InitAxi4LiteReadAddressRec(AddrWidth),
-      ReadData       => InitAxi4LiteReadDataRec(DataWidth)
+      WriteAddress   => InitAxi4LiteWriteAddressRec(AxiBusRec.WriteAddress),
+      WriteData      => InitAxi4LiteWriteDataRec(AxiBusRec.WriteData),
+      WriteResponse  => InitAxi4LiteWriteResponseRec(AxiBusRec.WriteResponse), 
+      ReadAddress    => InitAxi4LiteReadAddressRec(AxiBusRec.ReadAddress),
+      ReadData       => InitAxi4LiteReadDataRec(AxiBusRec.ReadData)
     ) ;
   end function InitAxi4LiteRec ; 
 
   procedure InitAxi4LiteRec (signal AxiBusRec : out Axi4LiteRecType ) is
-    constant AXI_ADDR_WIDTH : integer := AxiBusRec.WriteAddress.AWAddr'length ; 
-    constant AXI_DATA_WIDTH : integer := AxiBusRec.WriteData.WData'length ;
   begin
-    AxiBusRec <= InitAxi4LiteRec(AXI_ADDR_WIDTH, AXI_DATA_WIDTH) ;
+    AxiBusRec <= InitAxi4LiteRec(AxiBusRec) ;
   end procedure InitAxi4LiteRec ;
 
 end package body Axi4LiteInterfacePkg ; 

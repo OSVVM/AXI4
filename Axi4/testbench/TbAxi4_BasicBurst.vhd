@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4Lite_BasicBurst.vhd
+--  File Name:         TbAxi4_BasicBurst.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -43,9 +43,9 @@ architecture BasicBurst of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
   
-  alias WriteBurstFifo is <<variable .TbAxi4Lite.Axi4LiteMaster_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+  alias WriteBurstFifo is <<variable .TbAxi4.Axi4Super_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
 
---  alias AxiLiteBus is <<signal .TbAxi4Lite.AxiLiteBus : Axi4LiteRecType>> ;
+--  alias AxiLiteBus is <<signal .TbAxi4.AxiLiteBus : Axi4RecType>> ;
 
 
 begin
@@ -57,13 +57,13 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4Lite_BasicBurst") ;
+    SetAlertLogName("TbAxi4_BasicBurst") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4Lite_BasicBurst.txt") ;
+    TranscriptOpen("./results/TbAxi4_BasicBurst.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -78,7 +78,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4Lite_BasicBurst.txt", "../AXI4/Axi4Lite/testbench/validated_results/TbAxi4Lite_BasicBurst.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_BasicBurst.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_BasicBurst.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 
@@ -88,70 +88,70 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- AxiMasterProc
-  --   Generate transactions for AxiMaster
+  -- AxiSuperProc
+  --   Generate transactions for AxiSuper
   ------------------------------------------------------------
-  AxiMasterProc : process
+  AxiSuperProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
 
   begin
     wait until nReset = '1' ;  
-    NoOp(AxiMasterTransRec, 2) ; 
+    NoOp(AxiSuperTransRec, 2) ; 
     log("Write with ByteAddr = 0, 4 Bytes") ;
     for i in 3 to 10 loop
       WriteBurstFifo.Push(to_slv(i, 8)) ;
     end loop ;
-    MasterWriteBurst(AxiMasterTransRec, X"0000_1002", 8) ;
+    WriteBurst(AxiSuperTransRec, X"0000_1002", 8) ;
     
---    NoOp(AxiMasterTransRec, 18) ; 
+--    NoOp(AxiSuperTransRec, 18) ; 
     
     -- Wait for outputs to propagate and signal TestDone
-    NoOp(AxiMasterTransRec, 2) ;
+    NoOp(AxiSuperTransRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiMasterProc ;
+  end process AxiSuperProc ;
 
 
   ------------------------------------------------------------
-  -- AxiSlaveProc
-  --   Generate transactions for AxiSlave
+  -- AxiMinionProc
+  --   Generate transactions for AxiMinion
   ------------------------------------------------------------
-  AxiSlaveProc : process
+  AxiMinionProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;  
 --    alias  WReady    : std_logic        is AxiLiteBus.WriteData.WReady ;
     
   begin
 --    WReady <= 'Z' ; 
-    NoOp(AxiSlaveTransRec, 2) ; 
+    NoOp(AxiMinionTransRec, 2) ; 
     -- Write and Read with ByteAddr = 0, 4 Bytes
-    SlaveGetWrite(AxiSlaveTransRec, Addr, Data) ;
-    AffirmIfEqual(Addr, X"0000_1002", "Slave Write Addr: ") ;
-    AffirmIfEqual(Data, X"0403_0000", "Slave Write Data: ") ;
-    SlaveGetWriteData(AxiSlaveTransRec, Data) ;
-    AffirmIfEqual(Data, X"0807_0605", "Slave Write Data: ") ;
-    SlaveGetWriteData(AxiSlaveTransRec, Data) ;
-    AffirmIfEqual(Data, X"0000_0A09", "Slave Write Data: ") ;
+    GetWrite(AxiMinionTransRec, Addr, Data) ;
+    AffirmIfEqual(Addr, X"0000_1002", "Minion Write Addr: ") ;
+    AffirmIfEqual(Data, X"0403_0000", "Minion Write Data: ") ;
+    GetWriteData(AxiMinionTransRec, Data) ;
+    AffirmIfEqual(Data, X"0807_0605", "Minion Write Data: ") ;
+    GetWriteData(AxiMinionTransRec, Data) ;
+    AffirmIfEqual(Data, X"0000_0A09", "Minion Write Data: ") ;
 
     
-    -- Force the Slave to allow the bus to transfer the write burst
+    -- Force the Minion to allow the bus to transfer the write burst
 --    WReady <= force '1' ; 
     
---    NoOp(AxiSlaveTransRec, 18) ; 
+--    NoOp(AxiMinionTransRec, 18) ; 
 
     -- Wait for outputs to propagate and signal TestDone
---    NoOp(AxiSlaveTransRec, 2) ;
+--    NoOp(AxiMinionTransRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiSlaveProc ;
+  end process AxiMinionProc ;
 
 
 end BasicBurst ;
 
-Configuration TbAxi4Lite_BasicBurst of TbAxi4Lite is
+Configuration TbAxi4_BasicBurst of TbAxi4 is
   for TestHarness
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(BasicBurst) ; 
     end for ; 
   end for ; 
-end TbAxi4Lite_BasicBurst ; 
+end TbAxi4_BasicBurst ; 

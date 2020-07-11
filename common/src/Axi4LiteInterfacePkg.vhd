@@ -95,6 +95,9 @@ package Axi4LiteInterfacePkg is
 --!TODO Add VHDL-2018 mode declarations here
 -- Comment out for now, also include `ifdef for language revision
 --
+-- View AxiWriteAddr_OutView of Axi4LiteWriteAddressRecType is 
+--   AWAddr : out ;
+--
   
   -- AXI Write Data Channel
   type Axi4LiteWriteDataRecType is record
@@ -113,6 +116,10 @@ package Axi4LiteInterfacePkg is
   function InitAxi4LiteWriteDataRec (WriteData : Axi4LiteWriteDataRecType ) return Axi4LiteWriteDataRecType ;
 
 -- Add VHDL-2018 modes here
+--
+-- View AxiWriteData_OutView of Axi4LiteWriteDataRecType is 
+--   WData : out ;
+--
 
   
   -- AXI Write Response Channel
@@ -175,8 +182,10 @@ package Axi4LiteInterfacePkg is
   
   function InitAxi4LiteReadDataRec (ReadData : Axi4LiteReadDataRecType ) return Axi4LiteReadDataRecType ;
 
-  
 -- Add VHDL-2018 modes here
+-- View AxiReadData_InView of Axi4LiteReadDataRecType is 
+--   RData : in ;
+
   
   type Axi4RecType is record
     WriteAddress   : Axi4LiteWriteAddressRecType ; 
@@ -188,6 +197,13 @@ package Axi4LiteInterfacePkg is
   
   -- Axi4RecType with sized elements
   -- Get From Above
+-- view Axi4_MasterView of Axi4RecType is
+--   WriteAddress  : view AxiWriteAddr_OutView ;
+--   WriteData     : view AxiWriteData_OutView ;
+--   WriteResponse : view AxiWriteResponse_InView ;
+--   ReadAddress   : view AxiReadAddr_OutView ;
+--   ReadData      : view AxiReadData_InView ;
+-- end view Axi4LiteMasterView ;
 
   -- Axi4Lite Record, Axi4 full elements are null arrays  
   subtype Axi4LiteRecType is Axi4RecType( 

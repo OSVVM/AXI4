@@ -46,11 +46,8 @@ library ieee ;
   use ieee.math_real.all ;
   
 library osvvm ; 
-    use osvvm.AlertLogPkg.all ; 
-    use osvvm.ResolutionPkg.all ; 
-    
-use work.Axi4LiteInterfacePkg.all ; 
-  
+  context osvvm.OsvvmContext ; 
+      
 package Axi4CommonPkg is 
 
   ------------------------------------------------------------
@@ -110,7 +107,7 @@ package body Axi4CommonPkg is
     AlertIf(
       AlertLogID, 
       Ready /= '1', 
-      TimeOutMessage & ".   Ready: " & to_string(Ready) & "  Expected: 1",
+      TimeOutMessage & ".  Ready: " & to_string(Ready) & "  Expected: 1",
       FAILURE
     ) ;
   end procedure DoAxiValidHandshake ;
@@ -141,7 +138,7 @@ package body Axi4CommonPkg is
     AlertIf(
       AlertLogID, 
       Valid /= '1', 
-      TimeOutMessage & ".   Valid: " & to_string(Valid) & "  Expected: 1",
+      TimeOutMessage & ".  Valid: " & to_string(Valid) & "  Expected: 1",
       FAILURE
     ) ;
 
@@ -151,7 +148,15 @@ package body Axi4CommonPkg is
     
     -- If ready not signaled yet, find ready at a rising edge of clk
     if Ready /= '1' then
-      wait on Clk until Clk = '1' and Ready = '1' ;
+      wait on Clk until Clk = '1' and (Ready = '1' or Valid /= '1') ;
+      AlertIf(
+        AlertLogID, 
+        Valid /= '1', 
+        TimeOutMessage & 
+        ".  Valid (" & to_string(Valid) & ") " & 
+        "deasserted before Ready asserted (" & to_string(Ready) & ") ",
+        FAILURE
+      ) ;
     end if ; 
 
     -- State after operation

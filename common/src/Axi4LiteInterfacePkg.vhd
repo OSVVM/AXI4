@@ -215,7 +215,7 @@ package Axi4LiteInterfacePkg is
   ) ;
   
   function InitAxi4LiteRec (AxiBusRec : in Axi4LiteRecType) return Axi4LiteRecType ;
-  procedure InitAxi4LiteRec (signal AxiBusRec : out Axi4LiteRecType ) ;
+  procedure InitAxi4LiteRec (signal AxiBusRec : inout Axi4LiteRecType ) ;
   
 end package Axi4LiteInterfacePkg ;
 package body Axi4LiteInterfacePkg is 
@@ -320,7 +320,7 @@ package body Axi4LiteInterfacePkg is
     ) ;
   end function InitAxi4LiteRec ; 
 
-  procedure InitAxi4LiteRec (signal AxiBusRec : out Axi4LiteRecType ) is
+  procedure InitAxi4LiteRec (signal AxiBusRec : inout Axi4LiteRecType ) is
   begin
     AxiBusRec <= InitAxi4LiteRec(AxiBusRec) ;
   end procedure InitAxi4LiteRec ;

@@ -225,9 +225,10 @@ package Axi4InterfacePkg is
     AxiBusRec : in Axi4RecType ;
     InitVal   : std_logic := 'Z'
   ) return Axi4RecType ;
+  
   procedure InitAxi4Rec (
-    signal AxiBusRec : out Axi4RecType ;
-    InitVal   : std_logic := 'Z'
+    signal AxiBusRec : inout Axi4RecType ;
+    InitVal          : std_logic := 'Z'
   ) ;
   
 end package Axi4InterfacePkg ;
@@ -352,8 +353,8 @@ package body Axi4InterfacePkg is
   end function InitAxi4Rec ; 
 
   procedure InitAxi4Rec (
-    signal AxiBusRec : out Axi4RecType ;
-    InitVal   : std_logic := 'Z'
+    signal AxiBusRec : inout Axi4RecType ;
+    InitVal          : std_logic := 'Z'
   ) is
   begin
     AxiBusRec <= InitAxi4Rec(AxiBusRec, InitVal) ;

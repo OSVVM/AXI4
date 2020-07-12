@@ -59,33 +59,16 @@ port (
   -- AXI Master Functional Interface
   AxiBus      : in    Axi4RecType 
 ) ;
-
-    alias AWValid : std_logic        is AxiBus.WriteAddress.AWValid ;
-    alias AWReady : std_logic        is AxiBus.WriteAddress.AWReady ;
-    alias AWProt  : Axi4ProtType is AxiBus.WriteAddress.AWProt ;
-    alias AWAddr  : std_logic_vector is AxiBus.WriteAddress.AWAddr ;
-
-    alias WValid  : std_logic        is AxiBus.WriteData.WValid ;
-    alias WReady  : std_logic        is AxiBus.WriteData.WReady ;
-    alias WData   : std_logic_vector is AxiBus.WriteData.WData ;
-    alias WStrb   : std_logic_vector is AxiBus.WriteData.WStrb ;
-
-    alias BValid  : std_logic        is AxiBus.WriteResponse.BValid ;
-    alias BReady  : std_logic        is AxiBus.WriteResponse.BReady ;
-    alias BResp   : Axi4RespType is AxiBus.WriteResponse.BResp ;
-
-    alias ARValid : std_logic        is AxiBus.ReadAddress.ARValid ;
-    alias ARReady : std_logic        is AxiBus.ReadAddress.ARReady ;
-    alias ARProt  : Axi4ProtType is AxiBus.ReadAddress.ARProt ;
-    alias ARAddr  : std_logic_vector is AxiBus.ReadAddress.ARAddr ;
-
-    alias RValid  : std_logic        is AxiBus.ReadData.RValid ;
-    alias RReady  : std_logic        is AxiBus.ReadData.RReady ;
-    alias RData   : std_logic_vector is AxiBus.ReadData.RData ;
-    alias RResp   : Axi4RespType is AxiBus.ReadData.RResp ;
-    
+   
 end entity Axi4Monitor ;
 architecture Monitor of Axi4Monitor is
+
+--  alias    AB : AxiBus'subtype is AxiBus ; 
+--  alias    AW is AB.WriteAddress ;
+--  alias    WD is AB.WriteData ; 
+--  alias    WR is AB.WriteResponse ; 
+--  alias    AR is AB.ReadAddress ; 
+--  alias    RD is AB.ReadData ;
 
   constant MODEL_INSTANCE_NAME : string     := PathTail(to_lower(Axi4Monitor'PATH_NAME)) ;
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ; 

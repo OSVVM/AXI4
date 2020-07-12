@@ -119,8 +119,8 @@ port (
 end entity Axi4Master ;
 architecture AxiFull of Axi4Master is
 
-  alias  AxiAddr is AxiBus.WriteAddress.AWAddr ;
-  alias  AxiData is AxiBus.WriteData.WData ;
+  alias    AxiAddr is AxiBus.WriteAddress.AWAddr ;
+  alias    AxiData is AxiBus.WriteData.WData ;
   constant AXI_ADDR_WIDTH : integer := AxiAddr'length ;
   constant AXI_DATA_WIDTH : integer := AxiData'length ;
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
@@ -598,25 +598,23 @@ begin
   WriteAddressHandler : process
     alias    AB : AxiBus'subtype is AxiBus ; 
     alias    AW is AB.WriteAddress ;
-
-    variable Local : AxiBus.WriteAddress'subtype := InitAxi4WriteAddressRec(AxiBus.WriteAddress, '0') ; 
-
+    variable Local : AxiBus.WriteAddress'subtype ;  
     variable WriteAddressReadyTimeOut : integer ; 
   begin
     -- AXI4 LIte Signaling
     AW.AWValid  <= '0' ;
-    AW.AWAddr   <= Local.AWAddr ;
-    AW.AWProt   <= Local.AWProt    ;
+    AW.AWAddr   <= (Local.AWAddr'range   => '0') ;
+    AW.AWProt   <= (Local.AWProt'range   => '0') ;
     -- AXI4 Full Signaling
-    AW.AWLen    <= Local.AWLen     ;
-    AW.AWID     <= Local.AWID      ;
-    AW.AWSize   <= Local.AWSize    ;
-    AW.AWBurst  <= Local.AWBurst   ;
-    AW.AWLock   <= Local.AWLock    ;
-    AW.AWCache  <= Local.AWCache   ;
-    AW.AWQOS    <= Local.AWQOS     ;
-    AW.AWRegion <= Local.AWRegion  ;
-    AW.AWUser   <= Local.AWUser    ;
+    AW.AWLen    <= (Local.AWLen'range    => '0') ;
+    AW.AWID     <= (Local.AWID'range     => '0') ;
+    AW.AWSize   <= (Local.AWSize'range   => '0') ;
+    AW.AWBurst  <= (Local.AWBurst'range  => '0') ;
+    AW.AWLock   <= '0' ;
+    AW.AWCache  <= (Local.AWCache'range  => '0') ;
+    AW.AWQOS    <= (Local.AWQOS'range    => '0') ;
+    AW.AWRegion <= (Local.AWRegion'range => '0') ;
+    AW.AWUser   <= (Local.AWUser'range   => '0') ;
     
     WriteAddressLoop : loop
       -- Find Transaction
@@ -690,19 +688,19 @@ begin
     alias    AB : AxiBus'subtype is AxiBus ; 
     alias    WD is AB.WriteData ;
 
-    variable Local : AxiBus.WriteData'subtype := InitAxi4WriteDataRec(AxiBus.WriteData, '0') ; 
+    variable Local : AxiBus.WriteData'subtype ; 
 
     variable WriteDataReadyTimeOut : integer ; 
   begin
     -- initialize
     WD.WValid <= '0' ;
-    WD.WData  <= Local.WData ;
-    WD.WStrb  <= Local.WStrb ;
+    WD.WData  <= (Local.WData'range => '0') ;
+    WD.WStrb  <= (Local.WStrb'range => '0') ;
     -- AXI4 Full
-    WD.WLast  <= Local.WLast ;
-    WD.WUser  <= Local.WUser ;
+    WD.WLast  <= '0' ;
+    WD.WUser  <= (Local.WUser'range => '0') ;
     -- AXI3
-    WD.WID    <= Local.WID ;
+    WD.WID    <= (Local.WID'range   => '0') ;
 
     WriteDataLoop : loop
       -- Find Transaction
@@ -832,24 +830,24 @@ begin
     alias    AB : AxiBus'subtype is AxiBus ; 
     alias    AR is AB.ReadAddress ;
 
-    variable Local : AxiBus.ReadAddress'subtype := InitAxi4ReadAddressRec(AxiBus.ReadAddress, '0') ; 
+    variable Local : AxiBus.ReadAddress'subtype ; 
     
     variable ReadAddressReadyTimeOut : integer ; 
   begin
     -- AXI4 LIte Signaling
     AR.ARValid  <= '0' ;
-    AR.ARAddr   <= Local.ARAddr ;
-    AR.ARProt   <= Local.ARProt    ;
+    AR.ARAddr   <= (Local.ARAddr'range   => '0') ;
+    AR.ARProt   <= (Local.ARProt'range   => '0') ;
     -- AXI4 Full Signaling
-    AR.ARLen    <= Local.ARLen     ;
-    AR.ARID     <= Local.ARID      ;
-    AR.ARSize   <= Local.ARSize    ;
-    AR.ARBurst  <= Local.ARBurst   ;
-    AR.ARLock   <= Local.ARLock    ;
-    AR.ARCache  <= Local.ARCache   ;
-    AR.ARQOS    <= Local.ARQOS     ;
-    AR.ARRegion <= Local.ARRegion  ;
-    AR.ARUser   <= Local.ARUser    ;
+    AR.ARLen    <= (Local.ARLen'range    => '0') ;
+    AR.ARID     <= (Local.ARID'range     => '0') ;
+    AR.ARSize   <= (Local.ARSize'range   => '0') ;
+    AR.ARBurst  <= (Local.ARBurst'range  => '0') ;
+    AR.ARLock   <= '0' ;
+    AR.ARCache  <= (Local.ARCache'range  => '0') ;
+    AR.ARQOS    <= (Local.ARQOS'range    => '0') ;
+    AR.ARRegion <= (Local.ARRegion'range => '0') ;
+    AR.ARUser   <= (Local.ARUser'range   => '0') ;
 
 
     AddressReadLoop : loop

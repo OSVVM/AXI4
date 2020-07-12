@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Test transaction source for AxiStreamMaster and AxiStreamSlave
+--      Test transaction source for AxiStreamTransmitter and AxiStreamReceiver
 --
 --
 --  Developed by:
@@ -83,55 +83,55 @@ begin
 
   
   ------------------------------------------------------------
-  -- AxiMasterProc
-  --   Generate transactions for AxiMaster
+  -- AxiTransmitterProc
+  --   Generate transactions for AxiTransmitter
   ------------------------------------------------------------
-  AxiMasterProc : process
+  AxiTransmitterProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
   begin
     wait until nReset = '1' ;  
-    NoOp(AxiStreamMasterTransRec, 2) ; 
+    WaitForClock(AxiStreamTransmitterTransRec, 2) ; 
     
     log("Send 256 words with each byte incrementing") ;
     for i in 0 to 2**8-1 loop 
        -- Create words one byte at a time
        Data := to_slv(i, 8) & Data(Data'left downto 8) ;
        if ((i+1) mod 4) = 0 then 
-        Send(AxiStreamMasterTransRec, Data) ;
+        Send(AxiStreamTransmitterTransRec, Data) ;
        end if ; 
     end loop ;
    
     -- Wait for outputs to propagate and signal TestDone
-    NoOp(AxiStreamMasterTransRec, 2) ;
+    WaitForClock(AxiStreamTransmitterTransRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiMasterProc ;
+  end process AxiTransmitterProc ;
 
 
   ------------------------------------------------------------
-  -- AxiSlaveProc
-  --   Generate transactions for AxiSlave
+  -- AxiReceiverProc
+  --   Generate transactions for AxiReceiver
   ------------------------------------------------------------
-  AxiSlaveProc : process
+  AxiReceiverProc : process
     variable ExpData, RxData : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
   begin
-    NoOp(AxiStreamSlaveTransRec, 2) ; 
+    WaitForClock(AxiStreamReceiverTransRec, 2) ; 
     
     -- Get and check the 256 words
     for i in 0 to 2**8-1 loop
        -- Create words one byte at a time
        ExpData := to_slv(i, 8) & ExpData(ExpData'left downto 8) ;
        if ((i+1) mod 4) = 0 then 
-         Get(AxiStreamSlaveTransRec, RxData) ; 
-         AffirmIfEqual(RxData, ExpData, "AxiStreamSlave Get: ") ;
+         Get(AxiStreamReceiverTransRec, RxData) ; 
+         AffirmIfEqual(RxData, ExpData, "AxiStreamReceiver Get: ") ;
        end if ; 
      end loop ;
      
     -- Wait for outputs to propagate and signal TestDone
-    NoOp(AxiStreamSlaveTransRec, 2) ;
+    WaitForClock(AxiStreamReceiverTransRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiSlaveProc ;
+  end process AxiReceiverProc ;
 
 end BasicSendGet ;
 

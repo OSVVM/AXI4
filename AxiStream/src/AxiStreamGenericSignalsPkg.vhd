@@ -44,6 +44,9 @@ library ieee ;
 library osvvm ;
     context osvvm.OsvvmContext ;
 
+library osvvm_common ;
+  context osvvm_common.OsvvmCommonContext ;
+
 library osvvm_axi4 ;
     context osvvm_axi4.AxiStreamContext ;
     
@@ -74,9 +77,11 @@ package AxiStreamGenericSignalsPkg is
   signal TLast     : std_logic ; 
 
   -- Testbench Transaction Interface
-  subtype TransactionRecType is AxiStreamTransactionRecType(
+  subtype TransactionRecType is StreamRecType(
     DataToModel(AXI_DATA_WIDTH-1 downto 0),
-    DataFromModel(AXI_DATA_WIDTH-1 downto 0)
+    DataFromModel(AXI_DATA_WIDTH-1 downto 0),
+    ParamToModel(AXI_DATA_WIDTH-1 downto 0),
+    ParamFromModel(AXI_DATA_WIDTH-1 downto 0)
   ) ;  
   signal TransRec : TransactionRecType ;
 end package AxiStreamGenericSignalsPkg ;

@@ -54,11 +54,8 @@ library OSVVM_Common ;
   context OSVVM_Common.OsvvmCommonContext ; 
 
   use work.Axi4OptionsTypePkg.all ;
---  use work.Axi4SlaveOptionsTypePkg.all ;
---  use work.Axi4SlaveTransactionPkg.all ;
   use work.Axi4InterfacePkg.all ;
   use work.Axi4Pkg.all ;
---  use work.Axi4MasterPkg.all ;
   use work.Axi4CommonPkg.all ;
   
 entity Axi4Slave is
@@ -91,78 +88,86 @@ port (
   AxiBus      : inout Axi4RecType
 ) ;
 
-  -- Entity Declaration region - continues in architecture
-  -- These aliases make the record signals available by their short name
-    -- Write Address
-    alias  AWAddr    : std_logic_vector is AxiBus.WriteAddress.AWAddr ;
-    alias  AWProt    : Axi4ProtType     is AxiBus.WriteAddress.AWProt ;
-    alias  AWValid   : std_logic        is AxiBus.WriteAddress.AWValid ;
-    alias  AWReady   : std_logic        is AxiBus.WriteAddress.AWReady ;
-    -- Axi4 Full
-    alias  AWID      : std_logic_vector is AxiBus.WriteAddress.AWID ;
-    alias  AWLen     : std_logic_vector is AxiBus.WriteAddress.AWLen ;
-    alias  AWSize    : std_logic_vector is AxiBus.WriteAddress.AWSize ;
-    alias  AWBurst   : std_logic_vector is AxiBus.WriteAddress.AWBurst ;
-    alias  AWLock    : std_logic        is AxiBus.WriteAddress.AWLock ;
-    alias  AWCache   : std_logic_vector is AxiBus.WriteAddress.AWCache ;
-    alias  AWQOS     : std_logic_vector is AxiBus.WriteAddress.AWQOS ;
-    alias  AWRegion  : std_logic_vector is AxiBus.WriteAddress.AWRegion ;
-    alias  AWUser    : std_logic_vector is AxiBus.WriteAddress.AWUser ;
-
-    -- Write Data
-    alias  WData     : std_logic_vector is AxiBus.WriteData.WData ;
-    alias  WStrb     : std_logic_vector is AxiBus.WriteData.WStrb ;
-    alias  WValid    : std_logic        is AxiBus.WriteData.WValid ;
-    alias  WReady    : std_logic        is AxiBus.WriteData.WReady ;
-    -- AXI4 Full
-    alias  WLast     : std_logic        is AxiBus.WriteData.WLast ;
-    alias  WUser     : std_logic_vector is AxiBus.WriteData.WUser ;
-    -- AXI3
-    alias  WID       : std_logic_vector is AxiBus.WriteData.WID ;
-
-    -- Write Response
-    alias  BResp     : Axi4RespType     is AxiBus.WriteResponse.BResp ;
-    alias  BValid    : std_logic        is AxiBus.WriteResponse.BValid ;
-    alias  BReady    : std_logic        is AxiBus.WriteResponse.BReady ;
-    -- AXI4 Full
-    alias  BID       : std_logic_vector is AxiBus.WriteResponse.BID ;
-    alias  BUser     : std_logic_vector is AxiBus.WriteResponse.BUser ;
-
-    -- Read Address
-    alias  ARAddr    : std_logic_vector is AxiBus.ReadAddress.ARAddr ;
-    alias  ARProt    : Axi4ProtType     is AxiBus.ReadAddress.ARProt ;
-    alias  ARValid   : std_logic        is AxiBus.ReadAddress.ARValid ;
-    alias  ARReady   : std_logic        is AxiBus.ReadAddress.ARReady ;
-    -- Axi4 Full
-    alias  ARID      : std_logic_vector is AxiBus.ReadAddress.ARID ;
-    -- BurstLength = AxLen+1.  AXI4: 7:0,  AXI3: 3:0
-    alias  ARLen     : std_logic_vector is AxiBus.ReadAddress.ARLen ;
-    -- #Bytes in transfer = 2**AxSize
-    alias  ARSize    : std_logic_vector is AxiBus.ReadAddress.ARSize ;
-    -- AxBurst = (Fixed, Incr, Wrap, NotDefined)
-    alias  ARBurst   : std_logic_vector is AxiBus.ReadAddress.ARBurst ;
-    alias  ARLock    : std_logic is AxiBus.ReadAddress.ARLock ;
-    -- AxCache One-hot (Write-Allocate, Read-Allocate, Modifiable, Bufferable)
-    alias  ARCache   : std_logic_vector is AxiBus.ReadAddress.ARCache  ;
-    alias  ARQOS     : std_logic_vector is AxiBus.ReadAddress.ARQOS    ;
-    alias  ARRegion  : std_logic_vector is AxiBus.ReadAddress.ARRegion ;
-    alias  ARUser    : std_logic_vector is AxiBus.ReadAddress.ARUser   ;
-
-    -- Read Data
-    alias  RData     : std_logic_vector is AxiBus.ReadData.RData ;
-    alias  RResp     : Axi4RespType     is AxiBus.ReadData.RResp ;
-    alias  RValid    : std_logic        is AxiBus.ReadData.RValid ;
-    alias  RReady    : std_logic        is AxiBus.ReadData.RReady ;
-    -- AXI4 Full
-    alias  RID       : std_logic_vector is AxiBus.ReadData.RID   ;
-    alias  RLast     : std_logic        is AxiBus.ReadData.RLast ;
-    alias  RUser     : std_logic_vector is AxiBus.ReadData.RUser ;
+--  -- Entity Declaration region - continues in architecture
+--  -- These aliases make the record signals available by their short name
+--    -- Write Address
+--    alias  AWAddr    : std_logic_vector is AxiBus.WriteAddress.AWAddr ;
+--    alias  AWProt    : Axi4ProtType     is AxiBus.WriteAddress.AWProt ;
+--    alias  AWValid   : std_logic        is AxiBus.WriteAddress.AWValid ;
+--    alias  AWReady   : std_logic        is AxiBus.WriteAddress.AWReady ;
+--    -- Axi4 Full
+--    alias  AWID      : std_logic_vector is AxiBus.WriteAddress.AWID ;
+--    alias  AWLen     : std_logic_vector is AxiBus.WriteAddress.AWLen ;
+--    alias  AWSize    : std_logic_vector is AxiBus.WriteAddress.AWSize ;
+--    alias  AWBurst   : std_logic_vector is AxiBus.WriteAddress.AWBurst ;
+--    alias  AWLock    : std_logic        is AxiBus.WriteAddress.AWLock ;
+--    alias  AWCache   : std_logic_vector is AxiBus.WriteAddress.AWCache ;
+--    alias  AWQOS     : std_logic_vector is AxiBus.WriteAddress.AWQOS ;
+--    alias  AWRegion  : std_logic_vector is AxiBus.WriteAddress.AWRegion ;
+--    alias  AWUser    : std_logic_vector is AxiBus.WriteAddress.AWUser ;
+--
+--    -- Write Data
+--    alias  WData     : std_logic_vector is AxiBus.WriteData.WData ;
+--    alias  WStrb     : std_logic_vector is AxiBus.WriteData.WStrb ;
+--    alias  WValid    : std_logic        is AxiBus.WriteData.WValid ;
+--    alias  WReady    : std_logic        is AxiBus.WriteData.WReady ;
+--    -- AXI4 Full
+--    alias  WLast     : std_logic        is AxiBus.WriteData.WLast ;
+--    alias  WUser     : std_logic_vector is AxiBus.WriteData.WUser ;
+--    -- AXI3
+--    alias  WID       : std_logic_vector is AxiBus.WriteData.WID ;
+--
+--    -- Write Response
+--    alias  BResp     : Axi4RespType     is AxiBus.WriteResponse.BResp ;
+--    alias  BValid    : std_logic        is AxiBus.WriteResponse.BValid ;
+--    alias  BReady    : std_logic        is AxiBus.WriteResponse.BReady ;
+--    -- AXI4 Full
+--    alias  BID       : std_logic_vector is AxiBus.WriteResponse.BID ;
+--    alias  BUser     : std_logic_vector is AxiBus.WriteResponse.BUser ;
+--
+--    -- Read Address
+--    alias  ARAddr    : std_logic_vector is AxiBus.ReadAddress.ARAddr ;
+--    alias  ARProt    : Axi4ProtType     is AxiBus.ReadAddress.ARProt ;
+--    alias  ARValid   : std_logic        is AxiBus.ReadAddress.ARValid ;
+--    alias  ARReady   : std_logic        is AxiBus.ReadAddress.ARReady ;
+--    -- Axi4 Full
+--    alias  ARID      : std_logic_vector is AxiBus.ReadAddress.ARID ;
+--    -- BurstLength = AxLen+1.  AXI4: 7:0,  AXI3: 3:0
+--    alias  ARLen     : std_logic_vector is AxiBus.ReadAddress.ARLen ;
+--    -- #Bytes in transfer = 2**AxSize
+--    alias  ARSize    : std_logic_vector is AxiBus.ReadAddress.ARSize ;
+--    -- AxBurst = (Fixed, Incr, Wrap, NotDefined)
+--    alias  ARBurst   : std_logic_vector is AxiBus.ReadAddress.ARBurst ;
+--    alias  ARLock    : std_logic is AxiBus.ReadAddress.ARLock ;
+--    -- AxCache One-hot (Write-Allocate, Read-Allocate, Modifiable, Bufferable)
+--    alias  ARCache   : std_logic_vector is AxiBus.ReadAddress.ARCache  ;
+--    alias  ARQOS     : std_logic_vector is AxiBus.ReadAddress.ARQOS    ;
+--    alias  ARRegion  : std_logic_vector is AxiBus.ReadAddress.ARRegion ;
+--    alias  ARUser    : std_logic_vector is AxiBus.ReadAddress.ARUser   ;
+--
+--    -- Read Data
+--    alias  RData     : std_logic_vector is AxiBus.ReadData.RData ;
+--    alias  RResp     : Axi4RespType     is AxiBus.ReadData.RResp ;
+--    alias  RValid    : std_logic        is AxiBus.ReadData.RValid ;
+--    alias  RReady    : std_logic        is AxiBus.ReadData.RReady ;
+--    -- AXI4 Full
+--    alias  RID       : std_logic_vector is AxiBus.ReadData.RID   ;
+--    alias  RLast     : std_logic        is AxiBus.ReadData.RLast ;
+--    alias  RUser     : std_logic_vector is AxiBus.ReadData.RUser ;
 end entity Axi4Slave ;
 
 architecture SlaveTransactor of Axi4Slave is
+--  alias    AB : AxiBus'subtype is AxiBus ; 
+--  alias    AW is AB.WriteAddress ;
+--  alias    WD is AB.WriteData ; 
+--  alias    WR is AB.WriteResponse ; 
+--  alias    AR is AB.ReadAddress ; 
+--  alias    RD is AB.ReadData ; 
 
-  constant AXI_ADDR_WIDTH : integer := AWAddr'length ;
-  constant AXI_DATA_WIDTH : integer := WData'length ;
+  alias    AxiAddr is AxiBus.WriteAddress.AWAddr ;
+  alias    AxiData is AxiBus.WriteData.WData ;
+  constant AXI_ADDR_WIDTH : integer := AxiAddr'length ;
+  constant AXI_DATA_WIDTH : integer := AxiData'length ;
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ; 
 
@@ -259,30 +264,38 @@ begin
   --    Handles transactions between TestCtrl and Model
   ------------------------------------------------------------
   TransactionDispatcher : process
+    variable AxiLocal    : AxiBus'subtype ; 
+    alias    LAW is AxiLocal.WriteAddress ; 
+    alias    LWD is AxiLocal.WriteData ; 
+    alias    LWR is AxiLocal.WriteResponse ; 
+    alias    LAR is AxiLocal.ReadAddress ; 
+    alias    LRD is AxiLocal.ReadData ;
+    
     variable WaitClockCycles     : integer ;
-    variable WriteAddr           : AWAddr'subtype ;
-    variable WriteProt           : AWProt'subtype ;
+    alias WriteAddr           is LAW.AWAddr ;
+    alias WriteProt           is LAW.AWProt ;
+
     variable FoundWriteAddress   : boolean := FALSE ; 
     variable WriteAvailable      : boolean := FALSE ; 
     
-    variable WriteData           : WData'subtype ;
-    variable WriteStrb           : WStrb'subtype ;
-    variable WriteLast           : WLast'subtype ;
-    variable WriteUser           : WUser'subtype ;
-    variable WriteID             : WID'subtype ;
-    variable ExpectedWStrb       : WStrb'subtype ; 
+    alias WriteData           is LWD.WData ;
+    alias WriteStrb           is LWD.WStrb ;
+    alias WriteLast           is LWD.WLast ;
+    alias WriteUser           is LWD.WUser ;
+    alias WriteID             is LWD.WID ;
+--    alias ExpectedWStrb       is LWD.WStrb ; 
     variable WriteByteCount      : integer ; 
     variable WriteByteAddress    : integer ; 
     variable FoundLastWriteData  : boolean := FALSE ; 
 
-    variable WriteResp           : BResp'subtype ;
+--    alias WriteResp           is LWR.BResp ;
     
-    variable ReadAddr            : ARAddr'subtype ;
-    variable ReadProt            : ARProt'subtype ;
+    alias ReadAddr            is LAR.ARAddr ;
+    alias ReadProt            is LAR.ARProt ;
     variable ReadAvailable       : boolean := FALSE ; 
     
-    variable ReadData            : RData'subtype ;
-    variable ReadResp            : RResp'subtype ;
+    alias ReadData            is LRD.RData ;
+--    alias ReadResp            is LRD.RResp ;
     
   begin
     WaitForTransaction(
@@ -509,8 +522,10 @@ begin
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   WriteAddressHandler : process
+    alias    AB : AxiBus'subtype is AxiBus ; 
+    alias    AW is AB.WriteAddress ;
   begin
-    AWReady <= '0' ;
+    AW.AWReady <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
 
     WriteAddressOperation : loop
@@ -518,8 +533,8 @@ begin
       DoAxiReadyHandshake (
       ---------------------
         Clk                     => Clk,
-        Valid                   => AWValid,
-        Ready                   => AWReady,
+        Valid                   => AW.AWValid,
+        Ready                   => AW.AWReady,
         ReadyBeforeValid        => WriteAddressReadyBeforeValid,
         ReadyDelayCycles        => WriteAddressReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_AWReady, 
@@ -528,13 +543,13 @@ begin
       ) ;
 
       -- capture address, prot
-      WriteAddressFifo.push(AWAddr & AWProt) ;
+      WriteAddressFifo.push(AW.AWAddr & AW.AWProt) ;
 
       -- Log this operation
       Log(ModelID,
         "Write Address." &
-        "  AWAddr: "  & to_hstring(AWAddr) &
-        "  AWProt: "  & to_string(AWProt) &
+        "  AWAddr: "  & to_hstring(AW.AWAddr) &
+        "  AWProt: "  & to_string(AW.AWProt) &
         "  Operation# " & to_string(WriteAddressReceiveCount + 1),
         INFO
       ) ;
@@ -551,8 +566,10 @@ begin
   --    Execute Write Data Transactions
   ------------------------------------------------------------
   WriteDataHandler : process
+    alias    AB : AxiBus'subtype is AxiBus ; 
+    alias    WD is AB.WriteData ; 
   begin
-    WReady <= '0' ;
+    WD.WReady <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
 
     WriteDataOperation : loop
@@ -560,8 +577,8 @@ begin
       DoAxiReadyHandshake(
       ---------------------
         Clk                     => Clk,
-        Valid                   => WValid,
-        Ready                   => WReady,
+        Valid                   => WD.WValid,
+        Ready                   => WD.WReady,
         ReadyBeforeValid        => WriteDataReadyBeforeValid,
         ReadyDelayCycles        => WriteDataReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_WReady,
@@ -571,13 +588,13 @@ begin
 
       -- capture Data, wstrb
 -- Planned Upgrade, Axi4Lite always sets WLast to 1      
-      WriteDataFifo.push(WData & WStrb & WLast & WUser) ;
+      WriteDataFifo.push(WD.WData & WD.WStrb & WD.WLast & WD.WUser) ;
 
       -- Log this operation
       Log(ModelID,
         "Write Data." &
-        "  WData: "  & to_hstring(WData) &
-        "  WStrb: "  & to_string(WStrb) &
+        "  WData: "  & to_hstring(WD.WData) &
+        "  WStrb: "  & to_string(WD.WStrb) &
         "  Operation# " & to_string(WriteDataReceiveCount + 1),
         INFO
       ) ;
@@ -594,11 +611,14 @@ begin
   --   Receive and Check Write Responses
   ------------------------------------------------------------
   WriteResponseHandler : process
-    variable localResp : BResp'subtype ;
+    alias    AB : AxiBus'subtype is AxiBus ; 
+    alias    WR is AB.WriteResponse ; 
+    variable Local : AxiBus.WriteResponse'subtype ;
+--    alias localResp  is Local.BResp ;
   begin
     -- initialize
-    BValid <= '0' ;
-    BResp  <= (BResp'range => '0') ;
+    WR.BValid <= '0' ;
+    WR.BResp  <= (WR.BResp'range => '0') ;
 
     WriteResponseLoop : loop
       -- Find Transaction
@@ -608,17 +628,17 @@ begin
         WaitForToggle(WriteReceiveCount) ;
       end if ;
       if not WriteResponseFifo.Empty then
-        localResp := WriteResponseFifo.pop ;
+        Local.BResp := WriteResponseFifo.pop ;
       else
-       localResp := AXI4_RESP_OKAY ;
+       Local.BResp := AXI4_RESP_OKAY ;
       end if ;
 
       -- Do Transaction
-      BResp  <= localResp  after tpd_Clk_BResp ;
+      WR.BResp  <= Local.BResp  after tpd_Clk_BResp ;
 
       Log(ModelID,
         "Write Response." &
-        "  BResp: "  & to_hstring(localResp) &
+        "  BResp: "  & to_hstring(Local.BResp) &
         "  Operation# " & to_string(WriteResponseDoneCount + 1),
         INFO
       ) ;
@@ -627,8 +647,8 @@ begin
       DoAxiValidHandshake (
       ---------------------
         Clk            =>  Clk,
-        Valid          =>  BValid,
-        Ready          =>  BReady,
+        Valid          =>  WR.BValid,
+        Ready          =>  WR.BReady,
         tpd_Clk_Valid  =>  tpd_Clk_BValid,
         AlertLogID     =>  BusFailedID,
         TimeOutMessage =>  "Write Response # " & to_string(WriteResponseDoneCount + 1),
@@ -636,7 +656,7 @@ begin
       ) ;
 
       -- State after operation
-      BResp  <= not localResp after tpd_Clk_BResp ;
+      WR.BResp  <= not Local.BResp after tpd_Clk_BResp ;
 
       -- Signal completion
       Increment(WriteResponseDoneCount) ;
@@ -650,9 +670,11 @@ begin
   --    Execute Read Address Transactions
   ------------------------------------------------------------
   ReadAddressHandler : process
+    alias    AB : AxiBus'subtype is AxiBus ; 
+    alias    AR is AB.ReadAddress ; 
   begin
     -- Initialize
-    ARReady <= '0' ;
+    AR.ARReady <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
 
     ReadAddressOperation : loop
@@ -660,8 +682,8 @@ begin
       DoAxiReadyHandshake (
       ---------------------
         Clk                     => Clk,
-        Valid                   => ARValid,
-        Ready                   => ARReady,
+        Valid                   => AR.ARValid,
+        Ready                   => AR.ARReady,
         ReadyBeforeValid        => ReadAddressReadyBeforeValid,
         ReadyDelayCycles        => ReadAddressReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_ARReady,
@@ -670,14 +692,14 @@ begin
       ) ;
 
       -- capture address, prot
-      ReadAddressFifo.push(ARAddr & ARProt) ;
+      ReadAddressFifo.push(AR.ARAddr & AR.ARProt) ;
       increment(ReadAddressReceiveCount) ;
       wait for 0 ns ;
 
       Log(ModelID,
         "Read Address." &
-        "  ARAddr: "  & to_hstring(ARAddr) &
-        "  ARProt: "  & to_string(ARProt) &
+        "  ARAddr: "  & to_hstring(AR.ARAddr) &
+        "  ARProt: "  & to_string(AR.ARProt) &
         "  Operation# " & to_string(ReadAddressReceiveCount), -- adjusted for delay of ReadAddressReceiveCount
         INFO
       ) ;
@@ -690,13 +712,16 @@ begin
   --    Receive Read Data Transactions
   ------------------------------------------------------------
   ReadDataHandler : process
-    variable ReadData  : RData'subtype ;
-    variable ReadResp  : RResp'subtype ;
+    alias    AB : AxiBus'subtype is AxiBus ; 
+    alias    RD is AB.ReadData ;
+    variable Local : AxiBus.ReadData'subtype ;
+--    alias ReadData  is Local.RData ;
+--    alias ReadResp  is Local.RResp ;
   begin
     -- initialize
-    RValid <= '0' ;
-    RData  <= (RData'range => '0') ;
-    RResp  <= (RResp'range => '0') ;
+    RD.RValid <= '0' ;
+    RD.RData  <= (RD.RData'range => '0') ;
+    RD.RResp  <= (RD.RResp'range => '0') ;
 
     ReadDataLoop : loop
       -- Start a Read Data Response Transaction after receiving a read address
@@ -708,24 +733,24 @@ begin
         WaitForToggle(ReadDataRequestCount) ;
       end if ;
 
-      (ReadData, ReadResp) := ReadDataFifo.pop ;
+      (Local.RData, Local.RResp) := ReadDataFifo.pop ;
 
 --      -- Find Response if available
 --      if not ReadDataFifo.Empty then
---        (ReadData, ReadResp) := ReadDataFifo.pop ;
+--        (Local.RData, Local.RResp) := ReadDataFifo.pop ;
 --      else
---        ReadData := to_slv(ReadAddressReceiveCount, RData'length) ;
---        ReadResp := AXI4_RESP_OKAY ;
+--        Local.RData := to_slv(ReadAddressReceiveCount, RData'length) ;
+--        Local.RResp := AXI4_RESP_OKAY ;
 --      end if ;
 
       -- Transaction Values
-      RData  <= ReadData  after tpd_Clk_RDATA ;
-      RResp  <= ReadResp  after tpd_Clk_RResp ;
+      RD.RData  <= Local.RData  after tpd_Clk_RDATA ;
+      RD.RResp  <= Local.RResp  after tpd_Clk_RResp ;
 
       Log(ModelID,
         "Read Data." &
-        "  RData: "  & to_hstring(ReadData) &
-        "  RResp: "  & to_hstring(ReadResp) &
+        "  RData: "  & to_hstring(Local.RData) &
+        "  RResp: "  & to_hstring(Local.RResp) &
         "  Operation# " & to_string(ReadDataDoneCount + 1),
         INFO
       ) ;
@@ -734,8 +759,8 @@ begin
       DoAxiValidHandshake (
       ---------------------
         Clk            =>  Clk,
-        Valid          =>  RValid,
-        Ready          =>  RReady,
+        Valid          =>  RD.RValid,
+        Ready          =>  RD.RReady,
         tpd_Clk_Valid  =>  tpd_Clk_RValid,
         AlertLogID     =>  BusFailedID,
         TimeOutMessage =>  "Read Data # " & to_string(ReadDataDoneCount + 1),
@@ -743,9 +768,9 @@ begin
       ) ;
 
       -- State after operation
-      RValid <= '0' after tpd_Clk_RValid ;
-      RData  <= not ReadData after tpd_clk_RData ;
-      RResp  <= not ReadResp after tpd_Clk_RResp ;
+      RD.RValid <= '0' after tpd_Clk_RValid ;
+      RD.RData  <= not Local.RData after tpd_clk_RData ;
+      RD.RResp  <= not Local.RResp after tpd_Clk_RResp ;
 
       -- Signal completion
       Increment(ReadDataDoneCount) ;

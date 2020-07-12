@@ -217,35 +217,35 @@ begin
     variable Axi4OptionVal : integer ; 
     
     variable AxiDefaults    : AxiBus'subtype ; 
-    alias    AW is AxiDefaults.WriteAddress ; 
-    alias    WD is AxiDefaults.WriteData ; 
-    alias    WR is AxiDefaults.WriteResponse ; 
-    alias    AR is AxiDefaults.ReadAddress ; 
-    alias    RD is AxiDefaults.ReadData ;
+    alias    LAW is AxiDefaults.WriteAddress ; 
+    alias    LWD is AxiDefaults.WriteData ; 
+    alias    LWR is AxiDefaults.WriteResponse ; 
+    alias    LAR is AxiDefaults.ReadAddress ; 
+    alias    LRD is AxiDefaults.ReadData ;
 
     variable WriteByteAddr   : integer ;
-    alias    WriteAddress    is AW.AWAddr ; 
-    alias    WriteBurstLen   is AW.AWLen ; 
-    alias    AWSize          is AW.AWSize ;
+    alias    WriteAddress    is LAW.AWAddr ; 
+    alias    WriteBurstLen   is LAW.AWLen ; 
+    alias    AWSize          is LAW.AWSize ;
   
     variable BytesToSend              : integer ; 
     variable BytesPerTransfer         : integer ; 
     variable MaxBytesInFirstTransfer  : integer ; 
-    alias    WriteData       is WD.WData ; 
-    alias    WriteStrb       is WD.WStrb ; 
+    alias    WriteData       is LWD.WData ; 
+    alias    WriteStrb       is LWD.WStrb ; 
     
     variable BytesInTransfer : integer ; 
     variable BytesToReceive  : integer ; 
     variable DataBitOffset   : integer ;
     
     variable ReadByteAddr    : integer ;
-    alias    ReadAddress     is AR.ARAddr ; 
-    alias    ReadBurstLen    is AR.ARLen ; 
-    alias    ARSize          is AR.ARSize ;
-    alias    DefaultReadProt is AR.ARProt ; 
+    alias    ReadAddress     is LAR.ARAddr ; 
+    alias    ReadBurstLen    is LAR.ARLen ; 
+    alias    ARSize          is LAR.ARSize ;
+    alias    DefaultReadProt is LAR.ARProt ; 
     variable ReadProt        : DefaultReadProt'subtype ;
     
-    alias    ReadData    is RD.RData ;
+    alias    ReadData    is LRD.RData ;
     variable ExpectedData    : ReadData'subtype ;
     
     variable Operation       : AddressBusOperationType ;
@@ -299,11 +299,11 @@ begin
             WriteBurstLen := (others => '0') ; 
             
             -- Initiate Write Address
-            WriteAddressFifo.Push(WriteAddress  & WriteBurstLen & AW.AWProt & AW.AWID & AW.AWSize & AW.AWBurst & AW.AWLock & AW.AWCache & AW.AWQOS & AW.AWRegion & AW.AWUser) ;            
+            WriteAddressFifo.Push(WriteAddress  & WriteBurstLen & LAW.AWProt & LAW.AWID & LAW.AWSize & LAW.AWBurst & LAW.AWLock & LAW.AWCache & LAW.AWQOS & LAW.AWRegion & LAW.AWUser) ;            
             Increment(WriteAddressRequestCount) ;
 
             -- Queue Write Response
-            WriteResponseScoreboard.Push(WR.BResp) ;
+            WriteResponseScoreboard.Push(LWR.BResp) ;
             Increment(WriteResponseExpectCount) ;
           end if ;
 
@@ -314,7 +314,7 @@ begin
             -- Single Transfer Write Data Handling
             WriteData     := FromTransaction(TransRec.DataToModel) ;
             AlignCheckWriteData (ModelID, WriteData, WriteStrb, TransRec.DataWidth, WriteByteAddr) ;
-            WriteDataFifo.Push(WriteData & WriteStrb & '1' & WD.WUser & WD.WID) ;
+            WriteDataFifo.Push(WriteData & WriteStrb & '1' & LWD.WUser & LWD.WID) ;
 
             Increment(WriteDataRequestCount) ;
           end if ;
@@ -342,18 +342,18 @@ begin
           if IsWriteAddress(Operation) then
             -- Write Address Handling
             AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Write Address length does not match", FAILURE) ;
-            BytesPerTransfer := 2**to_integer(AW.AWSize);
+            BytesPerTransfer := 2**to_integer(LAW.AWSize);
             
             -- Burst transfer, calcualte burst length 
             WriteBurstLen := to_slv(CalculateAxiBurstLen(TransRec.DataWidth, WriteByteAddr, BytesPerTransfer), WriteBurstLen'length) ;
             
             -- Initiate Write Address
-            WriteAddressFifo.Push(WriteAddress  & WriteBurstLen & AW.AWProt & AW.AWID & AW.AWSize & AW.AWBurst & AW.AWLock & AW.AWCache & AW.AWQOS & AW.AWRegion & AW.AWUser) ;            
+            WriteAddressFifo.Push(WriteAddress  & WriteBurstLen & LAW.AWProt & LAW.AWID & LAW.AWSize & LAW.AWBurst & LAW.AWLock & LAW.AWCache & LAW.AWQOS & LAW.AWRegion & LAW.AWUser) ;            
    
             Increment(WriteAddressRequestCount) ;
 
             -- Queue Write Response
-            WriteResponseScoreboard.Push(WR.BResp) ;
+            WriteResponseScoreboard.Push(LWR.BResp) ;
             Increment(WriteResponseExpectCount) ;
           end if ;
 
@@ -364,7 +364,7 @@ begin
             -- Burst Transfer Write Data Handling
   --!! WriteBurstData -  must have BytesToSend in TransRec.DataWidth
             BytesToSend       := TransRec.DataWidth ; 
-            BytesPerTransfer  := 2 ** to_integer(AW.AWSize) ;
+            BytesPerTransfer  := 2 ** to_integer(LAW.AWSize) ;
             MaxBytesInFirstTransfer := BytesPerTransfer - WriteByteAddr ; 
             AlertIf(ModelID, BytesPerTransfer /= AXI_DATA_BYTE_WIDTH, 
               "Write Bytes Per Transfer (" & to_string(BytesPerTransfer) & ") " & 
@@ -377,26 +377,26 @@ begin
             if BytesToSend > MaxBytesInFirstTransfer then
               -- More than 1 transfer in burst
               GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, MaxBytesInFirstTransfer, WriteByteAddr) ; 
-              WriteDataFifo.Push(WriteData & WriteStrb & '0' & WD.WUser & WD.WID) ;
+              WriteDataFifo.Push(WriteData & WriteStrb & '0' & LWD.WUser & LWD.WID) ;
               BytesToSend       := BytesToSend - MaxBytesInFirstTransfer; 
             else
               -- Only one transfer in Burst.  # Bytes may be less than a whole word
               GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, BytesToSend, WriteByteAddr) ; 
-              WriteDataFifo.Push(WriteData & WriteStrb & '1' & WD.WUser & WD.WID) ;
+              WriteDataFifo.Push(WriteData & WriteStrb & '1' & LWD.WUser & LWD.WID) ;
               BytesToSend := 0 ; 
             end if ; 
 
             -- Middle words of burst
             while BytesToSend >= BytesPerTransfer loop
               GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, BytesPerTransfer) ;
-              WriteDataFifo.Push(WriteData & WriteStrb & '0' & WD.WUser & WD.WID) ;
+              WriteDataFifo.Push(WriteData & WriteStrb & '0' & LWD.WUser & LWD.WID) ;
               BytesToSend := BytesToSend - BytesPerTransfer ; 
             end loop ; 
             
             -- End of Burst
             if BytesToSend > 0 then 
               GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, BytesToSend) ;
-              WriteDataFifo.Push(WriteData & WriteStrb & '1' & WD.WUser & WD.WID) ;
+              WriteDataFifo.Push(WriteData & WriteStrb & '1' & LWD.WUser & LWD.WID) ;
             end if ; 
             
             -- Increment(WriteDataRequestCount) ;
@@ -423,16 +423,16 @@ begin
             ReadAddress   :=  FromTransaction(TransRec.Address) ;
             ReadByteAddr  :=  CalculateAxiByteAddress(ReadAddress, AXI_BYTE_ADDR_WIDTH);
             AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Read Address length does not match", FAILURE) ;
-            BytesPerTransfer := 2**to_integer(AR.ARSize);
+            BytesPerTransfer := 2**to_integer(LAR.ARSize);
 
             ReadBurstLen := (others => '0') ; 
             
-            ReadAddressFifo.Push(ReadAddress & ReadBurstLen & AR.ARProt & AR.ARID & AR.ARSize & AR.ARBurst & AR.ARLock & AR.ARCache & AR.ARQOS & AR.ARRegion & AR.ARUser) ;                        
-            ReadAddressTransactionFifo.Push(ReadAddress & AR.ARProt);
+            ReadAddressFifo.Push(ReadAddress & ReadBurstLen & LAR.ARProt & LAR.ARID & LAR.ARSize & LAR.ARBurst & LAR.ARLock & LAR.ARCache & LAR.ARQOS & LAR.ARRegion & LAR.ARUser) ;                        
+            ReadAddressTransactionFifo.Push(ReadAddress & LAR.ARProt);
             Increment(ReadAddressRequestCount) ;
 
             -- Expect a Read Data Cycle
-            ReadResponseScoreboard.Push(RD.RResp) ;
+            ReadResponseScoreboard.Push(LRD.RResp) ;
             increment(ReadDataExpectCount) ;
           end if ;
 
@@ -487,19 +487,19 @@ begin
             ReadAddress   :=  FromTransaction(TransRec.Address) ;
             ReadByteAddr  :=  CalculateAxiByteAddress(ReadAddress, AXI_BYTE_ADDR_WIDTH);
             AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Read Address length does not match", FAILURE) ;
-            BytesPerTransfer := 2**to_integer(AR.ARSize);
+            BytesPerTransfer := 2**to_integer(LAR.ARSize);
 
             -- Burst transfer, calcualte burst length 
             TransfersInBurst := 1 + CalculateAxiBurstLen(TransRec.DataWidth, ReadByteAddr, BytesPerTransfer) ;
             ReadBurstLen := to_slv(TransfersInBurst - 1, ReadBurstLen'length) ;
             
-            ReadAddressFifo.Push(ReadAddress & ReadBurstLen & AR.ARProt & AR.ARID & AR.ARSize & AR.ARBurst & AR.ARLock & AR.ARCache & AR.ARQOS & AR.ARRegion & AR.ARUser) ;
-            ReadAddressTransactionFifo.Push(ReadAddress & AR.ARProt);
+            ReadAddressFifo.Push(ReadAddress & ReadBurstLen & LAR.ARProt & LAR.ARID & LAR.ARSize & LAR.ARBurst & LAR.ARLock & LAR.ARCache & LAR.ARQOS & LAR.ARRegion & LAR.ARUser) ;
+            ReadAddressTransactionFifo.Push(ReadAddress & LAR.ARProt);
             Increment(ReadAddressRequestCount) ;
 
             -- Expect a Read Data Cycle
             for i in 1 to TransfersInBurst loop 
-              ReadResponseScoreboard.Push(RD.RResp) ;
+              ReadResponseScoreboard.Push(LRD.RResp) ;
             end loop ;
   -- Should this be + TransfersInBurst + 1 ; ???          
             ReadDataExpectCount <= ReadDataExpectCount + to_integer(ReadBurstLen) + 1 ;
@@ -526,7 +526,7 @@ begin
   --!! f(ReadAddress, TransRec, Params, AXI_DATA_BYTE_WIDTH, ReadDataFifo, ReadDataReceiveCount, ReadBurstFifo)            
             ReadByteAddr := CalculateAxiByteAddress(ReadAddress, AXI_BYTE_ADDR_WIDTH);
             BytesToReceive    := TransRec.DataWidth ; 
-            BytesPerTransfer  := 2 ** to_integer(AR.ARSize) ;
+            BytesPerTransfer  := 2 ** to_integer(LAR.ARSize) ;
             AlertIf(ModelID, BytesPerTransfer /= AXI_DATA_BYTE_WIDTH, 
               "Write Bytes Per Transfer (" & to_string(BytesPerTransfer) & ") " & 
               "/= AXI_DATA_BYTE_WIDTH (" & to_string(AXI_DATA_BYTE_WIDTH) & ")"

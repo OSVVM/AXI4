@@ -87,82 +87,9 @@ port (
   -- AXI Master Functional Interface
   AxiBus      : inout Axi4RecType
 ) ;
-
---  -- Entity Declaration region - continues in architecture
---  -- These aliases make the record signals available by their short name
---    -- Write Address
---    alias  AWAddr    : std_logic_vector is AxiBus.WriteAddress.AWAddr ;
---    alias  AWProt    : Axi4ProtType     is AxiBus.WriteAddress.AWProt ;
---    alias  AWValid   : std_logic        is AxiBus.WriteAddress.AWValid ;
---    alias  AWReady   : std_logic        is AxiBus.WriteAddress.AWReady ;
---    -- Axi4 Full
---    alias  AWID      : std_logic_vector is AxiBus.WriteAddress.AWID ;
---    alias  AWLen     : std_logic_vector is AxiBus.WriteAddress.AWLen ;
---    alias  AWSize    : std_logic_vector is AxiBus.WriteAddress.AWSize ;
---    alias  AWBurst   : std_logic_vector is AxiBus.WriteAddress.AWBurst ;
---    alias  AWLock    : std_logic        is AxiBus.WriteAddress.AWLock ;
---    alias  AWCache   : std_logic_vector is AxiBus.WriteAddress.AWCache ;
---    alias  AWQOS     : std_logic_vector is AxiBus.WriteAddress.AWQOS ;
---    alias  AWRegion  : std_logic_vector is AxiBus.WriteAddress.AWRegion ;
---    alias  AWUser    : std_logic_vector is AxiBus.WriteAddress.AWUser ;
---
---    -- Write Data
---    alias  WData     : std_logic_vector is AxiBus.WriteData.WData ;
---    alias  WStrb     : std_logic_vector is AxiBus.WriteData.WStrb ;
---    alias  WValid    : std_logic        is AxiBus.WriteData.WValid ;
---    alias  WReady    : std_logic        is AxiBus.WriteData.WReady ;
---    -- AXI4 Full
---    alias  WLast     : std_logic        is AxiBus.WriteData.WLast ;
---    alias  WUser     : std_logic_vector is AxiBus.WriteData.WUser ;
---    -- AXI3
---    alias  WID       : std_logic_vector is AxiBus.WriteData.WID ;
---
---    -- Write Response
---    alias  BResp     : Axi4RespType     is AxiBus.WriteResponse.BResp ;
---    alias  BValid    : std_logic        is AxiBus.WriteResponse.BValid ;
---    alias  BReady    : std_logic        is AxiBus.WriteResponse.BReady ;
---    -- AXI4 Full
---    alias  BID       : std_logic_vector is AxiBus.WriteResponse.BID ;
---    alias  BUser     : std_logic_vector is AxiBus.WriteResponse.BUser ;
---
---    -- Read Address
---    alias  ARAddr    : std_logic_vector is AxiBus.ReadAddress.ARAddr ;
---    alias  ARProt    : Axi4ProtType     is AxiBus.ReadAddress.ARProt ;
---    alias  ARValid   : std_logic        is AxiBus.ReadAddress.ARValid ;
---    alias  ARReady   : std_logic        is AxiBus.ReadAddress.ARReady ;
---    -- Axi4 Full
---    alias  ARID      : std_logic_vector is AxiBus.ReadAddress.ARID ;
---    -- BurstLength = AxLen+1.  AXI4: 7:0,  AXI3: 3:0
---    alias  ARLen     : std_logic_vector is AxiBus.ReadAddress.ARLen ;
---    -- #Bytes in transfer = 2**AxSize
---    alias  ARSize    : std_logic_vector is AxiBus.ReadAddress.ARSize ;
---    -- AxBurst = (Fixed, Incr, Wrap, NotDefined)
---    alias  ARBurst   : std_logic_vector is AxiBus.ReadAddress.ARBurst ;
---    alias  ARLock    : std_logic is AxiBus.ReadAddress.ARLock ;
---    -- AxCache One-hot (Write-Allocate, Read-Allocate, Modifiable, Bufferable)
---    alias  ARCache   : std_logic_vector is AxiBus.ReadAddress.ARCache  ;
---    alias  ARQOS     : std_logic_vector is AxiBus.ReadAddress.ARQOS    ;
---    alias  ARRegion  : std_logic_vector is AxiBus.ReadAddress.ARRegion ;
---    alias  ARUser    : std_logic_vector is AxiBus.ReadAddress.ARUser   ;
---
---    -- Read Data
---    alias  RData     : std_logic_vector is AxiBus.ReadData.RData ;
---    alias  RResp     : Axi4RespType     is AxiBus.ReadData.RResp ;
---    alias  RValid    : std_logic        is AxiBus.ReadData.RValid ;
---    alias  RReady    : std_logic        is AxiBus.ReadData.RReady ;
---    -- AXI4 Full
---    alias  RID       : std_logic_vector is AxiBus.ReadData.RID   ;
---    alias  RLast     : std_logic        is AxiBus.ReadData.RLast ;
---    alias  RUser     : std_logic_vector is AxiBus.ReadData.RUser ;
 end entity Axi4Slave ;
 
 architecture SlaveTransactor of Axi4Slave is
---  alias    AB : AxiBus'subtype is AxiBus ; 
---  alias    AW is AB.WriteAddress ;
---  alias    WD is AB.WriteData ; 
---  alias    WR is AB.WriteResponse ; 
---  alias    AR is AB.ReadAddress ; 
---  alias    RD is AB.ReadData ; 
 
   alias    AxiAddr is AxiBus.WriteAddress.AWAddr ;
   alias    AxiData is AxiBus.WriteData.WData ;
@@ -229,10 +156,6 @@ begin
   Initalize : process
     variable ID : AlertLogIDType ;
   begin
-    -- Transaction Interface
---    TransRec.AxiAddrWidth   <= AWAddr'length ;
---    TransRec.AxiDataWidth   <= WData'length ;
-
     -- Alerts
     ID                      := GetAlertLogID(MODEL_INSTANCE_NAME) ;
     ModelID                 <= ID ;
@@ -452,58 +375,56 @@ begin
 
       when SET_MODEL_OPTIONS =>
         -- Set Model Options
---        case TransRec.Options is
---        case Axi4OptionsType'val(TransRec.Options) is
---          -- Slave Ready TimeOut Checks
---          when WRITE_RESPONSE_READY_TIME_OUT =>       WriteResponseReadyTimeOut     <= TransRec.IntToModel ;
---          when READ_DATA_READY_TIME_OUT =>            ReadDataReadyTimeOut          <= TransRec.IntToModel ;
---          -- Slave Ready Before Valid
---          when WRITE_ADDRESS_READY_BEFORE_VALID =>    WriteAddressReadyBeforeValid  <= TransRec.BoolToModel ;
---          when WRITE_DATA_READY_BEFORE_VALID =>       WriteDataReadyBeforeValid     <= TransRec.BoolToModel ;
---          when READ_ADDRESS_READY_BEFORE_VALID =>     ReadAddressReadyBeforeValid   <= TransRec.BoolToModel ;
---          -- Slave Ready Delay Cycles
---          when WRITE_ADDRESS_READY_DELAY_CYCLES =>    WriteAddressReadyDelayCycles  <= TransRec.IntToModel ;
---          when WRITE_DATA_READY_DELAY_CYCLES =>       WriteDataReadyDelayCycles     <= TransRec.IntToModel ;
---          when READ_ADDRESS_READY_DELAY_CYCLES =>     ReadAddressReadyDelayCycles   <= TransRec.IntToModel ;
---          -- Slave PROT Settings
---          when WRITE_PROT =>                          ModelWProt <= to_slv(TransRec.IntToModel, ModelWProt'length) ;
---          when READ_PROT =>                           ModelRProt  <= to_slv(TransRec.IntToModel, ModelRProt'length) ;
---          -- Slave RESP Settings
---          when WRITE_RESPONSE_RESP =>                 ModelWResp <= to_slv(TransRec.IntToModel, ModelWResp'length) ;
---          when READ_DATA_RESP =>                      ModelRResp  <= to_slv(TransRec.IntToModel, ModelRResp'length) ;
---          --
---          -- The End -- Done
---          when others =>
---            Alert(ModelID, "Unimplemented Option", FAILURE) ;
---        end case ;
+        case Axi4OptionsType'val(TransRec.Options) is
+          -- Slave Ready TimeOut Checks
+          when WRITE_RESPONSE_READY_TIME_OUT =>       WriteResponseReadyTimeOut     <= TransRec.IntToModel ;
+          when READ_DATA_READY_TIME_OUT =>            ReadDataReadyTimeOut          <= TransRec.IntToModel ;
+          -- Slave Ready Before Valid
+          when WRITE_ADDRESS_READY_BEFORE_VALID =>    WriteAddressReadyBeforeValid  <= TransRec.BoolToModel ;
+          when WRITE_DATA_READY_BEFORE_VALID =>       WriteDataReadyBeforeValid     <= TransRec.BoolToModel ;
+          when READ_ADDRESS_READY_BEFORE_VALID =>     ReadAddressReadyBeforeValid   <= TransRec.BoolToModel ;
+          -- Slave Ready Delay Cycles
+          when WRITE_ADDRESS_READY_DELAY_CYCLES =>    WriteAddressReadyDelayCycles  <= TransRec.IntToModel ;
+          when WRITE_DATA_READY_DELAY_CYCLES =>       WriteDataReadyDelayCycles     <= TransRec.IntToModel ;
+          when READ_ADDRESS_READY_DELAY_CYCLES =>     ReadAddressReadyDelayCycles   <= TransRec.IntToModel ;
+          -- Slave PROT Settings
+          when AWPROT =>                              ModelWProt <= to_slv(TransRec.IntToModel, ModelWProt'length) ;
+          when ARPROT =>                              ModelRProt  <= to_slv(TransRec.IntToModel, ModelRProt'length) ;
+          -- Slave RESP Settings
+          when BRESP =>                               ModelWResp <= to_slv(TransRec.IntToModel, ModelWResp'length) ;
+          when RRESP =>                               ModelRResp  <= to_slv(TransRec.IntToModel, ModelRResp'length) ;
+          --
+          -- The End -- Done
+          when others =>
+            Alert(ModelID, "Unimplemented Option", FAILURE) ;
+        end case ;
         wait for 0 ns ;
         
       when GET_MODEL_OPTIONS =>
---        -- Set Model Options
---        case Axi4OptionsType'val(TransRec.Options) is
---          case TransRec.Options is
---          -- Slave Ready TimeOut Checks
---          when WRITE_RESPONSE_READY_TIME_OUT =>       TransRec.IntFromModel  <= WriteResponseReadyTimeOut ;
---          when READ_DATA_READY_TIME_OUT =>            TransRec.IntFromModel  <= ReadDataReadyTimeOut ;
---          -- Slave Ready Before Valid
---          when WRITE_ADDRESS_READY_BEFORE_VALID =>    TransRec.BoolFromModel <= WriteAddressReadyBeforeValid ;
---          when WRITE_DATA_READY_BEFORE_VALID =>       TransRec.BoolFromModel <= WriteDataReadyBeforeValid    ;
---          when READ_ADDRESS_READY_BEFORE_VALID =>     TransRec.BoolFromModel <= ReadAddressReadyBeforeValid  ;
---          -- Slave Ready Delay Cycles
---          when WRITE_ADDRESS_READY_DELAY_CYCLES =>    TransRec.IntFromModel  <= WriteAddressReadyDelayCycles ;
---          when WRITE_DATA_READY_DELAY_CYCLES =>       TransRec.IntFromModel  <= WriteDataReadyDelayCycles    ;
---          when READ_ADDRESS_READY_DELAY_CYCLES =>     TransRec.IntFromModel  <= ReadAddressReadyDelayCycles  ;
---          -- Slave PROT Settings
---          when WRITE_PROT =>                          TransRec.IntFromModel <= to_integer(ModelWProt) ;
---          when READ_PROT =>                           TransRec.IntFromModel <= to_integer(ModelRProt ) ;
---          -- Slave RESP Settings
---          when WRITE_RESPONSE_RESP =>                 TransRec.IntFromModel <= to_integer(ModelWResp) ;
---          when READ_DATA_RESP =>                      TransRec.IntFromModel <= to_integer(ModelRResp) ;
---          --
---          -- The End -- Done
---          when others =>
---            Alert(ModelID, "Unimplemented Option", FAILURE) ;
---        end case ;
+        -- Set Model Options
+        case Axi4OptionsType'val(TransRec.Options) is
+          -- Slave Ready TimeOut Checks
+          when WRITE_RESPONSE_READY_TIME_OUT =>       TransRec.IntFromModel  <= WriteResponseReadyTimeOut ;
+          when READ_DATA_READY_TIME_OUT =>            TransRec.IntFromModel  <= ReadDataReadyTimeOut ;
+          -- Slave Ready Before Valid
+          when WRITE_ADDRESS_READY_BEFORE_VALID =>    TransRec.BoolFromModel <= WriteAddressReadyBeforeValid ;
+          when WRITE_DATA_READY_BEFORE_VALID =>       TransRec.BoolFromModel <= WriteDataReadyBeforeValid    ;
+          when READ_ADDRESS_READY_BEFORE_VALID =>     TransRec.BoolFromModel <= ReadAddressReadyBeforeValid  ;
+          -- Slave Ready Delay Cycles
+          when WRITE_ADDRESS_READY_DELAY_CYCLES =>    TransRec.IntFromModel  <= WriteAddressReadyDelayCycles ;
+          when WRITE_DATA_READY_DELAY_CYCLES =>       TransRec.IntFromModel  <= WriteDataReadyDelayCycles    ;
+          when READ_ADDRESS_READY_DELAY_CYCLES =>     TransRec.IntFromModel  <= ReadAddressReadyDelayCycles  ;
+          -- Slave PROT Settings
+          when AWPROT =>                              TransRec.IntFromModel <= to_integer(ModelWProt) ;
+          when ARPROT =>                              TransRec.IntFromModel <= to_integer(ModelRProt ) ;
+          -- Slave RESP Settings
+          when BRESP =>                               TransRec.IntFromModel <= to_integer(ModelWResp) ;
+          when RRESP =>                               TransRec.IntFromModel <= to_integer(ModelRResp) ;
+          --
+          -- The End -- Done
+          when others =>
+            Alert(ModelID, "Unimplemented Option", FAILURE) ;
+        end case ;
         wait for 0 ns ;
   
       when others =>

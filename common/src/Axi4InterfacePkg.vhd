@@ -205,21 +205,24 @@ package Axi4InterfacePkg is
 
   -- Axi4 Record, Axi4 full elements are null arrays  
   subtype Axi4LiteRecType is Axi4BaseRecType( 
-    WriteAddress( AWID(0 downto 1), AWUser(0 downto 1) ),
-    WriteData( WUser(0 downto 1), WID(0 downto 1) ),  -- WID only AXI3
+    WriteAddress( AWAddr(open), AWID(0 downto 1), AWUser(0 downto 1) ),
+    WriteData( WData(open), WStrb(open), WUser(0 downto 1), WID(0 downto 1) ),  -- WID only AXI3
     WriteResponse( BID(0 downto 1), BUser(0 downto 1) ),
-    ReadAddress( ARID(0 downto 1), ARUser(0 downto 1) ),
-    ReadData( RID(0 downto 1), RUser(0 downto 1) )
+    ReadAddress( ARAddr(open), ARID(0 downto 1), ARUser(0 downto 1) ),
+    ReadData( RData(open), RID(0 downto 1), RUser(0 downto 1) )
   ) ;
+--   alias Axi4LiteRecType is Axi4BaseRecType ; 
 
-  -- Axi4 Record, Axi4 full elements are null arrays  
-  subtype Axi4RecType is Axi4BaseRecType( 
-    WriteAddress ( AWID(7 downto 0), AWUser(7 downto 0) ),
-    WriteData    ( WUser(7 downto 0), WID(7 downto 0) ),  -- WID only AXI3
-    WriteResponse( BID(7 downto 0), BUser(7 downto 0) ),
-    ReadAddress  ( ARID(7 downto 0), ARUser(7 downto 0) ),
-    ReadData     ( RID(7 downto 0), RUser(7 downto 0) )
-  ) ;
+ -- Axi4 Record, Axi4 full elements are null arrays  
+ subtype Axi4RecType is Axi4BaseRecType( 
+   WriteAddress ( AWAddr(open), AWID(7 downto 0), AWUser(7 downto 0) ),
+   WriteData    ( WData(open), WStrb(open), WUser(7 downto 0), WID(7 downto 0) ),  -- WID only AXI3
+   WriteResponse( BID(7 downto 0), BUser(7 downto 0) ),
+   ReadAddress  ( ARAddr(open), ARID(7 downto 0), ARUser(7 downto 0) ),
+   ReadData     ( RData(open), RID(7 downto 0), RUser(7 downto 0) )
+ ) ;
+ 
+--  alias Axi4RecType is Axi4BaseRecType ; 
   
   function InitAxi4Rec (
     AxiBusRec : in Axi4RecType ;

@@ -213,16 +213,16 @@ package Axi4InterfacePkg is
 --  ) ;
 --   alias Axi4LiteRecType is Axi4BaseRecType ; 
 
- -- Axi4 Record, Axi4 full elements are null arrays  
- subtype Axi4RecType is Axi4BaseRecType( 
-   WriteAddress ( AWAddr(open), AWID(7 downto 0), AWUser(7 downto 0) ),
-   WriteData    ( WData(open), WStrb(open), WUser(7 downto 0), WID(7 downto 0) ),  -- WID only AXI3
-   WriteResponse( BID(7 downto 0), BUser(7 downto 0) ),
-   ReadAddress  ( ARAddr(open), ARID(7 downto 0), ARUser(7 downto 0) ),
-   ReadData     ( RData(open), RID(7 downto 0), RUser(7 downto 0) )
- ) ;
+-- -- Axi4 Record, Axi4 full elements are null arrays  
+-- subtype Axi4RecType is Axi4BaseRecType( 
+--   WriteAddress ( AWAddr(open), AWID(7 downto 0), AWUser(7 downto 0) ),
+--   WriteData    ( WData(open), WStrb(open), WUser(7 downto 0), WID(7 downto 0) ),  -- WID only AXI3
+--   WriteResponse( BID(7 downto 0), BUser(7 downto 0) ),
+--   ReadAddress  ( ARAddr(open), ARID(7 downto 0), ARUser(7 downto 0) ),
+--   ReadData     ( RData(open), RID(7 downto 0), RUser(7 downto 0) )
+-- ) ;
  
---  alias Axi4RecType is Axi4BaseRecType ; 
+  alias Axi4RecType is Axi4BaseRecType ; 
   
   function InitAxi4Rec (
     AxiBusRec : in Axi4RecType ;

@@ -75,13 +75,47 @@ architecture TestHarness of TbAxi4 is
   signal AxiMinionTransRec  : LocalTransactionRecType ;
 
 
-  -- AXI Master Functional Interface
+--  -- AXI Master Functional Interface
+--  signal   AxiBus : Axi4RecType( 
+--    WriteAddress( AWAddr(AXI_ADDR_WIDTH-1 downto 0) ),
+--    WriteData   ( WData (AXI_DATA_WIDTH-1 downto 0),   WStrb(AXI_STRB_WIDTH-1 downto 0) ),
+--    ReadAddress ( ARAddr(AXI_ADDR_WIDTH-1 downto 0) ),
+--    ReadData    ( RData (AXI_DATA_WIDTH-1 downto 0) )
+--  ) ;
+
   signal   AxiBus : Axi4RecType( 
-    WriteAddress( AWAddr(AXI_ADDR_WIDTH-1 downto 0) ),
-    WriteData( WData(AXI_DATA_WIDTH-1 downto 0), WStrb(AXI_STRB_WIDTH-1 downto 0) ),
-    ReadAddress( ARAddr(AXI_ADDR_WIDTH-1 downto 0) ),
-    ReadData( RData(AXI_DATA_WIDTH-1 downto 0) )
+    WriteAddress( 
+      AWAddr(AXI_ADDR_WIDTH-1 downto 0),
+      AWID(7 downto 0), 
+      AWUser(7 downto 0)
+    ),
+    WriteData   ( 
+      WData(AXI_DATA_WIDTH-1 downto 0), 
+      WStrb(AXI_STRB_WIDTH-1 downto 0),
+      WUser(7 downto 0), 
+      WID(7 downto 0)    
+    ),
+    WriteResponse( 
+      BID(7 downto 0), 
+      BUser(7 downto 0) 
+    ),
+    ReadAddress ( 
+      ARAddr(AXI_ADDR_WIDTH-1 downto 0),
+      ARID(7 downto 0), 
+      ARUser(7 downto 0)
+    ),
+    ReadData    ( 
+      RData(AXI_DATA_WIDTH-1 downto 0),
+      RID(7 downto 0), 
+      RUser(7 downto 0)
+    )
   ) ;
+--   WriteAddress (  ),
+--   WriteData    (  ),  -- WID only AXI3
+--   WriteResponse( BID(7 downto 0), BUser(7 downto 0) ),
+--   ReadAddress  ( ARAddr(open), ARID(7 downto 0), ARUser(7 downto 0) ),
+--   ReadData     ( RData(open), RID(7 downto 0), RUser(7 downto 0) )
+
 
   -- Aliases to make access to record elements convenient 
   -- This is only needed for model use them

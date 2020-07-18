@@ -1,6 +1,6 @@
 --
---  File Name:         Axi4Pkg.vhd
---  Design Unit Name:  Axi4Pkg
+--  File Name:         Axi4ModelPkg.vhd
+--  Design Unit Name:  Axi4ModelPkg
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -51,7 +51,7 @@ library osvvm ;
     
 use work.Axi4InterfacePkg.all ; 
   
-package Axi4Pkg is 
+package Axi4ModelPkg is 
 
   --                                     00    01      10      11
   type  Axi4UnresolvedRespEnumType is (OKAY, EXOKAY, SLVERR, DECERR) ;
@@ -140,12 +140,12 @@ package Axi4Pkg is
     constant MaxAddrBits     : In    integer     
   ) ;
 
-end package Axi4Pkg ;
+end package Axi4ModelPkg ;
 
 -- /////////////////////////////////////////////////////////////////////////////////////////
 -- /////////////////////////////////////////////////////////////////////////////////////////
 
-package body Axi4Pkg is
+package body Axi4ModelPkg is
  
   function resolved_max ( s : Axi4UnresolvedRespVectorEnumType) return Axi4UnresolvedRespEnumType is
   begin
@@ -393,4 +393,4 @@ package body Axi4Pkg is
     end if ; 
   end procedure AxiReadDataAlignCheck ; 
 
-end package body Axi4Pkg ; 
+end package body Axi4ModelPkg ; 

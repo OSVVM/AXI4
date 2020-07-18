@@ -409,38 +409,38 @@ package body Axi4OptionsTypePkg is
 --    -- AXI Interface Settings    
 --    -- Set all AXI bus parameters to 0 and Size them to match the corresponding AXI Bus signal.
 --    -- Write Address
---    SetAxiOption(Params, AWPROT,    to_slv(0, AxiBus.WriteAddress.AWProt'length)) ;
---    SetAxiOption(Params, AWID,      to_slv(0, AxiBus.WriteAddress.AWID'length)) ;
---    SetAxiOption(Params, AWSIZE,    to_slv(0, AxiBus.WriteAddress.AWSize'length)) ;
---    SetAxiOption(Params, AWBURST,   to_slv(0, AxiBus.WriteAddress.AWBurst'length)) ;
+--    SetAxiOption(Params, AWPROT,    to_slv(0, AxiBus.WriteAddress.Prot'length)) ;
+--    SetAxiOption(Params, AWID,      to_slv(0, AxiBus.WriteAddress.ID'length)) ;
+--    SetAxiOption(Params, AWSIZE,    to_slv(0, AxiBus.WriteAddress.Size'length)) ;
+--    SetAxiOption(Params, AWBURST,   to_slv(0, AxiBus.WriteAddress.Burst'length)) ;
 --    SetAxiOption(Params, AWLOCK,    to_slv(0, 1)) ;
---    SetAxiOption(Params, AWCACHE,   to_slv(0, AxiBus.WriteAddress.AWCache'length)) ;
---    SetAxiOption(Params, AWQOS,     to_slv(0, AxiBus.WriteAddress.AWRegion'length)) ;
---    SetAxiOption(Params, AWREGION,  to_slv(0, AxiBus.WriteAddress.AWSize'length)) ;
---    SetAxiOption(Params, AWUSER,    to_slv(0, AxiBus.WriteAddress.AWUser'length)) ;
+--    SetAxiOption(Params, AWCACHE,   to_slv(0, AxiBus.WriteAddress.Cache'length)) ;
+--    SetAxiOption(Params, AWQOS,     to_slv(0, AxiBus.WriteAddress.Region'length)) ;
+--    SetAxiOption(Params, AWREGION,  to_slv(0, AxiBus.WriteAddress.Size'length)) ;
+--    SetAxiOption(Params, AWUSER,    to_slv(0, AxiBus.WriteAddress.User'length)) ;
 --    -- Write Data
 --    SetAxiOption(Params, WLAST,     to_slv(0, 1)) ;
---    SetAxiOption(Params, WUSER,     to_slv(0, AxiBus.WriteData.WUser'length)) ;
---    SetAxiOption(Params, WID,       to_slv(0, AxiBus.WriteData.WID'length)) ;
+--    SetAxiOption(Params, WUSER,     to_slv(0, AxiBus.WriteData.User'length)) ;
+--    SetAxiOption(Params, WID,       to_slv(0, AxiBus.WriteData.ID'length)) ;
 --    -- Write Response
---    SetAxiOption(Params, BRESP,     to_slv(0, AxiBus.WriteResponse.BResp'length)) ;
---    SetAxiOption(Params, BID,       to_slv(0, AxiBus.WriteResponse.BID'length)) ;
---    SetAxiOption(Params, BUSER,     to_slv(0, AxiBus.WriteResponse.BUser'length)) ;
+--    SetAxiOption(Params, BRESP,     to_slv(0, AxiBus.WriteResponse.Resp'length)) ;
+--    SetAxiOption(Params, BID,       to_slv(0, AxiBus.WriteResponse.ID'length)) ;
+--    SetAxiOption(Params, BUSER,     to_slv(0, AxiBus.WriteResponse.User'length)) ;
 --    -- Read Address
---    SetAxiOption(Params, ARPROT,            to_slv(0, AxiBus.ReadAddress.ARProt'length)) ;
---    SetAxiOption(Params, ARID,      to_slv(0, AxiBus.ReadAddress.ARID'length)) ;
---    SetAxiOption(Params, ARSIZE,    to_slv(0, AxiBus.ReadAddress.ARSize'length)) ;
---    SetAxiOption(Params, ARBURST,   to_slv(0, AxiBus.ReadAddress.ARBurst'length)) ;
+--    SetAxiOption(Params, ARPROT,    to_slv(0, AxiBus.ReadAddress.Prot'length)) ;
+--    SetAxiOption(Params, ARID,      to_slv(0, AxiBus.ReadAddress.ID'length)) ;
+--    SetAxiOption(Params, ARSIZE,    to_slv(0, AxiBus.ReadAddress.Size'length)) ;
+--    SetAxiOption(Params, ARBURST,   to_slv(0, AxiBus.ReadAddress.Burst'length)) ;
 --    SetAxiOption(Params, ARLOCK,    to_slv(0, 1)) ;
---    SetAxiOption(Params, ARCACHE,   to_slv(0, AxiBus.ReadAddress.ARCache'length)) ;
---    SetAxiOption(Params, ARQOS,     to_slv(0, AxiBus.ReadAddress.ARQOS'length)) ;
---    SetAxiOption(Params, ARREGION,  to_slv(0, AxiBus.ReadAddress.ARRegion'length)) ;
---    SetAxiOption(Params, ARUSER,    to_slv(0, AxiBus.ReadAddress.ARUser'length)) ;
+--    SetAxiOption(Params, ARCACHE,   to_slv(0, AxiBus.ReadAddress.Cache'length)) ;
+--    SetAxiOption(Params, ARQOS,     to_slv(0, AxiBus.ReadAddress.QOS'length)) ;
+--    SetAxiOption(Params, ARREGION,  to_slv(0, AxiBus.ReadAddress.Region'length)) ;
+--    SetAxiOption(Params, ARUSER,    to_slv(0, AxiBus.ReadAddress.User'length)) ;
 --    -- Read Data
---    SetAxiOption(Params, RRESP,     to_slv(0, AxiBus.ReadData.RResp'length)) ;
---    SetAxiOption(Params, RID,       to_slv(0, AxiBus.ReadData.RID'length)) ;
+--    SetAxiOption(Params, RRESP,     to_slv(0, AxiBus.ReadData.Resp'length)) ;
+--    SetAxiOption(Params, RID,       to_slv(0, AxiBus.ReadData.ID'length)) ;
 --    SetAxiOption(Params, RLAST,     to_slv(0, 1)) ;
---    SetAxiOption(Params, RUSER,     to_slv(0, AxiBus.ReadData.RUser'length)) ;
+--    SetAxiOption(Params, RUSER,     to_slv(0, AxiBus.ReadData.User'length)) ;
   end procedure InitAxiOptions ; 
 
  
@@ -454,53 +454,53 @@ package body Axi4OptionsTypePkg is
   begin
     case Operation is
       -- AXI
-      when AWPROT =>       AxiBus.WriteAddress.AWProt   := to_slv(OpVal, AxiBus.WriteAddress.AWProt'length) ;
+      when AWPROT =>       AxiBus.WriteAddress.Prot   := to_slv(OpVal, AxiBus.WriteAddress.Prot'length) ;
         
       -- AXI4 Full
-      when AWID =>         AxiBus.WriteAddress.AWID     := to_slv(OpVal, AxiBus.WriteAddress.AWID'length) ;
-      when AWSIZE =>       AxiBus.WriteAddress.AWSize   := to_slv(OpVal, AxiBus.WriteAddress.AWSize'length) ;
-      when AWBURST =>      AxiBus.WriteAddress.AWBurst  := to_slv(OpVal, AxiBus.WriteAddress.AWBurst'length) ;
-      when AWLOCK =>       AxiBus.WriteAddress.AWLock   := '1' when OpVal mod 2 = 1 else '0' ; 
-      when AWCACHE =>      AxiBus.WriteAddress.AWCache  := to_slv(OpVal, AxiBus.WriteAddress.AWCache'length) ;
-      when AWQOS =>        AxiBus.WriteAddress.AWQOS    := to_slv(OpVal, AxiBus.WriteAddress.AWQOS'length) ;
-      when AWREGION =>     AxiBus.WriteAddress.AWRegion := to_slv(OpVal, AxiBus.WriteAddress.AWRegion'length) ;
-      when AWUSER =>       AxiBus.WriteAddress.AWUser   := to_slv(OpVal, AxiBus.WriteAddress.AWUser'length) ;
+      when AWID =>         AxiBus.WriteAddress.ID     := to_slv(OpVal, AxiBus.WriteAddress.ID'length) ;
+      when AWSIZE =>       AxiBus.WriteAddress.Size   := to_slv(OpVal, AxiBus.WriteAddress.Size'length) ;
+      when AWBURST =>      AxiBus.WriteAddress.Burst  := to_slv(OpVal, AxiBus.WriteAddress.Burst'length) ;
+      when AWLOCK =>       AxiBus.WriteAddress.Lock   := '1' when OpVal mod 2 = 1 else '0' ;
+      when AWCACHE =>      AxiBus.WriteAddress.Cache  := to_slv(OpVal, AxiBus.WriteAddress.Cache'length) ;
+      when AWQOS =>        AxiBus.WriteAddress.QOS    := to_slv(OpVal, AxiBus.WriteAddress.QOS'length) ;
+      when AWREGION =>     AxiBus.WriteAddress.Region := to_slv(OpVal, AxiBus.WriteAddress.Region'length) ;
+      when AWUSER =>       AxiBus.WriteAddress.User   := to_slv(OpVal, AxiBus.WriteAddress.User'length) ;
 
       -- Write Data:  AXI
       -- AXI4 Full
-      when WLAST =>        AxiBus.WriteData.WLast       := '1' when OpVal mod 2 = 1 else '0' ;
-      when WUSER =>        AxiBus.WriteData.WUser       := to_slv(OpVal, AxiBus.WriteData.WUser'length) ;
-                                                        
-      -- AXI3                                           
-      when WID =>          AxiBus.WriteData.WID         := to_slv(OpVal, AxiBus.WriteData.WID'length) ; 
+      when WLAST =>        AxiBus.WriteData.Last       := '1' when OpVal mod 2 = 1 else '0' ;
+      when WUSER =>        AxiBus.WriteData.User       := to_slv(OpVal, AxiBus.WriteData.User'length) ;
+                                                       
+      -- AXI3                                          
+      when WID =>          AxiBus.WriteData.ID         := to_slv(OpVal, AxiBus.WriteData.ID'length) ; 
               
       -- Write Response:  AXI
-      when BRESP =>        AxiBus.WriteResponse.BResp   := to_slv(OpVal, AxiBus.WriteResponse.BResp'length) ;
-                                                        
-      -- AXI4 Full                                      
-      when BID =>          AxiBus.WriteResponse.BID     := to_slv(OpVal, AxiBus.WriteResponse.BID'length) ;
-      when BUSER =>        AxiBus.WriteResponse.BUser   := to_slv(OpVal, AxiBus.WriteResponse.BUser'length) ; 
+      when BRESP =>        AxiBus.WriteResponse.Resp   := to_slv(OpVal, AxiBus.WriteResponse.Resp'length) ;
+                                                       
+      -- AXI4 Full                                     
+      when BID =>          AxiBus.WriteResponse.ID     := to_slv(OpVal, AxiBus.WriteResponse.ID'length) ;
+      when BUSER =>        AxiBus.WriteResponse.User   := to_slv(OpVal, AxiBus.WriteResponse.User'length) ; 
                                                         
       -- Read Address:  AXI
-      when ARPROT =>       AxiBus.ReadAddress.ARProt    := to_slv(OpVal, AxiBus.ReadAddress.ARProt'length) ;
+      when ARPROT =>       AxiBus.ReadAddress.Prot    := to_slv(OpVal, AxiBus.ReadAddress.Prot'length) ;
         
       -- AXI4 Full
-      when ARID =>         AxiBus.ReadAddress.ARID      := to_slv(OpVal, AxiBus.ReadAddress.ARID'length) ;
-      when ARSIZE =>       AxiBus.ReadAddress.ARSize    := to_slv(OpVal, AxiBus.ReadAddress.ARSize'length) ;
-      when ARBURST =>      AxiBus.ReadAddress.ARBurst   := to_slv(OpVal, AxiBus.ReadAddress.ARBurst'length) ;
-      when ARLOCK =>       AxiBus.ReadAddress.ARLock    := '1' when OpVal mod 2 = 1 else '0' ;
-      when ARCACHE =>      AxiBus.ReadAddress.ARCache   := to_slv(OpVal, AxiBus.ReadAddress.ARCache'length) ;
-      when ARQOS =>        AxiBus.ReadAddress.ARQOS     := to_slv(OpVal, AxiBus.ReadAddress.ARQOS'length) ;
-      when ARREGION =>     AxiBus.ReadAddress.ARRegion  := to_slv(OpVal, AxiBus.ReadAddress.ARRegion'length) ;
-      when ARUSER =>       AxiBus.ReadAddress.ARUser    := to_slv(OpVal, AxiBus.ReadAddress.ARUser'length) ;
+      when ARID =>         AxiBus.ReadAddress.ID      := to_slv(OpVal, AxiBus.ReadAddress.ID'length) ;
+      when ARSIZE =>       AxiBus.ReadAddress.Size    := to_slv(OpVal, AxiBus.ReadAddress.Size'length) ;
+      when ARBURST =>      AxiBus.ReadAddress.Burst   := to_slv(OpVal, AxiBus.ReadAddress.Burst'length) ;
+      when ARLOCK =>       AxiBus.ReadAddress.Lock    := '1' when OpVal mod 2 = 1 else '0' ;
+      when ARCACHE =>      AxiBus.ReadAddress.Cache   := to_slv(OpVal, AxiBus.ReadAddress.Cache'length) ;
+      when ARQOS =>        AxiBus.ReadAddress.QOS     := to_slv(OpVal, AxiBus.ReadAddress.QOS'length) ;
+      when ARREGION =>     AxiBus.ReadAddress.Region  := to_slv(OpVal, AxiBus.ReadAddress.Region'length) ;
+      when ARUSER =>       AxiBus.ReadAddress.User    := to_slv(OpVal, AxiBus.ReadAddress.User'length) ;
 
       -- Read Data: AXI
-      when RRESP =>         AxiBus.ReadData.RResp       := to_slv(OpVal, AxiBus.ReadData.RResp'length) ;
+      when RRESP =>         AxiBus.ReadData.Resp       := to_slv(OpVal, AxiBus.ReadData.Resp'length) ;
         
       -- AXI4 Full
-      when RID =>           AxiBus.ReadData.RID         := to_slv(OpVal, AxiBus.ReadData.RID'length) ; 
-      when RLAST =>         AxiBus.ReadData.RLast       := '1' when OpVal mod 2 = 1 else '0' ;
-      when RUSER =>         AxiBus.ReadData.RUser       := to_slv(OpVal, AxiBus.ReadData.RUser'length) ; 
+      when RID =>           AxiBus.ReadData.ID         := to_slv(OpVal, AxiBus.ReadData.ID'length) ; 
+      when RLAST =>         AxiBus.ReadData.Last       := '1' when OpVal mod 2 = 1 else '0' ;
+      when RUSER =>         AxiBus.ReadData.User       := to_slv(OpVal, AxiBus.ReadData.User'length) ; 
 
       -- The End -- Done
       when others =>
@@ -519,53 +519,53 @@ package body Axi4OptionsTypePkg is
     case Operation is
       -- Write Address
       -- AXI
-      when AWPROT =>             return to_integer(AxiBus.WriteAddress.AWProt);
+      when AWPROT =>             return to_integer(AxiBus.WriteAddress.Prot);
                        
       -- AXI4 Full            
-      when AWID =>               return to_integer(AxiBus.WriteAddress.AWID    ) ;
-      when AWSIZE =>             return to_integer(AxiBus.WriteAddress.AWSize  ) ;
-      when AWBURST =>            return to_integer(AxiBus.WriteAddress.AWBurst ) ;
-      when AWLOCK =>             return to_integer(AxiBus.WriteAddress.AWLock  ) ;
-      when AWCACHE =>            return to_integer(AxiBus.WriteAddress.AWCache ) ;
-      when AWQOS =>              return to_integer(AxiBus.WriteAddress.AWQOS   ) ;
-      when AWREGION =>           return to_integer(AxiBus.WriteAddress.AWRegion) ;
-      when AWUSER =>             return to_integer(AxiBus.WriteAddress.AWUser  ) ;
+      when AWID =>               return to_integer(AxiBus.WriteAddress.ID    ) ;
+      when AWSIZE =>             return to_integer(AxiBus.WriteAddress.Size  ) ;
+      when AWBURST =>            return to_integer(AxiBus.WriteAddress.Burst ) ;
+      when AWLOCK =>             return to_integer(AxiBus.WriteAddress.Lock  ) ;
+      when AWCACHE =>            return to_integer(AxiBus.WriteAddress.Cache ) ;
+      when AWQOS =>              return to_integer(AxiBus.WriteAddress.QOS   ) ;
+      when AWREGION =>           return to_integer(AxiBus.WriteAddress.Region) ;
+      when AWUSER =>             return to_integer(AxiBus.WriteAddress.User  ) ;
                        
       -- Write Data             
       -- AXI4 Full            
-      when WLAST =>              return to_integer(AxiBus.WriteData.WLast) ;    
-      when WUSER =>              return to_integer(AxiBus.WriteData.WUser) ;    
+      when WLAST =>              return to_integer(AxiBus.WriteData.Last) ;    
+      when WUSER =>              return to_integer(AxiBus.WriteData.User) ;    
                        
       -- AXI3            
-      when WID =>                return to_integer(AxiBus.WriteData.WID) ;      
+      when WID =>                return to_integer(AxiBus.WriteData.ID) ;      
                           
       -- Write Response            
-      when BRESP =>              return to_integer(AxiBus.WriteResponse.BResp) ;    
+      when BRESP =>              return to_integer(AxiBus.WriteResponse.Resp) ;    
                        
       -- AXI4 Full            
-      when BID =>                return to_integer(AxiBus.WriteResponse.BID  ) ;    
-      when BUSER =>              return to_integer(AxiBus.WriteResponse.BUser) ;    
+      when BID =>                return to_integer(AxiBus.WriteResponse.ID  ) ;    
+      when BUSER =>              return to_integer(AxiBus.WriteResponse.User) ;    
                        
       -- Read Address            
-      when ARPROT =>             return to_integer(AxiBus.ReadAddress.ARProt) ;   
+      when ARPROT =>             return to_integer(AxiBus.ReadAddress.Prot) ;   
                        
       -- AXI4 Full            
-      when ARID =>               return to_integer(AxiBus.ReadAddress.ARID    ) ; 
-      when ARSIZE =>             return to_integer(AxiBus.ReadAddress.ARSize  ) ; 
-      when ARBURST =>            return to_integer(AxiBus.ReadAddress.ARBurst ) ; 
-      when ARLOCK =>             return to_integer(AxiBus.ReadAddress.ARLock  ) ; 
-      when ARCACHE =>            return to_integer(AxiBus.ReadAddress.ARCache ) ; 
-      when ARQOS =>              return to_integer(AxiBus.ReadAddress.ARQOS   ) ; 
-      when ARREGION =>           return to_integer(AxiBus.ReadAddress.ARRegion) ; 
-      when ARUSER =>             return to_integer(AxiBus.ReadAddress.ARUser  ) ; 
+      when ARID =>               return to_integer(AxiBus.ReadAddress.ID    ) ; 
+      when ARSIZE =>             return to_integer(AxiBus.ReadAddress.Size  ) ; 
+      when ARBURST =>            return to_integer(AxiBus.ReadAddress.Burst ) ; 
+      when ARLOCK =>             return to_integer(AxiBus.ReadAddress.Lock  ) ; 
+      when ARCACHE =>            return to_integer(AxiBus.ReadAddress.Cache ) ; 
+      when ARQOS =>              return to_integer(AxiBus.ReadAddress.QOS   ) ; 
+      when ARREGION =>           return to_integer(AxiBus.ReadAddress.Region) ; 
+      when ARUSER =>             return to_integer(AxiBus.ReadAddress.User  ) ; 
                        
       -- Read Data            
-      when RRESP =>              return to_integer(AxiBus.ReadData.RResp) ;   
+      when RRESP =>              return to_integer(AxiBus.ReadData.Resp) ;   
                        
       -- AXI4 Full            
-      when RID =>                return to_integer(AxiBus.ReadData.RID   ) ;
-      when RLAST =>              return to_integer(AxiBus.ReadData.RLast ) ;   
-      when RUSER =>              return to_integer(AxiBus.ReadData.RUser ) ;
+      when RID =>                return to_integer(AxiBus.ReadData.ID   ) ;
+      when RLAST =>              return to_integer(AxiBus.ReadData.Last ) ;   
+      when RUSER =>              return to_integer(AxiBus.ReadData.User ) ;
 
       -- The End -- Done
       when others =>

@@ -1,4 +1,4 @@
--- 
+--
 --  File Name:         Axi4LiteContext.vhd
 --  Design Unit Name:  Axi4LiteContext
 --  Revision:          OSVVM MODELS STANDARD VERSION
@@ -6,7 +6,7 @@
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
 --
 --  Description
---      Context Declaration for using Axi4Lite models
+--      Context Declaration for using Axi4 models
 --
 --  Developed by/for:
 --        SynthWorks Design Inc.
@@ -38,23 +38,24 @@
 --
 
 context Axi4LiteContext is
-    library osvvm_axi4 ;
+    library osvvm_common ;  
+    context osvvm_common.OsvvmCommonContext ;
+      
+    library osvvm_Axi4 ;
 
-    use osvvm_axi4.Axi4CommonPkg.all ;
-    use osvvm_axi4.Axi4LiteInterfacePkg.all ;
+    use osvvm_Axi4.Axi4CommonPkg.all ;
+    use osvvm_Axi4.Axi4LiteInterfacePkg.all ;
 
-    use osvvm_axi4.Axi4LiteMasterOptionsTypePkg.all ;
-    use osvvm_axi4.Axi4LiteMasterTransactionPkg.all ;
-    use osvvm_axi4.Axi4LiteMasterPkg.all ;
-
-    use osvvm_axi4.Axi4LiteSlaveOptionsTypePkg.all ;
-    use osvvm_axi4.Axi4LiteSlaveTransactionPkg.all ;
-
-    use osvvm_axi4.Axi4LiteMasterComponentPkg.all ;
-    use osvvm_axi4.Axi4LiteSlaveComponentPkg.all ;
-    use osvvm_axi4.Axi4LiteMonitorComponentPkg.all ;
-
-    -- Temporary inclusion of Axi4Lite things that become deprecated with changes
-    use osvvm_axi4.Axi4LiteVersionCompatibilityPkg.all ;
+    use osvvm_Axi4.Axi4OptionsTypePkg.all ; 
+    use osvvm_Axi4.Axi4ModelPkg.all ;
+    
+    
+    use osvvm_Axi4.Axi4LiteMasterComponentPkg.all ;
+    use osvvm_Axi4.Axi4LiteResponderComponentPkg.all ;
+    use osvvm_Axi4.Axi4LiteMemoryComponentPkg.all ;
+    use osvvm_Axi4.Axi4LiteMonitorComponentPkg.all ;
+    
+    -- Temporary inclusion of Axi4 things that become deprecated with changes
+    use osvvm_Axi4.Axi4VersionCompatibilityPkg.all ;
 
 end context Axi4LiteContext ;

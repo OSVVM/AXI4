@@ -42,14 +42,8 @@
 
 library ieee ;
   use ieee.std_logic_1164.all ;
-  use ieee.numeric_std.all ;
-  use ieee.numeric_std_unsigned.all ;
-
-library osvvm ;
-    context osvvm.OsvvmContext ;
 
   use work.Axi4LiteInterfacePkg.all ; 
-  use work.Axi4CommonPkg.all ; 
 
 package Axi4LiteMonitorComponentPkg is
   component Axi4LiteMonitor is
@@ -59,7 +53,7 @@ package Axi4LiteMonitorComponentPkg is
       nReset      : in   std_logic ;
 
       -- AXI Master Functional Interface
-      AxiLiteBus  : in    Axi4LiteRecType 
+      AxiBus      : in    Axi4LiteRecType 
     ) ;
   end component Axi4LiteMonitor ;
 end package Axi4LiteMonitorComponentPkg ;

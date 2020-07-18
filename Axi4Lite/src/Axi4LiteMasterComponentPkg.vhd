@@ -42,39 +42,58 @@
 
 library ieee ;
   use ieee.std_logic_1164.all ;
-  use ieee.numeric_std.all ;
-  use ieee.numeric_std_unsigned.all ;
-
-library osvvm ;
-  context osvvm.OsvvmContext ;
-  use osvvm.ScoreboardPkg_slv.all ;
   
-  use work.Axi4LiteMasterTransactionPkg.all ; 
+library osvvm_common ;  
+  context osvvm_common.OsvvmCommonContext ;
+
   use work.Axi4LiteInterfacePkg.all ; 
-  use work.Axi4CommonPkg.all ; 
 
 package Axi4LiteMasterComponentPkg is
   component Axi4LiteMaster is
     generic (
-      MODEL_ID_NAME   : string :="" ; 
-      tperiod_Clk     : time   := 10 ns ;
-      
-      tpd_Clk_AWValid : time   := 2 ns ; 
-      tpd_Clk_AWProt  : time   := 2 ns ; 
-      tpd_Clk_AWAddr  : time   := 2 ns ; 
+      MODEL_ID_NAME    : string :="" ;
+      tperiod_Clk      : time   := 10 ns ;
 
-      tpd_Clk_WValid  : time   := 2 ns ; 
-      tpd_Clk_WData   : time   := 2 ns ; 
-      tpd_Clk_WStrb   : time   := 2 ns ; 
-      tpd_Clk_WLast   : time   := 2 ns ;
+      tpd_Clk_AWAddr   : time   := 2 ns ;
+      tpd_Clk_AWProt   : time   := 2 ns ;
+      tpd_Clk_AWValid  : time   := 2 ns ;
+      -- AXI4 Full
+      tpd_clk_AWLen    : time   := 2 ns ;
+      tpd_clk_AWID     : time   := 2 ns ;
+      tpd_clk_AWSize   : time   := 2 ns ;
+      tpd_clk_AWBurst  : time   := 2 ns ;
+      tpd_clk_AWLock   : time   := 2 ns ;
+      tpd_clk_AWCache  : time   := 2 ns ;
+      tpd_clk_AWQOS    : time   := 2 ns ;
+      tpd_clk_AWRegion : time   := 2 ns ;
+      tpd_clk_AWUser   : time   := 2 ns ;
 
-      tpd_Clk_BReady  : time   := 2 ns ; 
+      tpd_Clk_WValid   : time   := 2 ns ;
+      tpd_Clk_WData    : time   := 2 ns ;
+      tpd_Clk_WStrb    : time   := 2 ns ;
+      -- AXI4 Full
+      tpd_Clk_WLast    : time   := 2 ns ;
+      tpd_Clk_WUser    : time   := 2 ns ;
+      -- AXI3
+      tpd_Clk_WID      : time   := 2 ns ;
 
-      tpd_Clk_ARValid : time   := 2 ns ; 
-      tpd_Clk_ARProt  : time   := 2 ns ; 
-      tpd_Clk_ARAddr  : time   := 2 ns ; 
+      tpd_Clk_BReady   : time   := 2 ns ;
 
-      tpd_Clk_RReady  : time   := 2 ns  
+      tpd_Clk_ARValid  : time   := 2 ns ;
+      tpd_Clk_ARProt   : time   := 2 ns ;
+      tpd_Clk_ARAddr   : time   := 2 ns ;
+      -- AXI4 Full
+      tpd_clk_ARLen    : time   := 2 ns ;
+      tpd_clk_ARID     : time   := 2 ns ;
+      tpd_clk_ARSize   : time   := 2 ns ;
+      tpd_clk_ARBurst  : time   := 2 ns ;
+      tpd_clk_ARLock   : time   := 2 ns ;
+      tpd_clk_ARCache  : time   := 2 ns ;
+      tpd_clk_ARQOS    : time   := 2 ns ;
+      tpd_clk_ARRegion : time   := 2 ns ;
+      tpd_clk_ARUser   : time   := 2 ns ;
+
+      tpd_Clk_RReady   : time   := 2 ns 
     ) ;
     port (
       -- Globals
@@ -82,10 +101,10 @@ package Axi4LiteMasterComponentPkg is
       nReset      : in   std_logic ;
 
       -- Testbench Transaction Interface
-      TransRec    : inout AddressBusMasterTransactionRecType ;
+      TransRec    : inout AddressBusTransactionRecType ;
 
       -- AXI Master Functional Interface
-      AxiLiteBus  : inout Axi4LiteRecType 
+      AxiBus  : inout Axi4LiteRecType
     ) ;
   end component Axi4LiteMaster ;
 end package Axi4LiteMasterComponentPkg ;

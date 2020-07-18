@@ -20,7 +20,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    01/2020   2020.02    Refactored from Axi4LiteSlaveTransactionPkg.vhd
+--    01/2020   2020.02    Refactored from Axi4SlaveTransactionPkg.vhd
 --
 --
 --  This file is part of OSVVM.
@@ -43,17 +43,19 @@
 library osvvm ;
     context osvvm.OsvvmContext ;
     
-    use work.Axi4LiteSlaveTransactionPkg.all ;
-    use work.Axi4LiteMasterTransactionPkg.all ;
+library osvvm_common ;  
+  context osvvm_common.OsvvmCommonContext ;
 
-
+--    use work.Axi4SlaveTransactionPkg.all ;
+--    use work.Axi4MasterTransactionPkg.all ;
+    
 package Axi4LiteVersionCompatibilityPkg is
   -- Temporary alias to allow older types to still work
   alias MasterTransactionRecType is AddressBusMasterTransactionRecType ; 
-  alias Axi4LiteMasterTransactionRecType is AddressBusMasterTransactionRecType ; 
+  alias Axi4MasterTransactionRecType is AddressBusMasterTransactionRecType ; 
 
   -- Temporary alias to allow older types to still work
-  alias Axi4LiteSlaveTransactionRecType is AddressBusSlaveTransactionRecType ; 
+  alias Axi4SlaveTransactionRecType is AddressBusSlaveTransactionRecType ; 
 
 end package Axi4LiteVersionCompatibilityPkg ;
 

@@ -67,10 +67,10 @@ package Axi4LiteInterfacePkg is
 
   -- AXI Write Address Channel
   type Axi4LiteWriteAddressRecType is record
-    AWValid     : std_logic ; 
-    AWReady     : std_logic ; 
-    AWAddr      : std_logic_vector ; 
-    AWProt      : Axi4ProtType ;
+    Valid     : std_logic ; 
+    Ready     : std_logic ; 
+    Addr      : std_logic_vector ; 
+    Prot      : Axi4ProtType ;
   end record Axi4LiteWriteAddressRecType ; 
   
   function InitAxi4LiteWriteAddressRec (AddrWidth : natural ) return Axi4LiteWriteAddressRecType ;
@@ -82,10 +82,10 @@ package Axi4LiteInterfacePkg is
   
   -- AXI Write Data Channel
   type Axi4LiteWriteDataRecType is record
-    WValid      : std_logic ; 
-    WReady      : std_logic ; 
-    WData       : std_logic_vector ; 
-    WStrb       : std_logic_vector ; 
+    Valid      : std_logic ; 
+    Ready      : std_logic ; 
+    Data       : std_logic_vector ; 
+    Strb       : std_logic_vector ; 
   end record Axi4LiteWriteDataRecType ; 
   
   function InitAxi4LiteWriteDataRec (DataWidth : natural ) return Axi4LiteWriteDataRecType ;
@@ -96,9 +96,9 @@ package Axi4LiteInterfacePkg is
 
   -- AXI Write Response Channel
   type Axi4LiteWriteResponseRecType is record
-    BValid      : std_logic ; 
-    BReady      : std_logic ; 
-    BResp       : Axi4RespType ; 
+    Valid      : std_logic ; 
+    Ready      : std_logic ; 
+    Resp       : Axi4RespType ; 
   end record Axi4LiteWriteResponseRecType ; 
   
   function InitAxi4LiteWriteResponseRec return Axi4LiteWriteResponseRecType ;
@@ -108,10 +108,10 @@ package Axi4LiteInterfacePkg is
   
   -- AXI Read Address Channel
   type Axi4LiteReadAddressRecType is record
-    ARValid     : std_logic ; 
-    ARReady     : std_logic ; 
-    ARAddr      : std_logic_vector ; 
-    ARProt      : Axi4ProtType ; 
+    Valid     : std_logic ; 
+    Ready     : std_logic ; 
+    Addr      : std_logic_vector ; 
+    Prot      : Axi4ProtType ; 
   end record Axi4LiteReadAddressRecType ; 
   
   function InitAxi4LiteReadAddressRec (AddrWidth : natural) return Axi4LiteReadAddressRecType ;
@@ -120,10 +120,10 @@ package Axi4LiteInterfacePkg is
 
   -- AXI Read Data Channel
   type Axi4LiteReadDataRecType is record
-    RValid      : std_logic ; 
-    RReady      : std_logic ; 
-    RData       : std_logic_vector ; 
-    RResp       : Axi4RespType ;
+    Valid      : std_logic ; 
+    Ready      : std_logic ; 
+    Data       : std_logic_vector ; 
+    Resp       : Axi4RespType ;
   end record Axi4LiteReadDataRecType ; 
   
   function InitAxi4LiteReadDataRec (DataWidth : natural ) return Axi4LiteReadDataRecType ;
@@ -148,49 +148,49 @@ package body Axi4LiteInterfacePkg is
   function InitAxi4LiteWriteAddressRec (AddrWidth : natural ) return Axi4LiteWriteAddressRecType is
   begin
     return (
-      AWValid => 'Z', 
-      AWReady => 'Z', 
-      AWAddr  => (AddrWidth-1 downto 0 => 'Z'), 
-      AWProt  => (others => 'Z')
+      Valid => 'Z', 
+      Ready => 'Z', 
+      Addr  => (AddrWidth-1 downto 0 => 'Z'), 
+      Prot  => (others => 'Z')
     ) ;
   end function InitAxi4LiteWriteAddressRec ; 
 
   function InitAxi4LiteWriteDataRec (DataWidth : natural ) return Axi4LiteWriteDataRecType is
   begin
     return (
-      WValid  => 'Z',
-      WReady  => 'Z',
-      WData   => (DataWidth-1 downto 0 => 'Z'),  
-      WStrb   => ((DataWidth/8)-1 downto 0 => 'Z') 
+      Valid  => 'Z',
+      Ready  => 'Z',
+      Data   => (DataWidth-1 downto 0 => 'Z'),  
+      Strb   => ((DataWidth/8)-1 downto 0 => 'Z') 
     ) ;
   end function InitAxi4LiteWriteDataRec ; 
 
   function InitAxi4LiteWriteResponseRec return Axi4LiteWriteResponseRecType is
   begin
     return (
-      BValid  => 'Z',
-      BReady  => 'Z',
-      BResp   => AXI4_RESP_INIT  
+      Valid  => 'Z',
+      Ready  => 'Z',
+      Resp   => AXI4_RESP_INIT  
     ) ;
   end function InitAxi4LiteWriteResponseRec ; 
 
   function InitAxi4LiteReadAddressRec (AddrWidth : natural ) return Axi4LiteReadAddressRecType is
   begin
     return (
-      ARValid => 'Z', 
-      ARReady => 'Z', 
-      ARAddr  => (AddrWidth-1 downto 0 => 'Z'), 
-      ARProt  => (others => 'Z')
+      Valid => 'Z', 
+      Ready => 'Z', 
+      Addr  => (AddrWidth-1 downto 0 => 'Z'), 
+      Prot  => (others => 'Z')
     ) ;
   end function InitAxi4LiteReadAddressRec ; 
 
   function InitAxi4LiteReadDataRec (DataWidth : natural ) return Axi4LiteReadDataRecType is
   begin
     return (
-      RValid  => 'Z',
-      RReady  => 'Z',
-      RData   => (DataWidth-1 downto 0 => 'Z'),  
-      RResp   => AXI4_RESP_INIT  
+      Valid  => 'Z',
+      Ready  => 'Z',
+      Data   => (DataWidth-1 downto 0 => 'Z'),  
+      Resp   => AXI4_RESP_INIT  
     ) ;
   end function InitAxi4LiteReadDataRec ; 
   
@@ -206,8 +206,8 @@ package body Axi4LiteInterfacePkg is
   end function InitAxi4LiteRec ; 
 
   procedure InitAxi4LiteRec (signal AxiBusRec : out Axi4LiteRecType ) is
-    constant AXI_ADDR_WIDTH : integer := AxiBusRec.WriteAddress.AWAddr'length ; 
-    constant AXI_DATA_WIDTH : integer := AxiBusRec.WriteData.WData'length ;
+    constant AXI_ADDR_WIDTH : integer := AxiBusRec.WriteAddress.Addr'length ; 
+    constant AXI_DATA_WIDTH : integer := AxiBusRec.WriteData.Data'length ;
   begin
     AxiBusRec <= InitAxi4LiteRec(AXI_ADDR_WIDTH, AXI_DATA_WIDTH) ;
   end procedure InitAxi4LiteRec ;

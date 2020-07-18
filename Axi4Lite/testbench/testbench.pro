@@ -39,23 +39,27 @@
 #  
 library osvvm_TbAxi4Lite
 analyze TestCtrl_e.vhd
-analyze TbAxi4Lite.vhd
-analyze TbAxi4Lite_BasicReadWrite.vhd
-analyze TbAxi4Lite_MasterReadWriteAsync1.vhd
-analyze TbAxi4Lite_MasterReadWriteAsync2.vhd
-analyze TbAxi4Lite_MasterReadWriteAsync3.vhd
-analyze TbAxi4Lite_RandomReadWrite.vhd
-analyze TbAxi4Lite_RandomReadWriteByte.vhd
-analyze TbAxi4Lite_TimeOut.vhd
-analyze TbAxi4Lite_WriteOptions.vhd
-analyze TbAxi4Lite_BasicBurst.vhd
+analyze TbAxi4.vhd
+analyze TbAxi4_BasicReadWrite.vhd
+analyze TbAxi4_ReadWriteAsync1.vhd
+analyze TbAxi4_ReadWriteAsync2.vhd
+analyze TbAxi4_ReadWriteAsync3.vhd
+analyze TbAxi4_RandomReadWrite.vhd
+analyze TbAxi4_RandomReadWriteByte.vhd
+analyze TbAxi4_TimeOut.vhd
+analyze TbAxi4_WriteOptions.vhd
+# analyze TbAxi4_BasicBurst.vhd
+analyze TbAxi4_MemoryReadWrite.vhd
+# analyze TbAxi4_MemoryBurst.vhd
 
-# simulate TbAxi4Lite_BasicReadWrite
-# simulate TbAxi4Lite_MasterReadWriteAsync1    
-# simulate TbAxi4Lite_MasterReadWriteAsync2    
-# simulate TbAxi4Lite_MasterReadWriteAsync3    
-# simulate TbAxi4Lite_RandomReadWrite    
-# simulate TbAxi4Lite_RandomReadWriteByte    
-# simulate TbAxi4Lite_TimeOut    
-# simulate TbAxi4Lite_WriteOptions 
-simulate TbAxi4Lite_BasicBurst
+# simulate TbAxi4_BasicReadWrite
+# simulate TbAxi4_ReadWriteAsync1    
+# simulate TbAxi4_ReadWriteAsync2    
+# simulate TbAxi4_ReadWriteAsync3    
+# simulate TbAxi4_RandomReadWrite    
+# simulate TbAxi4_RandomReadWriteByte    
+# simulate TbAxi4_TimeOut    
+# simulate TbAxi4_WriteOptions 
+#simulate TbAxi4_BasicBurst
+simulate TbAxi4_MemoryReadWrite
+#simulate TbAxi4_MemoryBurst

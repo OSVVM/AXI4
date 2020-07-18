@@ -49,22 +49,20 @@ library ieee ;
 library OSVVM ; 
   context OSVVM.OsvvmContext ; 
 
-library OSVVM_AXI4 ;
-  context OSVVM_AXI4.Axi4LiteContext ; 
+library osvvm_Axi4 ;
+  context osvvm_Axi4.Axi4Context ; 
 
 entity TestCtrl is
-  generic (
-    constant AXI_ADDR_WIDTH : integer := 32 ; 
-    constant AXI_DATA_WIDTH : integer := 32  
-  ) ;
   port (
     -- Global Signal Interface
     Clk                 : In    std_logic ;
     nReset              : In    std_logic ;
 
     -- Transaction Interfaces
-    AxiMasterTransRec   : inout AddressBusMasterTransactionRecType ;
-    AxiSlaveTransRec    : inout Axi4LiteSlaveTransactionRecType 
+    AxiSuperTransRec    : inout AddressBusTransactionRecType ;
+    AxiMinionTransRec   : inout AddressBusTransactionRecType 
 
   ) ;
+    constant AXI_ADDR_WIDTH : integer := AxiSuperTransRec.Address'length ; 
+    constant AXI_DATA_WIDTH : integer := AxiSuperTransRec.DataToModel'length ;  
 end entity TestCtrl ;

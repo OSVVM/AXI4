@@ -153,7 +153,7 @@ begin
     case Operation is
       when SEND =>
         Data     := FromTransaction(TransRec.DataToModel, Data'length) ;
-        TransmitFifo.Push(Data, Strb, Keep, ParamID, ParamDest, ParamUser) ; 
+        TransmitFifo.Push(Data & Strb & Keep & ParamID & ParamDest & ParamUser) ; 
         Increment(TransmitRequestCount) ;
         WaitForToggle(TransmitDoneCount) ;
         wait for 0 ns ; 
@@ -176,15 +176,15 @@ begin
             TransmitReadyTimeOut      <= FromTransaction(TransRec.DataToModel) ; 
             
           when SET_ID =>                      
-            ParamID       <= FromTransaction(TransRec.DataToModel, ModelID'length) ;
+            ParamID       <= FromTransaction(TransRec.DataToModel, ParamID'length) ;
             -- IdSet    <= TRUE ; 
             
           when SET_DEST => 
-            ParamDest     <= FromTransaction(TransRec.DataToModel, ModelDest'length) ;
+            ParamDest     <= FromTransaction(TransRec.DataToModel, ParamDest'length) ;
             -- DestSet  <= TRUE ; 
             
           when SET_USER =>
-            ParamUser     <= FromTransaction(TransRec.DataToModel, ModelUser'length) ;
+            ParamUser     <= FromTransaction(TransRec.DataToModel, ParamUser'length) ;
             -- UserSet  <= TRUE ; 
             
           when others =>

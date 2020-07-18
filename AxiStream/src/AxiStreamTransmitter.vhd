@@ -109,9 +109,9 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
 
   signal TransmitReadyTimeOut : integer := integer'right ; 
 
-  signal ID      : TID'subtype := DEFAULT_ID ;
-  signal Dest    : TDest'subtype := DEFAULT_DEST ;
-  signal User    : TUser'subtype := DEFAULT_USER;
+  signal ParamID   : TID'subtype   := DEFAULT_ID ;
+  signal ParamDest : TDest'subtype := DEFAULT_DEST ;
+  signal ParamUser : TUser'subtype := DEFAULT_USER;
 
 begin
 
@@ -137,7 +137,8 @@ begin
   --    Dispatches transactions to
   ------------------------------------------------------------
   TransactionDispatcher : process
-    variable Data : TData'subtype ; 
+    variable Data : TData'subtype ;
+    variable Strb, Keep : std_logic_vector(TData'length/8 - 1 downto 0) := (others => '1') ;    
 --    variable Operation : TransRec.Operation'subtype ;
     variable Operation : StreamOperationType ;
   begin
@@ -152,7 +153,7 @@ begin
     case Operation is
       when SEND =>
         Data     := FromTransaction(TransRec.DataToModel, Data'length) ;
-        TransmitFifo.Push(Data) ; 
+        TransmitFifo.Push(Data, Strb, Keep, ParamID, ParamDest, ParamUser) ; 
         Increment(TransmitRequestCount) ;
         WaitForToggle(TransmitDoneCount) ;
         wait for 0 ns ; 
@@ -175,15 +176,15 @@ begin
             TransmitReadyTimeOut      <= FromTransaction(TransRec.DataToModel) ; 
             
           when SET_ID =>                      
-            ID       <= FromTransaction(TransRec.DataToModel, ID'length) ;
+            ParamID       <= FromTransaction(TransRec.DataToModel, ModelID'length) ;
             -- IdSet    <= TRUE ; 
             
           when SET_DEST => 
-            Dest     <= FromTransaction(TransRec.DataToModel, Dest'length) ;
+            ParamDest     <= FromTransaction(TransRec.DataToModel, ModelDest'length) ;
             -- DestSet  <= TRUE ; 
             
           when SET_USER =>
-            User     <= FromTransaction(TransRec.DataToModel, User'length) ;
+            ParamUser     <= FromTransaction(TransRec.DataToModel, ModelUser'length) ;
             -- UserSet  <= TRUE ; 
             
           when others =>
@@ -207,12 +208,12 @@ begin
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   TransmitHandler : process
-    variable ID   :   TID'subtype := (others => '0') ;
-    variable Dest : TDest'subtype := (others => '0') ;
-    variable User : TUser'subtype := (others => '0') ;
-    variable Data : TData'subtype := (others => '1') ;
-    variable Strb : TStrb'subtype := (others => '1') ;
-    variable Keep : TKeep'subtype := (others => '1') ;
+    variable ID   : std_logic_vector(TID'range)   ;
+    variable Dest : std_logic_vector(TDest'range) ;
+    variable User : std_logic_vector(TUser'range) ;
+    variable Data : std_logic_vector(TData'range) ;
+    variable Strb : std_logic_vector(TStrb'range) ;
+    variable Keep : std_logic_vector(TKeep'range) ;
   begin
     -- Initialize
     TValid  <= '0' ;
@@ -231,8 +232,7 @@ begin
       end if ;
       
       -- Get Transaction
-      -- (ID, Dest, User, Data, Strb, Keep) := TransmitFifo.Pop ;
-      Data := TransmitFifo.Pop ;
+      (Data, Strb, Keep, ID, Dest, User) := TransmitFifo.Pop ;
 
       -- Do Transaction
       TID     <= ID   after tpd_Clk_tid ;

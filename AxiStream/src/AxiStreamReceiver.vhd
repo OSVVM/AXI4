@@ -81,7 +81,7 @@ entity AxiStreamReceiver is
     TransRec  : inout StreamRecType 
   ) ;
 end entity AxiStreamReceiver ;
-architecture SimpleMaster of AxiStreamReceiver is
+architecture behavioral of AxiStreamReceiver is
 
   constant AXI_STREAM_DATA_WIDTH : integer := TData'length ;
   constant AXI_ID_WIDTH : integer := TID'length ;
@@ -255,4 +255,4 @@ begin
   end process ReceiveHandler ;
 
 
-end architecture SimpleMaster ;
+end architecture behavioral ;

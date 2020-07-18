@@ -68,25 +68,25 @@ package Axi4InterfacePkg is
   -- AXI Write Address Channel
   type Axi4WriteAddressRecType is record
     -- AXI4 Lite
-    AWAddr      : std_logic_vector ; 
-    AWProt      : Axi4ProtType ;
-    AWValid     : std_logic ; 
-    AWReady     : std_logic ; 
+    Addr      : std_logic_vector ; 
+    Prot      : Axi4ProtType ;
+    Valid     : std_logic ; 
+    Ready     : std_logic ; 
     -- AXI4 Full
     -- User Config - AXI recommended 3:0 for master, 7:0 at slave
-    AWID        : std_logic_vector ; 
+    ID        : std_logic_vector ; 
     -- BurstLength = AxLen+1.  AXI4: 7:0,  AXI3: 3:0
-    AWLen       : std_logic_vector(7 downto 0) ; 
+    Len       : std_logic_vector(7 downto 0) ; 
     -- #Bytes in transfer = 2**AxSize
-    AWSize      : std_logic_vector(2 downto 0) ; 
+    Size      : std_logic_vector(2 downto 0) ; 
     -- AxBurst Binary Encoded (Fixed, Incr, Wrap, NotDefined)
-    AWBurst     : std_logic_vector(1 downto 0) ; 
-    AWLock      : std_logic ;
+    Burst     : std_logic_vector(1 downto 0) ; 
+    Lock      : std_logic ;
     -- AxCache One-hot (Write-Allocate, Read-Allocate, Modifiable, Bufferable)
-    AWCache     : std_logic_vector(3 downto 0) ;
-    AWQOS       : std_logic_vector(3 downto 0) ;
-    AWRegion    : std_logic_vector(7 downto 0) ;
-    AWUser      : std_logic_vector ; -- User Config
+    Cache     : std_logic_vector(3 downto 0) ;
+    QOS       : std_logic_vector(3 downto 0) ;
+    Region    : std_logic_vector(7 downto 0) ;
+    User      : std_logic_vector ; -- User Config
   end record Axi4WriteAddressRecType ; 
   
   function InitAxi4WriteAddressRec (
@@ -102,15 +102,15 @@ package Axi4InterfacePkg is
   -- AXI Write Data Channel
   type Axi4WriteDataRecType is record
     -- AXI4 Lite
-    WData       : std_logic_vector ; 
-    WStrb       : std_logic_vector ; 
-    WValid      : std_logic ; 
-    WReady      : std_logic ; 
+    Data       : std_logic_vector ; 
+    Strb       : std_logic_vector ; 
+    Valid      : std_logic ; 
+    Ready      : std_logic ; 
     -- AXI 4 Full
-    WLast       : std_logic ;
-    WUser       : std_logic_vector ;
+    Last       : std_logic ;
+    User       : std_logic_vector ;
     -- AXI3
-    WID         : std_logic_vector ;
+    ID         : std_logic_vector ;
   end record Axi4WriteDataRecType ; 
   
   function InitAxi4WriteDataRec (
@@ -124,12 +124,12 @@ package Axi4InterfacePkg is
   -- AXI Write Response Channel
   type Axi4WriteResponseRecType is record
     -- AXI4 Lite
-    BValid      : std_logic ; 
-    BReady      : std_logic ; 
-    BResp       : Axi4RespType ; 
+    Valid      : std_logic ; 
+    Ready      : std_logic ; 
+    Resp       : Axi4RespType ; 
     -- AXI 4 Full
-    BID         : std_logic_vector ;
-    BUser       : std_logic_vector ;
+    ID         : std_logic_vector ;
+    User       : std_logic_vector ;
   end record Axi4WriteResponseRecType ; 
   
   function InitAxi4WriteResponseRec(
@@ -143,25 +143,25 @@ package Axi4InterfacePkg is
   -- AXI Read Address Channel
   type Axi4ReadAddressRecType is record
     -- AXI4 Lite
-    ARAddr      : std_logic_vector ; 
-    ARProt      : Axi4ProtType ; 
-    ARValid     : std_logic ; 
-    ARReady     : std_logic ; 
+    Addr      : std_logic_vector ; 
+    Prot      : Axi4ProtType ; 
+    Valid     : std_logic ; 
+    Ready     : std_logic ; 
     -- AXI 4 Full
     -- User Config - AXI recommended 3:0 for master, 7:0 at slave
-    ARID        : std_logic_vector ; 
+    ID        : std_logic_vector ; 
     -- BurstLength = AxLen+1.  AXI4: 7:0,  AXI3: 3:0
-    ARLen       : std_logic_vector(7 downto 0) ; 
+    Len       : std_logic_vector(7 downto 0) ; 
     -- #Bytes in transfer = 2**AxSize
-    ARSize      : std_logic_vector(2 downto 0) ; 
+    Size      : std_logic_vector(2 downto 0) ; 
     -- AxBurst Binary Encoded (Fixed, Incr, Wrap, NotDefined)
-    ARBurst     : std_logic_vector(1 downto 0) ; 
-    ARLock      : std_logic ;
+    Burst     : std_logic_vector(1 downto 0) ; 
+    Lock      : std_logic ;
     -- AxCache One-hot (Write-Allocate, Read-Allocate, Modifiable, Bufferable)
-    ARCache     : std_logic_vector(3 downto 0) ;
-    ARQOS       : std_logic_vector(3 downto 0) ;
-    ARRegion    : std_logic_vector(7 downto 0) ;
-    ARUser      : std_logic_vector ; -- User Config
+    Cache     : std_logic_vector(3 downto 0) ;
+    QOS       : std_logic_vector(3 downto 0) ;
+    Region    : std_logic_vector(7 downto 0) ;
+    User      : std_logic_vector ; -- User Config
   end record Axi4ReadAddressRecType ; 
   
   function InitAxi4ReadAddressRec (
@@ -174,14 +174,14 @@ package Axi4InterfacePkg is
   -- AXI Read Data Channel
   type Axi4ReadDataRecType is record
     -- AXI4 Lite
-    RData       : std_logic_vector ; 
-    RResp       : Axi4RespType ;
-    RValid      : std_logic ; 
-    RReady      : std_logic ; 
+    Data       : std_logic_vector ; 
+    Resp       : Axi4RespType ;
+    Valid      : std_logic ; 
+    Ready      : std_logic ; 
     -- AXI 4 Full
-    RID       : std_logic_vector ;
-    RLast     : std_logic ;
-    RUser     : std_logic_vector ;
+    ID         : std_logic_vector ;
+    Last       : std_logic ;
+    User       : std_logic_vector ;
   end record Axi4ReadDataRecType ; 
   
   function InitAxi4ReadDataRec (
@@ -205,21 +205,21 @@ package Axi4InterfacePkg is
 
   -- Axi4 Record, Axi4 full elements are null arrays  
 --  subtype Axi4LiteRecType is Axi4BaseRecType( 
---    WriteAddress( AWAddr(open), AWID(0 downto 1), AWUser(0 downto 1) ),
---    WriteData( WData(open), WStrb(open), WUser(0 downto 1), WID(0 downto 1) ),  -- WID only AXI3
---    WriteResponse( BID(0 downto 1), BUser(0 downto 1) ),
---    ReadAddress( ARAddr(open), ARID(0 downto 1), ARUser(0 downto 1) ),
---    ReadData( RData(open), RID(0 downto 1), RUser(0 downto 1) )
+--    WriteAddress ( Addr(open), ID(0 downto 1), User(0 downto 1) ),
+--    WriteData    ( Data(open), Strb(open), User(0 downto 1), ID(0 downto 1) ),  -- ID only AXI3
+--    WriteResponse( ID(0 downto 1), User(0 downto 1) ),
+--    ReadAddress  ( Addr(open), ID(0 downto 1), User(0 downto 1) ),
+--    ReadData     ( Data(open), ID(0 downto 1), User(0 downto 1) )
 --  ) ;
 --   alias Axi4LiteRecType is Axi4BaseRecType ; 
 
 -- -- Axi4 Record, Axi4 full elements are null arrays  
 -- subtype Axi4RecType is Axi4BaseRecType( 
---   WriteAddress ( AWAddr(open), AWID(7 downto 0), AWUser(7 downto 0) ),
---   WriteData    ( WData(open), WStrb(open), WUser(7 downto 0), WID(7 downto 0) ),  -- WID only AXI3
---   WriteResponse( BID(7 downto 0), BUser(7 downto 0) ),
---   ReadAddress  ( ARAddr(open), ARID(7 downto 0), ARUser(7 downto 0) ),
---   ReadData     ( RData(open), RID(7 downto 0), RUser(7 downto 0) )
+--   WriteAddress ( Addr(open), ID(7 downto 0), User(7 downto 0) ),
+--   WriteData    ( Data(open), Strb(open), User(7 downto 0), ID(7 downto 0) ),  -- ID only AXI3
+--   WriteResponse( ID(7 downto 0), User(7 downto 0) ),
+--   ReadAddress  ( Addr(open), ID(7 downto 0), User(7 downto 0) ),
+--   ReadData     ( Data(open), ID(7 downto 0), User(7 downto 0) )
 -- ) ;
  
   alias Axi4RecType is Axi4BaseRecType ; 
@@ -244,20 +244,20 @@ package body Axi4InterfacePkg is
   begin
     return (
       -- AXI4 Lite
-      AWAddr   => (WriteAddress.AWAddr'range => InitVal), 
-      AWProt   => (WriteAddress.AWProt'range => InitVal),
-      AWValid  => InitVal, 
-      AWReady  => InitVal, 
+      Addr   => (WriteAddress.Addr'range => InitVal), 
+      Prot   => (WriteAddress.Prot'range => InitVal),
+      Valid  => InitVal, 
+      Ready  => InitVal, 
       -- AXI 4 Full
-      AWID     => (WriteAddress.AWID'range => InitVal),
-      AWLen    => (WriteAddress.AWLen'range => InitVal), 
-      AWSize   => (WriteAddress.AWSize'range => InitVal), 
-      AWBurst  => (WriteAddress.AWBurst'range => InitVal), 
-      AWLock   => InitVal,
-      AWCache  => (WriteAddress.AWCache'range => InitVal),
-      AWQOS    => (WriteAddress.AWQOS'range => InitVal),
-      AWRegion => (WriteAddress.AWRegion'range => InitVal),
-      AWUser   => (WriteAddress.AWUser'range => InitVal)
+      ID     => (WriteAddress.ID'range => InitVal),
+      Len    => (WriteAddress.Len'range => InitVal), 
+      Size   => (WriteAddress.Size'range => InitVal), 
+      Burst  => (WriteAddress.Burst'range => InitVal), 
+      Lock   => InitVal,
+      Cache  => (WriteAddress.Cache'range => InitVal),
+      QOS    => (WriteAddress.QOS'range => InitVal),
+      Region => (WriteAddress.Region'range => InitVal),
+      User   => (WriteAddress.User'range => InitVal)
     ) ;
   end function InitAxi4WriteAddressRec ; 
 
@@ -265,19 +265,19 @@ package body Axi4InterfacePkg is
     WriteData : Axi4WriteDataRecType ;
     InitVal   : std_logic := 'Z'
   ) return Axi4WriteDataRecType is
-    constant DataWidth : integer := WriteData.WData'length ; 
+    constant DataWidth : integer := WriteData.Data'length ; 
   begin
     return (
       -- AXI4 Lite
-      WData   => (DataWidth-1 downto 0 => InitVal),  
-      WStrb   => ((DataWidth/8)-1 downto 0 => InitVal),
-      WValid  => InitVal,
-      WReady  => InitVal,
+      Data   => (DataWidth-1 downto 0 => InitVal),  
+      Strb   => ((DataWidth/8)-1 downto 0 => InitVal),
+      Valid  => InitVal,
+      Ready  => InitVal,
       -- AXI 4 Full
-      WLast   => InitVal,
-      WUser   => (WriteData.WUser'range => InitVal),
+      Last   => InitVal,
+      User   => (WriteData.User'range => InitVal),
       -- AXI3
-      WID     => (WriteData.WID'range => InitVal)
+      ID     => (WriteData.ID'range => InitVal)
     ) ;
   end function InitAxi4WriteDataRec ; 
 
@@ -288,12 +288,12 @@ package body Axi4InterfacePkg is
   begin
     return (
       -- AXI4 Lite
-      BResp   => (WriteResponse.BResp'range =>InitVal),  
-      BValid  => InitVal,
-      BReady  => InitVal,
+      Resp   => (WriteResponse.Resp'range =>InitVal),  
+      Valid  => InitVal,
+      Ready  => InitVal,
       -- AXI 4 Full
-      BID     => (WriteResponse.BID'range => InitVal),
-      BUser   => (WriteResponse.BUser'range => InitVal)
+      ID     => (WriteResponse.ID'range => InitVal),
+      User   => (WriteResponse.User'range => InitVal)
 
     ) ;
   end function InitAxi4WriteResponseRec ; 
@@ -305,20 +305,20 @@ package body Axi4InterfacePkg is
   begin
     return (
       -- AXI4 Lite
-      ARAddr  => (ReadAddress.ARAddr'range => InitVal), 
-      ARProt  => (ReadAddress.ARProt'range => InitVal),
-      ARValid => InitVal, 
-      ARReady => InitVal, 
+      Addr   => (ReadAddress.Addr'range => InitVal), 
+      Prot   => (ReadAddress.Prot'range => InitVal),
+      Valid  => InitVal, 
+      Ready  => InitVal, 
       -- AXI 4 Full
-      ARID     => (ReadAddress.ARID'range => InitVal),
-      ARLen    => (ReadAddress.ARLen'range => InitVal), 
-      ARSize   => (ReadAddress.ARSize'range => InitVal), 
-      ARBurst  => (ReadAddress.ARBurst'range => InitVal), 
-      ARLock   => InitVal,
-      ARCache  => (ReadAddress.ARCache'range => InitVal),
-      ARQOS    => (ReadAddress.ARQOS'range => InitVal),
-      ARRegion => (ReadAddress.ARRegion'range => InitVal),
-      ARUser   => (ReadAddress.ARUser'range => InitVal)
+      ID     => (ReadAddress.ID'range => InitVal),
+      Len    => (ReadAddress.Len'range => InitVal), 
+      Size   => (ReadAddress.Size'range => InitVal), 
+      Burst  => (ReadAddress.Burst'range => InitVal), 
+      Lock   => InitVal,
+      Cache  => (ReadAddress.Cache'range => InitVal),
+      QOS    => (ReadAddress.QOS'range => InitVal),
+      Region => (ReadAddress.Region'range => InitVal),
+      User   => (ReadAddress.User'range => InitVal)
     ) ;
   end function InitAxi4ReadAddressRec ; 
 
@@ -329,15 +329,14 @@ package body Axi4InterfacePkg is
   begin
     return (
       -- AXI4 Lite
-      RData   => (ReadData.RData'range => InitVal),  
-      RResp   => (ReadData.RResp'range => InitVal),  
-      RValid  => InitVal,
-      RReady  => InitVal,
+      Data   => (ReadData.Data'range => InitVal),  
+      Resp   => (ReadData.Resp'range => InitVal),  
+      Valid  => InitVal,
+      Ready  => InitVal,
       -- AXI 4 Full
-      RID     => (ReadData.RID'range => InitVal),
-      RLast   => InitVal,
-      RUser   => (ReadData.RUser'range => InitVal)
-
+      ID     => (ReadData.ID'range => InitVal),
+      Last   => InitVal,
+      User   => (ReadData.User'range => InitVal)
     ) ;
   end function InitAxi4ReadDataRec ; 
     

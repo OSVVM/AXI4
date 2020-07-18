@@ -59,8 +59,8 @@ begin
   begin
     -- Initialization of test
     SetAlertLogName("TbAxi4_MemoryBurst") ;
-    SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
-    SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
+    SetLogEnable(PASSED, TRUE) ;   -- Enable PASSED logs
+    SetLogEnable(INFO, TRUE) ;     -- Enable INFO logs
     SetLogEnable(DEBUG, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
@@ -197,7 +197,7 @@ Configuration TbAxi4_MemoryBurst of TbAxi4 is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(MemoryBurst) ; 
     end for ; 
-  for Axi4Minion_1 : Axi4Slave 
+  for Axi4Minion_1 : Axi4Responder 
       use entity OSVVM_AXI4.Axi4Memory ; 
     end for ; 
   end for ; 

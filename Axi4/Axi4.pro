@@ -38,17 +38,13 @@
 #  limitations under the License.
 #
 library osvvm_axi4
-#analyze ./src/Axi4SlaveOptionsTypePkg.vhd
-analyze ./src/Axi4OptionsTypePkg.vhd
-#analyze ./src/Axi4MasterOptionsTypePkg.vhd
-analyze ./src/Axi4Pkg.vhd
 analyze ./src/Axi4MasterComponentPkg.vhd
-analyze ./src/Axi4SlaveComponentPkg.vhd
+analyze ./src/Axi4ResponderComponentPkg.vhd
 analyze ./src/Axi4MemoryComponentPkg.vhd
 analyze ./src/Axi4MonitorComponentPkg.vhd
 analyze ./src/Axi4VersionCompatibilityPkg.vhd
 analyze ./src/Axi4Context.vhd
 analyze ./src/Axi4Master.vhd
 analyze ./src/Axi4Monitor_dummy.vhd
-analyze ./src/Axi4Slave_Transactor.vhd
+analyze ./src/Axi4Responder_Transactor.vhd
 analyze ./src/Axi4Memory.vhd

@@ -176,7 +176,7 @@ Configuration TbAxi4_MemoryReadWrite of TbAxi4 is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(MemoryReadWrite) ; 
     end for ; 
-  for Axi4Minion_1 : Axi4Slave 
+  for Axi4Minion_1 : Axi4Responder 
       use entity OSVVM_AXI4.Axi4Memory ; 
     end for ; 
   end for ; 

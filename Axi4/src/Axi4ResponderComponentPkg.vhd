@@ -1,6 +1,6 @@
 --
---  File Name:         Axi4SlaveComponentPkg.vhd
---  Design Unit Name:  Axi4SlaveComponentPkg
+--  File Name:         Axi4ResponderComponentPkg.vhd
+--  Design Unit Name:  Axi4ResponderComponentPkg
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -48,9 +48,9 @@ library osvvm_common ;
 
   use work.Axi4InterfacePkg.all ; 
 
-package Axi4SlaveComponentPkg is
+package Axi4ResponderComponentPkg is
 
-  component Axi4Slave is
+  component Axi4Responder is
     generic (
       tperiod_Clk     : time := 10 ns ;
       
@@ -79,5 +79,5 @@ package Axi4SlaveComponentPkg is
       AxiBus      : inout Axi4RecType 
     ) ;
         
-  end component Axi4Slave ;
-end package Axi4SlaveComponentPkg ;
+  end component Axi4Responder ;
+end package Axi4ResponderComponentPkg ;

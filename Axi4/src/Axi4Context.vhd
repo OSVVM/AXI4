@@ -47,15 +47,11 @@ context Axi4Context is
     use osvvm_axi4.Axi4InterfacePkg.all ;
 
     use osvvm_axi4.Axi4OptionsTypePkg.all ; 
---    use osvvm_axi4.Axi4MasterOptionsTypePkg.all ; 
---    use osvvm_axi4.Axi4MasterTransactionPkg.all ;
-    use osvvm_axi4.Axi4Pkg.all ;
+    use osvvm_axi4.Axi4ModelPkg.all ;
     
---    use osvvm_axi4.Axi4SlaveOptionsTypePkg.all ; 
---    use osvvm_axi4.Axi4SlaveTransactionPkg.all ;
     
     use osvvm_axi4.Axi4MasterComponentPkg.all ;
-    use osvvm_axi4.Axi4SlaveComponentPkg.all ;
+    use osvvm_axi4.Axi4ResponderComponentPkg.all ;
     use osvvm_axi4.Axi4MemoryComponentPkg.all ;
     use osvvm_axi4.Axi4MonitorComponentPkg.all ;
     

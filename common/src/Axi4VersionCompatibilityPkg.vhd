@@ -1,6 +1,6 @@
 --
---  File Name:         Axi4VersionCompatibilityPkg.vhd
---  Design Unit Name:  Axi4VersionCompatibilityPkg
+--  File Name:         Axi4LiteVersionCompatibilityPkg.vhd
+--  Design Unit Name:  Axi4LiteVersionCompatibilityPkg
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -45,17 +45,15 @@ library osvvm ;
     
 library osvvm_common ;  
   context osvvm_common.OsvvmCommonContext ;
-
---    use work.Axi4SlaveTransactionPkg.all ;
---    use work.Axi4MasterTransactionPkg.all ;
     
 package Axi4VersionCompatibilityPkg is
-  -- Temporary alias to allow older types to still work
-  alias MasterTransactionRecType is AddressBusMasterTransactionRecType ; 
-  alias Axi4MasterTransactionRecType is AddressBusMasterTransactionRecType ; 
 
-  -- Temporary alias to allow older types to still work
-  alias Axi4SlaveTransactionRecType is AddressBusSlaveTransactionRecType ; 
+  -- Translate from Axi4Lite interface names to new name:  AddressBusTransactionRecType
+  alias MasterTransactionRecType is AddressBusTransactionRecType ; 
+  alias Axi4LiteMasterTransactionRecType is AddressBusTransactionRecType ; 
+  
+  -- Translate from Axi4Lite interface names to new name:  AddressBusTransactionRecType
+  alias Axi4LiteSlaveTransactionRecType is AddressBusTransactionRecType ; 
 
 end package Axi4VersionCompatibilityPkg ;
 

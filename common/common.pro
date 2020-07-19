@@ -43,3 +43,4 @@ analyze ./src/Axi4InterfacePkg.vhd
 analyze ./src/Axi4CommonPkg.vhd
 analyze ./src/Axi4ModelPkg.vhd
 analyze ./src/Axi4OptionsTypePkg.vhd
+analyze ./src/Axi4VersionCompatibilityPkg.vhd

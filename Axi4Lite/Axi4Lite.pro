@@ -42,7 +42,6 @@ analyze ./src/Axi4LiteMasterComponentPkg.vhd
 analyze ./src/Axi4LiteResponderComponentPkg.vhd
 analyze ./src/Axi4LiteMemoryComponentPkg.vhd
 analyze ./src/Axi4LiteMonitorComponentPkg.vhd
-analyze ./src/Axi4LiteVersionCompatibilityPkg.vhd
 analyze ./src/Axi4LiteContext.vhd
 analyze ./src/Axi4LiteMaster.vhd
 analyze ./src/Axi4LiteMonitor_dummy.vhd

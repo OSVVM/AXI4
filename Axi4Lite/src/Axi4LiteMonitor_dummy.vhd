@@ -57,35 +57,18 @@ port (
   nReset      : in   std_logic ;
 
   -- AXI Master Functional Interface
-  AxiLiteBus  : in    Axi4LiteRecType 
+  AxiBus      : in    Axi4LiteRecType 
 ) ;
-
-    alias AWValid : std_logic        is AxiLiteBus.WriteAddress.AWValid ;
-    alias AWReady : std_logic        is AxiLiteBus.WriteAddress.AWReady ;
-    alias AWProt  : Axi4ProtType is AxiLiteBus.WriteAddress.AWProt ;
-    alias AWAddr  : std_logic_vector is AxiLiteBus.WriteAddress.AWAddr ;
-
-    alias WValid  : std_logic        is AxiLiteBus.WriteData.WValid ;
-    alias WReady  : std_logic        is AxiLiteBus.WriteData.WReady ;
-    alias WData   : std_logic_vector is AxiLiteBus.WriteData.WData ;
-    alias WStrb   : std_logic_vector is AxiLiteBus.WriteData.WStrb ;
-
-    alias BValid  : std_logic        is AxiLiteBus.WriteResponse.BValid ;
-    alias BReady  : std_logic        is AxiLiteBus.WriteResponse.BReady ;
-    alias BResp   : Axi4RespType is AxiLiteBus.WriteResponse.BResp ;
-
-    alias ARValid : std_logic        is AxiLiteBus.ReadAddress.ARValid ;
-    alias ARReady : std_logic        is AxiLiteBus.ReadAddress.ARReady ;
-    alias ARProt  : Axi4ProtType is AxiLiteBus.ReadAddress.ARProt ;
-    alias ARAddr  : std_logic_vector is AxiLiteBus.ReadAddress.ARAddr ;
-
-    alias RValid  : std_logic        is AxiLiteBus.ReadData.RValid ;
-    alias RReady  : std_logic        is AxiLiteBus.ReadData.RReady ;
-    alias RData   : std_logic_vector is AxiLiteBus.ReadData.RData ;
-    alias RResp   : Axi4RespType is AxiLiteBus.ReadData.RResp ;
-    
+   
 end entity Axi4LiteMonitor ;
 architecture Monitor of Axi4LiteMonitor is
+
+--  alias    AB : AxiBus'subtype is AxiBus ; 
+--  alias    AW is AB.WriteAddress ;
+--  alias    WD is AB.WriteData ; 
+--  alias    WR is AB.WriteResponse ; 
+--  alias    AR is AB.ReadAddress ; 
+--  alias    RD is AB.ReadData ;
 
   constant MODEL_INSTANCE_NAME : string     := PathTail(to_lower(Axi4LiteMonitor'PATH_NAME)) ;
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ; 

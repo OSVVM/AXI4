@@ -39,7 +39,7 @@
 
 context AxiStreamContext is
     library osvvm_axi4 ;  
-    use osvvm_axi4.AxiStreamTransactionPkg.all ; 
+    use osvvm_axi4.AxiStreamOptionsTypePkg.all ; 
     use osvvm_axi4.Axi4CommonPkg.all ; 
     use osvvm_axi4.AxiStreamComponentPkg.all ; 
 

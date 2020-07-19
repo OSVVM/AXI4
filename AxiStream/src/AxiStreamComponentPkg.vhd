@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Package with component declarations for AxiStreamMaster and AxiStreamSlave
+--      Package with component declarations for AxiStreamTransmitter and AxiStreamReceiver
 --
 --
 --  Developed by:
@@ -44,14 +44,18 @@ library ieee ;
   use ieee.numeric_std.all ;
 
 library osvvm ;
-    context osvvm.OsvvmContext ;
+  context osvvm.OsvvmContext ;
+  use osvvm.ScoreboardPkg_slv.all ;
+  
+library osvvm_common ;
+  context osvvm_common.OsvvmCommonContext ;
 
-  use work.AxiStreamTransactionPkg.all ; 
+  use work.AxiStreamOptionsTypePkg.all ; 
   use work.Axi4CommonPkg.all ; 
     
 package AxiStreamComponentPkg is
 
-  component AxiStreamMaster is
+  component AxiStreamTransmitter is
     generic (
       DEFAULT_ID     : std_logic_vector ; 
       DEFAULT_DEST   : std_logic_vector ; 
@@ -73,7 +77,7 @@ package AxiStreamComponentPkg is
       Clk       : in  std_logic ;
       nReset    : in  std_logic ;
       
-      -- AXI Master Functional Interface
+      -- AXI Transmitter Functional Interface
       TValid    : out std_logic ;
       TReady    : in  std_logic ; 
       TID       : out std_logic_vector ; 
@@ -85,11 +89,11 @@ package AxiStreamComponentPkg is
       TLast     : out std_logic ; 
 
       -- Testbench Transaction Interface
-      TransRec  : inout AxiStreamTransactionRecType 
+      TransRec  : inout StreamRecType 
     ) ;
-  end component AxiStreamMaster ;
+  end component AxiStreamTransmitter ;
   
-  component AxiStreamSlave is
+  component AxiStreamReceiver is
     generic (
       tperiod_Clk     : time := 10 ns ;
       
@@ -100,7 +104,7 @@ package AxiStreamComponentPkg is
       Clk       : in  std_logic ;
       nReset    : in  std_logic ;
       
-      -- AXI Master Functional Interface
+      -- AXI Transmitter Functional Interface
       TValid    : in  std_logic ;
       TReady    : out std_logic ; 
       TID       : in  std_logic_vector ; 
@@ -112,8 +116,8 @@ package AxiStreamComponentPkg is
       TLast     : in  std_logic ; 
 
       -- Testbench Transaction Interface
-      TransRec  : inout AxiStreamTransactionRecType 
+      TransRec  : inout StreamRecType 
     ) ;
-  end component AxiStreamSlave ;
+  end component AxiStreamReceiver ;
 
 end package AxiStreamComponentPkg ;

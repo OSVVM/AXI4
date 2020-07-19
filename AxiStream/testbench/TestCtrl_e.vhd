@@ -47,18 +47,21 @@ library ieee ;
 library OSVVM ; 
   context OSVVM.OsvvmContext ; 
 
+library osvvm_common ;
+  context osvvm_common.OsvvmCommonContext ;
+
 library osvvm_AXI4 ;
     context osvvm_AXI4.AxiStreamContext ;
 
 entity TestCtrl is
   port (
       -- Global Signal Interface
-      Clk                       : In    std_logic ;
-      nReset                    : In    std_logic ;
+      Clk                           : In    std_logic ;
+      nReset                        : In    std_logic ;
 
       -- Transaction Interfaces
-      AxiStreamMasterTransRec   : inout AxiStreamTransactionRecType ;
-      AxiStreamSlaveTransRec    : inout AxiStreamTransactionRecType 
+      AxiStreamTransmitterTransRec  : inout StreamRecType ;
+      AxiStreamReceiverTransRec     : inout StreamRecType 
 
   ) ;
 end entity TestCtrl ;

@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Top level testbench for AxiStreamMaster and AxiStreamSlave
+--      Top level testbench for AxiStreamTransmitter and AxiStreamReceiver
 --
 --
 --  Developed by:
@@ -47,6 +47,9 @@ library ieee ;
 library osvvm ;
     context osvvm.OsvvmContext ;
     
+library osvvm_common ;
+  context osvvm_common.OsvvmCommonContext ;
+
 library osvvm_AXI4 ;
     context osvvm_AXI4.AxiStreamContext ;
 
@@ -97,26 +100,25 @@ architecture TestHarness of TbAxiStream is
 --      DataToModel(AXI_DATA_WIDTH-1 downto 0),
 --      DataFromModel(XI_DATA_WIDTH-1 downto 0)
 --    ) ;  
---    signal AxiStreamMasterTransRec : TransactionRecType ;
---    signal AxiStreamSlaveTransRec : TransactionRecType ;
+--    signal AxiStreamTransmitterTransRec : TransactionRecType ;
+--    signal AxiStreamReceiverTransRec : TransactionRecType ;
   
   -- MTI fails with the following ...
-  -- alias AxiStreamMasterTransRec : TransactionRecType is TransRec ; 
+  -- alias AxiStreamTransmitterTransRec : TransactionRecType is TransRec ; 
   -- however it is ok with:
-  signal AxiStreamMasterTransRec : TransactionRecType ;
-  signal AxiStreamSlaveTransRec : TransactionRecType ;
+  signal AxiStreamTransmitterTransRec : TransactionRecType ;
+  signal AxiStreamReceiverTransRec    : TransactionRecType ;
   
 
   component TestCtrl is
     port (
       -- Global Signal Interface
-      Clk                       : In    std_logic ;
-      nReset                    : In    std_logic ;
+      Clk                           : In    std_logic ;
+      nReset                        : In    std_logic ;
 
       -- Transaction Interfaces
-      AxiStreamMasterTransRec   : inout AxiStreamTransactionRecType ;
-      AxiStreamSlaveTransRec    : inout AxiStreamTransactionRecType 
-
+      AxiStreamTransmitterTransRec  : inout StreamRecType ;
+      AxiStreamReceiverTransRec     : inout StreamRecType 
     ) ;
   end component TestCtrl ;
 
@@ -138,7 +140,7 @@ begin
     tpd         => tpd
   ) ;
   
-  AxiStreamMaster_1 : AxiStreamMaster 
+  AxiStreamTransmitter_1 : AxiStreamTransmitter 
     generic map (
       DEFAULT_ID     => DEFAULT_ID  , 
       DEFAULT_DEST   => DEFAULT_DEST, 
@@ -172,10 +174,10 @@ begin
       TLast     => TLast ,
 
       -- Testbench Transaction Interface
-      TransRec  => AxiStreamMasterTransRec
+      TransRec  => AxiStreamTransmitterTransRec
     ) ;
   
-  AxiStreamSlave_1 : AxiStreamSlave
+  AxiStreamReceiver_1 : AxiStreamReceiver
     generic map (
       tperiod_Clk    => tperiod_Clk,
 
@@ -198,7 +200,7 @@ begin
       TLast     => TLast ,
 
       -- Testbench Transaction Interface
-      TransRec  => AxiStreamSlaveTransRec
+      TransRec  => AxiStreamReceiverTransRec
     ) ;
   
   
@@ -209,8 +211,8 @@ begin
     nReset                   => nReset,
     
     -- Testbench Transaction Interfaces
-    AxiStreamMasterTransRec  => AxiStreamMasterTransRec, 
-    AxiStreamSlaveTransRec   => AxiStreamSlaveTransRec  
+    AxiStreamTransmitterTransRec  => AxiStreamTransmitterTransRec, 
+    AxiStreamReceiverTransRec   => AxiStreamReceiverTransRec  
   ) ; 
 
 end architecture TestHarness ;

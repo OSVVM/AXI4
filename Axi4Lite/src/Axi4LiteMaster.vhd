@@ -125,6 +125,7 @@ architecture AxiFull of Axi4LiteMaster is
   constant AXI_DATA_WIDTH : integer := AxiData'length ;
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
+  constant AXI_STRB_WIDTH : integer := AXI_DATA_WIDTH/8 ;
 
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
@@ -216,7 +217,14 @@ begin
     variable Axi4Option    : Axi4OptionsType ;
     variable Axi4OptionVal : integer ;
 
-    variable AxiDefaults    : AxiBus'subtype ;
+-- GHDL issue
+--    variable AxiDefaults    : AxiBus'subtype ;
+    variable AxiDefaults    : Axi4LiteRecType(
+      WriteAddress( Addr(AXI_ADDR_WIDTH-1 downto 0) ),
+      WriteData   ( Data (AXI_DATA_WIDTH-1 downto 0),   Strb(AXI_STRB_WIDTH-1 downto 0) ),
+      ReadAddress ( Addr(AXI_ADDR_WIDTH-1 downto 0) ),
+      ReadData    ( Data (AXI_DATA_WIDTH-1 downto 0) )
+    ) ;    
     alias    LAW is AxiDefaults.WriteAddress ;
     alias    LWD is AxiDefaults.WriteData ;
     alias    LWR is AxiDefaults.WriteResponse ;
@@ -239,10 +247,14 @@ begin
     variable ReadByteAddr    : integer ;
     alias    ReadAddress     is LAR.Addr ;
     alias    DefaultReadProt is LAR.Prot ;
-    variable ReadProt        : DefaultReadProt'subtype ;
+-- GHDL issue
+--    variable ReadProt        : DefaultReadProt'subtype ;
+    variable ReadProt        : Axi4ProtType ;
 
     alias    ReadData    is LRD.Data ;
-    variable ExpectedData    : ReadData'subtype ;
+-- GHDL    
+--    variable ExpectedData    : ReadData'subtype ;
+    variable ExpectedData    : std_logic_vector(ReadData'range) ;
 
     variable Operation       : AddressBusOperationType ;
   begin
@@ -553,8 +565,8 @@ begin
 
   --!!f(ReadData, ReadBurstFifo, BytesInTransfer, ByteAddr)
               -- Move ReadData into ReadBurstFifo
-              for i in 0 to BytesInTransfer - 1 loop
-                 DataBitOffset := ReadByteAddr*8 + i*8 ;
+              for Byte in 0 to BytesInTransfer - 1 loop
+                 DataBitOffset := ReadByteAddr*8 + Byte*8 ;
                  ReadBurstFifo.Push(ReadData(DataBitOffset+7 downto DataBitOffset)) ;
               end loop ;
 
@@ -601,7 +613,9 @@ begin
   WriteAddressHandler : process
     alias    AB : AxiBus'subtype is AxiBus ;
     alias    AW is AB.WriteAddress ;
-    variable Local : AxiBus.WriteAddress'subtype ;
+-- GHDL
+--    variable Local : AxiBus.WriteAddress'subtype ;
+    variable Local    : Axi4LiteWriteAddressRecType(Addr(AXI_ADDR_WIDTH-1 downto 0) );
     variable WriteAddressReadyTimeOut : integer ;
   begin
     -- AXI4 LIte Signaling
@@ -661,7 +675,9 @@ begin
     alias    AB : AxiBus'subtype is AxiBus ;
     alias    WD is AB.WriteData ;
 
-    variable Local : AxiBus.WriteData'subtype ;
+-- GHDL
+--    variable Local : AxiBus.WriteData'subtype ;
+    variable Local    : Axi4LiteWriteDataRecType(Data (AXI_DATA_WIDTH-1 downto 0),   Strb(AXI_STRB_WIDTH-1 downto 0) ) ;
 
     variable WriteDataReadyTimeOut : integer ;
   begin
@@ -788,7 +804,9 @@ begin
     alias    AB : AxiBus'subtype is AxiBus ;
     alias    AR is AB.ReadAddress ;
 
-    variable Local : AxiBus.ReadAddress'subtype ;
+-- GHDL
+--    variable Local : AxiBus.ReadAddress'subtype ;
+    variable Local    : Axi4LiteReadAddressRecType(Addr(AXI_ADDR_WIDTH-1 downto 0) );
 
     variable ReadAddressReadyTimeOut : integer ;
   begin

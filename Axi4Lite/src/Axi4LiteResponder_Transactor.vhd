@@ -97,6 +97,7 @@ architecture TransactorResponder of Axi4LiteResponder is
   constant AXI_DATA_WIDTH : integer := AxiData'length ;
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
+  constant AXI_STRB_WIDTH : integer := AXI_DATA_WIDTH/8 ;
 
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
@@ -187,7 +188,14 @@ begin
   --    Handles transactions between TestCtrl and Model
   ------------------------------------------------------------
   TransactionDispatcher : process
-    variable AxiLocal    : AxiBus'subtype ;
+--!GHDL    variable AxiLocal    : AxiBus'subtype ;
+    variable AxiLocal    : Axi4LiteRecType(
+      WriteAddress( Addr(AXI_ADDR_WIDTH-1 downto 0) ),
+      WriteData   ( Data (AXI_DATA_WIDTH-1 downto 0),   Strb(AXI_STRB_WIDTH-1 downto 0) ),
+      ReadAddress ( Addr(AXI_ADDR_WIDTH-1 downto 0) ),
+      ReadData    ( Data (AXI_DATA_WIDTH-1 downto 0) )
+    ) ;    
+
     alias    LAW is AxiLocal.WriteAddress ;
     alias    LWD is AxiLocal.WriteData ;
     alias    LWR is AxiLocal.WriteResponse ;
@@ -531,8 +539,8 @@ begin
   WriteResponseHandler : process
     alias    AB : AxiBus'subtype is AxiBus ;
     alias    WR is AB.WriteResponse ;
-    variable Local : AxiBus.WriteResponse'subtype ;
---    alias localResp  is Local.BResp ;
+--!GHDL    variable Local : AxiBus.WriteResponse'subtype ;
+    variable Local : Axi4LiteWriteResponseRecType ;
   begin
     -- initialize
     WR.Valid <= '0' ;
@@ -632,9 +640,8 @@ begin
   ReadDataHandler : process
     alias    AB : AxiBus'subtype is AxiBus ;
     alias    RD is AB.ReadData ;
-    variable Local : AxiBus.ReadData'subtype ;
---    alias ReadData  is Local.Data ;
---    alias ReadResp  is Local.Resp ;
+--!GHDL    variable Local : AxiBus.ReadData'subtype ;
+    variable Local : Axi4LiteReadDataRecType(Data (AXI_DATA_WIDTH-1 downto 0)) ; 
   begin
     -- initialize
     RD.Valid <= '0' ;

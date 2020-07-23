@@ -448,8 +448,9 @@ begin
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   WriteAddressHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    AW is AB.WriteAddress ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    AW is AB.WriteAddress ;
+    alias AW : Axi4LiteWriteAddressRecType(Addr(AXI_ADDR_WIDTH-1 downto 0)) is AxiBus.WriteAddress ;
   begin
     AW.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -492,8 +493,9 @@ begin
   --    Execute Write Data Transactions
   ------------------------------------------------------------
   WriteDataHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    WD is AB.WriteData ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    WD is AB.WriteData ;
+    alias WD : Axi4LiteWriteDataRecType(Data (AXI_DATA_WIDTH-1 downto 0),   Strb(AXI_STRB_WIDTH-1 downto 0) ) is AxiBus.WriteData ; 
   begin
     WD.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -537,8 +539,9 @@ begin
   --   Receive and Check Write Responses
   ------------------------------------------------------------
   WriteResponseHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    WR is AB.WriteResponse ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    WR is AB.WriteResponse ;
+    alias WR : Axi4LiteWriteResponseRecType is AxiBus.WriteResponse ;
 --!GHDL    variable Local : AxiBus.WriteResponse'subtype ;
     variable Local : Axi4LiteWriteResponseRecType ;
   begin
@@ -596,8 +599,9 @@ begin
   --    Execute Read Address Transactions
   ------------------------------------------------------------
   ReadAddressHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    AR is AB.ReadAddress ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    AR is AB.ReadAddress ;
+    alias AR : Axi4LiteReadAddressRecType(Addr(AXI_ADDR_WIDTH-1 downto 0) ) is AxiBus.ReadAddress ;
   begin
     -- Initialize
     AR.Ready <= '0' ;
@@ -638,8 +642,9 @@ begin
   --    Receive Read Data Transactions
   ------------------------------------------------------------
   ReadDataHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    RD is AB.ReadData ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    RD is AB.ReadData ;
+    alias RD : Axi4LiteReadDataRecType(Data (AXI_DATA_WIDTH-1 downto 0)) is AxiBus.ReadData ;
 --!GHDL    variable Local : AxiBus.ReadData'subtype ;
     variable Local : Axi4LiteReadDataRecType(Data (AXI_DATA_WIDTH-1 downto 0)) ; 
   begin

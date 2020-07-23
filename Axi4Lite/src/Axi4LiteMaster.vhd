@@ -217,8 +217,7 @@ begin
     variable Axi4Option    : Axi4OptionsType ;
     variable Axi4OptionVal : integer ;
 
--- GHDL issue
---    variable AxiDefaults    : AxiBus'subtype ;
+--!GHDL    variable AxiDefaults    : AxiBus'subtype ;
     variable AxiDefaults    : Axi4LiteRecType(
       WriteAddress( Addr(AXI_ADDR_WIDTH-1 downto 0) ),
       WriteData   ( Data (AXI_DATA_WIDTH-1 downto 0),   Strb(AXI_STRB_WIDTH-1 downto 0) ),
@@ -247,13 +246,13 @@ begin
     variable ReadByteAddr    : integer ;
     alias    ReadAddress     is LAR.Addr ;
     alias    DefaultReadProt is LAR.Prot ;
--- GHDL issue
---    variable ReadProt        : DefaultReadProt'subtype ;
+
+--!GHDL    variable ReadProt        : DefaultReadProt'subtype ;
     variable ReadProt        : Axi4ProtType ;
 
     alias    ReadData    is LRD.Data ;
--- GHDL    
---    variable ExpectedData    : ReadData'subtype ;
+
+--!GHDL    variable ExpectedData    : ReadData'subtype ;
     variable ExpectedData    : std_logic_vector(ReadData'range) ;
 
     variable Operation       : AddressBusOperationType ;
@@ -611,10 +610,11 @@ begin
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   WriteAddressHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    AW is AB.WriteAddress ;
--- GHDL
---    variable Local : AxiBus.WriteAddress'subtype ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    AW is AB.WriteAddress ;
+    alias AW : Axi4LiteWriteAddressRecType(Addr(AXI_ADDR_WIDTH-1 downto 0)) is AxiBus.WriteAddress ;
+
+--!GHDL     variable Local : AxiBus.WriteAddress'subtype ;
     variable Local    : Axi4LiteWriteAddressRecType(Addr(AXI_ADDR_WIDTH-1 downto 0) );
     variable WriteAddressReadyTimeOut : integer ;
   begin
@@ -672,11 +672,11 @@ begin
   --    Execute Write Data Transactions
   ------------------------------------------------------------
   WriteDataHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    WD is AB.WriteData ;
-
--- GHDL
---    variable Local : AxiBus.WriteData'subtype ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    WD is AB.WriteData ;
+    alias WD : Axi4LiteWriteDataRecType(Data (AXI_DATA_WIDTH-1 downto 0),   Strb(AXI_STRB_WIDTH-1 downto 0) ) is AxiBus.WriteData ; 
+    
+--!GHDL    variable Local : AxiBus.WriteData'subtype ;
     variable Local    : Axi4LiteWriteDataRecType(Data (AXI_DATA_WIDTH-1 downto 0),   Strb(AXI_STRB_WIDTH-1 downto 0) ) ;
 
     variable WriteDataReadyTimeOut : integer ;
@@ -801,11 +801,11 @@ begin
   --    Execute Read Address Transactions
   ------------------------------------------------------------
   ReadAddressHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    AR is AB.ReadAddress ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    AR is AB.ReadAddress ;
+    alias AR : Axi4LiteReadAddressRecType(Addr(AXI_ADDR_WIDTH-1 downto 0) ) is AxiBus.ReadAddress ;
 
--- GHDL
---    variable Local : AxiBus.ReadAddress'subtype ;
+--!GHDL    variable Local : AxiBus.ReadAddress'subtype ;
     variable Local    : Axi4LiteReadAddressRecType(Addr(AXI_ADDR_WIDTH-1 downto 0) );
 
     variable ReadAddressReadyTimeOut : integer ;

@@ -119,12 +119,13 @@ port (
 end entity Axi4Master ;
 architecture AxiFull of Axi4Master is
 
-  alias    AxiAddr is AxiBus.WriteAddress.Addr ;
-  alias    AxiData is AxiBus.WriteData.Data ;
+  alias AxiAddr is AxiBus.WriteAddress.Addr ;
+  alias AxiData is AxiBus.WriteData.Data ;
   constant AXI_ADDR_WIDTH : integer := AxiAddr'length ;
   constant AXI_DATA_WIDTH : integer := AxiData'length ;
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
+  constant AXI_STRB_WIDTH : integer := AXI_DATA_WIDTH/8 ;
 
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
@@ -216,7 +217,41 @@ begin
     variable Axi4Option    : Axi4OptionsType ;
     variable Axi4OptionVal : integer ;
 
-    variable AxiDefaults    : AxiBus'subtype ;
+--!!GHDL Added to support AxiDefaults declaration
+	  alias    AW is AxiBus.WriteAddress ;
+	  alias    WD is AxiBus.WriteData ;
+	  alias    WR is AxiBus.WriteResponse ;
+	  alias    AR is AxiBus.ReadAddress ;
+	  alias    RD is AxiBus.ReadData ;
+    
+--!!GHDL    variable AxiDefaults    : AxiBus'subtype ;
+    variable AxiDefaults : Axi4RecType(
+      WriteAddress(
+        Addr(AW.Addr'range),
+        ID(AW.ID'range),
+        User(AW.User'range)
+      ),
+      WriteData   (
+        Data(WD.Data'range),
+        Strb(WD.Strb'range),
+        User(WD.User'range),
+        ID(WD.ID'range)
+      ),
+      WriteResponse(
+        ID(WR.ID'range),
+        User(WR.User'range)
+      ),
+      ReadAddress (
+        Addr(AR.Addr'range),
+        ID(AR.ID'range),
+        User(AR.User'range)
+      ),
+      ReadData    (
+        Data(RD.Data'range),
+        ID(RD.ID'range),
+        User(RD.User'range)
+      )
+    ) ;
     alias    LAW is AxiDefaults.WriteAddress ;
     alias    LWD is AxiDefaults.WriteData ;
     alias    LWR is AxiDefaults.WriteResponse ;
@@ -225,8 +260,6 @@ begin
 
     variable WriteByteAddr   : integer ;
     alias    WriteAddress    is LAW.Addr ;
-    alias    WriteBurstLen   is LAW.Len ;
-    alias    AWSize          is LAW.Size ;
 
     variable BytesToSend              : integer ;
     variable BytesPerTransfer         : integer ;
@@ -240,19 +273,16 @@ begin
 
     variable ReadByteAddr    : integer ;
     alias    ReadAddress     is LAR.Addr ;
-    alias    ReadBurstLen    is LAR.Len ;
-    alias    ARSize          is LAR.Size ;
-    alias    DefaultReadProt is LAR.Prot ;
-    variable ReadProt        : DefaultReadProt'subtype ;
+    variable ReadProt        : Axi4ProtType ;
 
     alias    ReadData    is LRD.Data ;
-    variable ExpectedData    : ReadData'subtype ;
+    variable ExpectedData    : std_logic_vector(LRD.Data'range) ;
 
     variable Operation       : AddressBusOperationType ;
   begin
-    AxiDefaults.WriteAddress.Size  := to_slv(AXI_BYTE_ADDR_WIDTH, AWSize'length) ;
+    AxiDefaults.WriteAddress.Size  := to_slv(AXI_BYTE_ADDR_WIDTH, LAW.Size'length) ;
     AxiDefaults.WriteResponse.Resp := to_Axi4RespType(OKAY);
-    AxiDefaults.ReadAddress.Size   := to_slv(AXI_BYTE_ADDR_WIDTH, ARSize'length) ;
+    AxiDefaults.ReadAddress.Size   := to_slv(AXI_BYTE_ADDR_WIDTH, LAR.Size'length) ;
     AxiDefaults.ReadData.Resp      := to_Axi4RespType(OKAY) ;
 
     loop
@@ -296,10 +326,10 @@ begin
             -- Write Address Handling
             -- AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Write Address length does not match", FAILURE) ;
 
-            WriteBurstLen := (others => '0') ;
+            LAW.Len := (others => '0') ;
 
             -- Initiate Write Address
-            WriteAddressFifo.Push(WriteAddress  & WriteBurstLen & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
+            WriteAddressFifo.Push(WriteAddress  & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
             Increment(WriteAddressRequestCount) ;
 
             -- Queue Write Response
@@ -345,10 +375,10 @@ begin
             BytesPerTransfer := 2**to_integer(LAW.Size);
 
             -- Burst transfer, calcualte burst length
-            WriteBurstLen := to_slv(CalculateAxiBurstLen(TransRec.DataWidth, WriteByteAddr, BytesPerTransfer), WriteBurstLen'length) ;
+            LAW.Len := to_slv(CalculateAxiBurstLen(TransRec.DataWidth, WriteByteAddr, BytesPerTransfer), LAW.Len'length) ;
 
             -- Initiate Write Address
-            WriteAddressFifo.Push(WriteAddress  & WriteBurstLen & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
+            WriteAddressFifo.Push(WriteAddress  & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
 
             Increment(WriteAddressRequestCount) ;
 
@@ -425,9 +455,9 @@ begin
             AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Read Address length does not match", FAILURE) ;
             BytesPerTransfer := 2**to_integer(LAR.Size);
 
-            ReadBurstLen := (others => '0') ;
+            LAR.Len := (others => '0') ;
 
-            ReadAddressFifo.Push(ReadAddress & ReadBurstLen & LAR.Prot & LAR.ID & LAR.Size & LAR.Burst & LAR.Lock & LAR.Cache & LAR.QOS & LAR.Region & LAR.User) ;
+            ReadAddressFifo.Push(ReadAddress & LAR.Len & LAR.Prot & LAR.ID & LAR.Size & LAR.Burst & LAR.Lock & LAR.Cache & LAR.QOS & LAR.Region & LAR.User) ;
             ReadAddressTransactionFifo.Push(ReadAddress & LAR.Prot);
             Increment(ReadAddressRequestCount) ;
 
@@ -491,9 +521,9 @@ begin
 
             -- Burst transfer, calcualte burst length
             TransfersInBurst := 1 + CalculateAxiBurstLen(TransRec.DataWidth, ReadByteAddr, BytesPerTransfer) ;
-            ReadBurstLen := to_slv(TransfersInBurst - 1, ReadBurstLen'length) ;
+            LAR.Len := to_slv(TransfersInBurst - 1, LAR.Len'length) ;
 
-            ReadAddressFifo.Push(ReadAddress & ReadBurstLen & LAR.Prot & LAR.ID & LAR.Size & LAR.Burst & LAR.Lock & LAR.Cache & LAR.QOS & LAR.Region & LAR.User) ;
+            ReadAddressFifo.Push(ReadAddress & LAR.Len & LAR.Prot & LAR.ID & LAR.Size & LAR.Burst & LAR.Lock & LAR.Cache & LAR.QOS & LAR.Region & LAR.User) ;
             ReadAddressTransactionFifo.Push(ReadAddress & LAR.Prot);
             Increment(ReadAddressRequestCount) ;
 
@@ -502,7 +532,7 @@ begin
               ReadResponseScoreboard.Push(LRD.Resp) ;
             end loop ;
   -- Should this be + TransfersInBurst + 1 ; ???
-            ReadDataExpectCount <= ReadDataExpectCount + to_integer(ReadBurstLen) + 1 ;
+            ReadDataExpectCount <= ReadDataExpectCount + to_integer(LAR.Len) + 1 ;
           end if ;
 
   --!!3 For Bursts, any TryReadData would need to specify length and
@@ -596,9 +626,14 @@ begin
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   WriteAddressHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    AW is AB.WriteAddress ;
-    variable Local : AxiBus.WriteAddress'subtype ;
+    alias    AW is AxiBus.WriteAddress ;
+--!!GHDL    variable Local : AxiBus.WriteAddress'subtype ;
+    variable Local : Axi4WriteAddressRecType (
+                        Addr(AW.Addr'range),
+                        ID(AW.ID'range),
+                        User(AW.User'range)
+                      ) ;
+    
     variable WriteAddressReadyTimeOut : integer ;
   begin
     -- AXI4 LIte Signaling
@@ -685,12 +720,17 @@ begin
   --    Execute Write Data Transactions
   ------------------------------------------------------------
   WriteDataHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    WD is AB.WriteData ;
+    alias    WD is AxiBus.WriteData ;
 
-    variable Local : AxiBus.WriteData'subtype ;
+--!!GHDL    variable Local : AxiBus.WriteData'subtype ;
+    variable Local : Axi4WriteDataRecType (
+                      Data(WD.Data'range),
+                      Strb(WD.Strb'range),
+                      User(WD.User'range),
+                      ID(WD.ID'range)
+                    );
 
-    variable WriteDataReadyTimeOut : integer ;
+      variable WriteDataReadyTimeOut : integer ;
   begin
     -- initialize
     WD.Valid <= '0' ;
@@ -827,10 +867,14 @@ begin
   --    Execute Read Address Transactions
   ------------------------------------------------------------
   ReadAddressHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    AR is AB.ReadAddress ;
+    alias    AR is AxiBus.ReadAddress ;
 
-    variable Local : AxiBus.ReadAddress'subtype ;
+--!!GHDL    variable Local : AxiBus.ReadAddress'subtype ;
+    variable Local : Axi4ReadAddressRecType (
+                          Addr(AR.Addr'range),
+                          ID(AR.ID'range),
+                          User(AR.User'range)
+                        ) ;
 
     variable ReadAddressReadyTimeOut : integer ;
   begin

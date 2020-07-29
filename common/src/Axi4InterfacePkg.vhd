@@ -179,9 +179,9 @@ package Axi4InterfacePkg is
     Valid      : std_logic ; 
     Ready      : std_logic ; 
     -- AXI 4 Full
-    ID         : std_logic_vector ;
     Last       : std_logic ;
     User       : std_logic_vector ;
+    ID         : std_logic_vector ;
   end record Axi4ReadDataRecType ; 
   
   function InitAxi4ReadDataRec (

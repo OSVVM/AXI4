@@ -187,7 +187,41 @@ begin
   --    Handles transactions between TestCtrl and Model
   ------------------------------------------------------------
   TransactionDispatcher : process
-    variable AxiLocal    : AxiBus'subtype ;
+--!!GHDL Added to support AxiLocal declaration
+	  alias    AW is AxiBus.WriteAddress ;
+	  alias    WD is AxiBus.WriteData ;
+	  alias    WR is AxiBus.WriteResponse ;
+	  alias    AR is AxiBus.ReadAddress ;
+	  alias    RD is AxiBus.ReadData ;
+    
+--!!GHDL    variable AxiLocal    : AxiBus'subtype ;
+    variable AxiLocal : Axi4RecType(
+      WriteAddress(
+        Addr(AW.Addr'range),
+        ID(AW.ID'range),
+        User(AW.User'range)
+      ),
+      WriteData   (
+        Data(WD.Data'range),
+        Strb(WD.Strb'range),
+        User(WD.User'range),
+        ID(WD.ID'range)
+      ),
+      WriteResponse(
+        ID(WR.ID'range),
+        User(WR.User'range)
+      ),
+      ReadAddress (
+        Addr(AR.Addr'range),
+        ID(AR.ID'range),
+        User(AR.User'range)
+      ),
+      ReadData    (
+        Data(RD.Data'range),
+        ID(RD.ID'range),
+        User(RD.User'range)
+      )
+    ) ;
     alias    LAW is AxiLocal.WriteAddress ;
     alias    LWD is AxiLocal.WriteData ;
     alias    LWR is AxiLocal.WriteResponse ;
@@ -443,8 +477,7 @@ begin
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   WriteAddressHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    AW is AB.WriteAddress ;
+    alias    AW is AxiBus.WriteAddress ;
   begin
     AW.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -487,8 +520,7 @@ begin
   --    Execute Write Data Transactions
   ------------------------------------------------------------
   WriteDataHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    WD is AB.WriteData ;
+    alias    WD is AxiBus.WriteData ;
   begin
     WD.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -532,10 +564,12 @@ begin
   --   Receive and Check Write Responses
   ------------------------------------------------------------
   WriteResponseHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    WR is AB.WriteResponse ;
-    variable Local : AxiBus.WriteResponse'subtype ;
---    alias localResp  is Local.BResp ;
+    alias    WR is AxiBus.WriteResponse ;
+--!!GHDL    variable Local : AxiBus.WriteResponse'subtype ;
+    variable Local : Axi4WriteResponseRecType (
+                          ID(WR.ID'range),
+                          User(WR.User'range)
+                        ) ;
   begin
     -- initialize
     WR.Valid <= '0' ;
@@ -551,7 +585,7 @@ begin
       if not WriteResponseFifo.Empty then
         Local.Resp := WriteResponseFifo.pop ;
       else
-       Local.Resp := AXI4_RESP_OKAY ;
+        Local.Resp := AXI4_RESP_OKAY ;
       end if ;
 
       -- Do Transaction
@@ -591,8 +625,7 @@ begin
   --    Execute Read Address Transactions
   ------------------------------------------------------------
   ReadAddressHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    AR is AB.ReadAddress ;
+    alias    AR is AxiBus.ReadAddress ;
   begin
     -- Initialize
     AR.Ready <= '0' ;
@@ -633,11 +666,13 @@ begin
   --    Receive Read Data Transactions
   ------------------------------------------------------------
   ReadDataHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    RD is AB.ReadData ;
-    variable Local : AxiBus.ReadData'subtype ;
---    alias ReadData  is Local.Data ;
---    alias ReadResp  is Local.Resp ;
+    alias    RD is AxiBus.ReadData ;
+--!!GHDL    variable Local : AxiBus.ReadData'subtype ;
+    variable Local : Axi4ReadDataRecType (
+                      Data(RD.Data'range),
+                      User(RD.User'range),
+                      ID(RD.ID'range)
+                    );
   begin
     -- initialize
     RD.Valid <= '0' ;

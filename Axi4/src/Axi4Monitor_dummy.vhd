@@ -64,11 +64,11 @@ end entity Axi4Monitor ;
 architecture Monitor of Axi4Monitor is
 
 --  alias    AB : AxiBus'subtype is AxiBus ; 
---  alias    AW is AB.WriteAddress ;
---  alias    WD is AB.WriteData ; 
---  alias    WR is AB.WriteResponse ; 
---  alias    AR is AB.ReadAddress ; 
---  alias    RD is AB.ReadData ;
+--  alias    AW is AxiBus.WriteAddress ;
+--  alias    WD is AxiBus.WriteData ; 
+--  alias    WR is AxiBus.WriteResponse ; 
+--  alias    AR is AxiBus.ReadAddress ; 
+--  alias    RD is AxiBus.ReadData ;
 
   constant MODEL_INSTANCE_NAME : string     := PathTail(to_lower(Axi4Monitor'PATH_NAME)) ;
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ; 

@@ -101,6 +101,7 @@ architecture MemoryResponder of Axi4LiteMemory is
   constant AXI_DATA_WIDTH : integer := AxiData'length ;
   constant AXI_DATA_BYTE_WIDTH  : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH  : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
+  constant AXI_STRB_WIDTH : integer := AXI_DATA_WIDTH/8 ;
 
 
 --!! Move IfElse to ConditionalPkg in OSVVM library
@@ -217,9 +218,12 @@ begin
   ------------------------------------------------------------
   TransactionDispatcher : process
     variable WaitClockCycles  : integer ;
-    variable Address          : AxiAddr'subtype ;
-    variable Data             : AxiData'subtype ;
-    variable ExpectedData     : AxiData'subtype ;
+--!GHDL    variable Address          : AxiAddr'subtype ;
+--!GHDL    variable Data             : AxiData'subtype ;
+--!GHDL    variable ExpectedData     : AxiData'subtype ;
+    variable Address          : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
+    variable Data             : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
+    variable ExpectedData     : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
     variable ByteData         : std_logic_vector(7 downto 0) ;
     variable DataWidth        : integer ;
     variable NumBytes         : integer ;
@@ -326,8 +330,9 @@ begin
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   WriteAddressHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    AW is AB.WriteAddress ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    AW is AB.WriteAddress ;
+    alias AW : Axi4LiteWriteAddressRecType(Addr(AXI_ADDR_WIDTH-1 downto 0)) is AxiBus.WriteAddress ;
   begin
     AW.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -371,8 +376,9 @@ begin
   --    Execute Write Data Transactions
   ------------------------------------------------------------
   WriteDataHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    WD is AB.WriteData ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    WD is AB.WriteData ;
+    alias WD : Axi4LiteWriteDataRecType(Data (AXI_DATA_WIDTH-1 downto 0),   Strb(AXI_STRB_WIDTH-1 downto 0) ) is AxiBus.WriteData ; 
   begin
     WD.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -418,13 +424,16 @@ begin
   --    Collect Write Address and Data transactions
   ------------------------------------------------------------
   WriteHandler : process
-    variable LAW : AxiBus.WriteAddress'subtype ;
-    variable LWD : AxiBus.WriteData'subtype ;
+--!GHDL    variable LAW : AxiBus.WriteAddress'subtype ;
+--!GHDL    variable LWD : AxiBus.WriteData'subtype ;
+    variable LAW : Axi4LiteWriteAddressRecType(Addr(AXI_ADDR_WIDTH-1 downto 0) );
+    variable LWD : Axi4LiteWriteDataRecType(Data (AXI_DATA_WIDTH-1 downto 0),   Strb(AXI_STRB_WIDTH-1 downto 0) ) ;
 
     variable BurstLen         : integer ;
     variable ByteAddressBits  : integer ;
     variable BytesPerTransfer : integer ;
-    variable TransferAddress, MemoryAddress : LAW.Addr'subtype ;
+--!GHDL    variable TransferAddress, MemoryAddress : LAW.Addr'subtype ;
+    variable TransferAddress, MemoryAddress : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0);
     variable ByteData         : std_logic_vector(7 downto 0) ;
   begin
     -- Find Write Address and Data transaction
@@ -494,9 +503,12 @@ begin
   --   Receive and Check Write Responses
   ------------------------------------------------------------
   WriteResponseHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    WR is AB.WriteResponse ;
-    variable Local : AxiBus.WriteResponse'subtype ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    WR is AB.WriteResponse ;
+    alias WR : Axi4LiteWriteResponseRecType is AxiBus.WriteResponse ;
+    
+--!GHDL    variable Local : AxiBus.WriteResponse'subtype ;
+    variable Local : Axi4LiteWriteResponseRecType ;
   begin
     -- initialize
     WR.Valid <= '0' ;
@@ -550,8 +562,9 @@ begin
   --    Handles addresses as received, adds appropriate interface characterists
   ------------------------------------------------------------
   ReadAddressHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    AR is AB.ReadAddress ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    AR is AB.ReadAddress ;
+    alias AR : Axi4LiteReadAddressRecType(Addr(AXI_ADDR_WIDTH-1 downto 0) ) is AxiBus.ReadAddress ;
   begin
     -- Initialize
     AR.Ready <= '0' ;
@@ -598,13 +611,15 @@ begin
   --    Introduces cycle delays due to accessing memory
   ------------------------------------------------------------
   ReadHandler : process
-    variable LAR : AxiBus.ReadAddress'subtype ;
-    variable LRD : AxiBus.ReadData'subtype ;
+--!GHDL    variable LAR : AxiBus.ReadAddress'subtype ;
+--!GHDL    variable LRD : AxiBus.ReadData'subtype ;
+    variable LAR : Axi4LiteReadAddressRecType(Addr(AXI_ADDR_WIDTH-1 downto 0) );
+    variable LRD : Axi4LiteReadDataRecType(Data (AXI_DATA_WIDTH-1 downto 0)) ; 
 
     variable BurstLen         : integer ;
     variable ByteAddressBits  : integer ;
     variable BytesPerTransfer : integer ;
-    variable MemoryAddress, TransferAddress : LAR.Addr'subtype ;
+    variable MemoryAddress, TransferAddress : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable ByteData         : std_logic_vector(7 downto 0) ;
   begin
     if ReadAddressFifo.Empty then
@@ -657,9 +672,11 @@ begin
   --    All delays at this point are due to AXI Read Data interface operations
   ------------------------------------------------------------
   ReadDataHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    RD is AB.ReadData ;
-    variable Local : AxiBus.ReadData'subtype ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    RD is AB.ReadData ;
+    alias RD : Axi4LiteReadDataRecType(Data (AXI_DATA_WIDTH-1 downto 0)) is AxiBus.ReadData ;
+--!GHDL    variable Local : AxiBus.ReadData'subtype ;
+    variable Local : Axi4LiteReadDataRecType(Data (AXI_DATA_WIDTH-1 downto 0)) ; 
   begin
     -- initialize
     RD.Valid <= '0' ;

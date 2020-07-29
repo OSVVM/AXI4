@@ -217,9 +217,9 @@ begin
   ------------------------------------------------------------
   TransactionDispatcher : process
     variable WaitClockCycles  : integer ;
-    variable Address          : AxiAddr'subtype ;
-    variable Data             : AxiData'subtype ;
-    variable ExpectedData     : AxiData'subtype ;
+    variable Address          : std_logic_vector(AxiAddr'range) ;
+    variable Data             : std_logic_vector(AxiData'range) ;
+    variable ExpectedData     : std_logic_vector(AxiData'range) ;
     variable ByteData         : std_logic_vector(7 downto 0) ;
     variable DataWidth        : integer ;
     variable NumBytes         : integer ;
@@ -326,8 +326,7 @@ begin
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   WriteAddressHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    AW is AB.WriteAddress ;
+    alias    AW is AxiBus.WriteAddress ;
   begin
     AW.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -376,8 +375,7 @@ begin
   --    Execute Write Data Transactions
   ------------------------------------------------------------
   WriteDataHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    WD is AB.WriteData ;
+    alias    WD is AxiBus.WriteData ;
   begin
     WD.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -423,13 +421,25 @@ begin
   --    Collect Write Address and Data transactions
   ------------------------------------------------------------
   WriteHandler : process
-    variable LAW : AxiBus.WriteAddress'subtype ;
-    variable LWD : AxiBus.WriteData'subtype ;
+--!!GHDL    variable LAW : AxiBus.WriteAddress'subtype ;
+    alias AW is AxiBus.WriteAddress ;
+    variable LAW : Axi4WriteAddressRecType (
+                          Addr(AW.Addr'range),
+                          ID(AW.ID'range),
+                          User(AW.User'range)
+                        ) ;
+--!!GHDL    variable LWD : AxiBus.WriteData'subtype ;
+    alias WD is AxiBus.WriteData ;
+    variable LWD : Axi4WriteDataRecType (
+                      Data(WD.Data'range),
+                      Strb(WD.Strb'range),
+                      User(WD.User'range),
+                      ID(WD.ID'range)
+                    ) ;
 
     variable BurstLen         : integer ;
     variable ByteAddressBits  : integer ;
     variable BytesPerTransfer : integer ;
---    variable TransferAddress, MemoryAddress : LAW.Addr'subtype ;
     variable TransferAddress, MemoryAddress : std_logic_vector(LAW.Addr'range) ;
     variable ByteData         : std_logic_vector(7 downto 0) ;
   begin
@@ -514,9 +524,12 @@ begin
   --   Receive and Check Write Responses
   ------------------------------------------------------------
   WriteResponseHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    WR is AB.WriteResponse ;
-    variable Local : AxiBus.WriteResponse'subtype ;
+    alias    WR is AxiBus.WriteResponse ;
+--!!GHDL    variable Local : AxiBus.WriteResponse'subtype ;
+    variable Local : Axi4WriteResponseRecType (
+                          ID(WR.ID'range),
+                          User(WR.User'range)
+                        ) ;
   begin
     -- initialize
     WR.Valid <= '0' ;
@@ -578,8 +591,7 @@ begin
   --    Handles addresses as received, adds appropriate interface characterists
   ------------------------------------------------------------
   ReadAddressHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    AR is AB.ReadAddress ;
+    alias    AR is AxiBus.ReadAddress ;
   begin
     -- Initialize
     AR.Ready <= '0' ;
@@ -631,13 +643,25 @@ begin
   --    Introduces cycle delays due to accessing memory
   ------------------------------------------------------------
   ReadHandler : process
-    variable LAR : AxiBus.ReadAddress'subtype ;
-    variable LRD : AxiBus.ReadData'subtype ;
+--!!GHDL    variable LAR : AxiBus.ReadAddress'subtype ;
+    alias    AR is AxiBus.ReadAddress ;
+    variable LAR : Axi4ReadAddressRecType (
+                          Addr(AR.Addr'range),
+                          ID(AR.ID'range),
+                          User(AR.User'range)
+                        ) ;
+--!!GHDL    variable LRD : AxiBus.ReadData'subtype ;
+    alias    RD is AxiBus.ReadData ;
+    variable LRD : Axi4ReadDataRecType (
+                      Data(RD.Data'range),
+                      User(RD.User'range),
+                      ID(RD.ID'range)
+                    );
 
     variable BurstLen         : integer ;
     variable ByteAddressBits  : integer ;
     variable BytesPerTransfer : integer ;
-    variable MemoryAddress, TransferAddress : LAR.Addr'subtype ;
+    variable MemoryAddress, TransferAddress : std_logic_vector(LAR.Addr'length-1 downto 0) ;
     variable ByteData         : std_logic_vector(7 downto 0) ;
   begin
     if ReadAddressFifo.Empty then
@@ -709,9 +733,13 @@ begin
   --    All delays at this point are due to AXI Read Data interface operations
   ------------------------------------------------------------
   ReadDataHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    RD is AB.ReadData ;
-    variable Local : AxiBus.ReadData'subtype ;
+    alias    RD is AxiBus.ReadData ;
+--!!GHDL    variable Local : AxiBus.ReadData'subtype ;
+    variable Local : Axi4ReadDataRecType (
+                      Data(RD.Data'range),
+                      User(RD.User'range),
+                      ID(RD.ID'range)
+                    );
   begin
     -- initialize
     RD.Valid <= '0' ;

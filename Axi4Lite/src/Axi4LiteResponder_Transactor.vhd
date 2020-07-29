@@ -97,6 +97,7 @@ architecture TransactorResponder of Axi4LiteResponder is
   constant AXI_DATA_WIDTH : integer := AxiData'length ;
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
+  constant AXI_STRB_WIDTH : integer := AXI_DATA_WIDTH/8 ;
 
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
@@ -187,7 +188,14 @@ begin
   --    Handles transactions between TestCtrl and Model
   ------------------------------------------------------------
   TransactionDispatcher : process
-    variable AxiLocal    : AxiBus'subtype ;
+--!GHDL    variable AxiLocal    : AxiBus'subtype ;
+    variable AxiLocal    : Axi4LiteRecType(
+      WriteAddress( Addr(AXI_ADDR_WIDTH-1 downto 0) ),
+      WriteData   ( Data (AXI_DATA_WIDTH-1 downto 0),   Strb(AXI_STRB_WIDTH-1 downto 0) ),
+      ReadAddress ( Addr(AXI_ADDR_WIDTH-1 downto 0) ),
+      ReadData    ( Data (AXI_DATA_WIDTH-1 downto 0) )
+    ) ;    
+
     alias    LAW is AxiLocal.WriteAddress ;
     alias    LWD is AxiLocal.WriteData ;
     alias    LWR is AxiLocal.WriteResponse ;
@@ -440,8 +448,9 @@ begin
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   WriteAddressHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    AW is AB.WriteAddress ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    AW is AB.WriteAddress ;
+    alias AW : Axi4LiteWriteAddressRecType(Addr(AXI_ADDR_WIDTH-1 downto 0)) is AxiBus.WriteAddress ;
   begin
     AW.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -484,8 +493,9 @@ begin
   --    Execute Write Data Transactions
   ------------------------------------------------------------
   WriteDataHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    WD is AB.WriteData ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    WD is AB.WriteData ;
+    alias WD : Axi4LiteWriteDataRecType(Data (AXI_DATA_WIDTH-1 downto 0),   Strb(AXI_STRB_WIDTH-1 downto 0) ) is AxiBus.WriteData ; 
   begin
     WD.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -529,10 +539,11 @@ begin
   --   Receive and Check Write Responses
   ------------------------------------------------------------
   WriteResponseHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    WR is AB.WriteResponse ;
-    variable Local : AxiBus.WriteResponse'subtype ;
---    alias localResp  is Local.BResp ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    WR is AB.WriteResponse ;
+    alias WR : Axi4LiteWriteResponseRecType is AxiBus.WriteResponse ;
+--!GHDL    variable Local : AxiBus.WriteResponse'subtype ;
+    variable Local : Axi4LiteWriteResponseRecType ;
   begin
     -- initialize
     WR.Valid <= '0' ;
@@ -588,8 +599,9 @@ begin
   --    Execute Read Address Transactions
   ------------------------------------------------------------
   ReadAddressHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    AR is AB.ReadAddress ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    AR is AB.ReadAddress ;
+    alias AR : Axi4LiteReadAddressRecType(Addr(AXI_ADDR_WIDTH-1 downto 0) ) is AxiBus.ReadAddress ;
   begin
     -- Initialize
     AR.Ready <= '0' ;
@@ -630,11 +642,11 @@ begin
   --    Receive Read Data Transactions
   ------------------------------------------------------------
   ReadDataHandler : process
-    alias    AB : AxiBus'subtype is AxiBus ;
-    alias    RD is AB.ReadData ;
-    variable Local : AxiBus.ReadData'subtype ;
---    alias ReadData  is Local.Data ;
---    alias ReadResp  is Local.Resp ;
+--!GHDL    alias    AB : AxiBus'subtype is AxiBus ;
+--!GHDL    alias    RD is AB.ReadData ;
+    alias RD : Axi4LiteReadDataRecType(Data (AXI_DATA_WIDTH-1 downto 0)) is AxiBus.ReadData ;
+--!GHDL    variable Local : AxiBus.ReadData'subtype ;
+    variable Local : Axi4LiteReadDataRecType(Data (AXI_DATA_WIDTH-1 downto 0)) ; 
   begin
     -- initialize
     RD.Valid <= '0' ;

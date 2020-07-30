@@ -1,13 +1,13 @@
 # AXI4 Verification Component Library
 The AXI Verification Component Library implements
 verification components for:  
- - [AXI4](https://opensource.ieee.org/osvvm/AXI4)
+ - [AXI4](https://github.com/osvvm/AXI4)
    - Master with bursting
    - Memory Slave with bursting
- - [AXI4 Lite](https://opensource.ieee.org/osvvm/AXI4)
+ - [AXI4 Lite](https://github.com/osvvm/AXI4)
    - Master
    - Transaction Slave 
- - [AXI Stream](https://opensource.ieee.org/osvvm/AXI4)
+ - [AXI Stream](https://github.com/osvvm/AXI4)
    - Transmitter
    - Receiver
 
@@ -35,10 +35,10 @@ of how to use the models.
          
 ### Building Depencencies
 Before building this project, you must build the following libraries in order
-   * [OSVVM utility library](https://opensource.ieee.org/osvvm/osvvm) 
-   * [OSVVM Common Library](https://opensource.ieee.org/osvvm/OSVVM-Common)   
+   * [OSVVM utility library](https://github.com/osvvm/osvvm) 
+   * [OSVVM Common Library](https://github.com/osvvm/OSVVM-Common)   
 
-See the [OSVVM Verification Script Library](https://opensource.ieee.org/osvvm/OSVVM-Scripts) 
+See the [OSVVM Verification Script Library](https://github.com/osvvm/OSVVM-Scripts) 
 for a simple way to build the OSVVM libraries.
 
 ### AXI4/common/src
@@ -137,19 +137,19 @@ For the release history see, [CHANGELOG.md](CHANGELOG.md)
 
 ## Downloading the libraries
 
-The library [OSVVM-Libraries](https://opensource.ieee.org/osvvm/OsvvmLibraries) 
+The library [OSVVM-Libraries](https://github.com/osvvm/OsvvmLibraries) 
 contains all of the OSVVM libraries as submodules.
 Download the entire OSVVM model library using git clone with the "--recursive" flag:  
-        `$ git clone --recursive https://opensource.ieee.org/osvvm/OsvvmLibraries`
+        `$ git clone --recursive https://github.com/osvvm/OsvvmLibraries`
 
 ## Participating and Project Organization 
 
 The OSVVM project welcomes your participation with either 
 issue reports or pull requests.
-For details on [how to participate see](https://opensource.ieee.org/osvvm/OsvvmLibraries/-/blob/master/CONTRIBUTING.md)
+For details on [how to participate see](https://github.com/osvvm/OsvvmLibraries/-/blob/master/CONTRIBUTING.md)
 
-You can find the project [Authors here](https://opensource.ieee.org/osvvm/OsvvmLibraries/-/blob/master/AUTHORS.md) and
-[Contributors here](https://opensource.ieee.org/osvvm/OsvvmLibraries/-/blob/master/CONTRIBUTORS.md).
+You can find the project [Authors here](https://github.com/osvvm/OsvvmLibraries/-/blob/master/AUTHORS.md) and
+[Contributors here](https://github.com/osvvm/OsvvmLibraries/-/blob/master/CONTRIBUTORS.md).
 
 ## More Information on OSVVM
 

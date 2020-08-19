@@ -147,7 +147,7 @@ begin
        Rdy      => TransRec.Rdy,
        Ack      => TransRec.Ack
     ) ;
-    
+
     Operation := TransRec.Operation ; 
 
     case Operation is
@@ -157,7 +157,7 @@ begin
         Increment(TransmitRequestCount) ;
         WaitForToggle(TransmitDoneCount) ;
         wait for 0 ns ; 
-      
+
       when WAIT_FOR_CLOCK =>
         WaitForClock(Clk, TransRec.IntToModel) ;
 

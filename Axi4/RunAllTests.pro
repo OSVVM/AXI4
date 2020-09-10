@@ -1,5 +1,5 @@
-#  File Name:         testbench.pro
-#  Revision:          OSVVM MODELS STANDARD VERSION
+#  File Name:         RunAllTests.pro
+#  Revision:          STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
 #  Contributor(s):
@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to compile the Axi4 Lite testbench  
+#        Script to run all Axi4 tests  
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -38,19 +38,19 @@
 #  limitations under the License.
 #  
 library osvvm_TbAxi4
-analyze TestCtrl_e.vhd
-analyze TbAxi4.vhd
-analyze TbAxi4_BasicReadWrite.vhd
-analyze TbAxi4_ReadWriteAsync1.vhd
-analyze TbAxi4_ReadWriteAsync2.vhd
-analyze TbAxi4_ReadWriteAsync3.vhd
-analyze TbAxi4_RandomReadWrite.vhd
-analyze TbAxi4_RandomReadWriteByte.vhd
-analyze TbAxi4_TimeOut.vhd
-analyze TbAxi4_WriteOptions.vhd
-analyze TbAxi4_BasicBurst.vhd
-analyze TbAxi4_MemoryReadWrite.vhd
-analyze TbAxi4_MemoryBurst.vhd
+analyze ./testbench/TestCtrl_e.vhd
+analyze ./testbench/TbAxi4.vhd
+analyze ./testbench/TbAxi4_BasicReadWrite.vhd
+analyze ./testbench/TbAxi4_ReadWriteAsync1.vhd
+analyze ./testbench/TbAxi4_ReadWriteAsync2.vhd
+analyze ./testbench/TbAxi4_ReadWriteAsync3.vhd
+analyze ./testbench/TbAxi4_RandomReadWrite.vhd
+analyze ./testbench/TbAxi4_RandomReadWriteByte.vhd
+analyze ./testbench/TbAxi4_TimeOut.vhd
+analyze ./testbench/TbAxi4_WriteOptions.vhd
+analyze ./testbench/TbAxi4_BasicBurst.vhd
+analyze ./testbench/TbAxi4_MemoryReadWrite.vhd
+analyze ./testbench/TbAxi4_MemoryBurst.vhd
 
 simulate TbAxi4_BasicReadWrite
 simulate TbAxi4_ReadWriteAsync1    

@@ -1,4 +1,4 @@
-#  File Name:         RunTests.pro
+#  File Name:         AXI4.pro
 #  Revision:          STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Top level script to compile the Axi4 models   
+#        Build all OSVVM AXI4 Verification Components   
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -38,7 +38,6 @@
 #  limitations under the License.
 #
 include ./common/common.pro
-include ./Axi4/common/common.pro
 include ./Axi4Lite/Axi4Lite.pro
 include ./Axi4/Axi4.pro
 include ./AxiStream/AxiStream.pro

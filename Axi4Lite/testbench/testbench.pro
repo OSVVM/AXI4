@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to compile the Axi4 Lite testbench  
+#        Script to run one Axi4 Lite test  
 #
 #  Developed for:
 #        SynthWorks Design Inc.

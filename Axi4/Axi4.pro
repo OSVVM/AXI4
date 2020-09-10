@@ -1,5 +1,5 @@
 #  File Name:         Axi4.pro
-#  Revision:          OSVVM MODELS STANDARD VERSION
+#  Revision:          STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
 #  Contributor(s):
@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to compile the Axi4 Lite models  
+#        Script to compile the Axi4 models  
 #
 #  Developed for:
 #        SynthWorks Design Inc.

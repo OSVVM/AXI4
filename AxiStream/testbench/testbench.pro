@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to compile the Axi Stream testbench  
+#        Script to run one Axi Stream test  
 #
 #  Developed for:
 #        SynthWorks Design Inc.

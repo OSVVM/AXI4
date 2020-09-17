@@ -239,7 +239,7 @@ package Axi4OptionsTypePkg is
   ) ;
   
   ------------------------------------------------------------
-  function GetAxiParameter (
+  impure function GetAxiParameter (
   -----------------------------------------------------------
     constant AxiBus        : in  Axi4BaseRecType ;
     constant Operation     : in  Axi4OptionsType 
@@ -510,7 +510,7 @@ package body Axi4OptionsTypePkg is
   end procedure SetAxiParameter ;
   
   ------------------------------------------------------------
-  function GetAxiParameter (
+  impure function GetAxiParameter (
   -----------------------------------------------------------
     constant AxiBus        : in  Axi4BaseRecType ;
     constant Operation     : in  Axi4OptionsType 

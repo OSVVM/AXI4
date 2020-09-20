@@ -57,11 +57,12 @@ library osvvm_common ;
 
 entity AxiStreamTransmitter is
   generic (
+    MODEL_ID_NAME  : string :="" ;
     DEFAULT_ID     : std_logic_vector ; 
     DEFAULT_DEST   : std_logic_vector ; 
     DEFAULT_USER   : std_logic_vector ; 
 
-    tperiod_Clk     : time := 10 ns ;
+    tperiod_Clk    : time := 10 ns ;
     
     tpd_Clk_TValid : time := 2 ns ; 
     tpd_Clk_TID    : time := 2 ns ; 
@@ -98,8 +99,11 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
   constant AXI_ID_WIDTH : integer := TID'length ;
   constant AXI_DEST_WIDTH : integer := TDest'length ;
 
-  constant MODEL_INSTANCE_NAME : string := 
-      PathTail(to_lower(AxiStreamTransmitter'PATH_NAME)) & " AxiStreamTransmitter" ;
+--!!  constant MODEL_INSTANCE_NAME : string := 
+--!!      PathTail(to_lower(AxiStreamTransmitter'PATH_NAME)) & " AxiStreamTransmitter" ;
+  constant MODEL_INSTANCE_NAME : string :=
+    -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
+    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, to_lower(PathTail(AxiStreamTransmitter'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ; 
   

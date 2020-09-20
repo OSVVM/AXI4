@@ -129,7 +129,7 @@ architecture AxiFull of Axi4LiteMaster is
 
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
-    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4LiteMaster'PATH_NAME))) ;
+    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, to_lower(PathTail(Axi4LiteMaster'PATH_NAME))) ;
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
 
   -- External Burst Interface

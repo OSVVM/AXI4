@@ -57,7 +57,8 @@ library osvvm_common ;
 
 entity AxiStreamReceiver is
   generic (
-    tperiod_Clk     : time := 10 ns ;
+    MODEL_ID_NAME  : string :="" ;
+    tperiod_Clk    : time := 10 ns ;
     
     tpd_Clk_TReady : time := 2 ns  
   ) ;
@@ -87,8 +88,11 @@ architecture behavioral of AxiStreamReceiver is
   constant AXI_ID_WIDTH : integer := TID'length ;
   constant AXI_DEST_WIDTH : integer := TDest'length ;
 
-  constant MODEL_INSTANCE_NAME : string := 
-      PathTail(to_lower(AxiStreamReceiver'PATH_NAME)) & " AxiStreamReceiver" ;
+--!!  constant MODEL_INSTANCE_NAME : string := 
+--!!      PathTail(to_lower(AxiStreamReceiver'PATH_NAME)) & " AxiStreamReceiver" ;
+  constant MODEL_INSTANCE_NAME : string :=
+    -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
+    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, to_lower(PathTail(AxiStreamReceiver'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ; 
   

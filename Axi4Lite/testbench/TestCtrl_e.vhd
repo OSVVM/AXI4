@@ -50,7 +50,7 @@ library OSVVM ;
   context OSVVM.OsvvmContext ; 
 
 library osvvm_Axi4 ;
-  context osvvm_Axi4.Axi4Context ; 
+  context osvvm_Axi4.Axi4LiteContext ; 
 
 entity TestCtrl is
   port (

@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to compile the Axi4 Lite testbench  
+#        Script to run one Axi4 Lite test  
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -48,9 +48,7 @@ analyze TbAxi4_RandomReadWrite.vhd
 analyze TbAxi4_RandomReadWriteByte.vhd
 analyze TbAxi4_TimeOut.vhd
 analyze TbAxi4_WriteOptions.vhd
-# analyze TbAxi4_BasicBurst.vhd
 analyze TbAxi4_MemoryReadWrite.vhd
-# analyze TbAxi4_MemoryBurst.vhd
 
 # simulate TbAxi4_BasicReadWrite
 # simulate TbAxi4_ReadWriteAsync1    
@@ -60,6 +58,4 @@ analyze TbAxi4_MemoryReadWrite.vhd
 # simulate TbAxi4_RandomReadWriteByte    
 # simulate TbAxi4_TimeOut    
 # simulate TbAxi4_WriteOptions 
-#simulate TbAxi4_BasicBurst
 simulate TbAxi4_MemoryReadWrite
-#simulate TbAxi4_MemoryBurst

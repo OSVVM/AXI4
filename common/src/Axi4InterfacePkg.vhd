@@ -85,7 +85,7 @@ package Axi4InterfacePkg is
     -- AxCache One-hot (Write-Allocate, Read-Allocate, Modifiable, Bufferable)
     Cache     : std_logic_vector(3 downto 0) ;
     QOS       : std_logic_vector(3 downto 0) ;
-    Region    : std_logic_vector(7 downto 0) ;
+    Region    : std_logic_vector(3 downto 0) ;
     User      : std_logic_vector ; -- User Config
   end record Axi4WriteAddressRecType ; 
   
@@ -160,7 +160,7 @@ package Axi4InterfacePkg is
     -- AxCache One-hot (Write-Allocate, Read-Allocate, Modifiable, Bufferable)
     Cache     : std_logic_vector(3 downto 0) ;
     QOS       : std_logic_vector(3 downto 0) ;
-    Region    : std_logic_vector(7 downto 0) ;
+    Region    : std_logic_vector(3 downto 0) ;
     User      : std_logic_vector ; -- User Config
   end record Axi4ReadAddressRecType ; 
   

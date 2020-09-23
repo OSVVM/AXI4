@@ -1,5 +1,5 @@
 #  File Name:         testbench.pro
-#  Revision:          OSVVM MODELS STANDARD VERSION
+#  Revision:          STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
 #  Contributor(s):
@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to compile the Axi4 Lite testbench  
+#        Script to run one Axi4 test  
 #
 #  Developed for:
 #        SynthWorks Design Inc.

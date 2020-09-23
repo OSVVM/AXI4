@@ -1,5 +1,5 @@
-#  File Name:         RunTests.pro
-#  Revision:          STANDARD VERSION
+#  File Name:         RunAllTests.pro
+#  Revision:          OSVVM MODELS STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
 #  Contributor(s):
@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Top level script to compile the Axi4 models and testbench  
+#        Script to run all Axi4 Lite tests  
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -36,9 +36,26 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-#
-# OSVVM Common
-include ../../common/common.pro
-include ./Axi4.pro
-include ./Axi4Lite/testbench/testbench.pro
-include ./AxiStream/testbench/testbench.pro
+#  
+library osvvm_TbAxi4
+analyze ./testbench/TestCtrl_e.vhd
+analyze ./testbench/TbAxi4.vhd
+analyze ./testbench/TbAxi4_BasicReadWrite.vhd
+analyze ./testbench/TbAxi4_ReadWriteAsync1.vhd
+analyze ./testbench/TbAxi4_ReadWriteAsync2.vhd
+analyze ./testbench/TbAxi4_ReadWriteAsync3.vhd
+analyze ./testbench/TbAxi4_RandomReadWrite.vhd
+analyze ./testbench/TbAxi4_RandomReadWriteByte.vhd
+analyze ./testbench/TbAxi4_TimeOut.vhd
+analyze ./testbench/TbAxi4_WriteOptions.vhd
+analyze ./testbench/TbAxi4_MemoryReadWrite.vhd
+
+simulate TbAxi4_BasicReadWrite
+simulate TbAxi4_ReadWriteAsync1
+simulate TbAxi4_ReadWriteAsync2
+simulate TbAxi4_ReadWriteAsync3
+simulate TbAxi4_RandomReadWrite
+simulate TbAxi4_RandomReadWriteByte
+simulate TbAxi4_TimeOut
+simulate TbAxi4_WriteOptions
+simulate TbAxi4_MemoryReadWrite

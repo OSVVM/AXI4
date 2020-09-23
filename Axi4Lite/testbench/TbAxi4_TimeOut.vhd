@@ -69,7 +69,7 @@ begin
     wait for 0 ns ;  wait for 0 ns ;
     SetAlertLogJustify ;
     TranscriptOpen("./results/TbAxi4_TimeOut.txt") ;
-    SetTranscriptMirror(TRUE) ; 
+--    SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
     wait until nReset = '1' ;  
@@ -103,38 +103,38 @@ begin
     variable PreviousErrorCount : AlertCountType ; 
   begin
     wait until nReset = '1' ;  
-    NoOp(AxiSuperTransRec, 2) ; 
+    WaitForClock(AxiSuperTransRec, 2) ; 
     
     PreviousErrorCount := GetAlertCount ; 
 
 WaitForBarrier(TestPhaseStart) ;
 log(TbSuperID, "Write Address Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
-    NoOp(AxiSuperTransRec, 2) ;  -- Allow Model Options to Set.
+    WaitForClock(AxiSuperTransRec, 2) ;  -- Allow Model Options to Set.
     Write(AxiSuperTransRec, X"0001_0010",  X"0001_0010") ;  -- Pass
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     SetModelOptions(AxiSuperTransRec, WRITE_ADDRESS_READY_TIME_OUT, 5) ;
     Write(AxiSuperTransRec, X"BAD0_0010",  X"BAD0_0010") ;  -- Write Address Fail
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     SetModelOptions(AxiSuperTransRec, WRITE_ADDRESS_READY_TIME_OUT, 10) ;
     Write(AxiSuperTransRec, X"0002_0020",  X"0002_0020") ;  -- Pass
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     SetModelOptions(AxiSuperTransRec, WRITE_ADDRESS_READY_TIME_OUT, 5) ;
     Write(AxiSuperTransRec, X"BAD0_0020",  X"BAD0_0020") ;  -- Write Address Fail
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     SetModelOptions(AxiSuperTransRec, WRITE_ADDRESS_READY_TIME_OUT, 25) ;
     Write(AxiSuperTransRec, X"0003_0030",  X"0003_0030") ;  -- Pass
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
-    ErrorsInjected    := (FAILURE => 4, ERROR => 2, WARNING => 0) ;
+    ErrorsInjected    := (FAILURE => 4, ERROR => 0, WARNING => 0) ;
     ExpectedErrors    <= ErrorsInjected ; 
 
     ReportNonZeroAlerts ;
@@ -147,29 +147,29 @@ log(TbSuperID, "Write Address Ready TimeOut test.  Trigger Ready TimeOut twice."
     
 WaitForBarrier(TestPhaseStart) ;
 log(TbSuperID, "Write DATA Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
-    NoOp(AxiSuperTransRec, 2) ;  -- Allow model options to set.
+    WaitForClock(AxiSuperTransRec, 2) ;  -- Allow model options to set.
     Write(AxiSuperTransRec, X"0001_0110",  X"0001_0110") ;  -- Pass
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
 
     SetModelOptions(AxiSuperTransRec, WRITE_DATA_READY_TIME_OUT, 5) ;
     Write(AxiSuperTransRec, X"BAD0_0110",  X"BAD0_0110") ;  -- Write Data Fail
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     SetModelOptions(AxiSuperTransRec, WRITE_DATA_READY_TIME_OUT, 10) ;
     Write(AxiSuperTransRec, X"0002_0120",  X"0002_0120") ;  -- Pass
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     SetModelOptions(AxiSuperTransRec, WRITE_DATA_READY_TIME_OUT, 5) ;
     Write(AxiSuperTransRec, X"BAD0_0120",  X"BAD0_0120") ;  -- Write DATA Fail
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     SetModelOptions(AxiSuperTransRec, WRITE_DATA_READY_TIME_OUT, 25) ;
     Write(AxiSuperTransRec, X"0003_0130",  X"0003_0130") ;  -- Pass
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
 
     ErrorsInjected    := (FAILURE => 4, ERROR => 0, WARNING => 0) ;
@@ -189,21 +189,21 @@ log(TbSuperID, "Write Response Ready TimeOut test.  Trigger Ready TimeOut twice.
     SetModelOptions(AxiSuperTransRec, WRITE_RESPONSE_READY_DELAY_CYCLES, 7) ;
     SetModelOptions(AxiSuperTransRec, WRITE_RESPONSE_READY_BEFORE_VALID, FALSE) ;
 
-    NoOp(AxiSuperTransRec, 2) ;  -- Allow model options to set.
+    WaitForClock(AxiSuperTransRec, 2) ;  -- Allow model options to set.
     Write(AxiSuperTransRec, X"0001_0210",  X"0001_0210") ;  -- Pass
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
 
     Write(AxiSuperTransRec, X"BAD0_0210",  X"BAD0_0210") ;  -- Write Data Fail
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     Write(AxiSuperTransRec, X"0002_0220",  X"0002_0220") ;  -- Pass
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     Write(AxiSuperTransRec, X"BAD0_0220",  X"BAD0_0220") ;  -- Write DATA Fail
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     SetModelOptions(AxiSuperTransRec, WRITE_RESPONSE_READY_DELAY_CYCLES, 0) ;
@@ -211,7 +211,7 @@ log(TbSuperID, "Write Response Ready TimeOut test.  Trigger Ready TimeOut twice.
 
     SetModelOptions(AxiSuperTransRec, WRITE_DATA_READY_TIME_OUT, 25) ;
     Write(AxiSuperTransRec, X"0003_0230",  X"0003_0230") ;  -- Pass
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
 
     ErrorsInjected    := (FAILURE => 4, ERROR => 2, WARNING => 0) ;
@@ -227,34 +227,34 @@ log(TbSuperID, "Write Response Ready TimeOut test.  Trigger Ready TimeOut twice.
     
 WaitForBarrier(TestPhaseStart) ;
 log(TbSuperID, "Read Address Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
-    NoOp(AxiSuperTransRec, 2) ;  -- Allow Model Options to Set.
+    WaitForClock(AxiSuperTransRec, 2) ;  -- Allow Model Options to Set.
     Read(AxiSuperTransRec, X"0001_0010",  ReadData) ;  -- Pass
     AffirmIfEqual(TbSuperID, ReadData, X"0001_0010", "AXI Super Read Data: ") ;
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     SetModelOptions(AxiSuperTransRec, READ_ADDRESS_READY_TIME_OUT, 5) ;
     Read(AxiSuperTransRec, X"BAD0_0010",  ReadData) ;  -- Read Address Fail
     AffirmIfEqual(TbSuperID, ReadData, X"BAD0_0010", "AXI Super Read Data: ") ;
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     SetModelOptions(AxiSuperTransRec, READ_ADDRESS_READY_TIME_OUT, 10) ;
     Read(AxiSuperTransRec, X"0002_0020",  ReadData) ;  -- Pass
     AffirmIfEqual(TbSuperID, ReadData, X"0002_0020", "AXI Super Read Data: ") ;
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     SetModelOptions(AxiSuperTransRec, READ_ADDRESS_READY_TIME_OUT, 5) ;
     Read(AxiSuperTransRec, X"BAD0_0020",  ReadData) ;  -- Read Address Fail
     AffirmIfEqual(TbSuperID, ReadData, X"BAD0_0020", "AXI Super Read Data: ") ;
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     SetModelOptions(AxiSuperTransRec, READ_ADDRESS_READY_TIME_OUT, 25) ;
     Read(AxiSuperTransRec, X"0003_0030",  ReadData) ;  -- Pass
     AffirmIfEqual(TbSuperID, ReadData, X"0003_0030", "AXI Super Read Data: ") ;
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     ErrorsInjected    := (FAILURE => 4, ERROR => 0, WARNING => 0) ;
@@ -274,25 +274,25 @@ log(TbSuperID, "Read Data Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
     SetModelOptions(AxiSuperTransRec, READ_DATA_READY_DELAY_CYCLES, 7) ;
     SetModelOptions(AxiSuperTransRec, READ_DATA_READY_BEFORE_VALID, FALSE) ;
 
-    NoOp(AxiSuperTransRec, 2) ;  -- Allow Model Options to Set.
+    WaitForClock(AxiSuperTransRec, 2) ;  -- Allow Model Options to Set.
     Read(AxiSuperTransRec, X"0001_0010",  ReadData) ;  -- Pass
     AffirmIfEqual(TbSuperID, ReadData, X"0001_0010", "AXI Super Read Data: ") ;
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     Read(AxiSuperTransRec, X"BAD0_0010",  ReadData) ;  -- Read Address Fail
     AffirmIfEqual(TbSuperID, ReadData, not(X"BAD0_0010"), "AXI Super Read Data: ") ;
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     Read(AxiSuperTransRec, X"0002_0020",  ReadData) ;  -- Pass
     AffirmIfEqual(TbSuperID, ReadData, X"0002_0020", "AXI Super Read Data: ") ;
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     Read(AxiSuperTransRec, X"BAD0_0020",  ReadData) ;  -- Read Address Fail
     AffirmIfEqual(TbSuperID, ReadData, not(X"BAD0_0020"), "AXI Super Read Data: ") ;
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     SetModelOptions(AxiSuperTransRec, READ_DATA_READY_DELAY_CYCLES, 0) ;
@@ -300,7 +300,7 @@ log(TbSuperID, "Read Data Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
 
     Read(AxiSuperTransRec, X"0003_0030",  ReadData) ;  -- Pass
     AffirmIfEqual(TbSuperID, ReadData, X"0003_0030", "AXI Super Read Data: ") ;
-    NoOp(AxiSuperTransRec, 10) ; 
+    WaitForClock(AxiSuperTransRec, 10) ; 
     print("") ;  print("") ;  
     
     ErrorsInjected    := (FAILURE => 4, ERROR => 2, WARNING => 0) ;
@@ -328,7 +328,7 @@ log(TbSuperID, "Read Data Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
 
     
     -- Wait for outputs to propagate and signal TestDone
-    NoOp(AxiSuperTransRec, 20) ;  
+    WaitForClock(AxiSuperTransRec, 20) ;  
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiSuperProc ;
@@ -490,7 +490,7 @@ WaitForBarrier(TestPhaseStart) ;
 
     
     -- Wait for outputs to propagate and signal TestDone
-    NoOp(AxiMinionTransRec, 2) ;
+    WaitForClock(AxiMinionTransRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiMinionProc ;

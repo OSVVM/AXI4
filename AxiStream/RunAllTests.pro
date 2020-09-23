@@ -1,5 +1,5 @@
-#  File Name:         testbench.pro
-#  Revision:          OSVVM MODELS STANDARD VERSION
+#  File Name:         RunAllTests.pro
+#  Revision:          STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
 #  Contributor(s):
@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to compile the Axi4 Lite testbench  
+#        Script to run all Axi Stream tests  
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -37,25 +37,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
-library osvvm_TbAxi4
-analyze TestCtrl_e.vhd
-analyze TbAxi4.vhd
-analyze TbAxi4_BasicReadWrite.vhd
-analyze TbAxi4_MasterReadWriteAsync1.vhd
-analyze TbAxi4_MasterReadWriteAsync2.vhd
-analyze TbAxi4_MasterReadWriteAsync3.vhd
-analyze TbAxi4_RandomReadWrite.vhd
-analyze TbAxi4_RandomReadWriteByte.vhd
-analyze TbAxi4_TimeOut.vhd
-analyze TbAxi4_WriteOptions.vhd
-analyze TbAxi4_BasicBurst.vhd
-
-simulate TbAxi4_BasicReadWrite
-simulate TbAxi4_MasterReadWriteAsync1    
-simulate TbAxi4_MasterReadWriteAsync2    
-simulate TbAxi4_MasterReadWriteAsync3    
-simulate TbAxi4_RandomReadWrite    
-simulate TbAxi4_RandomReadWriteByte    
-simulate TbAxi4_TimeOut    
-simulate TbAxi4_WriteOptions 
-simulate TbAxi4_BasicBurst
+library osvvm_TbAxiStream
+analyze ./testbench/TbAxiStream.vhd
+analyze ./testbench/TestCtrl_e.vhd
+analyze ./testbench/TbAxiStream_BasicSendGet.vhd
+simulate TbAxiStream_BasicSendGet

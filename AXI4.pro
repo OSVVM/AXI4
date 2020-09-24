@@ -39,5 +39,5 @@
 #
 include ./common/common.pro
 include ./Axi4Lite/Axi4Lite.pro
-include ./Axi4/Axi4.pro
 include ./AxiStream/AxiStream.pro
+include ./Axi4/Axi4.pro

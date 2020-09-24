@@ -52,7 +52,8 @@ library osvvm_common ;
 
 library osvvm_AXI4 ;
     context osvvm_AXI4.AxiStreamContext ;
-
+    use     osvvm_AXI4.AxiStreamSignalsPkg_32.all ;
+    
 entity TbAxiStream is
 end entity TbAxiStream ; 
 architecture TestHarness of TbAxiStream is
@@ -63,17 +64,19 @@ architecture TestHarness of TbAxiStream is
   signal Clk       : std_logic ;
   signal nReset    : std_logic ;
   
+  
+--!! Broken in Modelsim AE 2020.2
   -- Create signals and transaction interface for AxiStream TX model
-  package AxiStreamPkg is new osvvm_axi4.AxiStreamGenericSignalsPkg
-    generic map (
-      AXI_DATA_WIDTH   => 32, 
-      AXI_BYTE_WIDTH   => 4, 
-      TID_MAX_WIDTH    => 8,
-      TDEST_MAX_WIDTH  => 4,
-      TUSER_MAX_WIDTH  => 4
-    ) ;  
-
-  use AxiStreamPkg.all ;
+--  package AxiStreamPkg is new osvvm_axi4.AxiStreamGenericSignalsPkg
+--    generic map (
+--      AXI_DATA_WIDTH   => 32, 
+--      AXI_BYTE_WIDTH   => 4, 
+--      TID_MAX_WIDTH    => 8,
+--      TDEST_MAX_WIDTH  => 4,
+--      TUSER_MAX_WIDTH  => 4
+--    ) ;  
+--
+--  use AxiStreamPkg.all ;
   
 --  constant AXI_DATA_WIDTH   : integer := 32 ; 
 --  constant AXI_BYTE_WIDTH   : integer := AXI_DATA_WIDTH/8 ; 

@@ -76,15 +76,15 @@ Common/src/AddressBusResponderTransactionPkg.vhd
       * Axi4MemoryComponentPkg.vhd
       * Axi4MonitorComponentPkg.vhd
    * Axi4Context.vhd
-      * References all packages required to use the AXI4 verificaton components
+      * References all packages required to use the AXI4 verification components
    * Axi4Master.vhd
-      * AXI4 Master verificaton component with bursting
+      * AXI4 Master verification component with bursting
    * Axi4Monitor_dummy.vhd
    * Axi4Responder_Transactor.vhd
-      * AXI4 Responder verificaton component
+      * AXI4 Responder verification component
      * Currently does not support bursting
    * Axi4Memory.vhd
-      * AXI4 Memory verificaton component with bursting
+      * AXI4 Memory verification component with bursting
 
 For current compile order see AXI4/Axi4/Axi4.pro.
 
@@ -98,20 +98,20 @@ Uses OSVVM Model Independent Transactions for AddressBusses.
 See OSVVM-Common repository, files Common/src/AddressBusTransactionpkg.vhd and 
 Common/src/AddressBusResponderTransactionPkg.vhd
 
-   * Packages with component declarations for verificatoin components
+   * Packages with component declarations for verification components
       * Axi4LiteMasterComponentPkg.vhd
       * Axi4LiteResponderComponentPkg.vhd
       * Axi4LiteMemoryComponentPkg.vhd
       * Axi4LiteMonitorComponentPkg.vhd
    * Axi4LiteContext.vhd
-      * References all packages required to use the AXI4Lite verificaton components
+      * References all packages required to use the AXI4Lite verification components
    * Axi4LiteMaster.vhd
-      * AXI4 Master verificaton component
+      * AXI4 Master verification component
    * Axi4LiteMonitor_dummy.vhd
    * Axi4LiteResponder_Transactor.vhd
-      * AXI4 Responder verificaton component
+      * AXI4 Responder verification component
    * Axi4LiteMemory.vhd
-      * AXI4 Memory verificaton component
+      * AXI4 Memory verification component
 
 ### AXI4/AxiStream/src 
 AxiStream Transmitter and Receiver verification components. 
@@ -122,13 +122,13 @@ See OSVVM-Common repository, file Common/src/StreamTransactionPkg.vhd
       * Transaction extensions for AxiStream interface
       * Used in conjunction with StreamTransactionpkg 
    * AxiStreamTransmitter.vhd
-      * AXI4 Transmitter verificaton component
+      * AXI4 Transmitter verification component
    * AxiStreamReceiver.vhd
-      * AXI4 Receiver verificaton component
+      * AXI4 Receiver verification component
    * AxiStreamComponentPkg.vhd
-      * Packages with component declarations for verificatoin components
+      * Packages with component declarations for verification components
    * AxiStreamContext.vhd
-      * References all packages required to use the AxiStream verificaton components
+      * References all packages required to use the AxiStream verification components
 
 For current compile order see AXI4/AxiStream/AxiStream.pro.
 
@@ -146,10 +146,10 @@ Download the entire OSVVM model library using git clone with the "--recursive" f
 
 The OSVVM project welcomes your participation with either 
 issue reports or pull requests.
-For details on [how to participate see](https://github.com/osvvm/OsvvmLibraries/-/blob/master/CONTRIBUTING.md)
+For details on [how to participate see](https://opensource.ieee.org/osvvm/OsvvmLibraries/-/blob/master/CONTRIBUTING.md)
 
-You can find the project [Authors here](https://github.com/osvvm/OsvvmLibraries/-/blob/master/AUTHORS.md) and
-[Contributors here](https://github.com/osvvm/OsvvmLibraries/-/blob/master/CONTRIBUTORS.md).
+You can find the project [Authors here](AUTHORS.md) and
+[Contributors here](CONTRIBUTORS.md).
 
 ## More Information on OSVVM
 

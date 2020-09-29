@@ -280,6 +280,7 @@ begin
 
     variable Operation       : AddressBusOperationType ;
   begin
+    AxiDefaults := InitAxi4Rec(AxiDefaults, '0') ;
     AxiDefaults.WriteAddress.Size  := to_slv(AXI_BYTE_ADDR_WIDTH, LAW.Size'length) ;
     AxiDefaults.WriteResponse.Resp := to_Axi4RespType(OKAY);
     AxiDefaults.ReadAddress.Size   := to_slv(AXI_BYTE_ADDR_WIDTH, LAR.Size'length) ;

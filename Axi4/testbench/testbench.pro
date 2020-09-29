@@ -50,6 +50,7 @@ analyze TbAxi4_TimeOut.vhd
 analyze TbAxi4_WriteOptions.vhd
 analyze TbAxi4_BasicBurst.vhd
 analyze TbAxi4_MemoryReadWrite.vhd
+analyze TbAxi4_MemoryAsync.vhd
 analyze TbAxi4_MemoryBurst.vhd
 
 # simulate TbAxi4_BasicReadWrite

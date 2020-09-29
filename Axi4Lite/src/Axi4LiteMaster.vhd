@@ -257,7 +257,10 @@ begin
 
     variable Operation       : AddressBusOperationType ;
   begin
+    
+    AxiDefaults.WriteAddress.Prot  := (others => '0') ;
     AxiDefaults.WriteResponse.Resp := to_Axi4RespType(OKAY);
+    AxiDefaults.ReadAddress.Prot   := (others => '0') ;
     AxiDefaults.ReadData.Resp      := to_Axi4RespType(OKAY) ;
 
     loop

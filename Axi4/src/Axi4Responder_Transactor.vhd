@@ -306,8 +306,9 @@ begin
           FoundWriteAddress := TRUE ;
 
           AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "SlaveGetWrite, Address length does not match", FAILURE) ;
-          -- Check WProt
-          AlertIfNotEqual(ModelID, WriteProt, ModelWProt, "SlaveGetWrite, WProt", ERROR) ;
+--  Need checking of WriteProt to account for timeout - perhaps return "----" on timeout
+--          -- Check WProt
+--          AlertIfNotEqual(ModelID, WriteProt, ModelWProt, "SlaveGetWrite, WProt", ERROR) ;
         end if ;
 
         if WriteAvailable and IsWriteData(TransRec.Operation) then

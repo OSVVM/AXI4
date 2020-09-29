@@ -66,6 +66,7 @@ package AxiStreamGenericSignalsPkg is
 
   --! Issue:  with multiple interfaces, need to use a selected name with package
   --!         PackageInstanceName.TValid
+  --!         Interesting in that it works just like a record - except you cannot collectively refer to them
   signal TValid    : std_logic ;
   signal TReady    : std_logic ; 
   signal TID       : std_logic_vector(TID_MAX_WIDTH-1 downto 0) ; 

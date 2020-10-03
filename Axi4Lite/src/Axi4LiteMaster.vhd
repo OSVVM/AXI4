@@ -317,8 +317,8 @@ begin
           end if ;
 
           if IsWriteData(Operation) then
-            WriteAddress  := FromTransaction(TransRec.Address) ;
-            WriteByteAddr := CalculateAxiByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH);
+--            WriteAddress  := FromTransaction(TransRec.Address) ;
+--            WriteByteAddr := CalculateAxiByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH);
 
             -- Single Transfer Write Data Handling
             WriteData     := FromTransaction(TransRec.DataToModel) ;

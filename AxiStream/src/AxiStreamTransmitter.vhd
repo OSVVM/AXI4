@@ -61,6 +61,7 @@ entity AxiStreamTransmitter is
     DEFAULT_ID     : std_logic_vector ; 
     DEFAULT_DEST   : std_logic_vector ; 
     DEFAULT_USER   : std_logic_vector ; 
+    DEFAULT_LAST   : natural := 0 ; 
 
     tperiod_Clk    : time := 10 ns ;
     
@@ -96,11 +97,10 @@ end entity AxiStreamTransmitter ;
 architecture SimpleTransmitter of AxiStreamTransmitter is
 
   constant AXI_STREAM_DATA_WIDTH : integer := TData'length ;
+  constant AXI_STREAM_DATA_BYTE_WIDTH : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
   constant AXI_ID_WIDTH : integer := TID'length ;
   constant AXI_DEST_WIDTH : integer := TDest'length ;
 
---!!  constant MODEL_INSTANCE_NAME : string := 
---!!      PathTail(to_lower(AxiStreamTransmitter'PATH_NAME)) & " AxiStreamTransmitter" ;
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, to_lower(PathTail(AxiStreamTransmitter'PATH_NAME))) ;
@@ -111,11 +111,14 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
 
   signal TransmitRequestCount, TransmitDoneCount      : integer := 0 ;   
 
+
+  -- Configuring the Model
   signal TransmitReadyTimeOut : integer := integer'right ; 
 
-  signal ParamID   : TID'subtype   := DEFAULT_ID ;
-  signal ParamDest : TDest'subtype := DEFAULT_DEST ;
-  signal ParamUser : TUser'subtype := DEFAULT_USER;
+  signal ParamID      : TID'subtype   := DEFAULT_ID ;
+  signal ParamDest    : TDest'subtype := DEFAULT_DEST ;
+  signal ParamUser    : TUser'subtype := DEFAULT_USER;
+  signal ParamLast    : natural       := DEFAULT_LAST ;
 
 begin
 
@@ -141,10 +144,10 @@ begin
   --    Dispatches transactions to
   ------------------------------------------------------------
   TransactionDispatcher : process
+    constant PARAM_LENGTH : integer := TID'length + TDest'length + TUser'length + 1 ; 
     variable Data : TData'subtype ;
-    variable Strb, Keep : std_logic_vector(TData'length/8 - 1 downto 0) := (others => '1') ;    
---    variable Operation : TransRec.Operation'subtype ;
-    variable Operation : StreamOperationType ;
+    variable Param : std_logic_vector(PARAM_LENGTH downto 1) ;
+--    alias Operation : StreamOperationType is TransRec.Operation ;
   begin
     WaitForTransaction(
        Clk      => Clk,
@@ -152,15 +155,11 @@ begin
        Ack      => TransRec.Ack
     ) ;
 
-    Operation := TransRec.Operation ; 
-
-    case Operation is
-      when SEND =>
-        Data     := FromTransaction(TransRec.DataToModel, Data'length) ;
-        TransmitFifo.Push(Data & Strb & Keep & ParamID & ParamDest & ParamUser) ; 
-        Increment(TransmitRequestCount) ;
-        WaitForToggle(TransmitDoneCount) ;
-        wait for 0 ns ; 
+    case TransRec.Operation is
+      when WAIT_FOR_TRANSACTION =>
+        if TransmitRequestCount /= TransmitDoneCount then 
+          wait until TransmitRequestCount = TransmitDoneCount ;
+        end if ; 
 
       when WAIT_FOR_CLOCK =>
         WaitForClock(Clk, TransRec.IntToModel) ;
@@ -172,33 +171,88 @@ begin
       when GET_TRANSACTION_COUNT =>
         TransRec.IntFromModel <= TransmitDoneCount ;
         wait until Clk = '1' ;
+    
+      when SEND | SEND_ASYNC =>
+        Data   := FromTransaction(TransRec.DataToModel, Data'length) ;
+        Param  := FromTransaction(TransRec.ParamToModel, Param'length) ;
+        TransmitFifo.Push(Data & Param) ; 
+        Increment(TransmitRequestCount) ;
+        wait for 0 ns ; 
+        if IsBlocking(TransRec.Operation) then 
+          wait until TransmitRequestCount = TransmitDoneCount ;
+        end if ; 
+
+      when SEND_BURST | SEND_BURST_ASYNC =>
+        BytesToSend := TransRec.IntToModel ;
+        TransmitRequestCount <= TransmitRequestCount + BytesToSend ; 
+        Param  := FromTransaction(TransRec.ParamToModel, Param'length) ;
+        while BytesToSend > 0 loop
+          ByteData := (others => '-') ; 
+          BuildAWord : for i in 0 to AXI_STREAM_DATA_BYTE_WIDTH loop 
+            if not WriteBurstFifo.empty then 
+            ByteData(i*8+7 downto i*8+0) := WriteBurstFifo.pop ; 
+            BytesToSend := BytesToSend - 1 ; 
+            exit when BytesToSend = 0 ; 
+            else
+              Alert(ModelID, "WriteBurstFifo Empty during burst transfer") ;
+              exit ; 
+            end if ; 
+          end loop ;
+          TransmitFifo.Push(Data(ByteData'range) & Param) ; 
+        end loop ; 
+        wait for 0 ns ; 
+        if IsBlocking(TransRec.Operation) then 
+          wait until TransmitRequestCount = TransmitDoneCount ;
+        end if ; 
+
 
       when SET_MODEL_OPTIONS =>
-      
         case AxiStreamOptionsType'val(TransRec.Options) is
           when TRANSMIT_READY_TIME_OUT =>       
-            TransmitReadyTimeOut      <= FromTransaction(TransRec.DataToModel) ; 
+            TransmitReadyTimeOut      <= TransRec.IntToModel ; 
             
           when SET_ID =>                      
-            ParamID       <= FromTransaction(TransRec.DataToModel, ParamID'length) ;
-            -- IdSet    <= TRUE ; 
+            ParamID       <= FromTransaction(TransRec.ParamToModel, ParamID'length) ;
             
           when SET_DEST => 
-            ParamDest     <= FromTransaction(TransRec.DataToModel, ParamDest'length) ;
-            -- DestSet  <= TRUE ; 
+            ParamDest     <= FromTransaction(TransRec.ParamToModel, ParamDest'length) ;
             
           when SET_USER =>
-            ParamUser     <= FromTransaction(TransRec.DataToModel, ParamUser'length) ;
-            -- UserSet  <= TRUE ; 
+            ParamUser     <= FromTransaction(TransRec.ParamToModel, ParamUser'length) ;
             
+          when SET_LAST =>
+            ParamLast     <= TransRec.IntToModel ;
+
           when others =>
             Alert(ModelID, "SetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
+            wait for 0 ns ; 
+        end case ;
+        
+      when GET_MODEL_OPTIONS =>
+        case AxiStreamOptionsType'val(TransRec.Options) is
+          when TRANSMIT_READY_TIME_OUT =>       
+            TransRec.IntFromModel   <=  TransmitReadyTimeOut ; 
+            
+          when SET_ID =>                      
+            TransRec.ParamFromModel <= ToTransaction(ParamID, TransRec.ParamFromModel'length) ;
+            
+          when SET_DEST => 
+            TransRec.ParamFromModel <= ToTransaction(ParamDest, TransRec.ParamFromModel'length) ;
+            
+          when SET_USER =>
+            TransRec.ParamFromModel <= ToTransaction(ParamUser, TransRec.ParamFromModel'length) ;
+            
+          when SET_LAST =>
+            TransRec.IntFromModel   <= ParamLast ;
+
+          when others =>
+            Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
             wait for 0 ns ; 
         end case ;
 
       -- The End -- Done  
       when others =>
-        Alert(ModelID, "Unimplemented Transaction: " & to_string(Operation), FAILURE) ;
+        Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
         wait for 0 ns ; 
     end case ;
 
@@ -212,12 +266,13 @@ begin
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   TransmitHandler : process
-    variable ID   : std_logic_vector(TID'range)   ;
-    variable Dest : std_logic_vector(TDest'range) ;
-    variable User : std_logic_vector(TUser'range) ;
-    variable Data : std_logic_vector(TData'range) ;
-    variable Strb : std_logic_vector(TStrb'range) ;
-    variable Keep : std_logic_vector(TKeep'range) ;
+    variable ID    : std_logic_vector(TID'range)   ;
+    variable Dest  : std_logic_vector(TDest'range) ;
+    variable User  : std_logic_vector(TUser'range) ;
+    variable Data  : std_logic_vector(TData'length-1 downto 0) ;
+    variable Strb  : std_logic_vector(TStrb'length-1 downto 0) ;
+    variable Keep  : std_logic_vector(TKeep'length-1 downto 0) ;
+    variable Last  : std_logic ; 
   begin
     -- Initialize
     TValid  <= '0' ;
@@ -227,7 +282,7 @@ begin
     TData   <= (TData'range => 'X') ;
     TStrb   <= (TStrb'range => 'X') ;
     TKeep   <= (TKeep'range => 'X') ;
-    TLast   <= '0' ; 
+    TLast   <= 'X' ; 
   
     TransmitLoop : loop 
       -- Find Transaction
@@ -236,8 +291,50 @@ begin
       end if ;
       
       -- Get Transaction
-      (Data, Strb, Keep, ID, Dest, User) := TransmitFifo.Pop ;
+      (Data, ID, Dest, User, Last) := TransmitFifo.Pop ;
+      
+      if ID'Length > 0 and ID(ID'right) = '-' then
+        ID := ParamID ; 
+      end if ; 
+      
+      if Dest'length > 0 and Dest(Dest'right) = '-' then 
+        Dest := ParamDest ; 
+      end if ; 
+      
+      if User'length > 0 and User(User'right) = '-' then 
+        User := ParamUser ; 
+      end if ; 
 
+      -- Calculate Strb. 1 when data else 0  
+      -- If Strb is unused it may be null range
+      for i in Strb'range loop
+        if not IS_X(Data(i*8)) then 
+          Strb(i) := '1' ; 
+        else
+          Strb(i) := '0' ;
+        end if ; 
+      end loop ; 
+      
+      -- Calculate Keep.  1 when data /= '-' else 0
+      -- If Keep is unused it may be null range
+      for i in Strb'range loop
+        if Data(i*8) /= '-' then 
+          Keep(i) := '1' ; 
+        else
+          Keep(i) := '0' ;
+        end if ; 
+      end loop ; 
+      
+      -- Calculate Last.  
+      if Last = '-' then  -- use defaults
+        if ParamLast <= 1 then 
+          Last := '1' when ParamLast = 1 else '0' ; 
+        else 
+          -- generate last once every ParamLast cycles
+          Last := '1' when TransmitRequestCount mod ParamLast = 0 else '0' ; 
+        end if ; 
+      end if ; 
+      
       -- Do Transaction
       TID     <= ID   after tpd_Clk_tid ;
       TDest   <= Dest after tpd_Clk_TDest ;
@@ -245,15 +342,18 @@ begin
       TData   <= Data after tpd_Clk_TData ;
       TStrb   <= Strb after tpd_Clk_TStrb ;
       TKeep   <= Keep after tpd_Clk_TKeep ;
+      TLast   <= Last after tpd_Clk_TLast ;  
 
       Log(ModelID, 
         "Axi Stream Send." &
         "  TID: "       & to_hstring(ID) &
         "  TDest: "     & to_hstring(Dest) &
         "  TData: "     & to_hstring(Data) &
+        "  TUser: "     & to_hstring(User) &
         "  TStrb: "     & to_string( Strb) &
         "  TKeep: "     & to_string( Keep) &
-        "  Operation# " & to_string( TransmitDoneCount + 1),
+        -- Must be DoneCount and not RequestCount due to queuing/Async and burst operations
+        "  Operation# " & to_string( TransmitDoneCount + 1),  
         INFO
       ) ;
 

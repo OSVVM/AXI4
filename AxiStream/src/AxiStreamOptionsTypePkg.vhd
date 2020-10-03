@@ -9,8 +9,8 @@
 --
 --
 --  Description:
---      Defines types, constants, and subprograms used by
---      OSVVM Axi Stream Transaction Based Models (aka: TBM, TLM, VVC)
+--      Defines an abstraction layer to define options settings 
+--      for AxiStream.  
 --
 --
 --  Developed by:
@@ -54,122 +54,31 @@ library OSVVM_Common ;
     
 package AxiStreamOptionsTypePkg is
 
-  -- Model AXI Lite Operations
-  type AxiStreamUnresolvedOptionsType is (
-    TRANSMIT_READY_TIME_OUT,
-    RECEIVE_READY_BEFORE_VALID,
-    RECEIVE_READY_DELAY_CYCLES,
-    SET_ID,
-    SET_DEST,
-    SET_USER,
-    END_PARAMS,
-    THE_END
+  -- ========================================================
+  --  AxiStreamOptionsType 
+  --  Define what model configuration options AxiStream supports
+  -- ========================================================
+
+  type AxiStreamOptionsType is (    -- OptVal
+    TRANSMIT_READY_TIME_OUT,        -- Integer
+    RECEIVE_READY_BEFORE_VALID,     -- Integer
+    RECEIVE_READY_DELAY_CYCLES,     -- Integer
+    SET_ID,                         -- std_logic_vector
+    SET_DEST,                       -- std_logic_vector
+    SET_USER,                       -- std_logic_vector
+    SET_LAST,                       -- integer
+    THE_END                         
   ) ;
 
-  type AxiStreamUnresolvedOptionsVectorType is array (natural range <>) of AxiStreamUnresolvedOptionsType ;
-  -- alias resolved_max is maximum[ AxiStreamUnresolvedOptionsVectorType return AxiStreamUnresolvedOptionsType] ;
-  function resolved_max(A : AxiStreamUnresolvedOptionsVectorType) return AxiStreamUnresolvedOptionsType ;
-
-  subtype AxiStreamOptionsType is resolved_max AxiStreamUnresolvedOptionsType ;
-  
-  type AxiParamsType is array (AxiStreamOptionsType range <>) of integer ; 
-
---! Need init Parms for default values - many parms all init with ignore values & 
---! call via named association
-
-  ------------------------------------------------------------
-  function IsAxiParameter (
-  -----------------------------------------------------------
-    constant Operation     : in AxiStreamOptionsType
-  ) return boolean ;
-
-  ------------------------------------------------------------
-  function IsAxiInterface (
-  -----------------------------------------------------------
-    constant Operation     : in AxiStreamOptionsType
-  ) return boolean ;
-  
-  ------------------------------------------------------------
-  procedure SetAxiOption (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    AxiStreamOptionsType ;
-    constant OpVal         : in    boolean  
-  ) ; 
-  
-  ------------------------------------------------------------
-  procedure SetAxiOption (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    AxiStreamOptionsType ;
-    constant OpVal         : in    integer  
-  ) ; 
-  
-  ------------------------------------------------------------
-  procedure SetAxiOption (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    AxiStreamOptionsType ;
-    constant OpVal         : in    std_logic_vector  
-  ) ; 
-  
-  ------------------------------------------------------------
-  procedure GetAxiOption (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    AxiStreamOptionsType ;
-    variable OpVal         : out   boolean  
-  ) ; 
-  
-  ------------------------------------------------------------
-  procedure GetAxiOption (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    AxiStreamOptionsType ;
-    variable OpVal         : out   integer  
-  ) ; 
-
-  ------------------------------------------------------------
-  procedure GetAxiOption (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    AxiStreamOptionsType ;
-    variable OpVal         : out   std_logic_vector  
-  ) ;  
-    
---  ------------------------------------------------------------
---  procedure InitAxiOptions (
---  -----------------------------------------------------------
---    variable Params        : InOut ModelParametersPType --;
-----    signal   AxiBus        : In    AxiStreamBaseRecType 
---  ) ;
---
---  ------------------------------------------------------------
---  procedure SetAxiParameter (
---  -----------------------------------------------------------
---    variable AxiBus        : out AxiStreamBaseRecType ;
---    constant Operation     : in  AxiStreamOptionsType ;
---    constant OpVal         : in  integer  
---  ) ;
---  
---  ------------------------------------------------------------
---  function GetAxiParameter (
---  -----------------------------------------------------------
---    constant AxiBus        : in  AxiStreamBaseRecType ;
---    constant Operation     : in  AxiStreamOptionsType 
---  ) return integer ;
-  
-  --
-  --  Extensions to support model customizations
-  -- 
---!! Need GetModelOptions  
-  ------------------------------------------------------------
-  procedure SetModelOptions (
-  ------------------------------------------------------------
-    signal   TransRec    : InOut StreamRecType ;
-    constant Option      : In    AxiStreamOptionsType ;
-    constant OptVal      : In    boolean
-  ) ;
+  -- ========================================================
+  --  SetModelOptions / GetModelOptions
+  --  Abstraction layer to SetModelOptions / GetModelOptions
+  --  from StreamTransactionPkg.  
+  --  Allows calls to have enumerated values rather than constants.
+  --  This way we do not need to manage constant values.
+  --  Places std_logic_vector options in ParamToModel since 
+  --  they can be larger than DataToModel
+  -- ========================================================
 
   ------------------------------------------------------------
   procedure SetModelOptions (
@@ -185,6 +94,22 @@ package AxiStreamOptionsTypePkg is
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
     constant OptVal      : In    std_logic_vector
+  ) ;
+
+  ------------------------------------------------------------
+  procedure GetModelOptions (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut StreamRecType ;
+    constant Option      : In    AxiStreamOptionsType ;
+    variable OptVal      : Out   integer
+  ) ;
+
+  ------------------------------------------------------------
+  procedure GetModelOptions (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut StreamRecType ;
+    constant Option      : In    AxiStreamOptionsType ;
+    variable OptVal      : Out   std_logic_vector
   ) ;
 
 
@@ -195,197 +120,11 @@ end package AxiStreamOptionsTypePkg ;
 
 package body AxiStreamOptionsTypePkg is
 
-  function resolved_max(A : AxiStreamUnresolvedOptionsVectorType) return AxiStreamUnresolvedOptionsType is
-  begin
-    return maximum(A) ;
-  end function resolved_max ;
-  
-  ------------------------------------------------------------
-  function IsAxiParameter (
-  -----------------------------------------------------------
-    constant Operation     : in AxiStreamOptionsType
-  ) return boolean is
-  begin
-    return (Operation < END_PARAMS) ;
-  end function IsAxiParameter ;
-
-  ------------------------------------------------------------
-  function IsAxiInterface (
-  -----------------------------------------------------------
-    constant Operation     : in AxiStreamOptionsType
-  ) return boolean is
-  begin
-    return (Operation >= END_PARAMS) ;
-  end function IsAxiInterface ;
-   
-  ------------------------------------------------------------
-  procedure SetAxiOption (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    AxiStreamOptionsType ;
-    constant OpVal         : in    boolean  
-  ) is
-  begin
-    Params.Set(AxiStreamOptionsType'POS(Operation), OpVal) ;
-  end procedure SetAxiOption ; 
- 
-  ------------------------------------------------------------
-  procedure SetAxiOption (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    AxiStreamOptionsType ;
-    constant OpVal         : in    integer  
-  ) is
-  begin
-    Params.Set(AxiStreamOptionsType'POS(Operation), OpVal) ;
-  end procedure SetAxiOption ; 
-  
-  ------------------------------------------------------------
-  procedure SetAxiOption (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    AxiStreamOptionsType ;
-    constant OpVal         : in    std_logic_vector  
-  ) is
-  begin
-    Params.Set(AxiStreamOptionsType'POS(Operation), OpVal) ;
-  end procedure SetAxiOption ; 
-  
-  ------------------------------------------------------------
-  procedure GetAxiOption (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    AxiStreamOptionsType ;
-    variable OpVal         : out   boolean  
-  ) is
-  begin
-    OpVal := Params.Get(AxiStreamOptionsType'POS(Operation)) ;
-  end procedure GetAxiOption ; 
-  
-  ------------------------------------------------------------
-  procedure GetAxiOption (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    AxiStreamOptionsType ;
-    variable OpVal         : out   integer  
-  ) is
-  begin
-    OpVal := Params.Get(AxiStreamOptionsType'POS(Operation)) ;
-  end procedure GetAxiOption ; 
-  
-  ------------------------------------------------------------
-  procedure GetAxiOption (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    AxiStreamOptionsType ;
-    variable OpVal         : out   std_logic_vector  
-  ) is
-  begin
-    OpVal := Params.Get(AxiStreamOptionsType'POS(Operation), OpVal'length) ;
-  end procedure GetAxiOption ; 
-  
---   ------------------------------------------------------------
---   procedure InitAxiStreamOptions (
---   -----------------------------------------------------------
---     variable Params        : InOut ModelParametersPType --;
--- --    signal   AxiBus        : In    AxiStreamBaseRecType 
---   ) is
---   begin
---    -- Size the Data structure, such that it creates 1 parameter for each option
---    Params.Init(1 + AxiStreamOptionsType'POS(READ_DATA_VALID_TIME_OUT)) ;
---    
---    -- AxiStream Model Options
---    -- Ready timeout
---    SetAxiOption(Params, WRITE_ADDRESS_READY_TIME_OUT,       25 ) ; 
---    SetAxiOption(Params, WRITE_DATA_READY_TIME_OUT,          25 ) ; 
---    SetAxiOption(Params, WRITE_RESPONSE_READY_TIME_OUT,      25 ) ; -- S
---    SetAxiOption(Params, READ_ADDRESS_READY_TIME_OUT,        25 ) ; 
---    SetAxiOption(Params, READ_DATA_READY_TIME_OUT,           25 ) ; -- S
---    
---    -- Ready Controls
---    SetAxiOption(Params, WRITE_ADDRESS_READY_BEFORE_VALID,   TRUE) ; -- S
---    SetAxiOption(Params, WRITE_DATA_READY_BEFORE_VALID,      TRUE) ; -- S
---    SetAxiOption(Params, WRITE_RESPONSE_READY_BEFORE_VALID,  TRUE) ; 
---    SetAxiOption(Params, READ_ADDRESS_READY_BEFORE_VALID,    TRUE) ; -- S
---    SetAxiOption(Params, READ_DATA_READY_BEFORE_VALID,       TRUE) ; 
---    
---    -- Ready Controls
---    SetAxiOption(Params, WRITE_ADDRESS_READY_DELAY_CYCLES,   0) ;  -- S
---    SetAxiOption(Params, WRITE_DATA_READY_DELAY_CYCLES,      0) ;  -- S
---    SetAxiOption(Params, WRITE_RESPONSE_READY_DELAY_CYCLES,  0) ;  
---    SetAxiOption(Params, READ_ADDRESS_READY_DELAY_CYCLES,    0) ;  -- S
---    SetAxiOption(Params, READ_DATA_READY_DELAY_CYCLES,       0) ;  
---
---    -- Valid Timeouts 
---    SetAxiOption(Params, WRITE_RESPONSE_VALID_TIME_OUT,      25) ; 
---    SetAxiOption(Params, READ_DATA_VALID_TIME_OUT,           25) ; 
--- 
---  end procedure InitAxiOptions ; 
-
- 
---  ------------------------------------------------------------
---  procedure SetAxiParameter (
---  -----------------------------------------------------------
---    variable AxiBus        : out AxiStreamBaseRecType ;
---    constant Operation     : in  AxiStreamOptionsType ;
---    constant OpVal         : in  integer  
---  ) is
---  begin
---    case Operation is
---     -- Read Data: AXI
---     when RRESP =>         AxiBus.ReadData.RResp       := to_slv(OpVal, AxiBus.ReadData.RResp'length) ;
---       
---     -- AxiStream Full
---     when RID =>           AxiBus.ReadData.RID         := to_slv(OpVal, AxiBus.ReadData.RID'length) ; 
---     when RLAST =>         AxiBus.ReadData.RLast       := '1' when OpVal mod 2 = 1 else '0' ;
---     when RUSER =>         AxiBus.ReadData.RUser       := to_slv(OpVal, AxiBus.ReadData.RUser'length) ; 
---
---     -- The End -- Done
---     when others =>
---       Alert("Unknown model option", FAILURE) ;
---        
---    end case ; 
---  end procedure SetAxiParameter ;
-  
---  ------------------------------------------------------------
---  function GetAxiParameter (
---  -----------------------------------------------------------
---    constant AxiBus        : in  AxiStreamBaseRecType ;
---    constant Operation     : in  AxiStreamOptionsType 
---  ) return integer is
---  begin
---    case Operation is
---                      
---      -- Read Data            
---      when RRESP =>              return to_integer(AxiBus.ReadData.RResp) ;   
---                       
---      -- AxiStream Full            
---      when RID =>                return to_integer(AxiBus.ReadData.RID   ) ;
---      when RLAST =>              return to_integer(AxiBus.ReadData.RLast ) ;   
---      when RUSER =>              return to_integer(AxiBus.ReadData.RUser ) ;
---
---      -- The End -- Done
---      when others =>
-----        Alert(ModelID, "Unknown model option", FAILURE) ;
---        Alert("Unknown model option", FAILURE) ;
---        return integer'left ; 
---        
---    end case ; 
---  end function GetAxiParameter ;
-  
-  --
-  --  Extensions to support model customizations
-  -- 
-  ------------------------------------------------------------
-  procedure SetModelOptions (
-  ------------------------------------------------------------
-    signal   TransRec    : InOut StreamRecType ;
-    constant Option      : In    AxiStreamOptionsType ;
-    constant OptVal      : In    boolean
-  ) is
-  begin
-    SetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), OptVal) ;
-  end procedure SetModelOptions ;
+  -- ========================================================
+  --  SetModelOptions / GetModelOptions
+  --  For integer uses normal connections
+  --  For std_logic_vector, uses ParamToModel/ParamFromModel 
+  -- ========================================================
 
   ------------------------------------------------------------
   procedure SetModelOptions (
@@ -406,8 +145,31 @@ package body AxiStreamOptionsTypePkg is
     constant OptVal      : In    std_logic_vector
   ) is
   begin
-    SetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), OptVal) ;
+    TransRec.ParamToModel <= ToTransaction(OptVal, TransRec.ParamToModel'length) ;
+    SetModelOptions(TransRec, AxiStreamOptionsType'POS(Option)) ;
   end procedure SetModelOptions ;
-  
+
+  ------------------------------------------------------------
+  procedure GetModelOptions (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut StreamRecType ;
+    constant Option      : In    AxiStreamOptionsType ;
+    variable OptVal      : Out   integer
+  ) is
+  begin
+    GetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), OptVal) ;
+  end procedure GetModelOptions ;
+
+  ------------------------------------------------------------
+  procedure GetModelOptions (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut StreamRecType ;
+    constant Option      : In    AxiStreamOptionsType ;
+    variable OptVal      : Out   std_logic_vector
+  ) is
+  begin
+    GetModelOptions(TransRec, AxiStreamOptionsType'POS(Option)) ;
+    OptVal := FromTransaction(TransRec.ParamFromModel, OptVal'length) ;
+  end procedure GetModelOptions ;
 
 end package body AxiStreamOptionsTypePkg ;

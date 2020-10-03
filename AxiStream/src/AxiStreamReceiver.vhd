@@ -149,8 +149,28 @@ begin
     Operation := TransRec.Operation ; 
 
     case Operation is
-      when GET | TRY_GET =>
-        if ReceiveFifo.empty and  Operation = TRY_GET then
+      when GET | TRY_GET | CHECK | TRY_CHECK =>
+-- Finish adding Check as it is not currently there
+        if ReceiveFifo.empty and  IsTry(Operation) then
+          -- Return if no data
+          TransRec.BoolToModel <= FALSE ; 
+          wait for 0 ns ; 
+        else 
+          -- Get data
+          TransRec.BoolToModel <= TRUE ; 
+          if ReceiveFifo.empty then 
+            -- Wait for data
+            WaitForToggle(ReceiveCount) ;
+          end if ; 
+          -- Put Data into record
+          -- (ID, Dest, User, Data, Strb, Keep) := ReceiveFifo.pop ;
+          Data := ReceiveFifo.pop ;
+          TransRec.DataFromModel  <= ToTransaction(Data, TransRec.DataFromModel'length) ; 
+          wait for 0 ns ; 
+        end if ; 
+      
+      when GET_BURST | TRY_GET_BURST =>
+        if ReceiveFifo.empty and  IsTry(Operation) then
           -- Return if no data
           TransRec.BoolToModel <= FALSE ; 
           wait for 0 ns ; 
@@ -167,7 +187,8 @@ begin
           TransRec.DataFromModel  <= ToTransaction(Data, TransRec.DataFromModel'length) ; 
           wait for 0 ns ; 
         end if ; 
-      
+        
+
       when WAIT_FOR_CLOCK =>
         WaitForClock(Clk, TransRec.IntToModel) ;
 

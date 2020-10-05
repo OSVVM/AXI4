@@ -40,5 +40,6 @@
 library osvvm_TbAxiStream
 analyze ./testbench/TbAxiStream.vhd
 analyze ./testbench/TestCtrl_e.vhd
+
 analyze ./testbench/TbAxiStream_BasicSendGet.vhd
 simulate TbAxiStream_BasicSendGet

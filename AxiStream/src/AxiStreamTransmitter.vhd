@@ -44,7 +44,8 @@ library ieee ;
   use ieee.std_logic_1164.all ;
   use ieee.numeric_std.all ;
   use ieee.numeric_std_unsigned.all ;
-
+  use ieee.math_real.all ;
+  
 library osvvm ;
   context osvvm.OsvvmContext ;
   use osvvm.ScoreboardPkg_slv.all ;
@@ -107,7 +108,8 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ; 
   
-  shared variable TransmitFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
+  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
+  shared variable TransmitFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
 
   signal TransmitRequestCount, TransmitDoneCount      : integer := 0 ;   
 
@@ -145,9 +147,11 @@ begin
   ------------------------------------------------------------
   TransactionDispatcher : process
     constant PARAM_LENGTH : integer := TID'length + TDest'length + TUser'length + 1 ; 
-    variable Data : TData'subtype ;
-    variable Param : std_logic_vector(PARAM_LENGTH downto 1) ;
+    variable Data : std_logic_vector(TData'range) ; 
+    variable Param : std_logic_vector(PARAM_LENGTH-1 downto 0) ;
 --    alias Operation : StreamOperationType is TransRec.Operation ;
+    variable BytesToSend : integer ; 
+    variable PopValid : boolean ; 
   begin
     WaitForTransaction(
        Clk      => Clk,
@@ -164,14 +168,14 @@ begin
       when WAIT_FOR_CLOCK =>
         WaitForClock(Clk, TransRec.IntToModel) ;
 
-      when GET_ALERTLOG_ID =>
-        TransRec.IntFromModel <= integer(ModelID) ;
-        wait until Clk = '1' ;
-
       when GET_TRANSACTION_COUNT =>
         TransRec.IntFromModel <= TransmitDoneCount ;
         wait until Clk = '1' ;
     
+      when GET_ALERTLOG_ID =>
+        TransRec.IntFromModel <= integer(ModelID) ;
+        wait until Clk = '1' ;
+
       when SEND | SEND_ASYNC =>
         Data   := FromTransaction(TransRec.DataToModel, Data'length) ;
         Param  := FromTransaction(TransRec.ParamToModel, Param'length) ;
@@ -187,24 +191,15 @@ begin
         TransmitRequestCount <= TransmitRequestCount + BytesToSend ; 
         Param  := FromTransaction(TransRec.ParamToModel, Param'length) ;
         while BytesToSend > 0 loop
-          ByteData := (others => '-') ; 
-          BuildAWord : for i in 0 to AXI_STREAM_DATA_BYTE_WIDTH loop 
-            if not WriteBurstFifo.empty then 
-            ByteData(i*8+7 downto i*8+0) := WriteBurstFifo.pop ; 
-            BytesToSend := BytesToSend - 1 ; 
-            exit when BytesToSend = 0 ; 
-            else
-              Alert(ModelID, "WriteBurstFifo Empty during burst transfer") ;
-              exit ; 
-            end if ; 
-          end loop ;
-          TransmitFifo.Push(Data(ByteData'range) & Param) ; 
+          PopWord(BurstFifo, PopValid, Data, BytesToSend) ; 
+          AlertIfNot(ModelID, PopValid, "BurstFifo Empty during burst transfer", FAILURE) ; 
+          Param(0) := '1' when BytesToSend = 0 else '0' ;  -- TLast
+          TransmitFifo.Push(Data & Param) ; 
         end loop ; 
         wait for 0 ns ; 
         if IsBlocking(TransRec.Operation) then 
           wait until TransmitRequestCount = TransmitDoneCount ;
         end if ; 
-
 
       when SET_MODEL_OPTIONS =>
         case AxiStreamOptionsType'val(TransRec.Options) is
@@ -308,20 +303,20 @@ begin
       -- Calculate Strb. 1 when data else 0  
       -- If Strb is unused it may be null range
       for i in Strb'range loop
-        if not IS_X(Data(i*8)) then 
-          Strb(i) := '1' ; 
+        if Data(i*8) = 'Z' or Data(i*8) = 'U' then 
+          Strb(i) := '0' ; 
         else
-          Strb(i) := '0' ;
+          Strb(i) := '1' ;
         end if ; 
       end loop ; 
       
-      -- Calculate Keep.  1 when data /= '-' else 0
+      -- Calculate Keep.  1 when data /= 'U' else 0
       -- If Keep is unused it may be null range
-      for i in Strb'range loop
-        if Data(i*8) /= '-' then 
-          Keep(i) := '1' ; 
+      for i in Keep'range loop
+        if Data(i*8) = 'U' then 
+          Keep(i) := '0' ; 
         else
-          Keep(i) := '0' ;
+          Keep(i) := '1' ;
         end if ; 
       end loop ; 
       

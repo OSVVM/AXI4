@@ -369,11 +369,13 @@ begin
         when WRITE_BURST | ASYNC_WRITE_BURST =>
           WriteAddress  := FromTransaction(TransRec.Address) ;
           WriteByteAddr := CalculateAxiByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH);
+--!!          BytesPerTransfer := 2**to_integer(LAW.Size);
+          BytesPerTransfer := AXI_DATA_BYTE_WIDTH ;
 
           if IsWriteAddress(Operation) then
             -- Write Address Handling
             AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Write Address length does not match", FAILURE) ;
-            BytesPerTransfer := 2**to_integer(LAW.Size);
+--!!            BytesPerTransfer := 2**to_integer(LAW.Size);
 
             -- Burst transfer, calcualte burst length
             LAW.Len := to_slv(CalculateAxiBurstLen(TransRec.DataWidth, WriteByteAddr, BytesPerTransfer), LAW.Len'length) ;
@@ -395,7 +397,7 @@ begin
             -- Burst Transfer Write Data Handling
   --!! WriteBurstData -  must have BytesToSend in TransRec.DataWidth
             BytesToSend       := TransRec.DataWidth ;
-            BytesPerTransfer  := 2 ** to_integer(LAW.Size) ;
+--!!            BytesPerTransfer  := 2 ** to_integer(LAW.Size) ;
             MaxBytesInFirstTransfer := BytesPerTransfer - WriteByteAddr ;
             AlertIf(ModelID, BytesPerTransfer /= AXI_DATA_BYTE_WIDTH,
               "Write Bytes Per Transfer (" & to_string(BytesPerTransfer) & ") " &
@@ -418,7 +420,7 @@ begin
             end if ;
 
             -- Middle words of burst
-            while BytesToSend >= BytesPerTransfer loop
+            while BytesToSend > BytesPerTransfer loop
               GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, BytesPerTransfer) ;
               WriteDataFifo.Push(WriteData & WriteStrb & '0' & LWD.User & LWD.ID) ;
               BytesToSend := BytesToSend - BytesPerTransfer ;
@@ -547,6 +549,7 @@ begin
             TransRec.BoolFromModel <= FALSE ;
           elsif IsReadData(Operation) then
             (ReadAddress, ReadProt) := ReadAddressTransactionFifo.Pop ;
+            TransRec.BoolFromModel <= TRUE ;
 
   --!!** Implies that any separate ReadDataBurst must TryReadDataBurst
   --!!** must include the transfer length
@@ -572,7 +575,6 @@ begin
                 WaitForToggle(ReadDataReceiveCount) ;
               end if ;
               ReadData := ReadDataFifo.Pop ;
-              TransRec.BoolFromModel <= TRUE ;
 
               -- Adjust for last transfer
               if BytesInTransfer > BytesToReceive then

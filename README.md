@@ -3,10 +3,12 @@ The AXI Verification Component Library implements
 verification components for:  
  - [AXI4](https://github.com/osvvm/AXI4)
    - Master with bursting
-   - Memory Slave with bursting
+   - Memory Responder with bursting
+   - Transaction Responder - no bursting
  - [AXI4 Lite](https://github.com/osvvm/AXI4)
    - Master
-   - Transaction Slave 
+   - Memory Responder
+   - Transaction Responder 
  - [AXI Stream](https://github.com/osvvm/AXI4)
    - Transmitter
    - Receiver

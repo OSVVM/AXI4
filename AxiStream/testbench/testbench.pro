@@ -38,7 +38,10 @@
 #  limitations under the License.
 #  
 library osvvm_TbAxiStream
-analyze TbAxiStream.vhd
+analyze TbStream.vhd
 analyze TestCtrl_e.vhd
-analyze TbAxiStream_BasicSendGet.vhd
-simulate TbAxiStream_BasicSendGet
+
+analyze TbStream_SendGet1.vhd
+
+
+simulate TbStream_SendGet1

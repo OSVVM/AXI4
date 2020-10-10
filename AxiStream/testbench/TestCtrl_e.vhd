@@ -60,8 +60,8 @@ entity TestCtrl is
       nReset                        : In    std_logic ;
 
       -- Transaction Interfaces
-      AxiStreamTransmitterTransRec  : inout StreamRecType ;
-      AxiStreamReceiverTransRec     : inout StreamRecType 
+      StreamTransmitterTransRec  : inout StreamRecType ;
+      StreamReceiverTransRec     : inout StreamRecType 
 
   ) ;
 end entity TestCtrl ;

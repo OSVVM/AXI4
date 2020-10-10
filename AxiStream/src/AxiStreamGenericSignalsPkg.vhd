@@ -63,6 +63,7 @@ package AxiStreamGenericSignalsPkg is
   constant DEFAULT_DEST   : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) := (others => '0') ; 
   constant DEFAULT_USER   : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) := (others => '0') ; 
   
+  constant AXI_PARAM_WIDTH : integer := TID_MAX_WIDTH + TDEST_MAX_WIDTH + TUSER_MAX_WIDTH + 1 ;
 
   --! Issue:  with multiple interfaces, need to use a selected name with package
   --!         PackageInstanceName.TValid
@@ -79,10 +80,10 @@ package AxiStreamGenericSignalsPkg is
 
   -- Testbench Transaction Interface
   subtype TransactionRecType is StreamRecType(
-    DataToModel(AXI_DATA_WIDTH-1 downto 0),
-    DataFromModel(AXI_DATA_WIDTH-1 downto 0),
-    ParamToModel(AXI_DATA_WIDTH-1 downto 0),
-    ParamFromModel(AXI_DATA_WIDTH-1 downto 0)
+    DataToModel   (AXI_DATA_WIDTH-1  downto 0),
+    DataFromModel (AXI_DATA_WIDTH-1  downto 0),
+    ParamToModel  (AXI_PARAM_WIDTH-1 downto 0),
+    ParamFromModel(AXI_PARAM_WIDTH-1 downto 0)
   ) ;  
   signal TransRec : TransactionRecType ;
 end package AxiStreamGenericSignalsPkg ;

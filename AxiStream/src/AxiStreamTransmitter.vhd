@@ -20,7 +20,9 @@
 --  Revision History:
 --    Date       Version    Description
 --    05/2018    2018.05    First Release
---    01/2020   2020.01    Updated license notice
+--    01/2020    2020.01    Updated license notice
+--    07/2020    2020.07    Updated for Streaming Model Independent Transactions
+--    10/2020    2020.10    Added Bursting per updates to Model Independent Transactions
 --
 --
 --  This file is part of OSVVM.
@@ -97,10 +99,10 @@ entity AxiStreamTransmitter is
 end entity AxiStreamTransmitter ;
 architecture SimpleTransmitter of AxiStreamTransmitter is
 
-  constant AXI_STREAM_DATA_WIDTH : integer := TData'length ;
-  constant AXI_STREAM_DATA_BYTE_WIDTH : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
-  constant AXI_ID_WIDTH : integer := TID'length ;
-  constant AXI_DEST_WIDTH : integer := TDest'length ;
+  constant AXI_STREAM_DATA_WIDTH       : integer := TData'length ;
+  constant AXI_STREAM_DATA_BYTE_WIDTH  : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
+  constant AXI_ID_WIDTH   : integer    := TID'length ;
+  constant AXI_DEST_WIDTH : integer    := TDest'length ;
 
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
@@ -114,7 +116,7 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
   signal TransmitRequestCount, TransmitDoneCount      : integer := 0 ;   
 
 
-  -- Configuring the Model
+  -- Verification Component Configuration
   signal TransmitReadyTimeOut : integer := integer'right ; 
 
   signal ParamID      : TID'subtype   := DEFAULT_ID ;
@@ -170,7 +172,8 @@ begin
 
       when GET_TRANSACTION_COUNT =>
         TransRec.IntFromModel <= TransmitDoneCount ;
-        wait until Clk = '1' ;
+--        wait until Clk = '1' ;
+        wait for 0 ns ; 
     
       when GET_ALERTLOG_ID =>
         TransRec.IntFromModel <= integer(ModelID) ;

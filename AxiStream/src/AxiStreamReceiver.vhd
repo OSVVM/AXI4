@@ -18,10 +18,12 @@
 --        http://www.SynthWorks.com
 --
 --  Revision History:
---    Date      Version    Description
---    05/2018   2018.05    First Release
---    05/2019   2019.05    Removed generics for DEFAULT_ID, DEFAULT_DEST, DEFAULT_USER
---    01/2020   2020.01    Updated license notice
+--    Date       Version    Description
+--    05/2018    2018.05    First Release
+--    05/2019    2019.05    Removed generics for DEFAULT_ID, DEFAULT_DEST, DEFAULT_USER
+--    01/2020    2020.01    Updated license notice
+--    07/2020    2020.07    Updated for Streaming Model Independent Transactions
+--    10/2020    2020.10    Added Bursting per updates to Model Independent Transactions
 --
 --
 --  This file is part of OSVVM.
@@ -44,6 +46,7 @@ library ieee ;
   use ieee.std_logic_1164.all ;
   use ieee.numeric_std.all ;
   use ieee.numeric_std_unsigned.all ;
+  use ieee.math_real.all ;
 
 library osvvm ;
   context osvvm.OsvvmContext ;
@@ -99,7 +102,10 @@ architecture behavioral of AxiStreamReceiver is
 
   signal ReceiveCount : integer := 0 ;   
   signal ReceiveByteCount, TransferByteCount : integer := 0 ;   
+  
+  signal BurstReceiveCount     : integer := 0 ; 
 
+  -- Verification Component Configuration
   signal ReceiveReadyBeforeValid : boolean := TRUE ; 
   signal ReceiveReadyDelayCycles : integer := 0 ;
 
@@ -132,13 +138,20 @@ begin
   --    Dispatches transactions to
   ------------------------------------------------------------
   TransactionDispatcher : process
---    alias Operation : StreamOperationType is TransRec.Operation ;
+    alias Operation : StreamOperationType is TransRec.Operation ;
+    constant ID_LEN       : integer := TID'length ;
+	  constant DEST_LEN     : integer := TDest'length ;
+	  constant USER_LEN     : integer := TUser'length ;
+    constant PARAM_LENGTH : integer := ID_LEN + DEST_LEN + USER_LEN + 1 ;
     variable Data,  ExpectedData  : std_logic_vector(TData'range) ; 
     variable Param, ExpectedParam : std_logic_vector(PARAM_LENGTH-1 downto 0) ;
+    variable DispatcherReceiveCount : integer := 0 ; 
+    variable BurstTransferCount     : integer := 0 ; 
     variable BurstByteCount : integer ; 
     variable BurstBoundary  : std_logic ; 
+    variable DropUndriven   : boolean := FALSE ; 
     function param_to_string(Param : std_logic_vector) return string is 
-      alias aParam : std_logic_vector(Param'length-1 downto 0) ;
+      alias aParam : std_logic_vector(Param'length-1 downto 0) is Param ;
       alias ID   : std_logic_vector(ID_LEN-1 downto 0)   is aParam(PARAM_LENGTH-1 downto PARAM_LENGTH-ID_LEN);
       alias Dest : std_logic_vector(DEST_LEN-1 downto 0) is aParam(DEST_LEN+USER_LEN downto USER_LEN+1);
       alias User : std_logic_vector(USER_LEN-1 downto 0) is aParam(USER_LEN downto 1) ;
@@ -159,8 +172,7 @@ begin
        Ack      => TransRec.Ack
     ) ;
     
-    case TransRec.Operation is
---!!  Get Pending Get Count = ReceiveFifo.GetFifoCount
+    case Operation is
       when WAIT_FOR_TRANSACTION =>
         -- Receiver either blocks or does "try" operations
         -- There are no operations in flight   
@@ -169,8 +181,11 @@ begin
         wait for 0 ns ; 
 
       when GET_TRANSACTION_COUNT =>
+--!! This is GetTotalTransactionCount vs. GetPendingTransactionCount
+--!!  Get Pending Get Count = ReceiveFifo.GetFifoCount
         TransRec.IntFromModel <= ReceiveCount ;
-        wait until Clk = '1' ;
+--        wait until Clk = '1' ;
+        wait for 0 ns ; 
 
       when WAIT_FOR_CLOCK =>
         WaitForClock(Clk, TransRec.IntToModel) ;
@@ -186,7 +201,7 @@ begin
           wait for 0 ns ; 
         else 
           -- Get data
-          TransRec.BoolFromModel <= TRUE ;  ; 
+          TransRec.BoolFromModel <= TRUE ; 
           if ReceiveFifo.empty then 
             -- Wait for data
             WaitForToggle(ReceiveCount) ;
@@ -204,21 +219,21 @@ begin
           end if ; 
           
           if IsCheck(Operation) then 
-            ExpectedData  := std_logic_vector(TransactionRec.DataToModel) ;
-            ExpectedParam := std_logic_vector(TransactionRec.ParamToModel) ;
+            ExpectedData  := std_logic_vector(TransRec.DataToModel) ;
+            ExpectedParam := std_logic_vector(TransRec.ParamToModel) ;
             AffirmIf( ModelID, 
-                Data ?= ExpectedData and Param ?= ExpectedParam,
+                (Data ?= ExpectedData and Param ?= ExpectedParam) = '1',
                 "Operation# " & to_string (DispatcherReceiveCount) & " " & 
                 " Received.  Data: " & to_hstring(Data) &         param_to_string(Param),
-                " Expected.  Data: " & to_hstring(ExpectedData) & param_to_string(ExpectedParam) &  
-                TransactionRec.BoolToModel or IsLogEnabled(ModelID, INFO) ) ;
-            ) ;
+                " Expected.  Data: " & to_hstring(ExpectedData) & param_to_string(ExpectedParam), 
+                TransRec.BoolToModel or IsLogEnabled(ModelID, INFO) 
+              ) ;
           else 
             Log(ModelID, 
               "Word Receive. " &
               " Operation# " & to_string (DispatcherReceiveCount) &  " " & 
               " Data: "     & to_hstring(Data) & param_to_string(Param),
-              INFO, TransactionRec.BoolToModel 
+              INFO, TransRec.BoolToModel 
             ) ;
           end if ; 
         end if ; 
@@ -230,13 +245,14 @@ begin
           wait for 0 ns ; 
         else
           -- Get data
-          TransRec.BoolFromModel <= TRUE ;  ; 
+          TransRec.BoolFromModel <= TRUE ;
           if (BurstReceiveCount - BurstTransferCount) = 0 then 
             -- Wait for data
             WaitForToggle(BurstReceiveCount) ;
-          end loop ; 
+          end if ; 
           -- ReceiveFIFO: (TData & TID & TDest & TUser & TLast) 
-          DropUndriven   := TransRec.BoolToModel ; 
+--!! Make a model parameter?  Otherwise, need to provide overloading in customization package for this
+--!!          DropUndriven   := TransRec.BoolToModel ; 
           BurstByteCount := 0 ; 
           loop
             (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
@@ -254,7 +270,7 @@ begin
             "Burst Receive. " &
             " Operation# " & to_string (DispatcherReceiveCount) &  " " & 
             " Last Data: "     & to_hstring(Data) & param_to_string(Param),
-            INFO, TransactionRec.BoolToModel or IsLogEnabled(ModelID, PASSED) 
+            INFO, TransRec.BoolToModel or IsLogEnabled(ModelID, PASSED) 
           ) ;
           wait for 0 ns ; 
         end if ; 
@@ -305,7 +321,11 @@ begin
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   ReceiveHandler : process
-    variable Data : std_logic_vector(TData'range) ; 
+    variable Data           : std_logic_vector(TData'range) ; 
+    variable Last           : std_logic ; 
+    variable BurstBoundary  : std_logic ; 
+    variable LastID         : std_logic_vector(TID'range)   := (TID'range   => '-') ;
+    variable LastDest       : std_logic_vector(TDest'range) := (TDest'range => '-') ;
   begin
     -- Initialize
     TReady  <= '0' ;
@@ -338,12 +358,14 @@ begin
       end loop ;
       
       Last := to_01(TLast) ; 
-      BurstBoundary := Last when ID ?= LastID and Dest ?= LastDest else '1' ;
+      BurstBoundary := Last when TID ?= LastID and TDest ?= LastDest else '1' ;
+      LastID   := TID ; 
+      LastDest := TDest ;
       
       -- capture interface values
       ReceiveFifo.push(Data & TID & TDest & TUser & Last & BurstBoundary) ;
       if BurstBoundary = '1' then 
-        BurstReceiveCount := BurstReceiveCount + 1 ; 
+        BurstReceiveCount <= BurstReceiveCount + 1 ; 
       end if ; 
       
       -- Log this operation

@@ -184,7 +184,6 @@ begin
 --!! This is GetTotalTransactionCount vs. GetPendingTransactionCount
 --!!  Get Pending Get Count = ReceiveFifo.GetFifoCount
         TransRec.IntFromModel <= ReceiveCount ;
---        wait until Clk = '1' ;
         wait for 0 ns ; 
 
       when WAIT_FOR_CLOCK =>
@@ -192,7 +191,7 @@ begin
 
       when GET_ALERTLOG_ID =>
         TransRec.IntFromModel <= integer(ModelID) ;
-        wait until Clk = '1' ;    
+        wait for 0 ns ; 
     
       when GET | TRY_GET | CHECK | TRY_CHECK =>
         if ReceiveFifo.empty and  IsTry(Operation) then

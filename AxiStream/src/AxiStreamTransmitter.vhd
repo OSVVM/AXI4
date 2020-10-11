@@ -152,7 +152,7 @@ begin
     variable Data : std_logic_vector(TData'range) ; 
     variable Param : std_logic_vector(PARAM_LENGTH-1 downto 0) ;
 --    alias Operation : StreamOperationType is TransRec.Operation ;
-    variable BytesToSend : integer ; 
+    variable BytesToSend, NumberTransfers : integer ; 
     variable PopValid : boolean ; 
   begin
     WaitForTransaction(
@@ -177,7 +177,8 @@ begin
     
       when GET_ALERTLOG_ID =>
         TransRec.IntFromModel <= integer(ModelID) ;
-        wait until Clk = '1' ;
+--        wait until Clk = '1' ;
+        wait for 0 ns ; 
 
       when SEND | SEND_ASYNC =>
         Data   := FromTransaction(TransRec.DataToModel, Data'length) ;
@@ -191,7 +192,8 @@ begin
 
       when SEND_BURST | SEND_BURST_ASYNC =>
         BytesToSend := TransRec.IntToModel ;
-        TransmitRequestCount <= TransmitRequestCount + BytesToSend ; 
+        NumberTransfers := integer(ceil(real(BytesToSend) / real(AXI_STREAM_DATA_BYTE_WIDTH))) ;
+        TransmitRequestCount <= TransmitRequestCount + NumberTransfers ; 
         Param  := FromTransaction(TransRec.ParamToModel, Param'length) ;
         while BytesToSend > 0 loop
           PopWord(BurstFifo, PopValid, Data, BytesToSend) ; 

@@ -149,7 +149,7 @@ begin
     variable BurstTransferCount     : integer := 0 ; 
     variable BurstByteCount : integer ; 
     variable BurstBoundary  : std_logic ; 
-    variable DropUndriven   : boolean := FALSE ; 
+    variable DropUndriven   : boolean := TRUE ; 
     function param_to_string(Param : std_logic_vector) return string is 
       alias aParam : std_logic_vector(Param'length-1 downto 0) is Param ;
       alias ID   : std_logic_vector(ID_LEN-1 downto 0)   is aParam(PARAM_LENGTH-1 downto PARAM_LENGTH-ID_LEN);

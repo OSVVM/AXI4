@@ -44,8 +44,10 @@ analyze TestCtrl_e.vhd
 analyze TbStream_SendGet1.vhd
 analyze TbStream_SendGetAsync1.vhd
 analyze TbStream_SendGetBurst1.vhd
+analyze TbStream_SendGetBurstAsync1.vhd
 
 
 # simulate TbStream_SendGet1
 # simulate TbStream_SendGetAsync1
-simulate TbStream_SendGetBurst1
+# simulate TbStream_SendGetBurst1
+simulate TbStream_SendGetBurstAsync1

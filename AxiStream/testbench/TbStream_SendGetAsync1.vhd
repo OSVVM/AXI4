@@ -46,10 +46,7 @@
 architecture SendGetAsync1 of TestCtrl is
 
   signal   TestDone : integer_barrier := 1 ;
-  
-  constant DATA_WIDTH : integer := StreamTransmitterTransRec.DataToModel'length ; 
-  constant DATA_BYTES : integer := DATA_WIDTH/8 ; 
- 
+   
 begin
 
   ------------------------------------------------------------
@@ -150,6 +147,7 @@ begin
     variable ErrorCount : integer; 
     variable CurTime : time ; 
     variable TxAlertLogID : AlertLogIDType ; 
+    variable TryCount : integer ; 
     variable Available : boolean ; 
   begin
     WaitForClock(StreamReceiverTransRec, 2) ; 
@@ -163,11 +161,13 @@ begin
         ExpData := to_slv((OffSet + j) mod 256, 8) & ExpData(ExpData'left downto 8) ;
       end loop ; 
       -- Alternate using Get and Check
+      TryCount := 0 ; 
       if (i mod 2) /= 0 then 
         loop 
           TryGet(StreamReceiverTransRec, RxData, Available) ; 
           exit when Available ; 
           WaitForClock(StreamReceiverTransRec, 1) ; 
+          TryCount := TryCount + 1 ;
         end loop ; 
         GetTransactionCount(StreamReceiverTransRec, TransactionCount) ;
         AffirmIfEqual(TransactionCount, i, "Receive TranasctionCount:") ;
@@ -179,6 +179,7 @@ begin
             TryCheck(StreamReceiverTransRec, ExpData, Available) ; 
             exit when Available ; 
             WaitForClock(StreamReceiverTransRec, 1) ; 
+            TryCount := TryCount + 1 ;
           end loop ; 
         else
           -- Create error on model side
@@ -186,11 +187,13 @@ begin
             TryCheck(StreamReceiverTransRec, ExpData+1, Available) ; 
             exit when Available ; 
             WaitForClock(StreamReceiverTransRec, 1) ; 
+            TryCount := TryCount + 1 ;
           end loop ; 
         end if ; 
         GetTransactionCount(StreamReceiverTransRec, TransactionCount) ;
         AffirmIfEqual(TransactionCount, i, "Receive TranasctionCount:") ;
       end if ; 
+      AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       if i mod 2 = 0 then 
         GetErrorCount(StreamReceiverTransRec, ErrorCount) ;
         AffirmIfEqual(ErrorCount, i/128, "Transmitter, GetErrorCount: Verify that ErrorCount is 0") ;

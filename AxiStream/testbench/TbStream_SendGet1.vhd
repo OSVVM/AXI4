@@ -46,10 +46,7 @@
 architecture SendGet1 of TestCtrl is
 
   signal   TestDone : integer_barrier := 1 ;
-  
-  constant DATA_WIDTH : integer := StreamTransmitterTransRec.DataToModel'length ; 
-  constant DATA_BYTES : integer := DATA_WIDTH/8 ; 
- 
+   
 begin
 
   ------------------------------------------------------------

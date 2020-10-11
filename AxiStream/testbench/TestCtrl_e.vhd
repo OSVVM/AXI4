@@ -64,4 +64,9 @@ entity TestCtrl is
       StreamReceiverTransRec     : inout StreamRecType 
 
   ) ;
+  constant DATA_WIDTH : integer := StreamTransmitterTransRec.DataToModel'length ; 
+  constant DATA_BYTES : integer := DATA_WIDTH/8 ; 
+  
+  alias TxBurstFifo is <<variable .TbStream.AxiStreamTransmitter_1.BurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+  alias RxBurstFifo is <<variable .TbStream.AxiStreamReceiver_1.BurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
 end entity TestCtrl ;

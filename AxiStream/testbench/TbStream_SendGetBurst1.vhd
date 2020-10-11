@@ -45,11 +45,6 @@ architecture SendGetBurst1 of TestCtrl is
 
   signal   TestDone : integer_barrier := 1 ;
   
-  constant DATA_WIDTH : integer := StreamTransmitterTransRec.DataToModel'length ; 
-  constant DATA_BYTES : integer := DATA_WIDTH/8 ; 
-  
-  alias TxBurstFifo is <<variable .TbStream.AxiStreamTransmitter_1.BurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
-  alias RxBurstFifo is <<variable .TbStream.AxiStreamReceiver_1.BurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
  
 begin
 
@@ -115,6 +110,13 @@ begin
     log("Transmit 34 Bytes -- unaligned") ;
     PushBurstRandom(TxBurstFifo, 7, 34) ;
     SendBurst(StreamTransmitterTransRec, 34) ;
+    
+    for i in 0 to 6 loop 
+      log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
+      PushBurstIncrement(TxBurstFifo, i*32, 32 + 5*i) ;
+      SendBurst(StreamTransmitterTransRec, 32 + 5*i) ;
+    end loop ; 
+
 
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(StreamTransmitterTransRec, 2) ;
@@ -147,6 +149,13 @@ begin
     GetBurst (StreamReceiverTransRec, NumBytes) ;
     AffirmIfEqual(NumBytes, 34, "Receiver: NumBytes Received") ;
     CheckBurstRandom(RxBurstFifo, 7, NumBytes) ;
+    
+    for i in 0 to 6 loop 
+--      log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
+      GetBurst (StreamReceiverTransRec, NumBytes) ;
+      AffirmIfEqual(NumBytes, 32 + 5*i, "Receiver: NumBytes Received") ;
+      CheckBurstIncrement(RxBurstFifo, i*32, NumBytes) ;
+    end loop ; 
      
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(StreamReceiverTransRec, 2) ;

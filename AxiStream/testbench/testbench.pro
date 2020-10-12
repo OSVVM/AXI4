@@ -41,13 +41,20 @@ library osvvm_TbAxiStream
 analyze TbStream.vhd
 analyze TestCtrl_e.vhd
 
+# Tests for any Stream MIT
 analyze TbStream_SendGet1.vhd
 analyze TbStream_SendGetAsync1.vhd
 analyze TbStream_SendGetBurst1.vhd
 analyze TbStream_SendGetBurstAsync1.vhd
 
+# Tests for AXI Stream
+analyze TbStream_AxiSendGet2.vhd
+
+
 
 # simulate TbStream_SendGet1
 # simulate TbStream_SendGetAsync1
 # simulate TbStream_SendGetBurst1
-simulate TbStream_SendGetBurstAsync1
+# simulate TbStream_SendGetBurstAsync1
+
+simulate TbStream_AxiSendGet2

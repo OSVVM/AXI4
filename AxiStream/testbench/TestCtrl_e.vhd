@@ -54,6 +54,11 @@ library osvvm_AXI4 ;
     context osvvm_AXI4.AxiStreamContext ;
 
 entity TestCtrl is
+  generic ( 
+    ID_LEN       : integer ;
+    DEST_LEN     : integer ;
+    USER_LEN     : integer 
+  ) ;
   port (
       -- Global Signal Interface
       Clk                           : In    std_logic ;

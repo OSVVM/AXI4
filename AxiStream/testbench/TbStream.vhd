@@ -115,6 +115,11 @@ architecture TestHarness of TbStream is
   
 
   component TestCtrl is
+    generic ( 
+      ID_LEN       : integer ;
+      DEST_LEN     : integer ;
+      USER_LEN     : integer 
+    ) ;
     port (
       -- Global Signal Interface
       Clk                           : In    std_logic ;
@@ -209,6 +214,11 @@ begin
   
   
   TestCtrl_1 : TestCtrl
+  generic map ( 
+    ID_LEN       => TID'length,
+    DEST_LEN     => TDest'length,
+    USER_LEN     => TUser'length
+  ) 
   port map ( 
     -- Globals
     Clk                      => Clk,

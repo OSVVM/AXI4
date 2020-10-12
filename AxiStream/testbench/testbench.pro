@@ -49,6 +49,7 @@ analyze TbStream_SendGetBurstAsync1.vhd
 
 # Tests for AXI Stream
 analyze TbStream_AxiSendGet2.vhd
+analyze TbStream_AxiSendGetAsync2.vhd
 
 
 
@@ -57,4 +58,5 @@ analyze TbStream_AxiSendGet2.vhd
 # simulate TbStream_SendGetBurst1
 # simulate TbStream_SendGetBurstAsync1
 
-simulate TbStream_AxiSendGet2
+# simulate TbStream_AxiSendGet2
+simulate TbStream_AxiSendGetAsync2

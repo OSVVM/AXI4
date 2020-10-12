@@ -70,8 +70,8 @@ begin
     ClearAlerts ;
 
     -- Wait for test to finish
-    WaitForBarrier(TestDone, 35 ms) ;
-    AlertIf(now >= 35 ms, "Test finished due to timeout") ;
+    WaitForBarrier(TestDone, 1 ms) ;
+    AlertIf(now >= 1 ms, "Test finished due to timeout") ;
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
@@ -121,11 +121,12 @@ begin
         AffirmIfEqual(ErrorCount, 0, "Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0") ;
       end if ; 
       if (i mod 32) = 0 then
-        -- Verify that no transactions are pending
         CurTime := now ; 
         WaitForTransaction(StreamTransmitterTransRec) ;
-        Log("Transmitter: WaitForTransaction started at: " & to_string(CurTime, 1 ns) & "  finished at: " & to_string(now, 1 ns)) ;
---        AffirmIfEqual(now, CurTime, "Transmitter: WaitForTransaction executes in 0 time when using blocking transactions") ;
+        AffirmIf(now > CurTime, 
+           "Transmitter: WaitForTransaction started at: " & to_string(CurTime, 1 ns) & 
+           "  finished at: " & to_string(now, 1 ns)) ;
+        WaitForClock(StreamTransmitterTransRec, 4) ; 
       end if ; 
     end loop ;
    

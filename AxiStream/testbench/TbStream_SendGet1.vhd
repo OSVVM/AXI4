@@ -105,7 +105,7 @@ begin
     for i in 1 to 256 loop 
       -- Create words one byte at a time
       OffSet := i * DATA_BYTES ;
-      for j in 0 to DATA_BYTES loop 
+      for j in 0 to DATA_BYTES-1 loop 
         Data := to_slv((OffSet + j) mod 256, 8) & Data(Data'left downto 8) ;
       end loop ; 
       Send(StreamTransmitterTransRec, Data) ;
@@ -153,7 +153,7 @@ begin
     for i in 1 to 256 loop 
       -- Create words one byte at a time
       OffSet := i * DATA_BYTES ;
-      for j in 0 to DATA_BYTES loop 
+      for j in 0 to DATA_BYTES-1 loop 
         ExpData := to_slv((OffSet + j) mod 256, 8) & ExpData(ExpData'left downto 8) ;
       end loop ; 
       -- Alternate using Get and Check

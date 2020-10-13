@@ -1,5 +1,5 @@
 --
---  File Name:         TbStream_AxiLast1.vhd
+--  File Name:         TbStream_AxiLastParamAsync1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -39,7 +39,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --  
-architecture AxiLast1 of TestCtrl is
+architecture AxiLastParamAsync1 of TestCtrl is
 
   signal   TestDone : integer_barrier := 1 ;
   
@@ -53,13 +53,13 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbStream_AxiLast1") ;
+    SetAlertLogName("TbStream_AxiLastParamAsync1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbStream_AxiLast1.txt") ;
+    TranscriptOpen("./results/TbStream_AxiLastParamAsync1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -72,7 +72,7 @@ begin
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
---    AlertIfDiff("./results/TbStream_AxiLast1.txt", "../sim_shared/validated_results/TbStream_AxiLast1.txt", "") ; 
+--    AlertIfDiff("./results/TbStream_AxiLastParamAsync1.txt", "../sim_shared/validated_results/TbStream_AxiLastParamAsync1.txt", "") ; 
     
     print("") ;
     -- Expecting two check errors at 128 and 256
@@ -103,9 +103,9 @@ begin
       for j in 0 to 63+i loop 
         Data := Data + 1 ; 
         exit when j = 63+i ; 
-        Send(StreamTransmitterTransRec, Data, ID & Dest & User & '0') ;
+        SendAsync(StreamTransmitterTransRec, Data, ID & Dest & User & '0') ;
       end loop ;
-      Send(StreamTransmitterTransRec, Data, ID & Dest & User & '1') ;
+      SendAsync(StreamTransmitterTransRec, Data, ID & Dest & User & '1') ;
       WaitForClock(StreamTransmitterTransRec, i/4) ; 
       if i mod 4 = 0 then 
         WaitForTransaction(StreamTransmitterTransRec) ; 
@@ -136,6 +136,8 @@ begin
     variable Dest : std_logic_vector(DEST_LEN-1 downto 0) ;  -- 4
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
     variable PopValid : boolean ; 
+    variable TryCount  : integer ; 
+    variable Available : boolean ; 
   begin
     WaitForClock(StreamReceiverTransRec, 2) ; 
     Data := (others => '0') ;
@@ -144,7 +146,14 @@ begin
       ID   := to_slv(i/2,   ID_LEN);
       Dest := to_slv(1+i/2, DEST_LEN) ; 
       User := to_slv(2+i/2, USER_LEN) ; 
-      GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
+      TryCount := 0 ; 
+      loop 
+        TryGetBurst (StreamReceiverTransRec, NumBytes, RxParam, Available) ;
+        exit when Available ; 
+        WaitForClock(StreamReceiverTransRec, 1) ; 
+        TryCount := TryCount + 1 ;
+      end loop ;
+      AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       AffirmIfEqual(NumBytes, (64+i) * DATA_BYTES, "Receiver: NumBytes Received") ;
       AffirmIfEqual(RxID,   ID,   "Receiver, ID: ") ; 
       AffirmIfEqual(RxDest, Dest, "Receiver, Dest: ") ; 
@@ -163,12 +172,12 @@ begin
     wait ;
   end process AxiReceiverProc ;
 
-end AxiLast1 ;
+end AxiLastParamAsync1 ;
 
-Configuration TbStream_AxiLast1 of TbStream is
+Configuration TbStream_AxiLastParamAsync1 of TbStream is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(AxiLast1) ; 
+      use entity work.TestCtrl(AxiLastParamAsync1) ; 
     end for ; 
   end for ; 
-end TbStream_AxiLast1 ; 
+end TbStream_AxiLastParamAsync1 ; 

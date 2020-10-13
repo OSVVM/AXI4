@@ -143,24 +143,45 @@ begin
       WaitForClock(StreamReceiverTransRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     AffirmIfEqual(NumBytes, 32, "Receiver: NumBytes Received") ;
     CheckBurstIncrement(RxBurstFifo, 3, NumBytes) ;
-    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     
 --    log("Transmit 30 Bytes -- unaligned") ;
-    GetBurst (StreamReceiverTransRec, NumBytes) ;
+    TryCount := 0 ; 
+    loop 
+      TryGetBurst (StreamReceiverTransRec, NumBytes, Available) ;
+      exit when Available ; 
+      WaitForClock(StreamReceiverTransRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     AffirmIfEqual(NumBytes, 30, "Receiver: NumBytes Received") ;
     CheckBurst(RxBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25,27,29)) ;
     CheckBurst(RxBurstFifo, (31,33,35,37,39,41,43,45,47,49,51,53,55,57,59)) ;
 
 --    log("Transmit 34 Bytes -- unaligned") ;
-    GetBurst (StreamReceiverTransRec, NumBytes) ;
+    TryCount := 0 ; 
+    loop 
+      TryGetBurst (StreamReceiverTransRec, NumBytes, Available) ;
+      exit when Available ; 
+      WaitForClock(StreamReceiverTransRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     AffirmIfEqual(NumBytes, 34, "Receiver: NumBytes Received") ;
     CheckBurstRandom(RxBurstFifo, 7, NumBytes) ;
     
     for i in 0 to 6 loop 
 --      log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
-      GetBurst (StreamReceiverTransRec, NumBytes) ;
+      TryCount := 0 ; 
+      loop 
+        TryGetBurst (StreamReceiverTransRec, NumBytes, Available) ;
+        exit when Available ; 
+        WaitForClock(StreamReceiverTransRec, 1) ; 
+        TryCount := TryCount + 1 ;
+      end loop ;
+      AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       AffirmIfEqual(NumBytes, 32 + 5*i, "Receiver: NumBytes Received") ;
       CheckBurstIncrement(RxBurstFifo, i*32, NumBytes) ;
     end loop ; 

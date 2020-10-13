@@ -20,14 +20,12 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2017   2018.05    Initial revision
---    01/2020   2020.01    Updated license notice
---    10/2020   2020.10    Updated test to include Check, ...
+--    10/2020   2020.10    Initial revision
 --
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.  
+--  Copyright (c) 2020 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.

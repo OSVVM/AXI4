@@ -149,12 +149,51 @@ begin
   --    Dispatches transactions to
   ------------------------------------------------------------
   TransactionDispatcher : process
-    constant PARAM_LENGTH : integer := TID'length + TDest'length + TUser'length + 1 ; 
+    constant ID_LEN       : integer := TID'length ;
+    constant DEST_LEN     : integer := TDest'length ;
+    constant USER_LEN     : integer := TUser'length ;
+    constant PARAM_LEN : integer := ID_LEN + DEST_LEN + USER_LEN + 1 ; 
     variable Data : std_logic_vector(TData'range) ; 
-    variable Param : std_logic_vector(PARAM_LENGTH-1 downto 0) ;
+    variable Param : std_logic_vector(PARAM_LEN-1 downto 0) ;
 --    alias Operation : StreamOperationType is TransRec.Operation ;
     variable BytesToSend, NumberTransfers : integer ; 
     variable PopValid : boolean ; 
+    
+    ------------------------------------------------------------
+    impure function UpdateOptions (Param : std_logic_vector(PARAM_LEN-1 downto 0)) return std_logic_vector is
+    ------------------------------------------------------------
+      variable ResultParam : std_logic_vector(Param'range) ; 
+      alias ID    : std_logic_vector(ID_LEN-1 downto 0) is ResultParam(PARAM_LEN-1 downto PARAM_LEN-ID_LEN) ;
+      alias Dest  : std_logic_vector(DEST_LEN-1 downto 0) is ResultParam(DEST_LEN-1 + USER_LEN+1 downto USER_LEN+1) ;
+      alias User  : std_logic_vector(USER_LEN-1 downto 0) is ResultParam(USER_LEN downto 1) ;
+      alias Last  : std_logic is ResultParam(0) ;
+    begin    
+      ResultParam := Param ;
+      
+      if ID'Length > 0 and ID(ID'right) = '-' then
+        ID := ParamID ; 
+      end if ; 
+      
+      if Dest'length > 0 and Dest(Dest'right) = '-' then 
+        Dest := ParamDest ; 
+      end if ; 
+      
+      if User'length > 0 and User(User'right) = '-' then 
+        User := ParamUser ; 
+      end if ; 
+      
+      -- Calculate Last.  
+      if Last = '-' then  -- use defaults
+        if ParamLast <= 1 then 
+          Last := '1' when ParamLast = 1 else '0' ; 
+        else 
+          -- generate last once every ParamLast cycles
+          Last := '1' when ((TransmitRequestCount+1) - LastOffsetCount) mod ParamLast = 0 else '0' ; 
+        end if ; 
+      end if ; 
+      return ResultParam ; 
+    end function UpdateOptions ; 
+    
   begin
     WaitForTransaction(
        Clk      => Clk,
@@ -183,7 +222,7 @@ begin
 
       when SEND | SEND_ASYNC =>
         Data   := FromTransaction(TransRec.DataToModel, Data'length) ;
-        Param  := FromTransaction(TransRec.ParamToModel, Param'length) ;
+        Param  := UpdateOptions(FromTransaction(TransRec.ParamToModel, Param'length)) ;
         TransmitFifo.Push(Data & Param) ; 
         Increment(TransmitRequestCount) ;
         wait for 0 ns ; 
@@ -195,7 +234,7 @@ begin
         BytesToSend := TransRec.IntToModel ;
         NumberTransfers := integer(ceil(real(BytesToSend) / real(AXI_STREAM_DATA_BYTE_WIDTH))) ;
         TransmitRequestCount <= TransmitRequestCount + NumberTransfers ; 
-        Param  := FromTransaction(TransRec.ParamToModel, Param'length) ;
+        Param  := UpdateOptions(FromTransaction(TransRec.ParamToModel, Param'length)) ;
         while BytesToSend > 0 loop
           PopWord(BurstFifo, PopValid, Data, BytesToSend) ; 
           AlertIfNot(ModelID, PopValid, "BurstFifo Empty during burst transfer", FAILURE) ; 
@@ -295,18 +334,6 @@ begin
       -- Get Transaction
       (Data, ID, Dest, User, Last) := TransmitFifo.Pop ;
       
-      if ID'Length > 0 and ID(ID'right) = '-' then
-        ID := ParamID ; 
-      end if ; 
-      
-      if Dest'length > 0 and Dest(Dest'right) = '-' then 
-        Dest := ParamDest ; 
-      end if ; 
-      
-      if User'length > 0 and User(User'right) = '-' then 
-        User := ParamUser ; 
-      end if ; 
-
       -- Calculate Strb. 1 when data else 0  
       -- If Strb is unused it may be null range
       for i in Strb'range loop
@@ -326,16 +353,6 @@ begin
           Keep(i) := '1' ;
         end if ; 
       end loop ; 
-      
-      -- Calculate Last.  
-      if Last = '-' then  -- use defaults
-        if ParamLast <= 1 then 
-          Last := '1' when ParamLast = 1 else '0' ; 
-        else 
-          -- generate last once every ParamLast cycles
-          Last := '1' when (TransmitRequestCount - LastOffsetCount) mod ParamLast = 0 else '0' ; 
-        end if ; 
-      end if ; 
       
       -- Do Transaction
       TID     <= ID   after tpd_Clk_tid ;

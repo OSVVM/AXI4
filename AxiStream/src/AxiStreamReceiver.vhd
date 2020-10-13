@@ -219,6 +219,7 @@ begin
           
           if IsCheck(Operation) then 
             ExpectedData  := std_logic_vector(TransRec.DataToModel) ;
+--!! Need handling for expected param when from model is ---
             ExpectedParam := std_logic_vector(TransRec.ParamToModel) ;
             AffirmIf( ModelID, 
                 (Data ?= ExpectedData and Param ?= ExpectedParam) = '1',
@@ -257,7 +258,8 @@ begin
             (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
             PushWord(BurstFifo, Data, DropUndriven) ; 
             BurstByteCount := BurstByteCount + CountBytes(Data, DropUndriven) ;
-            exit when BurstBoundary = '1' ; 
+--            exit when BurstBoundary = '1' ; 
+            exit when Param(0) = '1' ; 
           end loop ; 
           BurstTransferCount      := BurstTransferCount + 1 ; 
           TransRec.IntFromModel   <= BurstByteCount ; 
@@ -325,6 +327,7 @@ begin
     variable BurstBoundary  : std_logic ; 
     variable LastID         : std_logic_vector(TID'range)   := (TID'range   => '-') ;
     variable LastDest       : std_logic_vector(TDest'range) := (TDest'range => '-') ;
+    variable LastLast       : std_logic := '1' ; 
   begin
     -- Initialize
     TReady  <= '0' ;
@@ -340,7 +343,7 @@ begin
         ReadyDelayCycles        => ReceiveReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_TReady
       ) ;
-      
+            
       Data := TData ; 
       -- Either Strb or Keep can have a null range
       -- Make Data a Z if Strb(i) is position byte
@@ -357,13 +360,13 @@ begin
       end loop ;
       
       Last := to_01(TLast) ; 
-      BurstBoundary := Last when TID ?= LastID and TDest ?= LastDest else '1' ;
+      BurstBoundary := '1' when (TID /= LastID or TDest /= LastDest) and LastLast /= '1' else '0' ;
       LastID   := TID ; 
       LastDest := TDest ;
-      
+      LastLast := Last ;
       -- capture interface values
       ReceiveFifo.push(Data & TID & TDest & TUser & Last & BurstBoundary) ;
-      if BurstBoundary = '1' then 
+      if BurstBoundary = '1' or Last = '1' then 
         BurstReceiveCount <= BurstReceiveCount + 1 ; 
       end if ; 
       

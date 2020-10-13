@@ -119,10 +119,11 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
   -- Verification Component Configuration
   signal TransmitReadyTimeOut : integer := integer'right ; 
 
-  signal ParamID      : TID'subtype   := DEFAULT_ID ;
-  signal ParamDest    : TDest'subtype := DEFAULT_DEST ;
-  signal ParamUser    : TUser'subtype := DEFAULT_USER;
-  signal ParamLast    : natural       := DEFAULT_LAST ;
+  signal ParamID         : TID'subtype   := DEFAULT_ID ;
+  signal ParamDest       : TDest'subtype := DEFAULT_DEST ;
+  signal ParamUser       : TUser'subtype := DEFAULT_USER;
+  signal ParamLast       : natural       := DEFAULT_LAST ;
+  signal LastOffsetCount : integer    := 0 ; 
 
 begin
 
@@ -212,16 +213,17 @@ begin
             TransmitReadyTimeOut      <= TransRec.IntToModel ; 
             
           when SET_ID =>                      
-            ParamID       <= FromTransaction(TransRec.ParamToModel, ParamID'length) ;
+            ParamID         <= FromTransaction(TransRec.ParamToModel, ParamID'length) ;
             
           when SET_DEST => 
-            ParamDest     <= FromTransaction(TransRec.ParamToModel, ParamDest'length) ;
+            ParamDest       <= FromTransaction(TransRec.ParamToModel, ParamDest'length) ;
             
           when SET_USER =>
-            ParamUser     <= FromTransaction(TransRec.ParamToModel, ParamUser'length) ;
+            ParamUser       <= FromTransaction(TransRec.ParamToModel, ParamUser'length) ;
             
           when SET_LAST =>
-            ParamLast     <= TransRec.IntToModel ;
+            ParamLast       <= TransRec.IntToModel ;
+            LastOffsetCount <= TransmitRequestCount ; 
 
           when others =>
             Alert(ModelID, "SetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
@@ -331,7 +333,7 @@ begin
           Last := '1' when ParamLast = 1 else '0' ; 
         else 
           -- generate last once every ParamLast cycles
-          Last := '1' when TransmitRequestCount mod ParamLast = 0 else '0' ; 
+          Last := '1' when (TransmitRequestCount - LastOffsetCount) mod ParamLast = 0 else '0' ; 
         end if ; 
       end if ; 
       

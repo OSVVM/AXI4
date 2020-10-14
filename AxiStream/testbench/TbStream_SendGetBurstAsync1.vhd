@@ -129,8 +129,8 @@ begin
   --   Generate transactions for AxiReceiver
   ------------------------------------------------------------
   AxiReceiverProc : process
-    variable NumBytes : integer ; 
-    variable TryCount : integer ; 
+    variable NumBytes  : integer ; 
+    variable TryCount  : integer ; 
     variable Available : boolean ; 
   begin
     WaitForClock(StreamReceiverTransRec, 2) ; 

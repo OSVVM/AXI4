@@ -38,8 +38,49 @@
 #  limitations under the License.
 #  
 library osvvm_TbAxiStream
-analyze ./testbench/TbAxiStream.vhd
+analyze ./testbench/TbStream.vhd
 analyze ./testbench/TestCtrl_e.vhd
 
-analyze ./testbench/TbAxiStream_BasicSendGet.vhd
-simulate TbAxiStream_BasicSendGet
+# Tests for any Stream MIT
+analyze ./testbench/TbStream_SendGet1.vhd
+analyze ./testbench/TbStream_SendGetAsync1.vhd
+analyze ./testbench/TbStream_SendGetBurst1.vhd
+analyze ./testbench/TbStream_SendGetBurstAsync1.vhd
+
+analyze ./testbench/TbStream_ByteHandling1.vhd
+analyze ./testbench/TbStream_ByteHandlingAsync1.vhd
+analyze ./testbench/TbStream_ByteHandlingBurst1.vhd
+analyze ./testbench/TbStream_ByteHandlingBurstAsync1.vhd
+
+
+# Tests for AXI Stream
+analyze ./testbench/TbStream_AxiSendGet2.vhd
+analyze ./testbench/TbStream_AxiSendGetAsync2.vhd
+analyze ./testbench/TbStream_AxiSendGetBurst2.vhd
+analyze ./testbench/TbStream_AxiSendGetBurstAsync2.vhd
+
+analyze ./testbench/TbStream_AxiLastParam1.vhd
+analyze ./testbench/TbStream_AxiLastParamAsync1.vhd
+analyze ./testbench/TbStream_AxiLastOption1.vhd
+analyze ./testbench/TbStream_AxiLastOptionAsync1.vhd
+
+simulate TbStream_SendGet1
+simulate TbStream_SendGetAsync1
+simulate TbStream_SendGetBurst1
+simulate TbStream_SendGetBurstAsync1
+
+simulate TbStream_ByteHandling1
+simulate TbStream_ByteHandlingAsync1
+simulate TbStream_ByteHandlingBurst1
+simulate TbStream_ByteHandlingBurstAsync1
+
+
+simulate TbStream_AxiSendGet2
+simulate TbStream_AxiSendGetAsync2
+simulate TbStream_AxiSendGetBurst2
+simulate TbStream_AxiSendGetBurstAsync2
+
+simulate TbStream_AxiLastParam1
+simulate TbStream_AxiLastParamAsync1
+simulate TbStream_AxiLastOption1
+simulate TbStream_AxiLastOptionAsync1

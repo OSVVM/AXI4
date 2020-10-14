@@ -109,10 +109,11 @@ architecture behavioral of AxiStreamReceiver is
   signal ReceiveReadyBeforeValid : boolean := TRUE ; 
   signal ReceiveReadyDelayCycles : integer := 0 ;
 
---!  For future checking
---  signal ID      : TID'subtype   := DEFAULT_ID ;
---  signal Dest    : TDest'subtype := DEFAULT_DEST ;
---  signal User    : TUser'subtype := DEFAULT_USER;
+  signal ParamID         : TID'subtype   := (others => '0') ;  -- DEFAULT_ID ;
+  signal ParamDest       : TDest'subtype := (others => '0') ;  -- DEFAULT_DEST ;
+  signal ParamUser       : TUser'subtype := (others => '0') ;  -- DEFAULT_USER;
+  signal ParamLast       : natural       := 0 ;  -- DEFAULT_LAST ;
+--  signal LastOffsetCount : integer    := 0 ; 
 
 begin
 
@@ -149,7 +150,7 @@ begin
     variable BurstTransferCount     : integer := 0 ; 
     variable BurstByteCount : integer ; 
     variable BurstBoundary  : std_logic ; 
-    variable DropUndriven   : boolean := TRUE ; 
+    variable DropUndriven   : boolean := FALSE ; 
     function param_to_string(Param : std_logic_vector) return string is 
       alias aParam : std_logic_vector(Param'length-1 downto 0) is Param ;
       alias ID   : std_logic_vector(ID_LEN-1 downto 0)   is aParam(PARAM_LENGTH-1 downto PARAM_LENGTH-ID_LEN);
@@ -286,25 +287,29 @@ begin
           when RECEIVE_READY_DELAY_CYCLES =>       
             ReceiveReadyDelayCycles <= FromTransaction(TransRec.DataToModel) ;
     
---! Currently not used    
---          when SET_ID =>                      
---            ID       <= FromTransaction(TransRec.DataToModel, ID'length) ;
---            -- IdSet    <= TRUE ; 
---            
---          when SET_DEST => 
---            Dest     <= FromTransaction(TransRec.DataToModel, Dest'length) ;
---            -- DestSet  <= TRUE ; 
---            
---          when SET_USER =>
---            User     <= FromTransaction(TransRec.DataToModel, User'length) ;
---            -- UserSet  <= TRUE ; 
+          when SET_DROP_UNDRIVEN =>                      
+            DropUndriven    := TransRec.BoolToModel ;
+            
+          when SET_ID =>                      
+            ParamID         <= FromTransaction(TransRec.ParamToModel, ParamID'length) ;
+            
+          when SET_DEST => 
+            ParamDest       <= FromTransaction(TransRec.ParamToModel, ParamDest'length) ;
+            
+          when SET_USER =>
+            ParamUser       <= FromTransaction(TransRec.ParamToModel, ParamUser'length) ;
+            
+          when SET_LAST =>
+            ParamLast       <= TransRec.IntToModel ;
+--            LastOffsetCount <= TransmitRequestCount ; 
 
           when others =>
             Alert(ModelID, "SetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
             wait for 0 ns ; 
         end case ;
 
-        
+      when GET_MODEL_OPTIONS =>
+        Alert(ModelID, "GetModelOptions to be added for AxiStreamReceiver: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
       -- The End -- Done  
         
       when others =>
@@ -322,12 +327,14 @@ begin
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   ReceiveHandler : process
-    variable Data           : std_logic_vector(TData'range) ; 
+    variable Data           : std_logic_vector(TData'length-1 downto 0) ; 
     variable Last           : std_logic ; 
     variable BurstBoundary  : std_logic ; 
     variable LastID         : std_logic_vector(TID'range)   := (TID'range   => '-') ;
     variable LastDest       : std_logic_vector(TDest'range) := (TDest'range => '-') ;
     variable LastLast       : std_logic := '1' ; 
+    alias Strb : std_logic_vector(TStrb'length-1 downto 0) is TStrb ; 
+    alias Keep : std_logic_vector(TKeep'length-1 downto 0) is TKeep ; 
   begin
     -- Initialize
     TReady  <= '0' ;
@@ -344,22 +351,36 @@ begin
         tpd_Clk_Ready           => tpd_Clk_TReady
       ) ;
             
-      Data := TData ; 
+      Data := to_x01(TData) ; 
+      Last := to_01(TLast) ; 
       -- Either Strb or Keep can have a null range
       -- Make Data a Z if Strb(i) is position byte
-      for i in TStrb'range loop
-        if TStrb(i) = '0' then
-          Data(i*8 + 7 downto i*8) := (others => 'Z') ;
+      for i in Strb'range loop
+        if Strb(i) = '0' then
+          Data(i*8 + 7 downto i*8) := (others => 'W') ;
         end if; 
       end loop ;
       -- Make Data a U if Keep(i) is null byte
-      for i in TKeep'range loop
-        if TKeep(i) = '0' then
+      for i in Keep'range loop
+        if Keep(i) = '0' then
           Data(i*8 + 7 downto i*8) := (others => 'U') ;
         end if; 
       end loop ;
-      
-      Last := to_01(TLast) ; 
+      -- For first Word in Transfer, Drop leading bytes until TKeep(i) = '1'
+      if LastLast = '1' then 
+        for i in Keep'reverse_range loop 
+          exit when Keep(i) = '1' ; 
+          Data(i*8 + 7 downto i*8) := (others => '-') ;
+        end loop ; 
+      end if ; 
+      -- For last Word in Transfer, Drop ending bytes until TKeep(i) = '1' 
+      if Last = '1' then 
+        for i in Keep'range loop 
+          exit when Keep(i) = '1' ; 
+          Data(i*8 + 7 downto i*8) := (others => '-') ;
+        end loop ; 
+      end if ; 
+
       BurstBoundary := '1' when (TID /= LastID or TDest /= LastDest) and LastLast /= '1' else '0' ;
       LastID   := TID ; 
       LastDest := TDest ;

@@ -337,7 +337,7 @@ begin
       -- Calculate Strb. 1 when data else 0  
       -- If Strb is unused it may be null range
       for i in Strb'range loop
-        if Data(i*8) = 'Z' or Data(i*8) = 'U' then 
+        if is_x(Data(i*8)) then 
           Strb(i) := '0' ; 
         else
           Strb(i) := '1' ;
@@ -358,7 +358,7 @@ begin
       TID     <= ID   after tpd_Clk_tid ;
       TDest   <= Dest after tpd_Clk_TDest ;
       TUser   <= User after tpd_Clk_TUser ;
-      TData   <= Data after tpd_Clk_TData ;
+      TData   <= to_x01(Data) after tpd_Clk_TData ;
       TStrb   <= Strb after tpd_Clk_TStrb ;
       TKeep   <= Keep after tpd_Clk_TKeep ;
       TLast   <= Last after tpd_Clk_TLast ;  

@@ -55,12 +55,17 @@ library osvvm ;
 library osvvm_common ;
   context osvvm_common.OsvvmCommonContext ;
 
-  use work.AxiStreamOptionsTypePkg.all ; 
+  use work.AxiStreamOptionsPkg.all ; 
   use work.Axi4CommonPkg.all ; 
+  use work.AxiStreamTbPkg.all ;
 
 entity AxiStreamReceiver is
   generic (
     MODEL_ID_NAME  : string :="" ;
+    DEFAULT_ID     : std_logic_vector ; 
+    DEFAULT_DEST   : std_logic_vector ; 
+    DEFAULT_USER   : std_logic_vector ; 
+    DEFAULT_LAST   : natural := 0 ; 
     tperiod_Clk    : time := 10 ns ;
     
     tpd_Clk_TReady : time := 2 ns  
@@ -109,11 +114,11 @@ architecture behavioral of AxiStreamReceiver is
   signal ReceiveReadyBeforeValid : boolean := TRUE ; 
   signal ReceiveReadyDelayCycles : integer := 0 ;
 
-  signal ParamID         : TID'subtype   := (others => '0') ;  -- DEFAULT_ID ;
-  signal ParamDest       : TDest'subtype := (others => '0') ;  -- DEFAULT_DEST ;
-  signal ParamUser       : TUser'subtype := (others => '0') ;  -- DEFAULT_USER;
-  signal ParamLast       : natural       := 0 ;  -- DEFAULT_LAST ;
---  signal LastOffsetCount : integer    := 0 ; 
+  signal ParamID         : TID'subtype   := DEFAULT_ID ;
+  signal ParamDest       : TDest'subtype := DEFAULT_DEST ;
+  signal ParamUser       : TUser'subtype := DEFAULT_USER;
+  signal ParamLast       : natural       := DEFAULT_LAST ;
+  signal LastOffsetCount : integer    := 0 ; 
 
 begin
 
@@ -220,8 +225,14 @@ begin
           
           if IsCheck(Operation) then 
             ExpectedData  := std_logic_vector(TransRec.DataToModel) ;
---!! Need handling for expected param when from model is ---
-            ExpectedParam := std_logic_vector(TransRec.ParamToModel) ;
+            ExpectedParam  := UpdateOptions(
+                        Param      => std_logic_vector(TransRec.ParamToModel),
+                        ParamID    => ParamID, 
+                        ParamDest  => ParamDest,
+                        ParamUser  => ParamUser,
+                        ParamLast  => ParamLast,           
+                        Count      => ReceiveCount - LastOffsetCount
+                      ) ;
             AffirmIf( ModelID, 
                 (Data ?= ExpectedData and Param ?= ExpectedParam) = '1',
                 "Operation# " & to_string (DispatcherReceiveCount) & " " & 
@@ -252,8 +263,6 @@ begin
             WaitForToggle(BurstReceiveCount) ;
           end if ; 
           -- ReceiveFIFO: (TData & TID & TDest & TUser & TLast) 
---!! Make a model parameter?  Otherwise, need to provide overloading in customization package for this
---!!          DropUndriven   := TransRec.BoolToModel ; 
           BurstByteCount := 0 ; 
           loop
             (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
@@ -282,10 +291,10 @@ begin
         case AxiStreamOptionsType'val(TransRec.Options) is
 
           when RECEIVE_READY_BEFORE_VALID =>       
-            ReceiveReadyBeforeValid <= TransRec.DataToModel(0) = '0' ; 
+            ReceiveReadyBeforeValid <= TransRec.BoolToModel ; 
 
           when RECEIVE_READY_DELAY_CYCLES =>       
-            ReceiveReadyDelayCycles <= FromTransaction(TransRec.DataToModel) ;
+            ReceiveReadyDelayCycles <= TransRec.IntToModel ;
     
           when SET_DROP_UNDRIVEN =>                      
             DropUndriven    := TransRec.BoolToModel ;
@@ -301,7 +310,7 @@ begin
             
           when SET_LAST =>
             ParamLast       <= TransRec.IntToModel ;
---            LastOffsetCount <= TransmitRequestCount ; 
+            LastOffsetCount <= ReceiveCount ; 
 
           when others =>
             Alert(ModelID, "SetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
@@ -309,7 +318,29 @@ begin
         end case ;
 
       when GET_MODEL_OPTIONS =>
-        Alert(ModelID, "GetModelOptions to be added for AxiStreamReceiver: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
+        case AxiStreamOptionsType'val(TransRec.Options) is
+          when RECEIVE_READY_BEFORE_VALID =>       
+            TransRec.BoolFromModel   <=  ReceiveReadyBeforeValid ; 
+
+          when RECEIVE_READY_DELAY_CYCLES =>       
+            TransRec.IntFromModel <= ReceiveReadyDelayCycles ;    
+
+          when SET_ID =>                      
+            TransRec.ParamFromModel <= ToTransaction(ParamID, TransRec.ParamFromModel'length) ;
+            
+          when SET_DEST => 
+            TransRec.ParamFromModel <= ToTransaction(ParamDest, TransRec.ParamFromModel'length) ;
+            
+          when SET_USER =>
+            TransRec.ParamFromModel <= ToTransaction(ParamUser, TransRec.ParamFromModel'length) ;
+            
+          when SET_LAST =>
+            TransRec.IntFromModel   <= ParamLast ;
+
+          when others =>
+            Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
+            wait for 0 ns ; 
+        end case ;
       -- The End -- Done  
         
       when others =>
@@ -348,8 +379,9 @@ begin
         Ready                   => TReady,
         ReadyBeforeValid        => ReceiveReadyBeforeValid,
         ReadyDelayCycles        => ReceiveReadyDelayCycles * tperiod_Clk,
-        tpd_Clk_Ready           => tpd_Clk_TReady
-      ) ;
+        tpd_Clk_Ready           => tpd_Clk_TReady,
+        AlertLogID              => ModelID 
+      ) ;         
             
       Data := to_x01(TData) ; 
       Last := to_01(TLast) ; 

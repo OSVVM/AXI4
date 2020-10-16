@@ -38,7 +38,8 @@
 #  limitations under the License.
 #
 library osvvm_axi4
-analyze ./src/AxiStreamOptionsTypePkg.vhd
+analyze ./src/AxiStreamOptionsPkg.vhd
+analyze ./src/AxiStreamTbPkg.vhd
 analyze ./src/AxiStreamTransmitter.vhd
 analyze ./src/AxiStreamReceiver.vhd
 analyze ./src/AxiStreamComponentPkg.vhd

@@ -1,6 +1,6 @@
 --
---  File Name:         AxiStreamOptionsTypePkg.vhd
---  Design Unit Name:  AxiStreamOptionsTypePkg
+--  File Name:         AxiStreamOptionsPkg.vhd
+--  Design Unit Name:  AxiStreamOptionsPkg
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -52,7 +52,7 @@ library osvvm ;
 library OSVVM_Common ;
     context OSVVM_Common.OsvvmCommonContext ; 
     
-package AxiStreamOptionsTypePkg is
+package AxiStreamOptionsPkg is
 
   -- ========================================================
   --  AxiStreamOptionsType 
@@ -122,12 +122,12 @@ package AxiStreamOptionsTypePkg is
   ) ;
 
 
-end package AxiStreamOptionsTypePkg ;
+end package AxiStreamOptionsPkg ;
 
 -- /////////////////////////////////////////////////////////////////////////////////////////
 -- /////////////////////////////////////////////////////////////////////////////////////////
 
-package body AxiStreamOptionsTypePkg is
+package body AxiStreamOptionsPkg is
 
   -- ========================================================
   --  SetModelOptions / GetModelOptions
@@ -205,4 +205,4 @@ package body AxiStreamOptionsTypePkg is
     OptVal := TransRec.BoolFromModel ;
   end procedure GetModelOptions ;
 
-end package body AxiStreamOptionsTypePkg ;
+end package body AxiStreamOptionsPkg ;

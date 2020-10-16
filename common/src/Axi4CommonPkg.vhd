@@ -83,8 +83,6 @@ end package Axi4CommonPkg ;
 
 package body Axi4CommonPkg is
  
-
-
   ------------------------------------------------------------
   procedure DoAxiValidHandshake (
   ------------------------------------------------------------
@@ -138,7 +136,7 @@ package body Axi4CommonPkg is
     AlertIf(
       AlertLogID, 
       Valid /= '1', 
-      TimeOutMessage & ".  Valid: " & to_string(Valid) & "  Expected: 1",
+      TimeOutMessage & " Valid: " & to_string(Valid) & "  Expected: 1",
       FAILURE
     ) ;
 
@@ -153,7 +151,7 @@ package body Axi4CommonPkg is
         AlertLogID, 
         Valid /= '1', 
         TimeOutMessage & 
-        ".  Valid (" & to_string(Valid) & ") " & 
+        " Valid (" & to_string(Valid) & ") " & 
         "deasserted before Ready asserted (" & to_string(Ready) & ") ",
         FAILURE
       ) ;
@@ -162,6 +160,7 @@ package body Axi4CommonPkg is
     -- State after operation
     Ready <= '0' after tpd_Clk_Ready ;
   end procedure DoAxiReadyHandshake ;
+  
   
 
 end package body Axi4CommonPkg ; 

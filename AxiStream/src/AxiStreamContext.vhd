@@ -39,9 +39,9 @@
 
 context AxiStreamContext is
     library osvvm_axi4 ;  
-    use osvvm_axi4.AxiStreamOptionsTypePkg.all ; 
+    use osvvm_axi4.AxiStreamOptionsPkg.all ; 
     use osvvm_axi4.Axi4CommonPkg.all ; 
+    use osvvm_axi4.AxiStreamTbPkg.all ; 
     use osvvm_axi4.AxiStreamComponentPkg.all ; 
-
 end context AxiStreamContext ; 
 

@@ -50,7 +50,7 @@ library osvvm ;
 library osvvm_common ;
   context osvvm_common.OsvvmCommonContext ;
 
-  use work.AxiStreamOptionsTypePkg.all ; 
+  use work.AxiStreamOptionsPkg.all ; 
   use work.Axi4CommonPkg.all ; 
     
 package AxiStreamComponentPkg is
@@ -61,7 +61,8 @@ package AxiStreamComponentPkg is
       DEFAULT_ID     : std_logic_vector ; 
       DEFAULT_DEST   : std_logic_vector ; 
       DEFAULT_USER   : std_logic_vector ; 
-
+      DEFAULT_LAST   : natural := 0 ; 
+      
       tperiod_Clk    : time := 10 ns ;
       
       tpd_Clk_TValid : time := 2 ns ; 
@@ -96,10 +97,14 @@ package AxiStreamComponentPkg is
   
   component AxiStreamReceiver is
     generic (
-      MODEL_ID_NAME  : string :="" ;
-      tperiod_Clk    : time := 10 ns ;
-      
-      tpd_Clk_TReady : time := 2 ns  
+    MODEL_ID_NAME  : string :="" ;
+    DEFAULT_ID     : std_logic_vector ; 
+    DEFAULT_DEST   : std_logic_vector ; 
+    DEFAULT_USER   : std_logic_vector ; 
+    DEFAULT_LAST   : natural := 0 ; 
+    tperiod_Clk    : time := 10 ns ;
+    
+    tpd_Clk_TReady : time := 2 ns  
     ) ;
     port (
       -- Globals

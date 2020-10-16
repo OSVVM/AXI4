@@ -154,6 +154,7 @@ begin
       DEFAULT_ID     => DEFAULT_ID  , 
       DEFAULT_DEST   => DEFAULT_DEST, 
       DEFAULT_USER   => DEFAULT_USER, 
+      DEFAULT_LAST   => 0,
 
       tperiod_Clk    => tperiod_Clk,
 
@@ -189,6 +190,10 @@ begin
   AxiStreamReceiver_1 : AxiStreamReceiver
     generic map (
       tperiod_Clk    => tperiod_Clk,
+      DEFAULT_ID     => DEFAULT_ID  , 
+      DEFAULT_DEST   => DEFAULT_DEST, 
+      DEFAULT_USER   => DEFAULT_USER, 
+      DEFAULT_LAST   => 0,
 
       tpd_Clk_TReady => tpd  
     ) 

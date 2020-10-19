@@ -264,13 +264,23 @@ begin
           end if ; 
           -- ReceiveFIFO: (TData & TID & TDest & TUser & TLast) 
           BurstByteCount := 0 ; 
+-- Word Handling
           loop
             (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
-            PushWord(BurstFifo, Data, DropUndriven) ; 
-            BurstByteCount := BurstByteCount + CountBytes(Data, DropUndriven) ;
+            -- PushWord(BurstFifo, Data, DropUndriven) ; 
+            BurstFifo.push(Data) ;
+            BurstByteCount := BurstByteCount + 1 ;
 --            exit when BurstBoundary = '1' ; 
             exit when Param(0) = '1' ; 
           end loop ; 
+-- Byte Handling
+--          loop
+--            (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
+--            PushWord(BurstFifo, Data, DropUndriven) ; 
+--            BurstByteCount := BurstByteCount + CountBytes(Data, DropUndriven) ;
+----            exit when BurstBoundary = '1' ; 
+--            exit when Param(0) = '1' ; 
+--          end loop ; 
           BurstTransferCount      := BurstTransferCount + 1 ; 
           TransRec.IntFromModel   <= BurstByteCount ; 
           TransRec.DataFromModel  <= ToTransaction(Data, TransRec.DataFromModel'length) ; 

@@ -93,6 +93,7 @@ begin
   begin
     wait until nReset = '1' ;  
     WaitForClock(StreamTransmitterTransRec, 2) ; 
+    SetModelOptions(StreamTransmitterTransRec, SET_BURST_MODE, STREAM_BURST_BYTE_MODE) ;
     
 log("Ready before Valid Tests.") ;
 WaitForBarrier(TestPhaseStart) ;
@@ -138,6 +139,7 @@ WaitForBarrier(TestPhaseStart) ;
     variable NumBytes : integer ; 
   begin
     WaitForClock(StreamReceiverTransRec, 2) ; 
+    SetModelOptions(StreamReceiverTransRec, SET_BURST_MODE, STREAM_BURST_BYTE_MODE) ;
     
 -- Start test phase 1:  
 WaitForBarrier(TestPhaseStart) ;

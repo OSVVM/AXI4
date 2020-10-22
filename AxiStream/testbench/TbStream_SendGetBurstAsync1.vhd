@@ -94,25 +94,25 @@ begin
     WaitForClock(StreamTransmitterTransRec, 2) ; 
     
     log("Transmit 32 Bytes -- word aligned") ;
-    PushBurstIncrement(TxBurstFifo, 3, 32) ;
+    PushBurstIncrement(TxBurstFifo, 3, 32, DATA_WIDTH) ;
     SendBurstAsync(StreamTransmitterTransRec, 32) ;
 
     WaitForClock(StreamTransmitterTransRec, 4) ; 
 
     log("Transmit 30 Bytes -- unaligned") ;
-    PushBurst(TxBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25,27,29)) ;
-    PushBurst(TxBurstFifo, (31,33,35,37,39,41,43,45,47,49,51,53,55,57,59)) ;
+    PushBurst(TxBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25,27,29), DATA_WIDTH) ;
+    PushBurst(TxBurstFifo, (31,33,35,37,39,41,43,45,47,49,51,53,55,57,59), DATA_WIDTH) ;
     SendBurstAsync(StreamTransmitterTransRec, 30) ;
 
     WaitForClock(StreamTransmitterTransRec, 4) ; 
 
     log("Transmit 34 Bytes -- unaligned") ;
-    PushBurstRandom(TxBurstFifo, 7, 34) ;
+    PushBurstRandom(TxBurstFifo, 7, 34, DATA_WIDTH) ;
     SendBurstAsync(StreamTransmitterTransRec, 34) ;
     
     for i in 0 to 6 loop 
       log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
-      PushBurstIncrement(TxBurstFifo, i*32, 32 + 5*i) ;
+      PushBurstIncrement(TxBurstFifo, i*32, 32 + 5*i, DATA_WIDTH) ;
       SendBurstAsync(StreamTransmitterTransRec, 32 + 5*i) ;
     end loop ; 
 
@@ -145,7 +145,7 @@ begin
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     AffirmIfEqual(NumBytes, 32, "Receiver: NumBytes Received") ;
-    CheckBurstIncrement(RxBurstFifo, 3, NumBytes) ;
+    CheckBurstIncrement(RxBurstFifo, 3, NumBytes, DATA_WIDTH) ;
     
 --    log("Transmit 30 Bytes -- unaligned") ;
     TryCount := 0 ; 
@@ -157,8 +157,8 @@ begin
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     AffirmIfEqual(NumBytes, 30, "Receiver: NumBytes Received") ;
-    CheckBurst(RxBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25,27,29)) ;
-    CheckBurst(RxBurstFifo, (31,33,35,37,39,41,43,45,47,49,51,53,55,57,59)) ;
+    CheckBurst(RxBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25,27,29), DATA_WIDTH) ;
+    CheckBurst(RxBurstFifo, (31,33,35,37,39,41,43,45,47,49,51,53,55,57,59), DATA_WIDTH) ;
 
 --    log("Transmit 34 Bytes -- unaligned") ;
     TryCount := 0 ; 
@@ -170,7 +170,7 @@ begin
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     AffirmIfEqual(NumBytes, 34, "Receiver: NumBytes Received") ;
-    CheckBurstRandom(RxBurstFifo, 7, NumBytes) ;
+    CheckBurstRandom(RxBurstFifo, 7, NumBytes, DATA_WIDTH) ;
     
     for i in 0 to 6 loop 
 --      log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
@@ -183,7 +183,7 @@ begin
       end loop ;
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       AffirmIfEqual(NumBytes, 32 + 5*i, "Receiver: NumBytes Received") ;
-      CheckBurstIncrement(RxBurstFifo, i*32, NumBytes) ;
+      CheckBurstIncrement(RxBurstFifo, i*32, NumBytes, DATA_WIDTH) ;
     end loop ; 
      
     -- Wait for outputs to propagate and signal TestDone

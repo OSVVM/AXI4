@@ -1,5 +1,5 @@
 --
---  File Name:         TbStream_ByteHandlingBurst1.vhd
+--  File Name:         TbStream_ByteHandlingBurstAsync1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -43,7 +43,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --  
-architecture ByteHandlingBurst1 of TestCtrl is
+architecture ByteHandlingBurstAsync1 of TestCtrl is
 
   signal   TestDone : integer_barrier := 1 ;
    
@@ -56,13 +56,13 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbStream_ByteHandlingBurst1") ;
+    SetAlertLogName("TbStream_ByteHandlingBurstAsync1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbStream_ByteHandlingBurst1.txt") ;
+    TranscriptOpen("./results/TbStream_ByteHandlingBurstAsync1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -75,7 +75,7 @@ begin
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
---    AlertIfDiff("./results/TbStream_ByteHandlingBurst1.txt", "../sim_shared/validated_results/TbStream_ByteHandlingBurst1.txt", "") ; 
+--    AlertIfDiff("./results/TbStream_ByteHandlingBurstAsync1.txt", "../sim_shared/validated_results/TbStream_ByteHandlingBurstAsync1.txt", "") ; 
     
     print("") ;
     -- Expecting two check errors at 128 and 256
@@ -102,26 +102,22 @@ begin
     Data := (DATA_WIDTH-1 downto 8 => 'W') & X"01" ;
     Data2 := to_slv(1, Data2'length) ;
     for i in 1 to DATA_BYTES loop 
---      PushWord(TxBurstFifo, Data2, FALSE) ;
-      TxBurstFifo.Push(Data2) ;
+      PushWord(TxBurstFifo, Data2, FALSE) ;
       Data2 := Data2 + 1 ; 
---      PushWord(TxBurstFifo, Data, FALSE) ;
-      TxBurstFifo.Push(Data) ;
+      PushWord(TxBurstFifo, Data, FALSE) ;
       Data := Data(DATA_WIDTH-8-1 downto 0) & X"WW" ;
-      BytesToSend := BytesToSend + 1 ;
+      BytesToSend := BytesToSend + 2*DATA_BYTES ;
     end loop ; 
     
     -- Two Bytes - with Z
     If DATA_BYTES > 2 then
       Data := (DATA_WIDTH-1 downto 16 => 'W') & X"0302" ;
       for i in 1 to DATA_BYTES-1 loop 
---        PushWord(TxBurstFifo, Data2, FALSE) ;
-        TxBurstFifo.Push(Data2) ;
+        PushWord(TxBurstFifo, Data2, FALSE) ;
         Data2 := Data2 + 1 ; 
---        PushWord(TxBurstFifo, Data, FALSE) ;
-        TxBurstFifo.Push(Data) ;
+        PushWord(TxBurstFifo, Data, FALSE) ;
         Data := Data(DATA_WIDTH-8-1 downto 0) & X"WW" ;
-        BytesToSend := BytesToSend + 1 ;
+        BytesToSend := BytesToSend + 2*DATA_BYTES ;
       end loop ; 
     end if; 
 
@@ -129,42 +125,36 @@ begin
     If DATA_BYTES > 3 then
       Data := (DATA_WIDTH-1 downto 24 => 'W') & X"060504" ;
       for i in 1 to DATA_BYTES-2 loop 
---        PushWord(TxBurstFifo, Data2, FALSE) ;
-        TxBurstFifo.Push(Data2) ;
+        PushWord(TxBurstFifo, Data2, FALSE) ;
         Data2 := Data2 + 1 ; 
---        PushWord(TxBurstFifo, Data, FALSE) ;
-        TxBurstFifo.Push(Data) ;
+        PushWord(TxBurstFifo, Data, FALSE) ;
         Data := Data(DATA_WIDTH-8-1 downto 0) & X"WW" ;
-        BytesToSend := BytesToSend + 1 ;
+        BytesToSend := BytesToSend + 2*DATA_BYTES ;
       end loop ; 
     end if; 
     
-    SendBurst(StreamTransmitterTransRec, BytesToSend) ; -- 18 
+    SendBurstAsync(StreamTransmitterTransRec, BytesToSend) ; -- 18 * 4
     
     -- Single Bytes - with U
     BytesToSend := 0 ;
     Data := (DATA_WIDTH-1 downto 8 => 'U') & X"01" ;
     for i in 1 to DATA_BYTES loop 
---      PushWord(TxBurstFifo, Data2, FALSE) ;
-      TxBurstFifo.Push(Data2) ;
+      PushWord(TxBurstFifo, Data2, FALSE) ;
       Data2 := Data2 + 1 ; 
---      PushWord(TxBurstFifo, Data, FALSE) ;
-      TxBurstFifo.Push(Data) ;
+      PushWord(TxBurstFifo, Data, FALSE) ;
       Data := Data(DATA_WIDTH-8-1 downto 0) & X"UU" ;
-      BytesToSend := BytesToSend + 1 ;
+      BytesToSend := BytesToSend + 2*DATA_BYTES ;
     end loop ; 
     
     -- Two Bytes - with U
     If DATA_BYTES > 2 then
       Data := (DATA_WIDTH-1 downto 16 => 'U') & X"0302" ;
       for i in 1 to DATA_BYTES-1 loop 
---        PushWord(TxBurstFifo, Data2, FALSE) ;
-        TxBurstFifo.Push(Data2) ;
+        PushWord(TxBurstFifo, Data2, FALSE) ;
         Data2 := Data2 + 1 ; 
---        PushWord(TxBurstFifo, Data, FALSE) ;
-        TxBurstFifo.Push(Data) ;
+        PushWord(TxBurstFifo, Data, FALSE) ;
         Data := Data(DATA_WIDTH-8-1 downto 0) & X"UU" ;
-        BytesToSend := BytesToSend + 1 ;
+        BytesToSend := BytesToSend + 2*DATA_BYTES ;
       end loop ; 
     end if; 
 
@@ -172,18 +162,18 @@ begin
     If DATA_BYTES > 3 then
       Data := (DATA_WIDTH-1 downto 24 => 'U') & X"060504" ;
       for i in 1 to DATA_BYTES-2 loop 
---        PushWord(TxBurstFifo, Data2, FALSE) ;
-        TxBurstFifo.Push(Data2) ;
+        PushWord(TxBurstFifo, Data2, FALSE) ;
         Data2 := Data2 + 1 ; 
---        PushWord(TxBurstFifo, Data, FALSE) ;
-        TxBurstFifo.Push(Data) ;
+        PushWord(TxBurstFifo, Data, FALSE) ;
         Data := Data(DATA_WIDTH-8-1 downto 0) & X"UU" ;
-        BytesToSend := BytesToSend + 1 ;
+        BytesToSend := BytesToSend + 2*DATA_BYTES ;
       end loop ; 
     end if; 
    
-    SendBurst(StreamTransmitterTransRec, BytesToSend) ; -- 18 
+    SendBurstAsync(StreamTransmitterTransRec, BytesToSend) ; -- 18 * 4
 
+    WaitForTransaction(StreamTransmitterTransRec) ;
+    
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(StreamTransmitterTransRec, 2) ;
     WaitForBarrier(TestDone) ;
@@ -197,24 +187,31 @@ begin
   ------------------------------------------------------------
   AxiReceiverProc : process
     variable Data, Data2, RxData : std_logic_vector(DATA_WIDTH-1 downto 0) ;  
-    variable NumBytes : integer ; 
-    variable PopValid : boolean ; 
+    variable NumBytes  : integer ; 
+    variable PopValid  : boolean ; 
+    variable TryCount  : integer ; 
+    variable Available : boolean ; 
   begin
     WaitForClock(StreamReceiverTransRec, 2) ; 
     
     Data2 := to_slv(1, Data2'length) ;
     for i in 1 to 2 loop 
-      GetBurst (StreamReceiverTransRec, NumBytes) ;
+      TryCount := 0 ; 
+      loop 
+        TryGetBurst (StreamReceiverTransRec, NumBytes, Available) ;
+        exit when Available ; 
+        WaitForClock(StreamReceiverTransRec, 1) ; 
+        TryCount := TryCount + 1 ;
+      end loop ;
+      AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       
       -- Single Bytes - with Z, then U
       Data  := (DATA_WIDTH-1 downto 8 => '-') & X"01" ;
       for i in 1 to DATA_BYTES loop 
---        PopWord(RxBurstFifo, PopValid, RxData, NumBytes) ; 
-        RxData := RxBurstFifo.Pop ;
+        PopWord(RxBurstFifo, PopValid, RxData, NumBytes) ; 
         AffirmIfEqual(RxData, Data2, "GetBurst: ") ;
         Data2 := Data2 + 1 ; 
---        PopWord(RxBurstFifo, PopValid, RxData, NumBytes) ; 
-        RxData := RxBurstFifo.Pop ;
+        PopWord(RxBurstFifo, PopValid, RxData, NumBytes) ; 
         AffirmIfEqual(RxData, Data, "GetBurst: ") ;
         Data := Data(DATA_WIDTH-8-1 downto 0) & X"--" ;
       end loop ; 
@@ -223,12 +220,10 @@ begin
       If DATA_BYTES > 2 then
         Data := (DATA_WIDTH-1 downto 16 => '-') & X"0302" ;
         for i in 1 to DATA_BYTES-1 loop 
---          PopWord(RxBurstFifo, PopValid, RxData, NumBytes) ; 
-          RxData := RxBurstFifo.Pop ;
+          PopWord(RxBurstFifo, PopValid, RxData, NumBytes) ; 
           AffirmIfEqual(RxData, Data2, "GetBurst: ") ;
           Data2 := Data2 + 1 ; 
---          PopWord(RxBurstFifo, PopValid, RxData, NumBytes) ; 
-          RxData := RxBurstFifo.Pop ;
+          PopWord(RxBurstFifo, PopValid, RxData, NumBytes) ; 
           AffirmIfEqual(RxData, Data, "GetBurst: ") ;
           Data := Data(DATA_WIDTH-8-1 downto 0) & X"--" ;
         end loop ; 
@@ -238,12 +233,10 @@ begin
       If DATA_BYTES > 3 then
         Data := (DATA_WIDTH-1 downto 24 => '-') & X"060504" ;
         for i in 1 to DATA_BYTES-2 loop 
---          PopWord(RxBurstFifo, PopValid, RxData, NumBytes) ; 
-          RxData := RxBurstFifo.Pop ;
+          PopWord(RxBurstFifo, PopValid, RxData, NumBytes) ; 
           AffirmIfEqual(RxData, Data2, "GetBurst: ") ;
           Data2 := Data2 + 1 ; 
---          PopWord(RxBurstFifo, PopValid, RxData, NumBytes) ; 
-          RxData := RxBurstFifo.Pop ;
+          PopWord(RxBurstFifo, PopValid, RxData, NumBytes) ; 
           AffirmIfEqual(RxData, Data, "GetBurst: ") ;
           Data := Data(DATA_WIDTH-8-1 downto 0) & X"--" ;
         end loop ; 
@@ -257,12 +250,12 @@ begin
     wait ;
   end process AxiReceiverProc ;
 
-end ByteHandlingBurst1 ;
+end ByteHandlingBurstAsync1 ;
 
-Configuration TbStream_ByteHandlingBurst1 of TbStream is
+Configuration TbStream_ByteHandlingBurstAsync1 of TbStream is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(ByteHandlingBurst1) ; 
+      use entity work.TestCtrl(ByteHandlingBurstAsync1) ; 
     end for ; 
   end for ; 
-end TbStream_ByteHandlingBurst1 ; 
+end TbStream_ByteHandlingBurstAsync1 ; 

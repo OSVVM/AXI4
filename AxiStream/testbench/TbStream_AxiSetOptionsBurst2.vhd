@@ -97,6 +97,7 @@ begin
   begin
     wait until nReset = '1' ;  
     WaitForClock(StreamTransmitterTransRec, 2) ; 
+    SetModelOptions(StreamTransmitterTransRec, SET_BURST_MODE, STREAM_BURST_BYTE_MODE) ;
     
     ID   := (others => '0') ;
     Dest := (others => '0') ;
@@ -147,6 +148,7 @@ begin
     variable Param, RxParam : std_logic_vector(ID_LEN + DEST_LEN + USER_LEN downto 0) ;
   begin
     WaitForClock(StreamReceiverTransRec, 2) ; 
+    SetModelOptions(StreamReceiverTransRec, SET_BURST_MODE, STREAM_BURST_BYTE_MODE) ;
     
     ID   := (others => '0') ;
     Dest := (others => '0') ;

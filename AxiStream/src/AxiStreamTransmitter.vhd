@@ -120,11 +120,14 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
   -- Verification Component Configuration
   signal TransmitReadyTimeOut : integer := integer'right ; 
 
-  signal ParamID         : TID'subtype   := DEFAULT_ID ;
-  signal ParamDest       : TDest'subtype := DEFAULT_DEST ;
-  signal ParamUser       : TUser'subtype := DEFAULT_USER;
-  signal ParamLast       : natural       := DEFAULT_LAST ;
-  signal LastOffsetCount : integer    := 0 ; 
+  signal ParamID         : std_logic_vector(TID'range)   := DEFAULT_ID ;
+  signal ParamDest       : std_logic_vector(TDest'range) := DEFAULT_DEST ;
+  signal ParamUser       : std_logic_vector(TUser'range) := DEFAULT_USER;
+  signal ParamLast       : natural   := DEFAULT_LAST ;
+  signal LastOffsetCount : integer   := 0 ; 
+  signal BurstFifoMode   : integer   := STREAM_BURST_WORD_MODE;
+  signal BurstFifoByteMode : boolean := (BurstFifoMode = STREAM_BURST_BYTE_MODE) ; 
+
 
 begin
 
@@ -154,6 +157,8 @@ begin
     variable Param : std_logic_vector(TransRec.ParamToModel'length-1 downto 0) ;
     variable BytesToSend, NumberTransfers : integer ; 
     variable PopValid : boolean ; 
+    variable Last : std_logic ; 
+    variable User : std_logic_vector(TUser'range) ; 
   begin
     WaitForTransaction(
        Clk      => Clk,
@@ -206,23 +211,59 @@ begin
                     ParamLast  => ParamLast,           
                     Count      => ((TransmitRequestCount+1) - LastOffsetCount)
                   ) ;
---        FifoWidth := SizeOf(BurstFifo.Peek) ;
-        NumberTransfers := TransRec.IntToModel ; 
+        If BurstFifoByteMode then 
+          BytesToSend := TransRec.IntToModel ;
+          NumberTransfers := integer(ceil(real(BytesToSend) / real(AXI_STREAM_DATA_BYTE_WIDTH))) ;
+        else 
+          NumberTransfers := TransRec.IntToModel ; 
+        end if ; 
         TransmitRequestCount <= TransmitRequestCount + NumberTransfers ;
+--        Last := '0' ;
         for i in NumberTransfers-1 downto 0 loop 
-          Data := BurstFifo.Pop ; 
+          case BurstFifoMode is
+            when STREAM_BURST_BYTE_MODE => 
+              PopWord(BurstFifo, PopValid, Data, BytesToSend) ; 
+              AlertIfNot(ModelID, PopValid, "BurstFifo Empty during burst transfer", FAILURE) ; 
+          
+            when STREAM_BURST_WORD_MODE => 
+              Data := BurstFifo.Pop ; 
+            
+            when STREAM_BURST_WORD_PARAM_MODE =>
+              (Data, User) := BurstFifo.Pop ; 
+              Param(User'length downto 1) := User ; 
+              
+--            when WORD_USER_LAST_MODE => 
+--              (Data, User, Last) := BurstFifo.Pop ; 
+--              Param(User'length downto 1) := User ; 
+              
+            when others => 
+              Alert(ModelID, "BurstFifoMode: Invalid Mode: " & to_string(BurstFifoMode)) ;
+          end case ; 
+--          Param(0) := '1' when i = 0 else Last ;  -- TLast
           Param(0) := '1' when i = 0 else '0' ;  -- TLast
           TransmitFifo.Push(Data & Param) ; 
         end loop ; 
---        BytesToSend := TransRec.IntToModel ;
---        NumberTransfers := integer(ceil(real(BytesToSend) / real(AXI_STREAM_DATA_BYTE_WIDTH))) ;
---        TransmitRequestCount <= TransmitRequestCount + NumberTransfers ; 
---        while BytesToSend > 0 loop
---          PopWord(BurstFifo, PopValid, Data, BytesToSend) ; 
---          AlertIfNot(ModelID, PopValid, "BurstFifo Empty during burst transfer", FAILURE) ; 
---          Param(0) := '1' when BytesToSend = 0 else '0' ;  -- TLast
---          TransmitFifo.Push(Data & Param) ; 
---        end loop ; 
+        
+--**-- Word Handling
+--**--        FifoWidth := SizeOf(BurstFifo.Peek) ;
+--**        NumberTransfers := TransRec.IntToModel ; 
+--**        TransmitRequestCount <= TransmitRequestCount + NumberTransfers ;
+--**        for i in NumberTransfers-1 downto 0 loop 
+--**          Data := BurstFifo.Pop ; 
+--**          Param(0) := '1' when i = 0 else '0' ;  -- TLast
+--**          TransmitFifo.Push(Data & Param) ; 
+--**        end loop ; 
+--**-- Byte Handling
+--**-- With Bytes, need ByteCount to track #words in FIFO
+--**        BytesToSend := TransRec.IntToModel ;
+--**        NumberTransfers := integer(ceil(real(BytesToSend) / real(AXI_STREAM_DATA_BYTE_WIDTH))) ;
+--**        TransmitRequestCount <= TransmitRequestCount + NumberTransfers ; 
+--**        while BytesToSend > 0 loop
+--**          PopWord(BurstFifo, PopValid, Data, BytesToSend) ; 
+--**          AlertIfNot(ModelID, PopValid, "BurstFifo Empty during burst transfer", FAILURE) ; 
+--**          Param(0) := '1' when BytesToSend = 0 else '0' ;  -- TLast
+--**          TransmitFifo.Push(Data & Param) ; 
+--**        end loop ; 
         wait for 0 ns ; 
         if IsBlocking(TransRec.Operation) then 
           wait until TransmitRequestCount = TransmitDoneCount ;
@@ -246,6 +287,10 @@ begin
             ParamLast       <= TransRec.IntToModel ;
             LastOffsetCount <= TransmitRequestCount ; 
 
+          when SET_BURST_MODE =>                      
+            BurstFifoMode       <= TransRec.IntToModel ;
+            BurstFifoByteMode   <= (TransRec.IntToModel = STREAM_BURST_BYTE_MODE) ;
+            
           when others =>
             Alert(ModelID, "SetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
             wait for 0 ns ; 
@@ -267,6 +312,9 @@ begin
             
           when SET_LAST =>
             TransRec.IntFromModel   <= ParamLast ;
+
+          when SET_BURST_MODE =>                      
+            TransRec.IntToModel <= BurstFifoMode ;
 
           when others =>
             Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;

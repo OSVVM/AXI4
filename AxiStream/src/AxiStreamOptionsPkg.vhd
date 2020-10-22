@@ -68,8 +68,15 @@ package AxiStreamOptionsPkg is
     SET_DEST,                       -- std_logic_vector
     SET_USER,                       -- std_logic_vector
     SET_LAST,                       -- integer
+    SET_BURST_MODE,
     THE_END                         
   ) ;
+  
+--!! Make these an enum that is part of Stream MIT?
+  subtype AxiStreamFifoBurstModeType is integer ;
+  constant STREAM_BURST_BYTE_MODE       : integer := 0 ; 
+  constant STREAM_BURST_WORD_MODE       : integer := 1 ;
+  constant STREAM_BURST_WORD_PARAM_MODE : integer := 2 ;
 
   -- ========================================================
   --  SetModelOptions / GetModelOptions

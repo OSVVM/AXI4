@@ -114,11 +114,13 @@ architecture behavioral of AxiStreamReceiver is
   signal ReceiveReadyBeforeValid : boolean := TRUE ; 
   signal ReceiveReadyDelayCycles : integer := 0 ;
 
-  signal ParamID         : TID'subtype   := DEFAULT_ID ;
-  signal ParamDest       : TDest'subtype := DEFAULT_DEST ;
-  signal ParamUser       : TUser'subtype := DEFAULT_USER;
-  signal ParamLast       : natural       := DEFAULT_LAST ;
-  signal LastOffsetCount : integer    := 0 ; 
+  signal ParamID         : std_logic_vector(TID'range)   := DEFAULT_ID ;
+  signal ParamDest       : std_logic_vector(TDest'range) := DEFAULT_DEST ;
+  signal ParamUser       : std_logic_vector(TUser'range) := DEFAULT_USER;
+  signal ParamLast       : natural   := DEFAULT_LAST ;
+  signal LastOffsetCount : integer   := 0 ; 
+  signal BurstFifoMode   : integer   := STREAM_BURST_WORD_MODE;
+  signal BurstFifoByteMode : boolean := (BurstFifoMode = STREAM_BURST_BYTE_MODE) ; 
 
 begin
 
@@ -153,7 +155,7 @@ begin
     variable Param, ExpectedParam : std_logic_vector(PARAM_LENGTH-1 downto 0) ;
     variable DispatcherReceiveCount : integer := 0 ; 
     variable BurstTransferCount     : integer := 0 ; 
-    variable BurstByteCount : integer ; 
+    variable FifoWordCount : integer ; 
     variable BurstBoundary  : std_logic ; 
     variable DropUndriven   : boolean := FALSE ; 
     function param_to_string(Param : std_logic_vector) return string is 
@@ -263,26 +265,49 @@ begin
             WaitForToggle(BurstReceiveCount) ;
           end if ; 
           -- ReceiveFIFO: (TData & TID & TDest & TUser & TLast) 
-          BurstByteCount := 0 ; 
--- Word Handling
+          FifoWordCount := 0 ; 
           loop
             (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
-            -- PushWord(BurstFifo, Data, DropUndriven) ; 
-            BurstFifo.push(Data) ;
-            BurstByteCount := BurstByteCount + 1 ;
+            case BurstFifoMode is
+              when STREAM_BURST_BYTE_MODE => 
+                PushWord(BurstFifo, Data, DropUndriven) ; 
+                FifoWordCount := FifoWordCount + CountBytes(Data, DropUndriven) ;
+            
+              when STREAM_BURST_WORD_MODE => 
+                BurstFifo.push(Data) ;
+                FifoWordCount := FifoWordCount + 1 ;
+              
+              when STREAM_BURST_WORD_PARAM_MODE =>
+                BurstFifo.push(Data & Param(USER_LEN downto 1)) ;
+                FifoWordCount := FifoWordCount + 1 ;
+                              
+              when others => 
+                Alert(ModelID, "BurstFifoMode: Invalid Mode: " & to_string(BurstFifoMode)) ;
+            end case ; 
 --            exit when BurstBoundary = '1' ; 
             exit when Param(0) = '1' ; 
           end loop ; 
--- Byte Handling
---          loop
---            (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
---            PushWord(BurstFifo, Data, DropUndriven) ; 
---            BurstByteCount := BurstByteCount + CountBytes(Data, DropUndriven) ;
-----            exit when BurstBoundary = '1' ; 
---            exit when Param(0) = '1' ; 
---          end loop ; 
+        
+--**-- Word Handling
+--**          loop
+--**            (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
+--**            -- PushWord(BurstFifo, Data, DropUndriven) ; 
+--**            BurstFifo.push(Data) ;
+--**            BurstByteCount := BurstByteCount + 1 ;
+--**--            exit when BurstBoundary = '1' ; 
+--**            exit when Param(0) = '1' ; 
+--**          end loop ; 
+--** Byte Handling
+--** With Bytes, need ByteCount to track #words in FIFO
+--**          loop
+--**            (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
+--**            PushWord(BurstFifo, Data, DropUndriven) ; 
+--**            BurstByteCount := BurstByteCount + CountBytes(Data, DropUndriven) ;
+--**--            exit when BurstBoundary = '1' ; 
+--**            exit when Param(0) = '1' ; 
+--**          end loop ; 
           BurstTransferCount      := BurstTransferCount + 1 ; 
-          TransRec.IntFromModel   <= BurstByteCount ; 
+          TransRec.IntFromModel   <= FifoWordCount ; 
           TransRec.DataFromModel  <= ToTransaction(Data, TransRec.DataFromModel'length) ; 
           TransRec.ParamFromModel <= ToTransaction(Param, TransRec.ParamFromModel'length) ; 
           
@@ -322,6 +347,10 @@ begin
             ParamLast       <= TransRec.IntToModel ;
             LastOffsetCount <= ReceiveCount ; 
 
+          when SET_BURST_MODE =>                      
+            BurstFifoMode       <= TransRec.IntToModel ;
+            BurstFifoByteMode   <= (TransRec.IntToModel = STREAM_BURST_BYTE_MODE) ;
+            
           when others =>
             Alert(ModelID, "SetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
             wait for 0 ns ; 
@@ -346,6 +375,9 @@ begin
             
           when SET_LAST =>
             TransRec.IntFromModel   <= ParamLast ;
+
+          when SET_BURST_MODE =>                      
+            TransRec.IntToModel <= BurstFifoMode ;
 
           when others =>
             Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;

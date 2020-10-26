@@ -47,10 +47,17 @@ analyze ./testbench/TbStream_SendGetAsync1.vhd
 analyze ./testbench/TbStream_SendGetBurst1.vhd
 analyze ./testbench/TbStream_SendGetBurstAsync1.vhd
 
+analyze ./testbench/TbStream_SendGetBurstByte1.vhd
+analyze ./testbench/TbStream_SendGetBurstByteAsync1.vhd
+
+
 analyze ./testbench/TbStream_ByteHandling1.vhd
 analyze ./testbench/TbStream_ByteHandlingAsync1.vhd
 analyze ./testbench/TbStream_ByteHandlingBurst1.vhd
 analyze ./testbench/TbStream_ByteHandlingBurstAsync1.vhd
+
+analyze ./testbench/TbStream_ByteHandlingBurstByte1.vhd
+analyze ./testbench/TbStream_ByteHandlingBurstByteAsync1.vhd
 
 
 # Tests for AXI Stream
@@ -78,15 +85,22 @@ analyze ./testbench/TbStream_AxiSetOptionsAsync2.vhd
 analyze ./testbench/TbStream_AxiSetOptionsBurst2.vhd
 analyze ./testbench/TbStream_AxiSetOptionsBurstAsync2.vhd
 
+
 simulate TbStream_SendGet1
 simulate TbStream_SendGetAsync1
 simulate TbStream_SendGetBurst1
 simulate TbStream_SendGetBurstAsync1
 
+simulate TbStream_SendGetBurstByte1
+simulate TbStream_SendGetBurstByteAsync1
+
 simulate TbStream_ByteHandling1
 simulate TbStream_ByteHandlingAsync1
 simulate TbStream_ByteHandlingBurst1
 simulate TbStream_ByteHandlingBurstAsync1
+
+simulate TbStream_ByteHandlingBurstByte1
+simulate TbStream_ByteHandlingBurstByteAsync1
 
 
 simulate TbStream_AxiSendGet2

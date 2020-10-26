@@ -62,10 +62,10 @@ library osvvm_common ;
 entity AxiStreamReceiver is
   generic (
     MODEL_ID_NAME  : string :="" ;
-    DEFAULT_ID     : std_logic_vector ; 
-    DEFAULT_DEST   : std_logic_vector ; 
-    DEFAULT_USER   : std_logic_vector ; 
-    DEFAULT_LAST   : natural := 0 ; 
+    INIT_ID        : std_logic_vector := "" ; 
+    INIT_DEST      : std_logic_vector := "" ; 
+    INIT_USER      : std_logic_vector := "" ; 
+    INIT_LAST      : natural := 0 ; 
     tperiod_Clk    : time := 10 ns ;
     
     tpd_Clk_TReady : time := 2 ns  
@@ -114,12 +114,12 @@ architecture behavioral of AxiStreamReceiver is
   signal ReceiveReadyBeforeValid : boolean := TRUE ; 
   signal ReceiveReadyDelayCycles : integer := 0 ;
 
-  signal ParamID         : std_logic_vector(TID'range)   := DEFAULT_ID ;
-  signal ParamDest       : std_logic_vector(TDest'range) := DEFAULT_DEST ;
-  signal ParamUser       : std_logic_vector(TUser'range) := DEFAULT_USER;
-  signal ParamLast       : natural   := DEFAULT_LAST ;
-  signal LastOffsetCount : integer   := 0 ; 
-  signal BurstFifoMode   : integer   := STREAM_BURST_WORD_MODE;
+  signal ParamID           : std_logic_vector(TID'range)   := IfElse(INIT_ID /= "",   INIT_ID,   (TID'range => '0')) ;
+  signal ParamDest         : std_logic_vector(TDest'range) := IfElse(INIT_DEST /= "", INIT_DEST, (TDest'range => '0')) ;
+  signal ParamUser         : std_logic_vector(TUser'range) := IfElse(INIT_USER /= "", INIT_USER, (TUser'range => '0')) ;
+  signal ParamLast         : natural := INIT_LAST ;
+  signal LastOffsetCount   : integer := 0 ; 
+  signal BurstFifoMode     : integer := STREAM_BURST_WORD_MODE;
   signal BurstFifoByteMode : boolean := (BurstFifoMode = STREAM_BURST_BYTE_MODE) ; 
 
 begin
@@ -181,6 +181,9 @@ begin
     ) ;
     
     case Operation is
+      when WAIT_FOR_CLOCK =>
+        WaitForClock(Clk, TransRec.IntToModel) ;
+
       when WAIT_FOR_TRANSACTION =>
         -- Receiver either blocks or does "try" operations
         -- There are no operations in flight   
@@ -194,13 +197,17 @@ begin
         TransRec.IntFromModel <= ReceiveCount ;
         wait for 0 ns ; 
 
-      when WAIT_FOR_CLOCK =>
-        WaitForClock(Clk, TransRec.IntToModel) ;
-
       when GET_ALERTLOG_ID =>
         TransRec.IntFromModel <= integer(ModelID) ;
         wait for 0 ns ; 
     
+      when SET_BURST_MODE =>                      
+        BurstFifoMode       <= TransRec.IntToModel ;
+        BurstFifoByteMode   <= (TransRec.IntToModel = STREAM_BURST_BYTE_MODE) ;
+            
+      when GET_BURST_MODE =>                      
+        TransRec.IntToModel <= BurstFifoMode ;
+
       when GET | TRY_GET | CHECK | TRY_CHECK =>
         if ReceiveFifo.empty and  IsTry(Operation) then
           -- Return if no data
@@ -331,26 +338,22 @@ begin
           when RECEIVE_READY_DELAY_CYCLES =>       
             ReceiveReadyDelayCycles <= TransRec.IntToModel ;
     
-          when SET_DROP_UNDRIVEN =>                      
+          when DROP_UNDRIVEN =>                      
             DropUndriven    := TransRec.BoolToModel ;
             
-          when SET_ID =>                      
+          when DEFAULT_ID =>                      
             ParamID         <= FromTransaction(TransRec.ParamToModel, ParamID'length) ;
             
-          when SET_DEST => 
+          when DEFAULT_DEST => 
             ParamDest       <= FromTransaction(TransRec.ParamToModel, ParamDest'length) ;
             
-          when SET_USER =>
+          when DEFAULT_USER =>
             ParamUser       <= FromTransaction(TransRec.ParamToModel, ParamUser'length) ;
             
-          when SET_LAST =>
+          when DEFAULT_LAST =>
             ParamLast       <= TransRec.IntToModel ;
             LastOffsetCount <= ReceiveCount ; 
 
-          when SET_BURST_MODE =>                      
-            BurstFifoMode       <= TransRec.IntToModel ;
-            BurstFifoByteMode   <= (TransRec.IntToModel = STREAM_BURST_BYTE_MODE) ;
-            
           when others =>
             Alert(ModelID, "SetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
             wait for 0 ns ; 
@@ -364,20 +367,20 @@ begin
           when RECEIVE_READY_DELAY_CYCLES =>       
             TransRec.IntFromModel <= ReceiveReadyDelayCycles ;    
 
-          when SET_ID =>                      
+          when DROP_UNDRIVEN =>                      
+            TransRec.BoolFromModel <= DropUndriven ;
+            
+          when DEFAULT_ID =>                      
             TransRec.ParamFromModel <= ToTransaction(ParamID, TransRec.ParamFromModel'length) ;
             
-          when SET_DEST => 
+          when DEFAULT_DEST => 
             TransRec.ParamFromModel <= ToTransaction(ParamDest, TransRec.ParamFromModel'length) ;
             
-          when SET_USER =>
+          when DEFAULT_USER =>
             TransRec.ParamFromModel <= ToTransaction(ParamUser, TransRec.ParamFromModel'length) ;
             
-          when SET_LAST =>
+          when DEFAULT_LAST =>
             TransRec.IntFromModel   <= ParamLast ;
-
-          when SET_BURST_MODE =>                      
-            TransRec.IntToModel <= BurstFifoMode ;
 
           when others =>
             Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;

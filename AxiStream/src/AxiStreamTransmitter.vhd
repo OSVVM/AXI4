@@ -61,11 +61,11 @@ library osvvm_common ;
 
 entity AxiStreamTransmitter is
   generic (
-    MODEL_ID_NAME  : string :="" ;
-    DEFAULT_ID     : std_logic_vector ; 
-    DEFAULT_DEST   : std_logic_vector ; 
-    DEFAULT_USER   : std_logic_vector ; 
-    DEFAULT_LAST   : natural := 0 ; 
+    MODEL_ID_NAME  : string := "" ;
+    INIT_ID        : std_logic_vector := "" ; 
+    INIT_DEST      : std_logic_vector := "" ; 
+    INIT_USER      : std_logic_vector := "" ; 
+    INIT_LAST      : natural := 0 ; 
 
     tperiod_Clk    : time := 10 ns ;
     
@@ -120,14 +120,13 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
   -- Verification Component Configuration
   signal TransmitReadyTimeOut : integer := integer'right ; 
 
-  signal ParamID         : std_logic_vector(TID'range)   := DEFAULT_ID ;
-  signal ParamDest       : std_logic_vector(TDest'range) := DEFAULT_DEST ;
-  signal ParamUser       : std_logic_vector(TUser'range) := DEFAULT_USER;
-  signal ParamLast       : natural   := DEFAULT_LAST ;
-  signal LastOffsetCount : integer   := 0 ; 
-  signal BurstFifoMode   : integer   := STREAM_BURST_WORD_MODE;
+  signal ParamID           : std_logic_vector(TID'range)   := IfElse(INIT_ID /= "",   INIT_ID,   (TID'range => '0')) ;
+  signal ParamDest         : std_logic_vector(TDest'range) := IfElse(INIT_DEST /= "", INIT_DEST, (TDest'range => '0')) ;
+  signal ParamUser         : std_logic_vector(TUser'range) := IfElse(INIT_USER /= "", INIT_USER, (TUser'range => '0')) ;
+  signal ParamLast         : natural := INIT_LAST ;
+  signal LastOffsetCount   : integer := 0 ; 
+  signal BurstFifoMode     : integer := STREAM_BURST_WORD_MODE;
   signal BurstFifoByteMode : boolean := (BurstFifoMode = STREAM_BURST_BYTE_MODE) ; 
-
 
 begin
 
@@ -167,23 +166,28 @@ begin
     ) ;
 
     case TransRec.Operation is
+      when WAIT_FOR_CLOCK =>
+        WaitForClock(Clk, TransRec.IntToModel) ;
+
       when WAIT_FOR_TRANSACTION =>
         if TransmitRequestCount /= TransmitDoneCount then 
           wait until TransmitRequestCount = TransmitDoneCount ;
         end if ; 
 
-      when WAIT_FOR_CLOCK =>
-        WaitForClock(Clk, TransRec.IntToModel) ;
-
       when GET_TRANSACTION_COUNT =>
         TransRec.IntFromModel <= TransmitDoneCount ;
---        wait until Clk = '1' ;
         wait for 0 ns ; 
     
       when GET_ALERTLOG_ID =>
         TransRec.IntFromModel <= integer(ModelID) ;
---        wait until Clk = '1' ;
         wait for 0 ns ; 
+
+      when SET_BURST_MODE =>                      
+        BurstFifoMode       <= TransRec.IntToModel ;
+        BurstFifoByteMode   <= (TransRec.IntToModel = STREAM_BURST_BYTE_MODE) ;
+            
+      when GET_BURST_MODE =>                      
+        TransRec.IntToModel <= BurstFifoMode ;
 
       when SEND | SEND_ASYNC =>
         Data   := FromTransaction(TransRec.DataToModel, Data'length) ;
@@ -274,23 +278,19 @@ begin
           when TRANSMIT_READY_TIME_OUT =>       
             TransmitReadyTimeOut      <= TransRec.IntToModel ; 
             
-          when SET_ID =>                      
+          when DEFAULT_ID =>                      
             ParamID         <= FromTransaction(TransRec.ParamToModel, ParamID'length) ;
             
-          when SET_DEST => 
+          when DEFAULT_DEST => 
             ParamDest       <= FromTransaction(TransRec.ParamToModel, ParamDest'length) ;
             
-          when SET_USER =>
+          when DEFAULT_USER =>
             ParamUser       <= FromTransaction(TransRec.ParamToModel, ParamUser'length) ;
             
-          when SET_LAST =>
+          when DEFAULT_LAST =>
             ParamLast       <= TransRec.IntToModel ;
             LastOffsetCount <= TransmitRequestCount ; 
 
-          when SET_BURST_MODE =>                      
-            BurstFifoMode       <= TransRec.IntToModel ;
-            BurstFifoByteMode   <= (TransRec.IntToModel = STREAM_BURST_BYTE_MODE) ;
-            
           when others =>
             Alert(ModelID, "SetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
             wait for 0 ns ; 
@@ -301,20 +301,17 @@ begin
           when TRANSMIT_READY_TIME_OUT =>       
             TransRec.IntFromModel   <=  TransmitReadyTimeOut ; 
             
-          when SET_ID =>                      
+          when DEFAULT_ID =>                      
             TransRec.ParamFromModel <= ToTransaction(ParamID, TransRec.ParamFromModel'length) ;
             
-          when SET_DEST => 
+          when DEFAULT_DEST => 
             TransRec.ParamFromModel <= ToTransaction(ParamDest, TransRec.ParamFromModel'length) ;
             
-          when SET_USER =>
+          when DEFAULT_USER =>
             TransRec.ParamFromModel <= ToTransaction(ParamUser, TransRec.ParamFromModel'length) ;
             
-          when SET_LAST =>
+          when DEFAULT_LAST =>
             TransRec.IntFromModel   <= ParamLast ;
-
-          when SET_BURST_MODE =>                      
-            TransRec.IntToModel <= BurstFifoMode ;
 
           when others =>
             Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;

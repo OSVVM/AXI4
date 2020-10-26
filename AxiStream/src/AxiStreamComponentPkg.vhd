@@ -58,10 +58,10 @@ package AxiStreamComponentPkg is
   component AxiStreamTransmitter is
     generic (
       MODEL_ID_NAME  : string :="" ;
-      DEFAULT_ID     : std_logic_vector ; 
-      DEFAULT_DEST   : std_logic_vector ; 
-      DEFAULT_USER   : std_logic_vector ; 
-      DEFAULT_LAST   : natural := 0 ; 
+      INIT_ID        : std_logic_vector := "" ; 
+      INIT_DEST      : std_logic_vector := "" ; 
+      INIT_USER      : std_logic_vector := "" ; 
+      INIT_LAST      : natural := 0 ; 
       
       tperiod_Clk    : time := 10 ns ;
       
@@ -97,12 +97,12 @@ package AxiStreamComponentPkg is
   
   component AxiStreamReceiver is
     generic (
-    MODEL_ID_NAME  : string :="" ;
-    DEFAULT_ID     : std_logic_vector ; 
-    DEFAULT_DEST   : std_logic_vector ; 
-    DEFAULT_USER   : std_logic_vector ; 
-    DEFAULT_LAST   : natural := 0 ; 
-    tperiod_Clk    : time := 10 ns ;
+      MODEL_ID_NAME  : string :="" ;
+      INIT_ID        : std_logic_vector := "" ; 
+      INIT_DEST      : std_logic_vector := "" ; 
+      INIT_USER      : std_logic_vector := "" ; 
+      INIT_LAST      : natural := 0 ; 
+      tperiod_Clk    : time := 10 ns ;
     
     tpd_Clk_TReady : time := 2 ns  
     ) ;

@@ -140,7 +140,7 @@ begin
     variable Available : boolean ; 
   begin
     WaitForClock(StreamReceiverTransRec, 2) ; 
-    SetModelOptions(StreamReceiverTransRec, SET_BURST_MODE, STREAM_BURST_BYTE_MODE) ;
+    SetBurstMode(StreamReceiverTransRec, STREAM_BURST_BYTE_MODE) ;
     Data := (others => '0') ;
 
     for i in 0 to 15 loop 

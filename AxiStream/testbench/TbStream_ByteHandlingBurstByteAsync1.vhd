@@ -1,5 +1,5 @@
 --
---  File Name:         TbStream_ByteHandlingBurst1.vhd
+--  File Name:         TbStream_ByteHandlingBurstByteAsync1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -22,9 +22,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2017   2018.05    Initial revision
---    01/2020   2020.01    Updated license notice
---    10/2020   2020.10    Updated test to include Check, ...
+--    10/2020   2020.10    Added test 
 --
 --
 --  This file is part of OSVVM.
@@ -43,7 +41,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --  
-architecture ByteHandlingBurst1 of TestCtrl is
+architecture ByteHandlingBurstByteAsync1 of TestCtrl is
 
   signal   TestDone : integer_barrier := 1 ;
    
@@ -56,13 +54,13 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbStream_ByteHandlingBurst1") ;
+    SetAlertLogName("TbStream_ByteHandlingBurstByteAsync1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbStream_ByteHandlingBurst1.txt") ;
+    TranscriptOpen("./results/TbStream_ByteHandlingBurstByteAsync1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -75,7 +73,7 @@ begin
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
---    AlertIfDiff("./results/TbStream_ByteHandlingBurst1.txt", "../sim_shared/validated_results/TbStream_ByteHandlingBurst1.txt", "") ; 
+--    AlertIfDiff("./results/TbStream_ByteHandlingBurstByteAsync1.txt", "../sim_shared/validated_results/TbStream_ByteHandlingBurstByteAsync1.txt", "") ; 
     
     print("") ;
     -- Expecting two check errors at 128 and 256
@@ -96,6 +94,7 @@ begin
   begin
     wait until nReset = '1' ;  
     WaitForClock(StreamTransmitterTransRec, 2) ; 
+    SetBurstMode(StreamTransmitterTransRec, STREAM_BURST_BYTE_MODE) ;
     
     -- Single Bytes - with Z
     BytesToSend := 0 ; 
@@ -133,7 +132,7 @@ begin
       end loop ; 
     end if; 
     
-    SendBurst(StreamTransmitterTransRec, BytesToSend) ; -- 18 
+    SendBurstAsync(StreamTransmitterTransRec, BytesToSend) ; -- 18 
     
     -- Single Bytes - with U
     BytesToSend := 0 ;
@@ -170,8 +169,10 @@ begin
       end loop ; 
     end if; 
    
-    SendBurst(StreamTransmitterTransRec, BytesToSend) ; -- 18 
+    SendBurstAsync(StreamTransmitterTransRec, BytesToSend) ; -- 18 
 
+    WaitForTransaction(StreamTransmitterTransRec) ;
+    
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(StreamTransmitterTransRec, 2) ;
     WaitForBarrier(TestDone) ;
@@ -185,14 +186,24 @@ begin
   ------------------------------------------------------------
   AxiReceiverProc : process
     variable Data, Data2, RxData : std_logic_vector(DATA_WIDTH-1 downto 0) ;  
-    variable NumBytes : integer ; 
-    variable PopValid : boolean ; 
+    variable NumBytes  : integer ; 
+    variable PopValid  : boolean ; 
+    variable TryCount  : integer ; 
+    variable Available : boolean ; 
   begin
     WaitForClock(StreamReceiverTransRec, 2) ; 
+    SetBurstMode(StreamReceiverTransRec, STREAM_BURST_BYTE_MODE) ;
     
     Data2 := to_slv(1, Data2'length) ;
     for i in 1 to 2 loop 
-      GetBurst (StreamReceiverTransRec, NumBytes) ;
+      TryCount := 0 ; 
+      loop 
+        TryGetBurst (StreamReceiverTransRec, NumBytes, Available) ;
+        exit when Available ; 
+        WaitForClock(StreamReceiverTransRec, 1) ; 
+        TryCount := TryCount + 1 ;
+      end loop ;
+      AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       
       -- Single Bytes - with Z, then U
       Data  := (DATA_WIDTH-1 downto 8 => '-') & X"01" ;
@@ -239,12 +250,12 @@ begin
     wait ;
   end process AxiReceiverProc ;
 
-end ByteHandlingBurst1 ;
+end ByteHandlingBurstByteAsync1 ;
 
-Configuration TbStream_ByteHandlingBurst1 of TbStream is
+Configuration TbStream_ByteHandlingBurstByteAsync1 of TbStream is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(ByteHandlingBurst1) ; 
+      use entity work.TestCtrl(ByteHandlingBurstByteAsync1) ; 
     end for ; 
   end for ; 
-end TbStream_ByteHandlingBurst1 ; 
+end TbStream_ByteHandlingBurstByteAsync1 ; 

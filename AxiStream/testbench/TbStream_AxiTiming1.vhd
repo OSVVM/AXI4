@@ -103,22 +103,22 @@ log("Transmit Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
     WaitForClock(StreamTransmitterTransRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetModelOptions(StreamTransmitterTransRec, TRANSMIT_READY_TIME_OUT, 5) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, TRANSMIT_READY_TIME_OUT, 5) ;
     Send(StreamTransmitterTransRec,  X"BAD0_0010") ;  -- Write Address Fail
     WaitForClock(StreamTransmitterTransRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetModelOptions(StreamTransmitterTransRec, TRANSMIT_READY_TIME_OUT, 10) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, TRANSMIT_READY_TIME_OUT, 10) ;
     Send(StreamTransmitterTransRec,  X"0002_0020") ;  -- Pass
     WaitForClock(StreamTransmitterTransRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetModelOptions(StreamTransmitterTransRec, TRANSMIT_READY_TIME_OUT, 5) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, TRANSMIT_READY_TIME_OUT, 5) ;
     Send(StreamTransmitterTransRec,  X"BAD0_0020") ;  -- Write Address Fail
     WaitForClock(StreamTransmitterTransRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetModelOptions(StreamTransmitterTransRec, TRANSMIT_READY_TIME_OUT, 25) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, TRANSMIT_READY_TIME_OUT, 25) ;
     Send(StreamTransmitterTransRec,  X"0003_0030") ;  -- Pass
     WaitForClock(StreamTransmitterTransRec, 10) ; 
     print("") ;  print("") ;  
@@ -141,8 +141,8 @@ log("Transmit Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
     
 -- Start test phase 1:  Write Address
 WaitForBarrier(TestPhaseStart) ;
-    SetModelOptions(StreamReceiverTransRec, RECEIVE_READY_DELAY_CYCLES, 7) ;
-    SetModelOptions(StreamReceiverTransRec, RECEIVE_READY_BEFORE_VALID, FALSE) ;
+    SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_DELAY_CYCLES, 7) ;
+    SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_BEFORE_VALID, FALSE) ;
 
     Get(StreamReceiverTransRec, Data) ;  -- Pass.  Ready Delay still = 0.
     AffirmIfEqual(Data, X"0001_0010", "Get Data: ") ;
@@ -157,8 +157,8 @@ WaitForBarrier(TestPhaseStart) ;
     AffirmIfEqual(Data, X"BAD0_0020", "Get Data: ") ;
     
     -- Warning:  it takes one operation before these take impact
-    SetModelOptions(StreamReceiverTransRec, RECEIVE_READY_DELAY_CYCLES, 0) ;
-    SetModelOptions(StreamReceiverTransRec, RECEIVE_READY_BEFORE_VALID, TRUE) ;
+    SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_DELAY_CYCLES, 0) ;
+    SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_BEFORE_VALID, TRUE) ;
 
     Get(StreamReceiverTransRec, Data) ;  -- Pass
     AffirmIfEqual(Data, X"0003_0030", "Get Data: ") ;

@@ -94,14 +94,14 @@ begin
   begin
     wait until nReset = '1' ;  
     WaitForClock(StreamTransmitterTransRec, 2) ; 
-    SetModelOptions(StreamTransmitterTransRec, SET_BURST_MODE, STREAM_BURST_BYTE_MODE) ;
+    SetBurstMode(StreamTransmitterTransRec, STREAM_BURST_BYTE_MODE) ;
     
     ID   := to_slv(1, ID_LEN);
     Dest := to_slv(2, DEST_LEN) ; 
     User := to_slv(3, USER_LEN) ; 
-    SetModelOptions(StreamTransmitterTransRec, SET_ID,   ID) ;
-    SetModelOptions(StreamTransmitterTransRec, SET_DEST, Dest) ;
-    SetModelOptions(StreamTransmitterTransRec, SET_USER, User) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID,   ID) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, Dest) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, User) ;
 
     log("Transmit 32 Bytes -- word aligned") ;
     PushBurstIncrement(TxBurstFifo, 3, 32) ;
@@ -110,9 +110,9 @@ begin
     WaitForClock(StreamTransmitterTransRec, 4) ; 
 
     log("Transmit 30 Bytes -- unaligned") ;
-    SetModelOptions(StreamTransmitterTransRec, SET_ID  , (  ID+1)) ;
-    SetModelOptions(StreamTransmitterTransRec, SET_DEST, (Dest+1)) ;
-    SetModelOptions(StreamTransmitterTransRec, SET_USER, (User+1)) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID  , (  ID+1)) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, (Dest+1)) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, (User+1)) ;
     PushBurst(TxBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25,27,29)) ;
     PushBurst(TxBurstFifo, (31,33,35,37,39,41,43,45,47,49,51,53,55,57,59)) ;
     SendBurst(StreamTransmitterTransRec, 30) ;
@@ -120,9 +120,9 @@ begin
     WaitForClock(StreamTransmitterTransRec, 4) ; 
 
     log("Transmit 34 Bytes -- unaligned") ;
-    SetModelOptions(StreamTransmitterTransRec, SET_ID  , (  ID+2)) ;
-    SetModelOptions(StreamTransmitterTransRec, SET_DEST, (Dest+2)) ;
-    SetModelOptions(StreamTransmitterTransRec, SET_USER, (User+2)) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID  , (  ID+2)) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, (Dest+2)) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, (User+2)) ;
     PushBurstRandom(TxBurstFifo, 7, 34) ;
     SendBurst(StreamTransmitterTransRec, 34) ;
     
@@ -132,9 +132,9 @@ begin
 
     for i in 0 to 6 loop 
       log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
-      SetModelOptions(StreamTransmitterTransRec, SET_ID  , (  ID+i/2)) ;
-      SetModelOptions(StreamTransmitterTransRec, SET_DEST, (Dest+i/2)) ;
-      SetModelOptions(StreamTransmitterTransRec, SET_USER, (User+i/2)) ;
+      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID  , (  ID+i/2)) ;
+      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, (Dest+i/2)) ;
+      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, (User+i/2)) ;
       PushBurstIncrement(TxBurstFifo, i*32, 32 + 5*i) ;
       SendBurst(StreamTransmitterTransRec, 32 + 5*i) ;
     end loop ; 
@@ -163,7 +163,7 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
   begin
     WaitForClock(StreamReceiverTransRec, 2) ; 
-    SetModelOptions(StreamReceiverTransRec, SET_BURST_MODE, STREAM_BURST_BYTE_MODE) ;
+    SetBurstMode(StreamReceiverTransRec, STREAM_BURST_BYTE_MODE) ;
     
     ID   := to_slv(1, ID_LEN);
     Dest := to_slv(2, DEST_LEN) ; 

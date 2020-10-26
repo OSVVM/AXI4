@@ -100,13 +100,13 @@ begin
       ID   := to_slv(i/2,   ID_LEN);
       Dest := to_slv(1+i/2, DEST_LEN) ; 
       User := to_slv(2+i/2, USER_LEN) ; 
-      SetModelOptions(StreamTransmitterTransRec, SET_LAST, 0) ;
+      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_LAST, 0) ;
       for j in 0 to 63+i loop 
         Data := Data + 1 ; 
         exit when j = 63+i ; 
         Send(StreamTransmitterTransRec, Data, ID & Dest & User & '-') ;
       end loop ;
-      SetModelOptions(StreamTransmitterTransRec, SET_LAST, 1) ;
+      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_LAST, 1) ;
       Send(StreamTransmitterTransRec, Data, ID & Dest & User & '-') ;
       WaitForClock(StreamTransmitterTransRec, i/4) ; 
       if i mod 4 = 0 then 
@@ -115,14 +115,14 @@ begin
     end loop ; 
     
     Data := X"00_01_00_00" ; 
-    SetModelOptions(StreamTransmitterTransRec, SET_LAST, 8) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_LAST, 8) ;
     for i in 1 to 8*4 loop 
       Data := Data + 1 ; 
       Send(StreamTransmitterTransRec, Data) ;
     end loop ; 
     
     Data := X"00_02_00_00" ; 
-    SetModelOptions(StreamTransmitterTransRec, SET_LAST, 16) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_LAST, 16) ;
     for i in 1 to 16*4 loop 
       Data := Data + 1 ; 
       Send(StreamTransmitterTransRec, Data) ;
@@ -153,7 +153,7 @@ begin
     variable PopValid : boolean ; 
   begin
     WaitForClock(StreamReceiverTransRec, 2) ; 
-    SetModelOptions(StreamReceiverTransRec, SET_BURST_MODE, STREAM_BURST_BYTE_MODE) ;
+    SetBurstMode(StreamReceiverTransRec, STREAM_BURST_BYTE_MODE) ;
     Data := (others => '0') ;
 
     for i in 0 to 15 loop 

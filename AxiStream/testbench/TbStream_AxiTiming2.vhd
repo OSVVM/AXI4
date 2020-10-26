@@ -149,7 +149,7 @@ WaitForBarrier(TestPhaseStart) ;
 -- Start test phase 1:  
 WaitForBarrier(TestPhaseStart) ;
 -- log("Ready before Valid Tests.") ;
-SetModelOptions(StreamReceiverTransRec, RECEIVE_READY_BEFORE_VALID, TRUE) ;
+SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_BEFORE_VALID, TRUE) ;
     -- Cycle to allow settings to update
     -- WaitForClock(StreamReceiverTransRec, 5) ; 
     Data := (others => '0') ;
@@ -157,7 +157,7 @@ SetModelOptions(StreamReceiverTransRec, RECEIVE_READY_BEFORE_VALID, TRUE) ;
 
     Data := Data + 4096 ;
     for i in 0 to 4 loop 
-      SetModelOptions(StreamReceiverTransRec, RECEIVE_READY_DELAY_CYCLES, i) ;
+      SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_DELAY_CYCLES, i) ;
       -- WaitForClock(StreamReceiverTransRec, 5) ; 
     
       for j in 1 to 3 loop 
@@ -169,8 +169,8 @@ SetModelOptions(StreamReceiverTransRec, RECEIVE_READY_BEFORE_VALID, TRUE) ;
           
 WaitForBarrier(TestPhaseStart) ;
 -- log("Ready after Valid Tests.") ;
-    SetModelOptions(StreamReceiverTransRec, RECEIVE_READY_BEFORE_VALID, FALSE) ;
-    SetModelOptions(StreamReceiverTransRec, RECEIVE_READY_DELAY_CYCLES, 0) ;
+    SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_BEFORE_VALID, FALSE) ;
+    SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_DELAY_CYCLES, 0) ;
     -- Cycle to allow settings to update
     -- WaitForClock(StreamReceiverTransRec, 5) ; 
     Data := (others => '0') ;
@@ -178,7 +178,7 @@ WaitForBarrier(TestPhaseStart) ;
 
     Data := Data + 8192 ;
     for i in 0 to 4 loop 
-      SetModelOptions(StreamReceiverTransRec, RECEIVE_READY_DELAY_CYCLES, i) ;
+      SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_DELAY_CYCLES, i) ;
       -- WaitForClock(StreamReceiverTransRec, 5) ; 
 
       for j in 1 to 3 loop 

@@ -108,7 +108,7 @@ begin
 --      PushWord(TxBurstFifo, Data, FALSE) ;
       TxBurstFifo.Push(Data) ;
       Data := Data(DATA_WIDTH-8-1 downto 0) & X"WW" ;
-      BytesToSend := BytesToSend + 1 ;
+      BytesToSend := BytesToSend + 2 ;
     end loop ; 
     
     -- Two Bytes - with Z
@@ -121,7 +121,7 @@ begin
 --        PushWord(TxBurstFifo, Data, FALSE) ;
         TxBurstFifo.Push(Data) ;
         Data := Data(DATA_WIDTH-8-1 downto 0) & X"WW" ;
-        BytesToSend := BytesToSend + 1 ;
+        BytesToSend := BytesToSend + 2 ;
       end loop ; 
     end if; 
 
@@ -135,7 +135,7 @@ begin
 --        PushWord(TxBurstFifo, Data, FALSE) ;
         TxBurstFifo.Push(Data) ;
         Data := Data(DATA_WIDTH-8-1 downto 0) & X"WW" ;
-        BytesToSend := BytesToSend + 1 ;
+        BytesToSend := BytesToSend + 2 ;
       end loop ; 
     end if; 
     
@@ -151,7 +151,7 @@ begin
 --      PushWord(TxBurstFifo, Data, FALSE) ;
       TxBurstFifo.Push(Data) ;
       Data := Data(DATA_WIDTH-8-1 downto 0) & X"UU" ;
-      BytesToSend := BytesToSend + 1 ;
+      BytesToSend := BytesToSend + 2 ;
     end loop ; 
     
     -- Two Bytes - with U
@@ -164,7 +164,7 @@ begin
 --        PushWord(TxBurstFifo, Data, FALSE) ;
         TxBurstFifo.Push(Data) ;
         Data := Data(DATA_WIDTH-8-1 downto 0) & X"UU" ;
-        BytesToSend := BytesToSend + 1 ;
+        BytesToSend := BytesToSend + 2 ;
       end loop ; 
     end if; 
 
@@ -178,7 +178,7 @@ begin
 --        PushWord(TxBurstFifo, Data, FALSE) ;
         TxBurstFifo.Push(Data) ;
         Data := Data(DATA_WIDTH-8-1 downto 0) & X"UU" ;
-        BytesToSend := BytesToSend + 1 ;
+        BytesToSend := BytesToSend + 2 ;
       end loop ; 
     end if; 
    

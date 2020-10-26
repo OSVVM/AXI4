@@ -97,15 +97,15 @@ begin
   begin
     wait until nReset = '1' ;  
     WaitForClock(StreamTransmitterTransRec, 2) ; 
-    SetModelOptions(StreamTransmitterTransRec, SET_BURST_MODE, STREAM_BURST_BYTE_MODE) ;
+    SetBurstMode(StreamTransmitterTransRec, STREAM_BURST_BYTE_MODE) ;
     
     ID   := (others => '0') ;
     Dest := (others => '0') ;
     User := (others => '0') ;
 
-    SetModelOptions(StreamTransmitterTransRec, SET_ID,   ID   + 3) ;
-    SetModelOptions(StreamTransmitterTransRec, SET_DEST, Dest + 2) ;
-    SetModelOptions(StreamTransmitterTransRec, SET_USER, User + 1) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID,   ID   + 3) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, Dest + 2) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, User + 1) ;
     
     PushBurstIncrement(TxBurstFifo, 0, 32) ;
     SendBurst(StreamTransmitterTransRec, 32) ;
@@ -148,16 +148,16 @@ begin
     variable Param, RxParam : std_logic_vector(ID_LEN + DEST_LEN + USER_LEN downto 0) ;
   begin
     WaitForClock(StreamReceiverTransRec, 2) ; 
-    SetModelOptions(StreamReceiverTransRec, SET_BURST_MODE, STREAM_BURST_BYTE_MODE) ;
+    SetBurstMode(StreamReceiverTransRec, STREAM_BURST_BYTE_MODE) ;
     
     ID   := (others => '0') ;
     Dest := (others => '0') ;
     User := (others => '0') ;
     Data := (others => '0') ;
 
-    SetModelOptions(StreamReceiverTransRec, SET_ID,   ID   + 3) ;
-    SetModelOptions(StreamReceiverTransRec, SET_DEST, Dest + 2) ;
-    SetModelOptions(StreamReceiverTransRec, SET_USER, User + 1) ;
+    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_ID,   ID   + 3) ;
+    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_DEST, Dest + 2) ;
+    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_USER, User + 1) ;
     
     Param := (ID+3) & (Dest+2) & (User+1) & "1" ;
     GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;

@@ -110,9 +110,9 @@ begin
       Dest := to_slv((256 - i)/16, DEST_LEN) ; 
       User := to_slv((i-1)/16, USER_LEN) ; 
       
-      SetModelOptions(StreamTransmitterTransRec, SET_ID,   ID) ;
-      SetModelOptions(StreamTransmitterTransRec, SET_DEST, Dest) ;
-      SetModelOptions(StreamTransmitterTransRec, SET_USER, User) ;
+      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID,   ID) ;
+      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, Dest) ;
+      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, User) ;
       
       SendAsync(StreamTransmitterTransRec, Data) ;
     end loop ;
@@ -152,9 +152,9 @@ begin
       ExpDest  := to_slv((256 - i)/16, DEST_LEN) ; 
       ExpUser  := to_slv((i-1)/16, USER_LEN) ; 
 
-      SetModelOptions(StreamReceiverTransRec, SET_ID,   ExpID) ;
-      SetModelOptions(StreamReceiverTransRec, SET_DEST, ExpDest) ;
-      SetModelOptions(StreamReceiverTransRec, SET_USER, ExpUser) ;
+      SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_ID,   ExpID) ;
+      SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_DEST, ExpDest) ;
+      SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_USER, ExpUser) ;
        
       TryCount := 0 ; 
       loop 
@@ -162,21 +162,21 @@ begin
           when 252 =>   -- Error in Data
             TryCheck(StreamReceiverTransRec, ExpData+1, Available) ; 
           when 253 =>   -- Error in LAST
-            SetModelOptions(StreamReceiverTransRec, SET_LAST, 1) ;
+            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_LAST, 1) ;
             TryCheck(StreamReceiverTransRec, ExpData, Available) ; 
-            SetModelOptions(StreamReceiverTransRec, SET_LAST, 0) ;
+            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_LAST, 0) ;
           when 254 =>   -- Error in USER
-            SetModelOptions(StreamReceiverTransRec, SET_USER, ExpUser+1) ;
+            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_USER, ExpUser+1) ;
             TryCheck(StreamReceiverTransRec, ExpData, Available) ; 
-            SetModelOptions(StreamReceiverTransRec, SET_USER, ExpUser) ;
+            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_USER, ExpUser) ;
           when 255 =>   -- Error in DEST
-            SetModelOptions(StreamReceiverTransRec, SET_DEST, ExpDest+1) ;
+            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_DEST, ExpDest+1) ;
             TryCheck(StreamReceiverTransRec, ExpData, Available) ; 
-            SetModelOptions(StreamReceiverTransRec, SET_DEST, ExpDest) ;
+            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_DEST, ExpDest) ;
           when 256 =>   -- Error in ID
-            SetModelOptions(StreamReceiverTransRec, SET_ID,   ExpID+1) ;
+            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_ID,   ExpID+1) ;
             TryCheck(StreamReceiverTransRec, ExpData, Available) ; 
-            SetModelOptions(StreamReceiverTransRec, SET_ID,   ExpID) ;
+            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_ID,   ExpID) ;
           when others =>  -- No Errors 
             TryCheck(StreamReceiverTransRec, ExpData, Available) ; 
         end case ; 

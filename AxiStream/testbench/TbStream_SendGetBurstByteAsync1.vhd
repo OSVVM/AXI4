@@ -1,5 +1,5 @@
 --
---  File Name:         TbStream_AxiSendGetBurst1.vhd
+--  File Name:         TbStream_SendGetBurstByteAsync1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -20,7 +20,9 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    10/2020   2020.10    Initial revision
+--    05/2017   2018.05    Initial revision
+--    01/2020   2020.01    Updated license notice
+--    10/2020   2020.10    Updated test to include Check, ...
 --
 --
 --  This file is part of OSVVM.
@@ -39,10 +41,9 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --  
-architecture AxiSendGetBurst1 of TestCtrl is
+architecture SendGetBurstByteAsync1 of TestCtrl is
 
   signal   TestDone : integer_barrier := 1 ;
-  
  
 begin
 
@@ -53,13 +54,13 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbStream_AxiSendGetBurst1") ;
+    SetAlertLogName("TbStream_SendGetBurstByteAsync1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbStream_AxiSendGetBurst1.txt") ;
+    TranscriptOpen("./results/TbStream_SendGetBurstByteAsync1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -72,7 +73,7 @@ begin
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
---    AlertIfDiff("./results/TbStream_AxiSendGetBurst1.txt", "../sim_shared/validated_results/TbStream_AxiSendGetBurst1.txt", "") ; 
+--    AlertIfDiff("./results/TbStream_SendGetBurstByteAsync1.txt", "../sim_shared/validated_results/TbStream_SendGetBurstByteAsync1.txt", "") ; 
     
     print("") ;
     -- Expecting two check errors at 128 and 256
@@ -91,29 +92,29 @@ begin
   begin
     wait until nReset = '1' ;  
     WaitForClock(StreamTransmitterTransRec, 2) ; 
-    SetModelOptions(StreamTransmitterTransRec, SET_BURST_MODE, STREAM_BURST_BYTE_MODE) ;
+    SetBurstMode(StreamTransmitterTransRec, STREAM_BURST_BYTE_MODE) ;
     
     log("Transmit 32 Bytes -- word aligned") ;
     PushBurstIncrement(TxBurstFifo, 3, 32) ;
-    SendBurst(StreamTransmitterTransRec, 32) ;
+    SendBurstAsync(StreamTransmitterTransRec, 32) ;
 
     WaitForClock(StreamTransmitterTransRec, 4) ; 
 
     log("Transmit 30 Bytes -- unaligned") ;
     PushBurst(TxBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25,27,29)) ;
     PushBurst(TxBurstFifo, (31,33,35,37,39,41,43,45,47,49,51,53,55,57,59)) ;
-    SendBurst(StreamTransmitterTransRec, 30) ;
+    SendBurstAsync(StreamTransmitterTransRec, 30) ;
 
     WaitForClock(StreamTransmitterTransRec, 4) ; 
 
     log("Transmit 34 Bytes -- unaligned") ;
     PushBurstRandom(TxBurstFifo, 7, 34) ;
-    SendBurst(StreamTransmitterTransRec, 34) ;
+    SendBurstAsync(StreamTransmitterTransRec, 34) ;
     
     for i in 0 to 6 loop 
       log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
       PushBurstIncrement(TxBurstFifo, i*32, 32 + 5*i) ;
-      SendBurst(StreamTransmitterTransRec, 32 + 5*i) ;
+      SendBurstAsync(StreamTransmitterTransRec, 32 + 5*i) ;
     end loop ; 
 
 
@@ -129,30 +130,60 @@ begin
   --   Generate transactions for AxiReceiver
   ------------------------------------------------------------
   AxiReceiverProc : process
-    variable NumBytes : integer ; 
+    variable NumBytes  : integer ; 
+    variable TryCount  : integer ; 
+    variable Available : boolean ; 
   begin
     WaitForClock(StreamReceiverTransRec, 2) ; 
-    SetModelOptions(StreamReceiverTransRec, SET_BURST_MODE, STREAM_BURST_BYTE_MODE) ;
+    SetBurstMode(StreamReceiverTransRec, STREAM_BURST_BYTE_MODE) ;
     
 --    log("Transmit 32 Bytes -- word aligned") ;
-    GetBurst (StreamReceiverTransRec, NumBytes) ;
+    TryCount := 0 ; 
+    loop 
+      TryGetBurst (StreamReceiverTransRec, NumBytes, Available) ;
+      exit when Available ; 
+      WaitForClock(StreamReceiverTransRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     AffirmIfEqual(NumBytes, 32, "Receiver: NumBytes Received") ;
     CheckBurstIncrement(RxBurstFifo, 3, NumBytes) ;
     
 --    log("Transmit 30 Bytes -- unaligned") ;
-    GetBurst (StreamReceiverTransRec, NumBytes) ;
+    TryCount := 0 ; 
+    loop 
+      TryGetBurst (StreamReceiverTransRec, NumBytes, Available) ;
+      exit when Available ; 
+      WaitForClock(StreamReceiverTransRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     AffirmIfEqual(NumBytes, 30, "Receiver: NumBytes Received") ;
     CheckBurst(RxBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25,27,29)) ;
     CheckBurst(RxBurstFifo, (31,33,35,37,39,41,43,45,47,49,51,53,55,57,59)) ;
 
 --    log("Transmit 34 Bytes -- unaligned") ;
-    GetBurst (StreamReceiverTransRec, NumBytes) ;
+    TryCount := 0 ; 
+    loop 
+      TryGetBurst (StreamReceiverTransRec, NumBytes, Available) ;
+      exit when Available ; 
+      WaitForClock(StreamReceiverTransRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     AffirmIfEqual(NumBytes, 34, "Receiver: NumBytes Received") ;
     CheckBurstRandom(RxBurstFifo, 7, NumBytes) ;
     
     for i in 0 to 6 loop 
 --      log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
-      GetBurst (StreamReceiverTransRec, NumBytes) ;
+      TryCount := 0 ; 
+      loop 
+        TryGetBurst (StreamReceiverTransRec, NumBytes, Available) ;
+        exit when Available ; 
+        WaitForClock(StreamReceiverTransRec, 1) ; 
+        TryCount := TryCount + 1 ;
+      end loop ;
+      AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       AffirmIfEqual(NumBytes, 32 + 5*i, "Receiver: NumBytes Received") ;
       CheckBurstIncrement(RxBurstFifo, i*32, NumBytes) ;
     end loop ; 
@@ -163,12 +194,12 @@ begin
     wait ;
   end process AxiReceiverProc ;
 
-end AxiSendGetBurst1 ;
+end SendGetBurstByteAsync1 ;
 
-Configuration TbStream_AxiSendGetBurst1 of TbStream is
+Configuration TbStream_SendGetBurstByteAsync1 of TbStream is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(AxiSendGetBurst1) ; 
+      use entity work.TestCtrl(SendGetBurstByteAsync1) ; 
     end for ; 
   end for ; 
-end TbStream_AxiSendGetBurst1 ; 
+end TbStream_SendGetBurstByteAsync1 ; 

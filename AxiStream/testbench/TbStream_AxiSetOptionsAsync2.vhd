@@ -104,9 +104,9 @@ begin
     User := (others => '0') ;
     Data := (others => '0') ;
 
-    SetModelOptions(StreamTransmitterTransRec, SET_ID,   ID   + 3) ;
-    SetModelOptions(StreamTransmitterTransRec, SET_DEST, Dest + 2) ;
-    SetModelOptions(StreamTransmitterTransRec, SET_USER, User + 1) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID,   ID   + 3) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, Dest + 2) ;
+    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, User + 1) ;
     
     for i in 1 to 4 loop 
       SendAsync(StreamTransmitterTransRec, Data) ;
@@ -171,9 +171,9 @@ begin
     User := (others => '0') ;
     Data := (others => '0') ;
 
-    SetModelOptions(StreamReceiverTransRec, SET_ID,   ID   + 3) ;
-    SetModelOptions(StreamReceiverTransRec, SET_DEST, Dest + 2) ;
-    SetModelOptions(StreamReceiverTransRec, SET_USER, User + 1) ;
+    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_ID,   ID   + 3) ;
+    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_DEST, Dest + 2) ;
+    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_USER, User + 1) ;
     
     Param := (ID+3) & (Dest+2) & (User+1) & "0" ;
     for i in 1 to 4 loop 

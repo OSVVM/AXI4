@@ -65,8 +65,8 @@ entity TestCtrl is
       nReset                        : In    std_logic ;
 
       -- Transaction Interfaces
-      StreamTransmitterTransRec  : inout StreamRecType ;
-      StreamReceiverTransRec     : inout StreamRecType 
+      StreamTransmitterTransRec     : InOut StreamRecType ;
+      StreamReceiverTransRec        : InOut StreamRecType 
 
   ) ;
   constant DATA_WIDTH : integer := StreamTransmitterTransRec.DataToModel'length ; 

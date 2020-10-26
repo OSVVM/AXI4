@@ -151,10 +151,10 @@ begin
   
   AxiStreamTransmitter_1 : AxiStreamTransmitter 
     generic map (
-      DEFAULT_ID     => DEFAULT_ID  , 
-      DEFAULT_DEST   => DEFAULT_DEST, 
-      DEFAULT_USER   => DEFAULT_USER, 
-      DEFAULT_LAST   => 0,
+      INIT_ID        => INIT_ID  , 
+      INIT_DEST      => INIT_DEST, 
+      INIT_USER      => INIT_USER, 
+      INIT_LAST      => 0,
 
       tperiod_Clk    => tperiod_Clk,
 
@@ -190,10 +190,10 @@ begin
   AxiStreamReceiver_1 : AxiStreamReceiver
     generic map (
       tperiod_Clk    => tperiod_Clk,
-      DEFAULT_ID     => DEFAULT_ID  , 
-      DEFAULT_DEST   => DEFAULT_DEST, 
-      DEFAULT_USER   => DEFAULT_USER, 
-      DEFAULT_LAST   => 0,
+      INIT_ID        => INIT_ID  , 
+      INIT_DEST      => INIT_DEST, 
+      INIT_USER      => INIT_USER, 
+      INIT_LAST      => 0,
 
       tpd_Clk_TReady => tpd  
     ) 

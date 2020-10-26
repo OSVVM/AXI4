@@ -63,24 +63,18 @@ package AxiStreamOptionsPkg is
     TRANSMIT_READY_TIME_OUT,        -- Integer
     RECEIVE_READY_BEFORE_VALID,     -- Integer
     RECEIVE_READY_DELAY_CYCLES,     -- Integer
-    SET_DROP_UNDRIVEN,              -- boolean
-    SET_ID,                         -- std_logic_vector
-    SET_DEST,                       -- std_logic_vector
-    SET_USER,                       -- std_logic_vector
-    SET_LAST,                       -- integer
-    SET_BURST_MODE,
+    DROP_UNDRIVEN,                  -- boolean
+    DEFAULT_ID,                     -- std_logic_vector
+    DEFAULT_DEST,                   -- std_logic_vector
+    DEFAULT_USER,                   -- std_logic_vector
+    DEFAULT_LAST,                   -- integer
     THE_END                         
   ) ;
   
---!! Make these an enum that is part of Stream MIT?
-  subtype AxiStreamFifoBurstModeType is integer ;
-  constant STREAM_BURST_BYTE_MODE       : integer := 0 ; 
-  constant STREAM_BURST_WORD_MODE       : integer := 1 ;
-  constant STREAM_BURST_WORD_PARAM_MODE : integer := 2 ;
 
   -- ========================================================
-  --  SetModelOptions / GetModelOptions
-  --  Abstraction layer to SetModelOptions / GetModelOptions
+  --  SetAxiStreamOptions / GetAxiStreamOptions
+  --  Abstraction layer to SetAxiStreamOptions / GetAxiStreamOptions
   --  from StreamTransactionPkg.  
   --  Allows calls to have enumerated values rather than constants.
   --  This way we do not need to manage constant values.
@@ -89,7 +83,7 @@ package AxiStreamOptionsPkg is
   -- ========================================================
 
   ------------------------------------------------------------
-  procedure SetModelOptions (
+  procedure SetAxiStreamOptions (
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
@@ -97,7 +91,7 @@ package AxiStreamOptionsPkg is
   ) ;
 
   ------------------------------------------------------------
-  procedure SetModelOptions (
+  procedure SetAxiStreamOptions (
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
@@ -105,7 +99,7 @@ package AxiStreamOptionsPkg is
   ) ;
 
   ------------------------------------------------------------
-  procedure SetModelOptions (
+  procedure SetAxiStreamOptions (
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
@@ -113,7 +107,7 @@ package AxiStreamOptionsPkg is
   ) ;
 
   ------------------------------------------------------------
-  procedure GetModelOptions (
+  procedure GetAxiStreamOptions (
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
@@ -121,7 +115,7 @@ package AxiStreamOptionsPkg is
   ) ;
 
   ------------------------------------------------------------
-  procedure GetModelOptions (
+  procedure GetAxiStreamOptions (
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
@@ -137,13 +131,13 @@ end package AxiStreamOptionsPkg ;
 package body AxiStreamOptionsPkg is
 
   -- ========================================================
-  --  SetModelOptions / GetModelOptions
+  --  SetAxiStreamOptions / GetAxiStreamOptions
   --  For integer uses normal connections
   --  For std_logic_vector, uses ParamToModel/ParamFromModel 
   -- ========================================================
 
   ------------------------------------------------------------
-  procedure SetModelOptions (
+  procedure SetAxiStreamOptions (
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
@@ -151,10 +145,10 @@ package body AxiStreamOptionsPkg is
   ) is
   begin
     SetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), OptVal) ;
-  end procedure SetModelOptions ;
+  end procedure SetAxiStreamOptions ;
 
   ------------------------------------------------------------
-  procedure SetModelOptions (
+  procedure SetAxiStreamOptions (
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
@@ -163,10 +157,10 @@ package body AxiStreamOptionsPkg is
   begin
     TransRec.ParamToModel <= ToTransaction(OptVal, TransRec.ParamToModel'length) ;
     SetModelOptions(TransRec, AxiStreamOptionsType'POS(Option)) ;
-  end procedure SetModelOptions ;
+  end procedure SetAxiStreamOptions ;
 
   ------------------------------------------------------------
-  procedure SetModelOptions (
+  procedure SetAxiStreamOptions (
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
@@ -175,10 +169,10 @@ package body AxiStreamOptionsPkg is
   begin
     TransRec.BoolToModel <= OptVal ;
     SetModelOptions(TransRec, AxiStreamOptionsType'POS(Option)) ;
-  end procedure SetModelOptions ;
+  end procedure SetAxiStreamOptions ;
 
   ------------------------------------------------------------
-  procedure GetModelOptions (
+  procedure GetAxiStreamOptions (
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
@@ -186,10 +180,10 @@ package body AxiStreamOptionsPkg is
   ) is
   begin
     GetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), OptVal) ;
-  end procedure GetModelOptions ;
+  end procedure GetAxiStreamOptions ;
 
   ------------------------------------------------------------
-  procedure GetModelOptions (
+  procedure GetAxiStreamOptions (
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
@@ -198,10 +192,10 @@ package body AxiStreamOptionsPkg is
   begin
     GetModelOptions(TransRec, AxiStreamOptionsType'POS(Option)) ;
     OptVal := FromTransaction(TransRec.ParamFromModel, OptVal'length) ;
-  end procedure GetModelOptions ;
+  end procedure GetAxiStreamOptions ;
 
   ------------------------------------------------------------
-  procedure GetModelOptions (
+  procedure GetAxiStreamOptions (
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
@@ -210,6 +204,6 @@ package body AxiStreamOptionsPkg is
   begin
     GetModelOptions(TransRec, AxiStreamOptionsType'POS(Option)) ;
     OptVal := TransRec.BoolFromModel ;
-  end procedure GetModelOptions ;
+  end procedure GetAxiStreamOptions ;
 
 end package body AxiStreamOptionsPkg ;

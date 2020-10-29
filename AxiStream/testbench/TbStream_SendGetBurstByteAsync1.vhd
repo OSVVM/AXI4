@@ -20,9 +20,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2017   2018.05    Initial revision
---    01/2020   2020.01    Updated license notice
---    10/2020   2020.10    Updated test to include Check, ...
+--    10/2020   2020.10    Initial revision
 --
 --
 --  This file is part of OSVVM.

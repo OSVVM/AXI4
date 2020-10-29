@@ -22,7 +22,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    10/2020   2020.10    Added test 
+--    10/2020   2020.10    Initial revision
 --
 --
 --  This file is part of OSVVM.

@@ -248,26 +248,6 @@ begin
           TransmitFifo.Push(Data & Param) ; 
         end loop ; 
         
---**-- Word Handling
---**--        FifoWidth := SizeOf(BurstFifo.Peek) ;
---**        NumberTransfers := TransRec.IntToModel ; 
---**        TransmitRequestCount <= TransmitRequestCount + NumberTransfers ;
---**        for i in NumberTransfers-1 downto 0 loop 
---**          Data := BurstFifo.Pop ; 
---**          Param(0) := '1' when i = 0 else '0' ;  -- TLast
---**          TransmitFifo.Push(Data & Param) ; 
---**        end loop ; 
---**-- Byte Handling
---**-- With Bytes, need ByteCount to track #words in FIFO
---**        BytesToSend := TransRec.IntToModel ;
---**        NumberTransfers := integer(ceil(real(BytesToSend) / real(AXI_STREAM_DATA_BYTE_WIDTH))) ;
---**        TransmitRequestCount <= TransmitRequestCount + NumberTransfers ; 
---**        while BytesToSend > 0 loop
---**          PopWord(BurstFifo, PopValid, Data, BytesToSend) ; 
---**          AlertIfNot(ModelID, PopValid, "BurstFifo Empty during burst transfer", FAILURE) ; 
---**          Param(0) := '1' when BytesToSend = 0 else '0' ;  -- TLast
---**          TransmitFifo.Push(Data & Param) ; 
---**        end loop ; 
         wait for 0 ns ; 
         if IsBlocking(TransRec.Operation) then 
           wait until TransmitRequestCount = TransmitDoneCount ;

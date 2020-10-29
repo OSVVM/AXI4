@@ -209,6 +209,7 @@ begin
         TransRec.IntToModel <= BurstFifoMode ;
 
       when GET | TRY_GET | CHECK | TRY_CHECK =>
+--!! With Burst Boundary NULL word, there is always another word that follows that triggered the Burst Boundary
         if ReceiveFifo.empty and  IsTry(Operation) then
           -- Return if no data
           TransRec.BoolFromModel <= FALSE ; 
@@ -228,7 +229,8 @@ begin
           DispatcherReceiveCount := DispatcherReceiveCount + 1 ; 
           
           -- Param: (TID & TDest & TUser & TLast & BurstBoundary) 
-          if BurstBoundary = '1' then 
+--!! Updated for TLast = '1' -- SendBurst, receive and read manually
+          if BurstBoundary = '1' or Param(0) = '1' then 
             BurstTransferCount := BurstTransferCount + 1 ; 
           end if ; 
           
@@ -295,24 +297,6 @@ begin
             exit when Param(0) = '1' ; 
           end loop ; 
         
---**-- Word Handling
---**          loop
---**            (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
---**            -- PushWord(BurstFifo, Data, DropUndriven) ; 
---**            BurstFifo.push(Data) ;
---**            BurstByteCount := BurstByteCount + 1 ;
---**--            exit when BurstBoundary = '1' ; 
---**            exit when Param(0) = '1' ; 
---**          end loop ; 
---** Byte Handling
---** With Bytes, need ByteCount to track #words in FIFO
---**          loop
---**            (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
---**            PushWord(BurstFifo, Data, DropUndriven) ; 
---**            BurstByteCount := BurstByteCount + CountBytes(Data, DropUndriven) ;
---**--            exit when BurstBoundary = '1' ; 
---**            exit when Param(0) = '1' ; 
---**          end loop ; 
           BurstTransferCount      := BurstTransferCount + 1 ; 
           TransRec.IntFromModel   <= FifoWordCount ; 
           TransRec.DataFromModel  <= ToTransaction(Data, TransRec.DataFromModel'length) ; 

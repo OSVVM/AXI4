@@ -84,7 +84,11 @@ analyze ./testbench/TbStream_AxiSetOptions2.vhd
 analyze ./testbench/TbStream_AxiSetOptionsAsync2.vhd
 analyze ./testbench/TbStream_AxiSetOptionsBurst2.vhd
 analyze ./testbench/TbStream_AxiSetOptionsBurstAsync2.vhd
+analyze ./testbench/TbStream_AxiSetOptionsBurstByte2.vhd
+analyze ./testbench/TbStream_AxiSetOptionsBurstByteAsync2.vhd
 
+analyze ./testbench/TbStream_AxiSetOptionsBurst3.vhd
+analyze ./testbench/TbStream_AxiSetOptionsBurstAsync3.vhd
 
 simulate TbStream_SendGet1
 simulate TbStream_SendGetAsync1
@@ -126,3 +130,8 @@ simulate TbStream_AxiSetOptions2
 simulate TbStream_AxiSetOptionsAsync2
 simulate TbStream_AxiSetOptionsBurst2
 simulate TbStream_AxiSetOptionsBurstAsync2
+simulate TbStream_AxiSetOptionsBurstByte2
+simulate TbStream_AxiSetOptionsBurstByteAsync2
+
+simulate TbStream_AxiSetOptionsBurst3
+simulate TbStream_AxiSetOptionsBurstAsync3

@@ -151,8 +151,8 @@ begin
 	  constant DEST_LEN     : integer := TDest'length ;
 	  constant USER_LEN     : integer := TUser'length ;
     constant PARAM_LENGTH : integer := ID_LEN + DEST_LEN + USER_LEN + 1 ;
-    variable Data,  ExpectedData  : std_logic_vector(TData'range) ; 
-    variable Param, ExpectedParam : std_logic_vector(PARAM_LENGTH-1 downto 0) ;
+    variable Data,  ExpectedData,  PopData  : std_logic_vector(TData'range) ; 
+    variable Param, ExpectedParam, PopParam : std_logic_vector(PARAM_LENGTH-1 downto 0) ;
     variable DispatcherReceiveCount : integer := 0 ; 
     variable BurstTransferCount     : integer := 0 ; 
     variable FifoWordCount : integer ; 
@@ -223,6 +223,9 @@ begin
           end if ; 
           -- Put Data and Parameters into record
           (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
+          if BurstBoundary = '1' then 
+            (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
+          end if ; 
           TransRec.DataFromModel  <= ToTransaction(Data, TransRec.DataFromModel'length) ; 
           TransRec.ParamFromModel <= ToTransaction(Param, TransRec.ParamFromModel'length) ; 
           
@@ -276,7 +279,12 @@ begin
           -- ReceiveFIFO: (TData & TID & TDest & TUser & TLast) 
           FifoWordCount := 0 ; 
           loop
-            (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
+            (PopData, PopParam, BurstBoundary) := ReceiveFifo.pop ;
+            -- BurstBoundary indication does not contain data for 
+            -- this transaction so exit
+            exit when BurstBoundary = '1' ;  
+            Data  := PopData ; 
+            Param := PopParam ; 
             case BurstFifoMode is
               when STREAM_BURST_BYTE_MODE => 
                 PushWord(BurstFifo, Data, DropUndriven) ; 
@@ -293,7 +301,6 @@ begin
               when others => 
                 Alert(ModelID, "BurstFifoMode: Invalid Mode: " & to_string(BurstFifoMode)) ;
             end case ; 
---            exit when BurstBoundary = '1' ; 
             exit when Param(0) = '1' ; 
           end loop ; 
         
@@ -442,13 +449,21 @@ begin
         end loop ; 
       end if ; 
 
-      BurstBoundary := '1' when (TID /= LastID or TDest /= LastDest) and LastLast /= '1' else '0' ;
+      if (TID /= LastID or TDest /= LastDest) and LastLast /= '1' then
+        -- push a burst boundary word, only the Burst Boundary value matters
+        ReceiveFifo.push(Data & TID & TDest & TUser & Last & '1') ;
+        BurstReceiveCount <= BurstReceiveCount + 1 ; 
+        if Last = '1' then
+          wait for 0 ns ;  
+        end if ; 
+      end if ; 
+--      BurstBoundary := '1' when (TID /= LastID or TDest /= LastDest) and LastLast /= '1' else '0' ;
       LastID   := TID ; 
       LastDest := TDest ;
       LastLast := Last ;
-      -- capture interface values
-      ReceiveFifo.push(Data & TID & TDest & TUser & Last & BurstBoundary) ;
-      if BurstBoundary = '1' or Last = '1' then 
+      -- capture this transaction
+      ReceiveFifo.push(Data & TID & TDest & TUser & Last & '0') ;
+      if Last = '1' then 
         BurstReceiveCount <= BurstReceiveCount + 1 ; 
       end if ; 
       

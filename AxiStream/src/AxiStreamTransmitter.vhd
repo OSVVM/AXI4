@@ -107,7 +107,7 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
 
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
-    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, to_lower(PathTail(AxiStreamTransmitter'PATH_NAME))) ;
+    IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamTransmitter'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ; 
   
@@ -120,9 +120,9 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
   -- Verification Component Configuration
   signal TransmitReadyTimeOut : integer := integer'right ; 
 
-  signal ParamID           : std_logic_vector(TID'range)   := IfElse(INIT_ID /= "",   INIT_ID,   (TID'range => '0')) ;
-  signal ParamDest         : std_logic_vector(TDest'range) := IfElse(INIT_DEST /= "", INIT_DEST, (TDest'range => '0')) ;
-  signal ParamUser         : std_logic_vector(TUser'range) := IfElse(INIT_USER /= "", INIT_USER, (TUser'range => '0')) ;
+  signal ParamID           : std_logic_vector(TID'range)   := IfElse(INIT_ID'length > 0,   INIT_ID,   (TID'range => '0')) ;
+  signal ParamDest         : std_logic_vector(TDest'range) := IfElse(INIT_DEST'length > 0, INIT_DEST, (TDest'range => '0')) ;
+  signal ParamUser         : std_logic_vector(TUser'range) := IfElse(INIT_USER'length > 0, INIT_USER, (TUser'range => '0')) ;
   signal ParamLast         : natural := INIT_LAST ;
   signal LastOffsetCount   : integer := 0 ; 
   signal BurstFifoMode     : integer := STREAM_BURST_WORD_MODE;

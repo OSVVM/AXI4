@@ -94,6 +94,9 @@ analyze ./testbench/TbStream_AxiSetOptionsBurstByteAsync2.vhd
 analyze ./testbench/TbStream_AxiSetOptionsBurst3.vhd
 analyze ./testbench/TbStream_AxiSetOptionsBurstAsync3.vhd
 
+analyze ./testbench/TbStream_AxiSetOptionsBurstCheck3.vhd
+analyze ./testbench/TbStream_AxiSetOptionsBurstCheckAsync3.vhd
+
 analyze ./testbench/TbStream_AxiBurstNoLast1.vhd
 analyze ./testbench/TbStream_AxiBurstAsyncNoLast1.vhd
 
@@ -148,6 +151,10 @@ simulate TbStream_AxiSetOptionsBurstByteAsync2
 
 simulate TbStream_AxiSetOptionsBurst3
 simulate TbStream_AxiSetOptionsBurstAsync3
+
+simulate TbStream_AxiSetOptionsBurstCheck3
+simulate TbStream_AxiSetOptionsBurstCheckAsync3
+
 
 simulate TbStream_AxiBurstNoLast1
 simulate TbStream_AxiBurstAsyncNoLast1

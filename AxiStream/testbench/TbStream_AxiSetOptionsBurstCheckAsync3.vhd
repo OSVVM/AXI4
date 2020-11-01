@@ -1,5 +1,5 @@
 --
---  File Name:         TbStream_AxiSetOptionsBurst3.vhd
+--  File Name:         TbStream_AxiSetOptionsBurstCheckAsync3.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -39,7 +39,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --  
-architecture AxiSetOptionsBurst3 of TestCtrl is
+architecture AxiSetOptionsBurstCheckAsync3 of TestCtrl is
 
   signal   TestDone : integer_barrier := 1 ;
   constant MAX_LEN  : integer := maximum(maximum(ID_LEN, DEST_LEN), USER_LEN)  ;
@@ -54,13 +54,13 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbStream_AxiSetOptionsBurst3") ;
+    SetAlertLogName("TbStream_AxiSetOptionsBurstCheckAsync3") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbStream_AxiSetOptionsBurst3.txt") ;
+    TranscriptOpen("./results/TbStream_AxiSetOptionsBurstCheckAsync3.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -73,7 +73,7 @@ begin
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
---    AlertIfDiff("./results/TbStream_AxiSetOptionsBurst3.txt", "../sim_shared/validated_results/TbStream_AxiSetOptionsBurst3.txt", "") ; 
+--    AlertIfDiff("./results/TbStream_AxiSetOptionsBurstCheckAsync3.txt", "../sim_shared/validated_results/TbStream_AxiSetOptionsBurstCheckAsync3.txt", "") ; 
     
     print("") ;
     -- Expecting five check errors 
@@ -169,12 +169,12 @@ begin
   --   Generate transactions for AxiReceiver
   ------------------------------------------------------------
   AxiReceiverProc : process
-    variable ExpData, RxData : std_logic_vector(DATA_WIDTH-1 downto 0) ;  
-    variable NumBytes : integer ; 
+    variable Data : std_logic_vector(DATA_WIDTH-1 downto 0) ;  
     variable ID   : std_logic_vector(ID_LEN-1 downto 0) ;    -- 5
     variable Dest : std_logic_vector(DEST_LEN-1 downto 0) ;  -- 4
-    variable User,  ExpUser, RxUser : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
-    variable Param, RxParam : std_logic_vector(ID_LEN + DEST_LEN + USER_LEN downto 0) ;
+    variable User,  RxUser : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
+    variable TryCount  : integer ; 
+    variable Available : boolean ; 
   begin
     WaitForClock(StreamReceiverTransRec, 2) ; 
     SetBurstMode(StreamReceiverTransRec, STREAM_BURST_WORD_PARAM_MODE) ;
@@ -182,109 +182,131 @@ begin
     ID   := (others => '0') ;
     Dest := (others => '0') ;
     User := (others => '0') ;
-    ExpData := (others => '0') ;
-    ExpUser := (others => '0') ;
+    Data := (others => '0') ; 
+    RxUser := (others => '0') ;
 
     SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_ID,   ID   + 3) ;
     SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_DEST, Dest + 2) ;
     SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_USER, User + 1) ;
     
-    Param := (ID+3) & (Dest+2) & (X"F") & "1" ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
-    AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
-    AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
-    for i in 1 to NumBytes loop
-      (RxData, RxUser) := RxBurstFifo.Pop ; 
-      AffirmIfEqual(RxData, ExpData, "Data") ;
-      AffirmIfEqual(RxUser, ExpUser, "User") ;
-      ExpData := ExpData + 1 ; 
-      ExpUser := ExpUser + 1 ; 
-    end loop ;    
+    for i in 1 to 32 loop
+      RxBurstFifo.push(Data & RxUser) ;
+      Data   := Data + 1 ; 
+      RxUser := RxUser + 1 ; 
+    end loop ; 
+    TryCount := 0 ; 
+    loop 
+      TryCheckBurst (StreamReceiverTransRec, 32, "1", Available) ;
+      exit when Available ; 
+      WaitForClock(StreamReceiverTransRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     
-    Param := (ID+3) & (Dest+2) & (X"F") & "1" ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
-    AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
-    AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
-    for i in 1 to NumBytes loop
-      (RxData, RxUser) := RxBurstFifo.Pop ; 
-      AffirmIfEqual(RxData, ExpData, "Data") ;
-      AffirmIfEqual(RxUser, ExpUser, "User") ;
-      ExpData := ExpData + 1 ; 
-      ExpUser := ExpUser + 1 ; 
-    end loop ;    
-    
-    Param := (ID+3) & (Dest+6) & (X"F") & "1" ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
-    AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
-    AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
-    for i in 1 to NumBytes loop
-      (RxData, RxUser) := RxBurstFifo.Pop ; 
-      AffirmIfEqual(RxData, ExpData, "Data") ;
-      AffirmIfEqual(RxUser, ExpUser, "User") ;
-      ExpData := ExpData + 1 ; 
-      ExpUser := ExpUser + 1 ; 
-    end loop ;    
-    
-    Param := (ID+7) & (Dest+6) & (X"F") & "1" ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
-    AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
-    AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
-    for i in 1 to NumBytes loop
-      (RxData, RxUser) := RxBurstFifo.Pop ; 
-      AffirmIfEqual(RxData, ExpData, "Data") ;
-      AffirmIfEqual(RxUser, ExpUser, "User") ;
-      ExpData := ExpData + 1 ; 
-      ExpUser := ExpUser + 1 ; 
-    end loop ;    
-    
-    Param := (ID+3) & (Dest+2) & (X"F") & "1" ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
-    AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
-    AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
-    for i in 1 to NumBytes loop
-      (RxData, RxUser) := RxBurstFifo.Pop ; 
-      AffirmIfEqual(RxData, ExpData, "Data") ;
-      AffirmIfEqual(RxUser, ExpUser, "User") ;
-      ExpData := ExpData + 1 ; 
-      ExpUser := ExpUser + 1 ; 
-    end loop ;    
+    for i in 1 to 32 loop
+      RxBurstFifo.push(Data & RxUser) ;
+      Data   := Data + 1 ; 
+      RxUser := RxUser + 1 ; 
+    end loop ; 
+    TryCount := 0 ; 
+    loop 
+      -- User here is overridden by the RxUser that was pushed into the FIFO
+      TryCheckBurst (StreamReceiverTransRec, 32, (USER+5) & "1", Available) ;
+      exit when Available ; 
+      WaitForClock(StreamReceiverTransRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
 
-    Param := (ID+3) & (Dest+6) & (X"F") & "1" ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
-    AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
-    AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
-    for i in 1 to NumBytes loop
-      (RxData, RxUser) := RxBurstFifo.Pop ; 
-      AffirmIfEqual(RxData, ExpData, "Data") ;
-      AffirmIfEqual(RxUser, ExpUser, "User") ;
-      ExpData := ExpData + 1 ; 
-      ExpUser := ExpUser + 1 ; 
-    end loop ;    
-
-    Param := (ID+7) & (Dest+2) & (X"F") & "1" ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
-    AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
-    AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
-    for i in 1 to NumBytes loop
-      (RxData, RxUser) := RxBurstFifo.Pop ; 
-      AffirmIfEqual(RxData, ExpData, "Data") ;
-      AffirmIfEqual(RxUser, ExpUser, "User") ;
-      ExpData := ExpData + 1 ; 
-      ExpUser := ExpUser + 1 ; 
-    end loop ;    
     
+    for i in 1 to 32 loop
+      RxBurstFifo.push(Data & RxUser) ;
+      Data   := Data + 1 ; 
+      RxUser := RxUser + 1 ; 
+    end loop ; 
+    TryCount := 0 ; 
+    loop 
+      -- User here is overridden by the RxUser that was pushed into the FIFO
+      TryCheckBurst (StreamReceiverTransRec, 32, (Dest+6) & (USER+5) & "1", Available) ;
+      exit when Available ; 
+      WaitForClock(StreamReceiverTransRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
+    
+    for i in 1 to 32 loop
+      RxBurstFifo.push(Data & RxUser) ;
+      Data   := Data + 1 ; 
+      RxUser := RxUser + 1 ; 
+    end loop ; 
+    TryCount := 0 ; 
+    loop 
+      -- User here is overridden by the RxUser that was pushed into the FIFO
+      TryCheckBurst (StreamReceiverTransRec, 32, (ID+7) & (Dest+6) & (USER+5) & "1", Available) ;
+      exit when Available ; 
+      WaitForClock(StreamReceiverTransRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
+    
+    for i in 1 to 32 loop
+      RxBurstFifo.push(Data & RxUser) ;
+      Data   := Data + 1 ; 
+      RxUser := RxUser + 1 ; 
+    end loop ; 
+    TryCount := 0 ; 
+    loop 
+      -- User here is overridden by the RxUser that was pushed into the FIFO
+      TryCheckBurst (StreamReceiverTransRec, 32, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "1", Available) ;
+      exit when Available ; 
+      WaitForClock(StreamReceiverTransRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
+    
+
+    for i in 1 to 32 loop
+      RxBurstFifo.push(Data & RxUser) ;
+      Data   := Data + 1 ; 
+      RxUser := RxUser + 1 ; 
+    end loop ; 
+    TryCount := 0 ; 
+    loop 
+      -- User here is overridden by the RxUser that was pushed into the FIFO
+      TryCheckBurst (StreamReceiverTransRec, 32,  Dash(ID'range) & (Dest+6) & Dash(USER'range) & "1", Available) ;
+      exit when Available ; 
+      WaitForClock(StreamReceiverTransRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
+
+    for i in 1 to 32 loop
+      RxBurstFifo.push(Data & RxUser) ;
+      Data   := Data + 1 ; 
+      RxUser := RxUser + 1 ; 
+    end loop ; 
+    TryCount := 0 ; 
+    loop 
+      -- User here is overridden by the RxUser that was pushed into the FIFO
+      TryCheckBurst (StreamReceiverTransRec, 32, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "1", Available) ;
+      exit when Available ; 
+      WaitForClock(StreamReceiverTransRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
+   
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(StreamReceiverTransRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;
 
-end AxiSetOptionsBurst3 ;
+end AxiSetOptionsBurstCheckAsync3 ;
 
-Configuration TbStream_AxiSetOptionsBurst3 of TbStream is
+Configuration TbStream_AxiSetOptionsBurstCheckAsync3 of TbStream is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(AxiSetOptionsBurst3) ; 
+      use entity work.TestCtrl(AxiSetOptionsBurstCheckAsync3) ; 
     end for ; 
   end for ; 
-end TbStream_AxiSetOptionsBurst3 ; 
+end TbStream_AxiSetOptionsBurstCheckAsync3 ; 

@@ -93,14 +93,19 @@ end entity AxiStreamReceiver ;
 architecture behavioral of AxiStreamReceiver is
   constant AXI_STREAM_DATA_WIDTH : integer := TData'length ;
   constant AXI_STREAM_DATA_BYTE_WIDTH : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
-  constant AXI_ID_WIDTH : integer := TID'length ;
-  constant AXI_DEST_WIDTH : integer := TDest'length ;
+  constant ID_LEN       : integer := TID'length ;
+  constant DEST_LEN     : integer := TDest'length ;
+  constant USER_LEN     : integer := TUser'length ;
+  constant PARAM_LENGTH : integer := ID_LEN + DEST_LEN + USER_LEN + 1 ;
+  constant USER_RIGHT   : integer := 1 ; 
+  constant DEST_RIGHT   : integer := USER_RIGHT + USER_LEN ; 
+  constant ID_RIGHT     : integer := DEST_RIGHT + DEST_LEN ; 
 
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
     IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamReceiver'PATH_NAME))) ;
 
-  signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ; 
+  signal ModelID, ProtocolID, DataCheckID, BusFailedID, BurstFifoID : AlertLogIDType ; 
   
   shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
   shared variable ReceiveFifo   : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
@@ -138,6 +143,7 @@ begin
     DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
     BusFailedID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
     BurstFifo.SetAlertLogID(MODEL_INSTANCE_NAME & ": BurstFifo", ID) ;
+    BurstFifoID             <= BurstFifo.GetAlertLogID ; 
     wait ; 
   end process Initialize ;
 
@@ -148,12 +154,9 @@ begin
   ------------------------------------------------------------
   TransactionDispatcher : process
     alias Operation : StreamOperationType is TransRec.Operation ;
-    constant ID_LEN       : integer := TID'length ;
-	  constant DEST_LEN     : integer := TDest'length ;
-	  constant USER_LEN     : integer := TUser'length ;
-    constant PARAM_LENGTH : integer := ID_LEN + DEST_LEN + USER_LEN + 1 ;
     variable Data,  ExpectedData,  PopData  : std_logic_vector(TData'range) ; 
     variable Param, ExpectedParam, PopParam : std_logic_vector(PARAM_LENGTH-1 downto 0) ;
+    variable ExpectedUser : std_logic_vector(USER_LEN-1 downto 0) ;
     variable DispatcherReceiveCount : integer := 0 ; 
     variable BurstTransferCount     : integer := 0 ; 
     variable FifoWordCount, CheckWordCount : integer ; 
@@ -353,7 +356,11 @@ begin
                 FifoWordCount := FifoWordCount + 1 ;
               
               when STREAM_BURST_WORD_PARAM_MODE =>
-                BurstFifo.Check(Data & Param(USER_LEN downto 1)) ;
+                -- Checking done here to differentiate data from user
+                (ExpectedData, ExpectedUser) := BurstFifo.Pop ; 
+                AffirmIfEqual(BurstFifoID, Data, ExpectedData, "Data") ;
+                AffirmIfEqual(BurstFifoID, Param(USER_LEN downto 1), ExpectedUser, "User") ;
+--                BurstFifo.Check(Data & Param(USER_LEN downto 1)) ;
                 FifoWordCount := FifoWordCount + 1 ;
                               
               when others => 
@@ -363,12 +370,6 @@ begin
             exit when FifoWordCount >= CheckWordCount ; 
           end loop ; 
           
-          BurstTransferCount      := BurstTransferCount + 1 ; 
-          TransRec.IntFromModel   <= FifoWordCount ; 
-          TransRec.DataFromModel  <= ToTransaction(Data, TransRec.DataFromModel'length) ; 
-          TransRec.ParamFromModel <= ToTransaction(Param, TransRec.ParamFromModel'length) ; 
-          
-          DispatcherReceiveCount := DispatcherReceiveCount + 1 ; -- Operation or #Words Transfered based?
           Log(ModelID, 
             "Burst Check. " &
             " Operation# " & to_string (DispatcherReceiveCount) &  " " & 
@@ -381,6 +382,35 @@ begin
               DEBUG 
             ) ;
           end if ; 
+          ExpectedParam  := UpdateOptions(
+                      Param      => std_logic_vector(TransRec.ParamToModel),
+                      ParamID    => ParamID, 
+                      ParamDest  => ParamDest,
+                      ParamUser  => ParamUser,
+                      ParamLast  => ParamLast,           
+                      Count      => 0
+                    ) ;
+          -- ID, Dest, User, Last
+          if ID_LEN > 0 then
+            AffirmIfEqual(ModelID, Param(ID_RIGHT+ID_LEN-1 downto ID_RIGHT), 
+                ExpectedParam(ID_RIGHT+ID_LEN-1 downto ID_RIGHT), "ID") ;
+          end if ; 
+          if DEST_LEN > 0 then
+            AffirmIfEqual(ModelID, Param(DEST_RIGHT+DEST_LEN-1 downto DEST_RIGHT), 
+                ExpectedParam(DEST_RIGHT+DEST_LEN-1 downto DEST_RIGHT), "DEST") ;
+          end if ; 
+          if USER_LEN > 0 and BurstFifoMode /= STREAM_BURST_WORD_PARAM_MODE then
+            AffirmIfEqual(ModelID, Param(USER_RIGHT+USER_LEN-1 downto USER_RIGHT), 
+                ExpectedParam(USER_RIGHT+USER_LEN-1 downto USER_RIGHT), "USER") ;
+          end if ; 
+          AffirmIfEqual(ModelID, Param(0) or BurstBoundary, ExpectedParam(0), "Last") ;         
+          
+          BurstTransferCount      := BurstTransferCount + 1 ; 
+          TransRec.IntFromModel   <= FifoWordCount ; 
+          TransRec.DataFromModel  <= ToTransaction(Data, TransRec.DataFromModel'length) ; 
+          TransRec.ParamFromModel <= ToTransaction(Param, TransRec.ParamFromModel'length) ; 
+          
+          DispatcherReceiveCount := DispatcherReceiveCount + 1 ; -- Operation or #Words Transfered based?
           wait for 0 ns ; 
         end if ; 
         

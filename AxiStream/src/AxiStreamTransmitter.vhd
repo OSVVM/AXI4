@@ -109,7 +109,8 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
     IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamTransmitter'PATH_NAME))) ;
 
-  signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ; 
+  signal ModelID, BusFailedID : AlertLogIDType ; 
+--  signal ProtocolID, DataCheckID : AlertLogIDType ; 
   
   shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
   shared variable TransmitFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
@@ -140,8 +141,8 @@ begin
     -- Alerts 
     ID                      := GetAlertLogID(MODEL_INSTANCE_NAME) ; 
     ModelID                 <= ID ; 
-    ProtocolID              <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
-    DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
+--    ProtocolID              <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
+--    DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
     BusFailedID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
     wait ; 
   end process Initialize ;

@@ -139,7 +139,7 @@ begin
     -- Alerts 
     ID                      := GetAlertLogID(MODEL_INSTANCE_NAME) ; 
     ModelID                 <= ID ; 
-    ProtocolID              <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
+--    ProtocolID              <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
     DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
     BusFailedID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
     BurstFifo.SetAlertLogID(MODEL_INSTANCE_NAME & ": BurstFifo", ID) ;
@@ -252,7 +252,7 @@ begin
                         ParamLast  => ParamLast,           
                         Count      => ReceiveCount - LastOffsetCount
                       ) ;
-            AffirmIf( ModelID, 
+            AffirmIf( DataCheckID, 
                 (Data ?= ExpectedData and Param ?= ExpectedParam) = '1',
                 "Operation# " & to_string (DispatcherReceiveCount) & " " & 
                 " Received.  Data: " & to_hstring(Data) &         param_to_string(Param),

@@ -387,7 +387,7 @@ begin
                       ParamID    => ParamID, 
                       ParamDest  => ParamDest,
                       ParamUser  => ParamUser,
-                      ParamLast  => ParamLast,           
+                      ParamLast  => 1,           
                       Count      => 0
                     ) ;
           -- ID, Dest, User, Last

@@ -60,7 +60,7 @@ begin
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
-    -- Wait for testbench initialization 
+    -- Wait for simulation elaboration/initialization 
     wait for 0 ns ;  wait for 0 ns ;
     TranscriptOpen("./results/TbStream_SendGet1.txt") ;
     SetTranscriptMirror(TRUE) ; 
@@ -90,7 +90,7 @@ begin
   -- AxiTransmitterProc
   --   Generate transactions for AxiTransmitter
   ------------------------------------------------------------
-  AxiTransmitterProc : process
+  TransmitterProc : process
     variable Data : std_logic_vector(DATA_WIDTH-1 downto 0) ;
     variable OffSet : integer ; 
     variable TransactionCount : integer; 
@@ -131,14 +131,14 @@ begin
     WaitForClock(StreamTransmitterTransRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiTransmitterProc ;
+  end process TransmitterProc ;
 
 
   ------------------------------------------------------------
   -- AxiReceiverProc
   --   Generate transactions for AxiReceiver
   ------------------------------------------------------------
-  AxiReceiverProc : process
+  ReceiverProc : process
     variable ExpData, RxData : std_logic_vector(DATA_WIDTH-1 downto 0) ;  
     variable OffSet : integer ; 
     variable TransactionCount : integer ;     
@@ -193,7 +193,7 @@ begin
     WaitForClock(StreamReceiverTransRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiReceiverProc ;
+  end process ReceiverProc ;
 
 end SendGet1 ;
 

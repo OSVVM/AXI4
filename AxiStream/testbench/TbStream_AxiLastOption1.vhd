@@ -94,42 +94,42 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
     Data := (others => '0') ;
     for i in 0 to 15 loop 
       ID   := to_slv(i/2,   ID_LEN);
       Dest := to_slv(1+i/2, DEST_LEN) ; 
       User := to_slv(2+i/2, USER_LEN) ; 
-      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_LAST, 0) ;
+      SetAxiStreamOptions(StreamTxRec, DEFAULT_LAST, 0) ;
       for j in 0 to 63+i loop 
         Data := Data + 1 ; 
         exit when j = 63+i ; 
-        Send(StreamTransmitterTransRec, Data, ID & Dest & User & '-') ;
+        Send(StreamTxRec, Data, ID & Dest & User & '-') ;
       end loop ;
-      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_LAST, 1) ;
-      Send(StreamTransmitterTransRec, Data, ID & Dest & User & '-') ;
-      WaitForClock(StreamTransmitterTransRec, i/4) ; 
+      SetAxiStreamOptions(StreamTxRec, DEFAULT_LAST, 1) ;
+      Send(StreamTxRec, Data, ID & Dest & User & '-') ;
+      WaitForClock(StreamTxRec, i/4) ; 
       if i mod 4 = 0 then 
-        WaitForTransaction(StreamTransmitterTransRec) ; 
+        WaitForTransaction(StreamTxRec) ; 
       end if ; 
     end loop ; 
     
     Data := X"00_01_00_00" ; 
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_LAST, 8) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_LAST, 8) ;
     for i in 1 to 8*4 loop 
       Data := Data + 1 ; 
-      Send(StreamTransmitterTransRec, Data) ;
+      Send(StreamTxRec, Data) ;
     end loop ; 
     
     Data := X"00_02_00_00" ; 
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_LAST, 16) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_LAST, 16) ;
     for i in 1 to 16*4 loop 
       Data := Data + 1 ; 
-      Send(StreamTransmitterTransRec, Data) ;
+      Send(StreamTxRec, Data) ;
     end loop ; 
 
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -152,15 +152,15 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
     variable PopValid : boolean ; 
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
-    SetBurstMode(StreamReceiverTransRec, STREAM_BURST_BYTE_MODE) ;
+    WaitForClock(StreamRxRec, 2) ; 
+    SetBurstMode(StreamRxRec, STREAM_BURST_BYTE_MODE) ;
     Data := (others => '0') ;
 
     for i in 0 to 15 loop 
       ID   := to_slv(i/2,   ID_LEN);
       Dest := to_slv(1+i/2, DEST_LEN) ; 
       User := to_slv(2+i/2, USER_LEN) ; 
-      GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
+      GetBurst (StreamRxRec, NumBytes, RxParam) ;
       AffirmIfEqual(NumBytes, (64+i) * DATA_BYTES, "Receiver: NumBytes Received") ;
       AffirmIfEqual(RxID,   ID,   "Receiver, ID: ") ; 
       AffirmIfEqual(RxDest, Dest, "Receiver, Dest: ") ; 
@@ -175,7 +175,7 @@ begin
     
     Data := X"00_01_00_00" ; 
     for i in 1 to 4 loop 
-      GetBurst (StreamReceiverTransRec, NumBytes) ;
+      GetBurst (StreamRxRec, NumBytes) ;
       AffirmIfEqual(NumBytes, 8 * DATA_BYTES, "Receiver: NumBytes Received") ;
       for j in 1 to 8 loop 
         Data := Data + 1 ; 
@@ -187,7 +187,7 @@ begin
      
     Data := X"00_02_00_00" ; 
     for i in 1 to 4 loop 
-      GetBurst (StreamReceiverTransRec, NumBytes) ;
+      GetBurst (StreamRxRec, NumBytes) ;
       AffirmIfEqual(NumBytes, 16 * DATA_BYTES, "Receiver: NumBytes Received") ;
       for j in 1 to 16 loop 
         Data := Data + 1 ; 
@@ -198,7 +198,7 @@ begin
     end loop ; 
      
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

@@ -90,39 +90,39 @@ begin
     variable Data : std_logic_vector(DATA_WIDTH-1 downto 0) ;
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
     
 -- Start test phase 1:  Write Address
 WaitForBarrier(TestPhaseStart) ;
 log("Transmit Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
 
-    Send(StreamTransmitterTransRec,  X"0001_0010") ;  -- Pass
-    WaitForClock(StreamTransmitterTransRec, 10) ; 
+    Send(StreamTxRec,  X"0001_0010") ;  -- Pass
+    WaitForClock(StreamTxRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxiStreamOptions(StreamTransmitterTransRec, TRANSMIT_READY_TIME_OUT, 5) ;
-    Send(StreamTransmitterTransRec,  X"BAD0_0010") ;  -- Write Address Fail
-    WaitForClock(StreamTransmitterTransRec, 10) ; 
+    SetAxiStreamOptions(StreamTxRec, TRANSMIT_READY_TIME_OUT, 5) ;
+    Send(StreamTxRec,  X"BAD0_0010") ;  -- Write Address Fail
+    WaitForClock(StreamTxRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxiStreamOptions(StreamTransmitterTransRec, TRANSMIT_READY_TIME_OUT, 10) ;
-    Send(StreamTransmitterTransRec,  X"0002_0020") ;  -- Pass
-    WaitForClock(StreamTransmitterTransRec, 10) ; 
+    SetAxiStreamOptions(StreamTxRec, TRANSMIT_READY_TIME_OUT, 10) ;
+    Send(StreamTxRec,  X"0002_0020") ;  -- Pass
+    WaitForClock(StreamTxRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxiStreamOptions(StreamTransmitterTransRec, TRANSMIT_READY_TIME_OUT, 5) ;
-    Send(StreamTransmitterTransRec,  X"BAD0_0020") ;  -- Write Address Fail
-    WaitForClock(StreamTransmitterTransRec, 10) ; 
+    SetAxiStreamOptions(StreamTxRec, TRANSMIT_READY_TIME_OUT, 5) ;
+    Send(StreamTxRec,  X"BAD0_0020") ;  -- Write Address Fail
+    WaitForClock(StreamTxRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxiStreamOptions(StreamTransmitterTransRec, TRANSMIT_READY_TIME_OUT, 25) ;
-    Send(StreamTransmitterTransRec,  X"0003_0030") ;  -- Pass
-    WaitForClock(StreamTransmitterTransRec, 10) ; 
+    SetAxiStreamOptions(StreamTxRec, TRANSMIT_READY_TIME_OUT, 25) ;
+    Send(StreamTxRec,  X"0003_0030") ;  -- Pass
+    WaitForClock(StreamTxRec, 10) ; 
     print("") ;  print("") ;  
        
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -135,35 +135,35 @@ log("Transmit Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
   AxiReceiverProc : process
     variable Data : std_logic_vector(DATA_WIDTH-1 downto 0) ;  
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
+    WaitForClock(StreamRxRec, 2) ; 
     
 -- Start test phase 1:  Write Address
 WaitForBarrier(TestPhaseStart) ;
-    SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_DELAY_CYCLES, 7) ;
-    SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_BEFORE_VALID, FALSE) ;
+    SetAxiStreamOptions(StreamRxRec, RECEIVE_READY_DELAY_CYCLES, 7) ;
+    SetAxiStreamOptions(StreamRxRec, RECEIVE_READY_BEFORE_VALID, FALSE) ;
 
-    Get(StreamReceiverTransRec, Data) ;  -- Pass.  Ready Delay still = 0.
+    Get(StreamRxRec, Data) ;  -- Pass.  Ready Delay still = 0.
     AffirmIfEqual(Data, X"0001_0010", "Get Data: ") ;
 
-    Get(StreamReceiverTransRec, Data) ;  -- Fail
+    Get(StreamRxRec, Data) ;  -- Fail
     AffirmIfEqual(Data, X"BAD0_0010", "Get Data: ") ;
     
-    Get(StreamReceiverTransRec, Data) ;  -- Pass
+    Get(StreamRxRec, Data) ;  -- Pass
     AffirmIfEqual(Data, X"0002_0020", "Get Data: ") ;
     
-    Get(StreamReceiverTransRec, Data) ;  -- Fail
+    Get(StreamRxRec, Data) ;  -- Fail
     AffirmIfEqual(Data, X"BAD0_0020", "Get Data: ") ;
     
     -- Warning:  it takes one operation before these take impact
-    SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_DELAY_CYCLES, 0) ;
-    SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_BEFORE_VALID, TRUE) ;
+    SetAxiStreamOptions(StreamRxRec, RECEIVE_READY_DELAY_CYCLES, 0) ;
+    SetAxiStreamOptions(StreamRxRec, RECEIVE_READY_BEFORE_VALID, TRUE) ;
 
-    Get(StreamReceiverTransRec, Data) ;  -- Pass
+    Get(StreamRxRec, Data) ;  -- Pass
     AffirmIfEqual(Data, X"0003_0030", "Get Data: ") ;
     
      
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

@@ -94,7 +94,7 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
     Data := (others => '0') ;
     for i in 0 to 15 loop 
       ID   := to_slv(i/2,   ID_LEN);
@@ -103,18 +103,18 @@ begin
       for j in 0 to 63+i loop 
         Data := Data + 1 ; 
         exit when j = 63+i ; 
-        Send(StreamTransmitterTransRec, Data, ID & Dest & User & '0') ;
+        Send(StreamTxRec, Data, ID & Dest & User & '0') ;
       end loop ;
-      Send(StreamTransmitterTransRec, Data, ID & Dest & User & '1') ;
-      WaitForClock(StreamTransmitterTransRec, i/4) ; 
+      Send(StreamTxRec, Data, ID & Dest & User & '1') ;
+      WaitForClock(StreamTxRec, i/4) ; 
       if i mod 4 = 0 then 
-        WaitForTransaction(StreamTransmitterTransRec) ; 
+        WaitForTransaction(StreamTxRec) ; 
       end if ; 
     end loop ; 
 
 
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -137,15 +137,15 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
     variable PopValid : boolean ; 
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
-    SetBurstMode(StreamReceiverTransRec, STREAM_BURST_BYTE_MODE) ;
+    WaitForClock(StreamRxRec, 2) ; 
+    SetBurstMode(StreamRxRec, STREAM_BURST_BYTE_MODE) ;
     Data := (others => '0') ;
 
     for i in 0 to 15 loop 
       ID   := to_slv(i/2,   ID_LEN);
       Dest := to_slv(1+i/2, DEST_LEN) ; 
       User := to_slv(2+i/2, USER_LEN) ; 
-      GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
+      GetBurst (StreamRxRec, NumBytes, RxParam) ;
       AffirmIfEqual(NumBytes, (64+i) * DATA_BYTES, "Receiver: NumBytes Received") ;
       AffirmIfEqual(RxID,   ID,   "Receiver, ID: ") ; 
       AffirmIfEqual(RxDest, Dest, "Receiver, Dest: ") ; 
@@ -159,7 +159,7 @@ begin
     end loop ; 
      
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

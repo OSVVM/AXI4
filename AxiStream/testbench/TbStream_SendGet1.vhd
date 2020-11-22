@@ -99,7 +99,7 @@ begin
     variable TxAlertLogID : AlertLogIDType ; 
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
     
     log("Send 256 words with each byte incrementing") ;
     for i in 1 to 256 loop 
@@ -108,27 +108,27 @@ begin
       for j in 0 to DATA_BYTES-1 loop 
         Data := to_slv((OffSet + j) mod 256, 8) & Data(Data'left downto 8) ;
       end loop ; 
-      Send(StreamTransmitterTransRec, Data) ;
-      GetTransactionCount(StreamTransmitterTransRec, TransactionCount) ;
+      Send(StreamTxRec, Data) ;
+      GetTransactionCount(StreamTxRec, TransactionCount) ;
       AffirmIfEqual(TransactionCount, i, "Transmit TransactionCount:") ;
       if i mod 2 = 0 then 
-        GetErrorCount(StreamTransmitterTransRec, ErrorCount) ;
+        GetErrorCount(StreamTxRec, ErrorCount) ;
         AffirmIfEqual(ErrorCount, 0, "Transmitter, GetErrorCount: Verify that ErrorCount is 0") ;
       else
-        GetAlertLogID(StreamTransmitterTransRec, TxAlertLogID) ;
+        GetAlertLogID(StreamTxRec, TxAlertLogID) ;
         ErrorCount := GetAlertCount(TxAlertLogID) ; 
         AffirmIfEqual(ErrorCount, 0, "Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0") ;
       end if ; 
       if (i mod 32) = 0 then
         -- Verify that no transactions are pending
         CurTime := now ; 
-        WaitForTransaction(StreamTransmitterTransRec) ;
+        WaitForTransaction(StreamTxRec) ;
         AffirmIfEqual(now, CurTime, "Transmitter: WaitForTransaction executes in 0 time when using blocking transactions") ;
       end if ; 
     end loop ;
    
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process TransmitterProc ;
@@ -146,7 +146,7 @@ begin
     variable CurTime : time ; 
     variable TxAlertLogID : AlertLogIDType ; 
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
+    WaitForClock(StreamRxRec, 2) ; 
     
     -- Get and check the 256 words
     log("Send 256 words with each byte incrementing") ;
@@ -158,39 +158,39 @@ begin
       end loop ; 
       -- Alternate using Get and Check
       if (i mod 2) /= 0 then 
-        Get(StreamReceiverTransRec, RxData) ; 
-        GetTransactionCount(StreamReceiverTransRec, TransactionCount) ;
+        Get(StreamRxRec, RxData) ; 
+        GetTransactionCount(StreamRxRec, TransactionCount) ;
         AffirmIfEqual(TransactionCount, i, "Receive TranasctionCount:") ;
         AffirmIfEqual(RxData, ExpData, "Get: ") ;
       else 
         -- Create two check failures
         if (i mod 128) /= 0 then 
-          Check(StreamReceiverTransRec, ExpData) ; 
+          Check(StreamRxRec, ExpData) ; 
         else
           -- Create error on model side
-          Check(StreamReceiverTransRec, ExpData+1) ; 
+          Check(StreamRxRec, ExpData+1) ; 
         end if ; 
-        GetTransactionCount(StreamReceiverTransRec, TransactionCount) ;
+        GetTransactionCount(StreamRxRec, TransactionCount) ;
         AffirmIfEqual(TransactionCount, i, "Receive TranasctionCount:") ;
       end if ; 
       if i mod 2 = 0 then 
-        GetErrorCount(StreamReceiverTransRec, ErrorCount) ;
+        GetErrorCount(StreamRxRec, ErrorCount) ;
         AffirmIfEqual(ErrorCount, i/128, "Transmitter, GetErrorCount: Verify that ErrorCount is 0") ;
       else
-        GetAlertLogID(StreamReceiverTransRec, TxAlertLogID) ;
+        GetAlertLogID(StreamRxRec, TxAlertLogID) ;
         ErrorCount := GetAlertCount(TxAlertLogID) ; 
         AffirmIfEqual(ErrorCount, i/128, "Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0") ;
       end if ; 
       if (i mod 32) = 0 then
         -- Verify that no transactions are pending
         CurTime := now ; 
-        WaitForTransaction(StreamReceiverTransRec) ;
+        WaitForTransaction(StreamRxRec) ;
         AffirmIfEqual(now, CurTime, "Receiver: WaitForTransaction executes in 0 time when using blocking transactions") ;
       end if ; 
      end loop ;
      
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process ReceiverProc ;

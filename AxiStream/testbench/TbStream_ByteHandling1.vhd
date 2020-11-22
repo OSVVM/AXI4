@@ -92,12 +92,12 @@ begin
     variable Data : std_logic_vector(DATA_WIDTH-1 downto 0) ;
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
     
     -- Single Bytes - with Z
     Data := (DATA_WIDTH-1 downto 8 => 'Z') & X"01" ;
     for i in 1 to DATA_BYTES loop 
-      Send(StreamTransmitterTransRec, Data) ;
+      Send(StreamTxRec, Data) ;
       Data := Data(DATA_WIDTH-8-1 downto 0) & X"ZZ" ;
     end loop ; 
     
@@ -105,7 +105,7 @@ begin
     If DATA_BYTES > 2 then
       Data := (DATA_WIDTH-1 downto 16 => 'Z') & X"0302" ;
       for i in 1 to DATA_BYTES-1 loop 
-        Send(StreamTransmitterTransRec, Data) ;
+        Send(StreamTxRec, Data) ;
         Data := Data(DATA_WIDTH-8-1 downto 0) & X"ZZ" ;
       end loop ; 
     end if; 
@@ -114,7 +114,7 @@ begin
     If DATA_BYTES > 3 then
       Data := (DATA_WIDTH-1 downto 24 => 'Z') & X"060504" ;
       for i in 1 to DATA_BYTES-2 loop 
-        Send(StreamTransmitterTransRec, Data) ;
+        Send(StreamTxRec, Data) ;
         Data := Data(DATA_WIDTH-8-1 downto 0) & X"ZZ" ;
       end loop ; 
     end if; 
@@ -122,7 +122,7 @@ begin
     -- Single Bytes - with U
     Data := (DATA_WIDTH-1 downto 8 => 'U') & X"01" ;
     for i in 1 to DATA_BYTES loop 
-      Send(StreamTransmitterTransRec, Data) ;
+      Send(StreamTxRec, Data) ;
       Data := Data(DATA_WIDTH-8-1 downto 0) & X"UU" ;
     end loop ; 
     
@@ -130,7 +130,7 @@ begin
     If DATA_BYTES > 2 then
       Data := (DATA_WIDTH-1 downto 16 => 'U') & X"0302" ;
       for i in 1 to DATA_BYTES-1 loop 
-        Send(StreamTransmitterTransRec, Data) ;
+        Send(StreamTxRec, Data) ;
         Data := Data(DATA_WIDTH-8-1 downto 0) & X"UU" ;
       end loop ; 
     end if; 
@@ -139,13 +139,13 @@ begin
     If DATA_BYTES > 3 then
       Data := (DATA_WIDTH-1 downto 24 => 'U') & X"060504" ;
       for i in 1 to DATA_BYTES-2 loop 
-        Send(StreamTransmitterTransRec, Data) ;
+        Send(StreamTxRec, Data) ;
         Data := Data(DATA_WIDTH-8-1 downto 0) & X"UU" ;
       end loop ; 
     end if; 
    
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -158,14 +158,14 @@ begin
   AxiReceiverProc : process
     variable Data, RxData : std_logic_vector(DATA_WIDTH-1 downto 0) ;  
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
+    WaitForClock(StreamRxRec, 2) ; 
     
     
     for i in 1 to 2 loop 
       -- Single Bytes - with Z, then U
       Data := (DATA_WIDTH-1 downto 8 => '-') & X"01" ;
       for i in 1 to DATA_BYTES loop 
-        Get(StreamReceiverTransRec, RxData) ; 
+        Get(StreamRxRec, RxData) ; 
         AffirmIfEqual(RxData, Data, "Get One Byte: ") ;
         Data := Data(DATA_WIDTH-8-1 downto 0) & X"--" ;
       end loop ; 
@@ -174,7 +174,7 @@ begin
       If DATA_BYTES > 2 then
         Data := (DATA_WIDTH-1 downto 16 => '-') & X"0302" ;
         for i in 1 to DATA_BYTES-1 loop 
-          Get(StreamReceiverTransRec, RxData) ; 
+          Get(StreamRxRec, RxData) ; 
           AffirmIfEqual(RxData, Data, "Get Two Bytes: ") ;
           Data := Data(DATA_WIDTH-8-1 downto 0) & X"--" ;
         end loop ; 
@@ -184,7 +184,7 @@ begin
       If DATA_BYTES > 3 then
         Data := (DATA_WIDTH-1 downto 24 => '-') & X"060504" ;
         for i in 1 to DATA_BYTES-2 loop 
-          Get(StreamReceiverTransRec, RxData) ; 
+          Get(StreamRxRec, RxData) ; 
           AffirmIfEqual(RxData, Data, "Get Three Bytes: ") ;
           Data := Data(DATA_WIDTH-8-1 downto 0) & X"--" ;
         end loop ; 
@@ -193,7 +193,7 @@ begin
     end loop ;
      
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

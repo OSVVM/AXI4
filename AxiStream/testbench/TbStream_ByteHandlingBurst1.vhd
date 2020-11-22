@@ -93,7 +93,7 @@ begin
     variable BytesToSend : integer ; 
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
     
     -- Single Bytes - with Z
     BytesToSend := 0 ; 
@@ -137,7 +137,7 @@ begin
       end loop ; 
     end if; 
     
-    SendBurst(StreamTransmitterTransRec, BytesToSend) ; -- 18 
+    SendBurst(StreamTxRec, BytesToSend) ; -- 18 
     
     -- Single Bytes - with U
     BytesToSend := 0 ;
@@ -180,10 +180,10 @@ begin
       end loop ; 
     end if; 
    
-    SendBurst(StreamTransmitterTransRec, BytesToSend) ; -- 18 
+    SendBurst(StreamTxRec, BytesToSend) ; -- 18 
 
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -198,11 +198,11 @@ begin
     variable NumBytes : integer ; 
     variable PopValid : boolean ; 
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
+    WaitForClock(StreamRxRec, 2) ; 
     
     Data2 := to_slv(1, Data2'length) ;
     for i in 1 to 2 loop 
-      GetBurst (StreamReceiverTransRec, NumBytes) ;
+      GetBurst (StreamRxRec, NumBytes) ;
       
       -- Single Bytes - with Z, then U
       Data  := (DATA_WIDTH-1 downto 8 => '-') & X"01" ;
@@ -250,7 +250,7 @@ begin
     end loop ;
      
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

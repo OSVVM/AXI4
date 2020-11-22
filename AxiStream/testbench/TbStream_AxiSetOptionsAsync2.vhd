@@ -95,54 +95,54 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
     
     ID   := (others => '0') ;
     Dest := (others => '0') ;
     User := (others => '0') ;
     Data := (others => '0') ;
 
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID,   ID   + 3) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, Dest + 2) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, User + 1) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_ID,   ID   + 3) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_DEST, Dest + 2) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_USER, User + 1) ;
     
     for i in 1 to 4 loop 
-      SendAsync(StreamTransmitterTransRec, Data) ;
+      SendAsync(StreamTxRec, Data) ;
       Data := Data + 1; 
     end loop ;
     
     for i in 1 to 4 loop 
-      SendAsync(StreamTransmitterTransRec, Data, (USER+5) & "0") ;
+      SendAsync(StreamTxRec, Data, (USER+5) & "0") ;
       Data := Data + 1; 
     end loop ;
     
     for i in 1 to 4 loop 
-      SendAsync(StreamTransmitterTransRec, Data, (Dest+6) & (USER+5) & "0") ;
+      SendAsync(StreamTxRec, Data, (Dest+6) & (USER+5) & "0") ;
       Data := Data + 1; 
     end loop ;
     
     for i in 1 to 4 loop 
-      SendAsync(StreamTransmitterTransRec, Data, (ID+7) & (Dest+6) & (USER+5) & "0") ;
+      SendAsync(StreamTxRec, Data, (ID+7) & (Dest+6) & (USER+5) & "0") ;
       Data := Data + 1; 
     end loop ;
     
     for i in 1 to 4 loop 
-      SendAsync(StreamTransmitterTransRec, Data, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
+      SendAsync(StreamTxRec, Data, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
       Data := Data + 1; 
     end loop ;
 
     for i in 1 to 4 loop 
-      SendAsync(StreamTransmitterTransRec, Data, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
+      SendAsync(StreamTxRec, Data, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
       Data := Data + 1; 
     end loop ;
 
     for i in 1 to 4 loop 
-      SendAsync(StreamTransmitterTransRec, Data, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-") ;
+      SendAsync(StreamTxRec, Data, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-") ;
       Data := Data + 1; 
     end loop ;
    
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -162,16 +162,16 @@ begin
     variable TryCount  : integer ; 
     variable Available : boolean ; 
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
+    WaitForClock(StreamRxRec, 2) ; 
     
     ID   := (others => '0') ;
     Dest := (others => '0') ;
     User := (others => '0') ;
     Data := (others => '0') ;
 
-    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_ID,   ID   + 3) ;
-    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_DEST, Dest + 2) ;
-    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_USER, User + 1) ;
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_ID,   ID   + 3) ;
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_DEST, Dest + 2) ;
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_USER, User + 1) ;
     
     Param := (ID+3) & (Dest+2) & (User+1) & "0" ;
     for i in 1 to 4 loop 
@@ -179,18 +179,18 @@ begin
       loop 
         case i is 
           when 1 =>
-            TryGet(StreamReceiverTransRec, RxData, RxParam, Available) ;
+            TryGet(StreamRxRec, RxData, RxParam, Available) ;
             if Available then
               AffirmIfEqual(RxData,  Data,    "Data ") ; 
               AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
             end if ; 
           when 2 => 
-            TryCheck(StreamReceiverTransRec, Data, Param, Available) ;
+            TryCheck(StreamRxRec, Data, Param, Available) ;
           when others =>
-            TryCheck(StreamReceiverTransRec, Data, Available) ;
+            TryCheck(StreamRxRec, Data, Available) ;
         end case ; 
         exit when Available ; 
-        WaitForClock(StreamReceiverTransRec, 1) ; 
+        WaitForClock(StreamRxRec, 1) ; 
         TryCount := TryCount + 1 ;
       end loop ;
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -203,18 +203,18 @@ begin
       loop 
         case i is 
           when 1 =>
-            TryGet(StreamReceiverTransRec, RxData, RxParam, Available) ;
+            TryGet(StreamRxRec, RxData, RxParam, Available) ;
             if Available then
               AffirmIfEqual(RxData,  Data,    "Data ") ; 
               AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
             end if ; 
           when 2 => 
-            TryCheck(StreamReceiverTransRec, Data, Param, Available) ;
+            TryCheck(StreamRxRec, Data, Param, Available) ;
           when others =>
-            TryCheck(StreamReceiverTransRec, Data, (USER+5) & "0", Available) ;
+            TryCheck(StreamRxRec, Data, (USER+5) & "0", Available) ;
         end case ; 
         exit when Available ; 
-        WaitForClock(StreamReceiverTransRec, 1) ; 
+        WaitForClock(StreamRxRec, 1) ; 
         TryCount := TryCount + 1 ;
       end loop ;
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -227,18 +227,18 @@ begin
       loop 
         case i is 
           when 1 =>
-            TryGet(StreamReceiverTransRec, RxData, RxParam, Available) ;
+            TryGet(StreamRxRec, RxData, RxParam, Available) ;
             if Available then
               AffirmIfEqual(RxData,  Data,    "Data ") ; 
               AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
             end if ; 
           when 2 => 
-            TryCheck(StreamReceiverTransRec, Data, Param, Available) ;
+            TryCheck(StreamRxRec, Data, Param, Available) ;
           when others =>
-            TryCheck(StreamReceiverTransRec, Data, (Dest+6) & (USER+5) & "0", Available) ;
+            TryCheck(StreamRxRec, Data, (Dest+6) & (USER+5) & "0", Available) ;
         end case ; 
         exit when Available ; 
-        WaitForClock(StreamReceiverTransRec, 1) ; 
+        WaitForClock(StreamRxRec, 1) ; 
         TryCount := TryCount + 1 ;
       end loop ;
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -251,18 +251,18 @@ begin
       loop 
         case i is 
           when 1 =>
-            TryGet(StreamReceiverTransRec, RxData, RxParam, Available) ;
+            TryGet(StreamRxRec, RxData, RxParam, Available) ;
             if Available then
               AffirmIfEqual(RxData,  Data,    "Data ") ; 
               AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
             end if ; 
           when 2 => 
-            TryCheck(StreamReceiverTransRec, Data, Param, Available) ;
+            TryCheck(StreamRxRec, Data, Param, Available) ;
           when others =>
-            TryCheck(StreamReceiverTransRec, Data, (ID+7) & (Dest+6) & (USER+5) & "0", Available) ;
+            TryCheck(StreamRxRec, Data, (ID+7) & (Dest+6) & (USER+5) & "0", Available) ;
         end case ; 
         exit when Available ; 
-        WaitForClock(StreamReceiverTransRec, 1) ; 
+        WaitForClock(StreamRxRec, 1) ; 
         TryCount := TryCount + 1 ;
       end loop ;
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -275,18 +275,18 @@ begin
       loop 
         case i is 
           when 1 =>
-            TryGet(StreamReceiverTransRec, RxData, RxParam, Available) ;
+            TryGet(StreamRxRec, RxData, RxParam, Available) ;
             if Available then
               AffirmIfEqual(RxData,  Data,    "Data ") ; 
               AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
             end if ; 
           when 2 => 
-            TryCheck(StreamReceiverTransRec, Data, Param, Available) ;
+            TryCheck(StreamRxRec, Data, Param, Available) ;
           when others =>
-            TryCheck(StreamReceiverTransRec, Data, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-", Available) ;
+            TryCheck(StreamRxRec, Data, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-", Available) ;
         end case ; 
         exit when Available ; 
-        WaitForClock(StreamReceiverTransRec, 1) ; 
+        WaitForClock(StreamRxRec, 1) ; 
         TryCount := TryCount + 1 ;
       end loop ;
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -299,18 +299,18 @@ begin
       loop 
         case i is 
           when 1 =>
-            TryGet(StreamReceiverTransRec, RxData, RxParam, Available) ;
+            TryGet(StreamRxRec, RxData, RxParam, Available) ;
             if Available then
               AffirmIfEqual(RxData,  Data,    "Data ") ; 
               AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
             end if ; 
           when 2 => 
-            TryCheck(StreamReceiverTransRec, Data, Param, Available) ;
+            TryCheck(StreamRxRec, Data, Param, Available) ;
           when others =>
-            TryCheck(StreamReceiverTransRec, Data, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-", Available) ;
+            TryCheck(StreamRxRec, Data, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-", Available) ;
         end case ; 
         exit when Available ; 
-        WaitForClock(StreamReceiverTransRec, 1) ; 
+        WaitForClock(StreamRxRec, 1) ; 
         TryCount := TryCount + 1 ;
       end loop ;
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -323,18 +323,18 @@ begin
       loop 
         case i is 
           when 1 =>
-            TryGet(StreamReceiverTransRec, RxData, RxParam, Available) ;
+            TryGet(StreamRxRec, RxData, RxParam, Available) ;
             if Available then
               AffirmIfEqual(RxData,  Data,    "Data ") ; 
               AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
             end if ; 
           when 2 => 
-            TryCheck(StreamReceiverTransRec, Data, Param, Available) ;
+            TryCheck(StreamRxRec, Data, Param, Available) ;
           when others =>
-            TryCheck(StreamReceiverTransRec, Data, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-", Available) ;
+            TryCheck(StreamRxRec, Data, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-", Available) ;
         end case ; 
         exit when Available ; 
-        WaitForClock(StreamReceiverTransRec, 1) ; 
+        WaitForClock(StreamRxRec, 1) ; 
         TryCount := TryCount + 1 ;
       end loop ;
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -343,7 +343,7 @@ begin
     
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

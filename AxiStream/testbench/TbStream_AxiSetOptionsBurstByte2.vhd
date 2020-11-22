@@ -94,40 +94,40 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
-    SetBurstMode(StreamTransmitterTransRec, STREAM_BURST_BYTE_MODE) ;
+    WaitForClock(StreamTxRec, 2) ; 
+    SetBurstMode(StreamTxRec, STREAM_BURST_BYTE_MODE) ;
     
     ID   := (others => '0') ;
     Dest := (others => '0') ;
     User := (others => '0') ;
 
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID,   ID   + 3) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, Dest + 2) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, User + 1) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_ID,   ID   + 3) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_DEST, Dest + 2) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_USER, User + 1) ;
     
     PushBurstIncrement(TxBurstFifo, 0, 32) ;
-    SendBurst(StreamTransmitterTransRec, 32) ;
+    SendBurst(StreamTxRec, 32) ;
     
     PushBurstIncrement(TxBurstFifo, 32, 32) ;
-    SendBurst(StreamTransmitterTransRec, 32, (USER+5) & "0") ;
+    SendBurst(StreamTxRec, 32, (USER+5) & "0") ;
     
     PushBurstIncrement(TxBurstFifo, 64, 32) ;
-    SendBurst(StreamTransmitterTransRec, 32, (Dest+6) & (USER+5) & "0") ;
+    SendBurst(StreamTxRec, 32, (Dest+6) & (USER+5) & "0") ;
     
     PushBurstIncrement(TxBurstFifo, 96, 32) ;
-    SendBurst(StreamTransmitterTransRec, 32, (ID+7) & (Dest+6) & (USER+5) & "0") ;
+    SendBurst(StreamTxRec, 32, (ID+7) & (Dest+6) & (USER+5) & "0") ;
     
     PushBurstIncrement(TxBurstFifo, 128, 32) ;
-    SendBurst(StreamTransmitterTransRec, 32, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
+    SendBurst(StreamTxRec, 32, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
 
     PushBurstIncrement(TxBurstFifo, 160, 32) ;
-    SendBurst(StreamTransmitterTransRec, 32, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
+    SendBurst(StreamTxRec, 32, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
 
     PushBurstIncrement(TxBurstFifo, 192, 32) ;
-    SendBurst(StreamTransmitterTransRec, 32, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-") ;
+    SendBurst(StreamTxRec, 32, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-") ;
    
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -145,63 +145,63 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
     variable Param, RxParam : std_logic_vector(ID_LEN + DEST_LEN + USER_LEN downto 0) ;
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
-    SetBurstMode(StreamReceiverTransRec, STREAM_BURST_BYTE_MODE) ;
+    WaitForClock(StreamRxRec, 2) ; 
+    SetBurstMode(StreamRxRec, STREAM_BURST_BYTE_MODE) ;
     
     ID   := (others => '0') ;
     Dest := (others => '0') ;
     User := (others => '0') ;
     Data := (others => '0') ;
 
-    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_ID,   ID   + 3) ;
-    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_DEST, Dest + 2) ;
-    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_USER, User + 1) ;
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_ID,   ID   + 3) ;
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_DEST, Dest + 2) ;
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_USER, User + 1) ;
     
     Param := (ID+3) & (Dest+2) & (User+1) & "1" ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
+    GetBurst (StreamRxRec, NumBytes, RxParam) ;
     AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
     AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
     CheckBurstIncrement(RxBurstFifo, 0, NumBytes) ;
     
     
     Param := (ID+3) & (Dest+2) & (User+5) & "1" ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
+    GetBurst (StreamRxRec, NumBytes, RxParam) ;
     AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
     AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
     CheckBurstIncrement(RxBurstFifo, 32, NumBytes) ;
     
     Param := (ID+3) & (Dest+6) & (User+5) & "1" ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
+    GetBurst (StreamRxRec, NumBytes, RxParam) ;
     AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
     AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
     CheckBurstIncrement(RxBurstFifo, 64, NumBytes) ;
     
     Param := (ID+7) & (Dest+6) & (User+5) & "1" ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
+    GetBurst (StreamRxRec, NumBytes, RxParam) ;
     AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
     AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
     CheckBurstIncrement(RxBurstFifo, 96, NumBytes) ;
     
     Param := (ID+3) & (Dest+2) & (User+5) & "1" ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
+    GetBurst (StreamRxRec, NumBytes, RxParam) ;
     AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
     AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
     CheckBurstIncrement(RxBurstFifo, 128, NumBytes) ;
 
     Param := (ID+3) & (Dest+6) & (User+1) & "1" ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
+    GetBurst (StreamRxRec, NumBytes, RxParam) ;
     AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
     AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
     CheckBurstIncrement(RxBurstFifo, 160, NumBytes) ;
 
     Param := (ID+7) & (Dest+2) & (User+1) & "1" ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
+    GetBurst (StreamRxRec, NumBytes, RxParam) ;
     AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
     AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
     CheckBurstIncrement(RxBurstFifo, 192, NumBytes) ;
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

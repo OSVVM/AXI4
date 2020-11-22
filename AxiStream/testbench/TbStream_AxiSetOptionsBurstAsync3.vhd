@@ -95,8 +95,8 @@ begin
     variable Data : std_logic_vector(DATA_WIDTH-1 downto 0) ;  
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
-    SetBurstMode(StreamTransmitterTransRec, STREAM_BURST_WORD_PARAM_MODE) ;
+    WaitForClock(StreamTxRec, 2) ; 
+    SetBurstMode(StreamTxRec, STREAM_BURST_WORD_PARAM_MODE) ;
     
     ID   := (others => '0') ;
     Dest := (others => '0') ;
@@ -104,61 +104,61 @@ begin
     Data := (others => '0') ; 
     TxUser := (others => '0') ;
 
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID,   ID   + 3) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, Dest + 2) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, User + 1) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_ID,   ID   + 3) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_DEST, Dest + 2) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_USER, User + 1) ;
     
     for i in 1 to 32 loop
       TxBurstFifo.push(Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurstAsync(StreamTransmitterTransRec, 32) ;
+    SendBurstAsync(StreamTxRec, 32) ;
     
     for i in 1 to 32 loop
       TxBurstFifo.push(Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurstAsync(StreamTransmitterTransRec, 32, (USER+5) & "0") ;
+    SendBurstAsync(StreamTxRec, 32, (USER+5) & "0") ;
     
     for i in 1 to 32 loop
       TxBurstFifo.push(Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurstAsync(StreamTransmitterTransRec, 32, (Dest+6) & (USER+5) & "0") ;
+    SendBurstAsync(StreamTxRec, 32, (Dest+6) & (USER+5) & "0") ;
     
     for i in 1 to 32 loop
       TxBurstFifo.push(Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurstAsync(StreamTransmitterTransRec, 32, (ID+7) & (Dest+6) & (USER+5) & "0") ;
+    SendBurstAsync(StreamTxRec, 32, (ID+7) & (Dest+6) & (USER+5) & "0") ;
     
     for i in 1 to 32 loop
       TxBurstFifo.push(Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurstAsync(StreamTransmitterTransRec, 32, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
+    SendBurstAsync(StreamTxRec, 32, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
 
     for i in 1 to 32 loop
       TxBurstFifo.push(Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurstAsync(StreamTransmitterTransRec, 32, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
+    SendBurstAsync(StreamTxRec, 32, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
 
     for i in 1 to 32 loop
       TxBurstFifo.push(Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurstAsync(StreamTransmitterTransRec, 32, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-") ;
+    SendBurstAsync(StreamTxRec, 32, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-") ;
          
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -178,8 +178,8 @@ begin
     variable TryCount  : integer ; 
     variable Available : boolean ; 
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
-    SetBurstMode(StreamReceiverTransRec, STREAM_BURST_WORD_PARAM_MODE) ;
+    WaitForClock(StreamRxRec, 2) ; 
+    SetBurstMode(StreamRxRec, STREAM_BURST_WORD_PARAM_MODE) ;
     
     ID   := (others => '0') ;
     Dest := (others => '0') ;
@@ -187,16 +187,16 @@ begin
     ExpData := (others => '0') ;
     ExpUser := (others => '0') ;
 
-    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_ID,   ID   + 3) ;
-    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_DEST, Dest + 2) ;
-    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_USER, User + 1) ;
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_ID,   ID   + 3) ;
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_DEST, Dest + 2) ;
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_USER, User + 1) ;
     
     Param := (ID+3) & (Dest+2) & (X"F") & "1" ;
     TryCount := 0 ; 
     loop 
-      TryGetBurst (StreamReceiverTransRec, NumBytes, RxParam, Available) ;
+      TryGetBurst (StreamRxRec, NumBytes, RxParam, Available) ;
       exit when Available ; 
-      WaitForClock(StreamReceiverTransRec, 1) ; 
+      WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -214,9 +214,9 @@ begin
     Param := (ID+3) & (Dest+2) & (X"F") & "1" ;
     TryCount := 0 ; 
     loop 
-      TryGetBurst (StreamReceiverTransRec, NumBytes, RxParam, Available) ;
+      TryGetBurst (StreamRxRec, NumBytes, RxParam, Available) ;
       exit when Available ; 
-      WaitForClock(StreamReceiverTransRec, 1) ; 
+      WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -233,9 +233,9 @@ begin
     Param := (ID+3) & (Dest+6) & (X"F") & "1" ;
     TryCount := 0 ; 
     loop 
-      TryGetBurst (StreamReceiverTransRec, NumBytes, RxParam, Available) ;
+      TryGetBurst (StreamRxRec, NumBytes, RxParam, Available) ;
       exit when Available ; 
-      WaitForClock(StreamReceiverTransRec, 1) ; 
+      WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -252,9 +252,9 @@ begin
     Param := (ID+7) & (Dest+6) & (X"F") & "1" ;
     TryCount := 0 ; 
     loop 
-      TryGetBurst (StreamReceiverTransRec, NumBytes, RxParam, Available) ;
+      TryGetBurst (StreamRxRec, NumBytes, RxParam, Available) ;
       exit when Available ; 
-      WaitForClock(StreamReceiverTransRec, 1) ; 
+      WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -271,9 +271,9 @@ begin
     Param := (ID+3) & (Dest+2) & (X"F") & "1" ;
     TryCount := 0 ; 
     loop 
-      TryGetBurst (StreamReceiverTransRec, NumBytes, RxParam, Available) ;
+      TryGetBurst (StreamRxRec, NumBytes, RxParam, Available) ;
       exit when Available ; 
-      WaitForClock(StreamReceiverTransRec, 1) ; 
+      WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -290,9 +290,9 @@ begin
     Param := (ID+3) & (Dest+6) & (X"F") & "1" ;
     TryCount := 0 ; 
     loop 
-      TryGetBurst (StreamReceiverTransRec, NumBytes, RxParam, Available) ;
+      TryGetBurst (StreamRxRec, NumBytes, RxParam, Available) ;
       exit when Available ; 
-      WaitForClock(StreamReceiverTransRec, 1) ; 
+      WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -309,9 +309,9 @@ begin
     Param := (ID+7) & (Dest+2) & (X"F") & "1" ;
     TryCount := 0 ; 
     loop 
-      TryGetBurst (StreamReceiverTransRec, NumBytes, RxParam, Available) ;
+      TryGetBurst (StreamRxRec, NumBytes, RxParam, Available) ;
       exit when Available ; 
-      WaitForClock(StreamReceiverTransRec, 1) ; 
+      WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -326,7 +326,7 @@ begin
     end loop ;    
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

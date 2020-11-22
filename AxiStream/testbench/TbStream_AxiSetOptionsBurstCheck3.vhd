@@ -95,8 +95,8 @@ begin
     variable Data : std_logic_vector(DATA_WIDTH-1 downto 0) ;  
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
-    SetBurstMode(StreamTransmitterTransRec, STREAM_BURST_WORD_PARAM_MODE) ;
+    WaitForClock(StreamTxRec, 2) ; 
+    SetBurstMode(StreamTxRec, STREAM_BURST_WORD_PARAM_MODE) ;
     
     ID   := (others => '0') ;
     Dest := (others => '0') ;
@@ -104,61 +104,61 @@ begin
     Data := (others => '0') ; 
     TxUser := (others => '0') ;
 
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID,   ID   + 3) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, Dest + 2) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, User + 1) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_ID,   ID   + 3) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_DEST, Dest + 2) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_USER, User + 1) ;
     
     for i in 1 to 32 loop
       TxBurstFifo.push(Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurst(StreamTransmitterTransRec, 32) ;
+    SendBurst(StreamTxRec, 32) ;
     
     for i in 1 to 32 loop
       TxBurstFifo.push(Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurst(StreamTransmitterTransRec, 32, (USER+5) & "0") ;
+    SendBurst(StreamTxRec, 32, (USER+5) & "0") ;
     
     for i in 1 to 32 loop
       TxBurstFifo.push(Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurst(StreamTransmitterTransRec, 32, (Dest+6) & (USER+5) & "0") ;
+    SendBurst(StreamTxRec, 32, (Dest+6) & (USER+5) & "0") ;
     
     for i in 1 to 32 loop
       TxBurstFifo.push(Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurst(StreamTransmitterTransRec, 32, (ID+7) & (Dest+6) & (USER+5) & "0") ;
+    SendBurst(StreamTxRec, 32, (ID+7) & (Dest+6) & (USER+5) & "0") ;
     
     for i in 1 to 32 loop
       TxBurstFifo.push(Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurst(StreamTransmitterTransRec, 32, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
+    SendBurst(StreamTxRec, 32, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
 
     for i in 1 to 32 loop
       TxBurstFifo.push(Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurst(StreamTransmitterTransRec, 32, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
+    SendBurst(StreamTxRec, 32, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
 
     for i in 1 to 32 loop
       TxBurstFifo.push(Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurst(StreamTransmitterTransRec, 32, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-") ;
+    SendBurst(StreamTxRec, 32, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-") ;
    
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -174,8 +174,8 @@ begin
     variable Dest : std_logic_vector(DEST_LEN-1 downto 0) ;  -- 4
     variable User,  RxUser : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
-    SetBurstMode(StreamReceiverTransRec, STREAM_BURST_WORD_PARAM_MODE) ;
+    WaitForClock(StreamRxRec, 2) ; 
+    SetBurstMode(StreamRxRec, STREAM_BURST_WORD_PARAM_MODE) ;
     
     ID   := (others => '0') ;
     Dest := (others => '0') ;
@@ -183,16 +183,16 @@ begin
     Data := (others => '0') ; 
     RxUser := (others => '0') ;
 
-    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_ID,   ID   + 3) ;
-    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_DEST, Dest + 2) ;
-    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_USER, User + 1) ;
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_ID,   ID   + 3) ;
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_DEST, Dest + 2) ;
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_USER, User + 1) ;
     
     for i in 1 to 32 loop
       RxBurstFifo.push(Data & RxUser) ;
       Data   := Data + 1 ; 
       RxUser := RxUser + 1 ; 
     end loop ; 
-    CheckBurst(StreamReceiverTransRec, 32, "1") ;
+    CheckBurst(StreamRxRec, 32, "1") ;
     
     for i in 1 to 32 loop
       RxBurstFifo.push(Data & RxUser) ;
@@ -200,45 +200,45 @@ begin
       RxUser := RxUser + 1 ; 
     end loop ; 
     -- User here is overridden by the RxUser that was pushed into the FIFO
-    CheckBurst(StreamReceiverTransRec, 32, (USER+5) & "1") ;
+    CheckBurst(StreamRxRec, 32, (USER+5) & "1") ;
     
     for i in 1 to 32 loop
       RxBurstFifo.push(Data & RxUser) ;
       Data   := Data + 1 ; 
       RxUser := RxUser + 1 ; 
     end loop ; 
-    CheckBurst(StreamReceiverTransRec, 32, (Dest+6) & (USER+5) & "1") ;
+    CheckBurst(StreamRxRec, 32, (Dest+6) & (USER+5) & "1") ;
     
     for i in 1 to 32 loop
       RxBurstFifo.push(Data & RxUser) ;
       Data   := Data + 1 ; 
       RxUser := RxUser + 1 ; 
     end loop ; 
-    CheckBurst(StreamReceiverTransRec, 32, (ID+7) & (Dest+6) & (USER+5) & "1") ;
+    CheckBurst(StreamRxRec, 32, (ID+7) & (Dest+6) & (USER+5) & "1") ;
     
     for i in 1 to 32 loop
       RxBurstFifo.push(Data & RxUser) ;
       Data   := Data + 1 ; 
       RxUser := RxUser + 1 ; 
     end loop ; 
-    CheckBurst(StreamReceiverTransRec, 32, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "1") ;
+    CheckBurst(StreamRxRec, 32, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "1") ;
 
     for i in 1 to 32 loop
       RxBurstFifo.push(Data & RxUser) ;
       Data   := Data + 1 ; 
       RxUser := RxUser + 1 ; 
     end loop ; 
-    CheckBurst(StreamReceiverTransRec, 32, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "1") ;
+    CheckBurst(StreamRxRec, 32, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "1") ;
 
     for i in 1 to 32 loop
       RxBurstFifo.push(Data & RxUser) ;
       Data   := Data + 1 ; 
       RxUser := RxUser + 1 ; 
     end loop ; 
-    CheckBurst(StreamReceiverTransRec, 32, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "1") ;
+    CheckBurst(StreamRxRec, 32, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "1") ;
    
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

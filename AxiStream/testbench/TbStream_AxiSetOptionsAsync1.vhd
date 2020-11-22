@@ -94,7 +94,7 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
     
     log("Send 256 words with each byte incrementing") ;
     for i in 1 to 256 loop 
@@ -108,15 +108,15 @@ begin
       Dest := to_slv((256 - i)/16, DEST_LEN) ; 
       User := to_slv((i-1)/16, USER_LEN) ; 
       
-      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID,   ID) ;
-      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, Dest) ;
-      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, User) ;
+      SetAxiStreamOptions(StreamTxRec, DEFAULT_ID,   ID) ;
+      SetAxiStreamOptions(StreamTxRec, DEFAULT_DEST, Dest) ;
+      SetAxiStreamOptions(StreamTxRec, DEFAULT_USER, User) ;
       
-      SendAsync(StreamTransmitterTransRec, Data) ;
+      SendAsync(StreamTxRec, Data) ;
     end loop ;
    
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -135,7 +135,7 @@ begin
     variable TryCount : integer ; 
     variable Available : boolean ; 
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
+    WaitForClock(StreamRxRec, 2) ; 
     
     -- Get and check the 256 words
     log("Send 256 words with each byte incrementing") ;
@@ -150,43 +150,43 @@ begin
       ExpDest  := to_slv((256 - i)/16, DEST_LEN) ; 
       ExpUser  := to_slv((i-1)/16, USER_LEN) ; 
 
-      SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_ID,   ExpID) ;
-      SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_DEST, ExpDest) ;
-      SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_USER, ExpUser) ;
+      SetAxiStreamOptions(StreamRxRec, DEFAULT_ID,   ExpID) ;
+      SetAxiStreamOptions(StreamRxRec, DEFAULT_DEST, ExpDest) ;
+      SetAxiStreamOptions(StreamRxRec, DEFAULT_USER, ExpUser) ;
        
       TryCount := 0 ; 
       loop 
         case i is
           when 252 =>   -- Error in Data
-            TryCheck(StreamReceiverTransRec, ExpData+1, Available) ; 
+            TryCheck(StreamRxRec, ExpData+1, Available) ; 
           when 253 =>   -- Error in LAST
-            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_LAST, 1) ;
-            TryCheck(StreamReceiverTransRec, ExpData, Available) ; 
-            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_LAST, 0) ;
+            SetAxiStreamOptions(StreamRxRec, DEFAULT_LAST, 1) ;
+            TryCheck(StreamRxRec, ExpData, Available) ; 
+            SetAxiStreamOptions(StreamRxRec, DEFAULT_LAST, 0) ;
           when 254 =>   -- Error in USER
-            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_USER, ExpUser+1) ;
-            TryCheck(StreamReceiverTransRec, ExpData, Available) ; 
-            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_USER, ExpUser) ;
+            SetAxiStreamOptions(StreamRxRec, DEFAULT_USER, ExpUser+1) ;
+            TryCheck(StreamRxRec, ExpData, Available) ; 
+            SetAxiStreamOptions(StreamRxRec, DEFAULT_USER, ExpUser) ;
           when 255 =>   -- Error in DEST
-            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_DEST, ExpDest+1) ;
-            TryCheck(StreamReceiverTransRec, ExpData, Available) ; 
-            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_DEST, ExpDest) ;
+            SetAxiStreamOptions(StreamRxRec, DEFAULT_DEST, ExpDest+1) ;
+            TryCheck(StreamRxRec, ExpData, Available) ; 
+            SetAxiStreamOptions(StreamRxRec, DEFAULT_DEST, ExpDest) ;
           when 256 =>   -- Error in ID
-            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_ID,   ExpID+1) ;
-            TryCheck(StreamReceiverTransRec, ExpData, Available) ; 
-            SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_ID,   ExpID) ;
+            SetAxiStreamOptions(StreamRxRec, DEFAULT_ID,   ExpID+1) ;
+            TryCheck(StreamRxRec, ExpData, Available) ; 
+            SetAxiStreamOptions(StreamRxRec, DEFAULT_ID,   ExpID) ;
           when others =>  -- No Errors 
-            TryCheck(StreamReceiverTransRec, ExpData, Available) ; 
+            TryCheck(StreamRxRec, ExpData, Available) ; 
         end case ; 
         exit when Available ; 
-        WaitForClock(StreamReceiverTransRec, 1) ; 
+        WaitForClock(StreamRxRec, 1) ; 
         TryCount := TryCount + 1 ;
       end loop ; 
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     end loop ;
      
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

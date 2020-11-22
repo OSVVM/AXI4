@@ -95,7 +95,7 @@ begin
     variable CurTime : time ; 
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
     
     log("Send 256 words with each byte incrementing") ;
     for i in 1 to 256 loop 
@@ -109,20 +109,20 @@ begin
       Dest := to_slv((256 - i)/16, DEST_LEN) ; 
       User := to_slv((i-1)/16, USER_LEN) ; 
       
-      SendAsync(StreamTransmitterTransRec, Data, ID & Dest & User & '0') ;
+      SendAsync(StreamTxRec, Data, ID & Dest & User & '0') ;
       
       if (i mod 32) = 0 then
         CurTime := now ; 
-        WaitForTransaction(StreamTransmitterTransRec) ;
+        WaitForTransaction(StreamTxRec) ;
         AffirmIf(now > CurTime, 
            "Transmitter: WaitForTransaction started at: " & to_string(CurTime, 1 ns) & 
            "  finished at: " & to_string(now, 1 ns)) ;
-        WaitForClock(StreamTransmitterTransRec, 4) ; 
+        WaitForClock(StreamTxRec, 4) ; 
       end if ; 
     end loop ;
    
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -142,7 +142,7 @@ begin
     variable TryCount : integer ; 
     variable Available : boolean ; 
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
+    WaitForClock(StreamRxRec, 2) ; 
     
     -- Get and check the 256 words
     log("Send 256 words with each byte incrementing") ;
@@ -162,9 +162,9 @@ begin
       TryCount := 0 ; 
       if (i mod 2) /= 0 and i < 252 then 
         loop 
-          TryGet(StreamReceiverTransRec, RxData, RxParam, Available) ; 
+          TryGet(StreamRxRec, RxData, RxParam, Available) ; 
           exit when Available ; 
-          WaitForClock(StreamReceiverTransRec, 1) ; 
+          WaitForClock(StreamRxRec, 1) ; 
           TryCount := TryCount + 1 ;
         end loop ; 
         AffirmIfEqual(RxData, ExpData, "Get, Data: ") ;
@@ -174,20 +174,20 @@ begin
         loop 
           case i is
             when 252 =>   -- Error in Data
-              TryCheck(StreamReceiverTransRec, ExpData+1, ExpParam, Available) ; 
+              TryCheck(StreamRxRec, ExpData+1, ExpParam, Available) ; 
             when 253 =>   -- Error in LAST
-              TryCheck(StreamReceiverTransRec, ExpData, ExpID & ExpDest & ExpUser & '1', Available) ; 
+              TryCheck(StreamRxRec, ExpData, ExpID & ExpDest & ExpUser & '1', Available) ; 
             when 254 =>   -- Error in USER
-              TryCheck(StreamReceiverTransRec, ExpData, ExpID & ExpDest & (ExpUser+1) & '0', Available) ; 
+              TryCheck(StreamRxRec, ExpData, ExpID & ExpDest & (ExpUser+1) & '0', Available) ; 
             when 255 =>   -- Error in DEST
-              TryCheck(StreamReceiverTransRec, ExpData, ExpID & (ExpDest+1) & ExpUser & '0', Available) ; 
+              TryCheck(StreamRxRec, ExpData, ExpID & (ExpDest+1) & ExpUser & '0', Available) ; 
             when 256 =>   -- Error in ID
-              TryCheck(StreamReceiverTransRec, ExpData, (ExpID + 1) & ExpDest & ExpUser & '0', Available) ; 
+              TryCheck(StreamRxRec, ExpData, (ExpID + 1) & ExpDest & ExpUser & '0', Available) ; 
             when others =>  -- No Errors 
-              TryCheck(StreamReceiverTransRec, ExpData, ExpParam, Available) ; 
+              TryCheck(StreamRxRec, ExpData, ExpParam, Available) ; 
           end case ; 
           exit when Available ; 
-          WaitForClock(StreamReceiverTransRec, 1) ; 
+          WaitForClock(StreamRxRec, 1) ; 
           TryCount := TryCount + 1 ;
         end loop ; 
       end if ; 
@@ -195,7 +195,7 @@ begin
      end loop ;
      
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

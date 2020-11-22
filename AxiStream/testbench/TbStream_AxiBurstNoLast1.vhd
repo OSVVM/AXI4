@@ -93,8 +93,8 @@ begin
     variable Data : std_logic_vector(DATA_WIDTH-1 downto 0) ;  
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
-    SetBurstMode(StreamTransmitterTransRec, STREAM_BURST_BYTE_MODE) ;
+    WaitForClock(StreamTxRec, 2) ; 
+    SetBurstMode(StreamTxRec, STREAM_BURST_BYTE_MODE) ;
     
     ID   := to_slv(1, ID_LEN);
     Dest := to_slv(2, DEST_LEN) ; 
@@ -106,14 +106,14 @@ begin
       ID    := ID + i mod 2 ; 
       Dest  := Dest + (i+1) mod 2 ; 
       for j in 0 to 31+5*i loop 
-        Send(StreamTransmitterTransRec, Data+(i*32+j), ID & Dest & User & '0') ;
+        Send(StreamTxRec, Data+(i*32+j), ID & Dest & User & '0') ;
       end loop ;
     end loop ; 
     
-    Send(StreamTransmitterTransRec, Data, (ID+2) & (Dest+2) & User & '0') ;
+    Send(StreamTxRec, Data, (ID+2) & (Dest+2) & User & '0') ;
 
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -135,8 +135,8 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
     variable Data : std_logic_vector(DATA_WIDTH-1 downto 0) ;  
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
-    SetBurstMode(StreamReceiverTransRec, STREAM_BURST_WORD_MODE) ;
+    WaitForClock(StreamRxRec, 2) ; 
+    SetBurstMode(StreamRxRec, STREAM_BURST_WORD_MODE) ;
     
     ID   := to_slv(1, ID_LEN);
     Dest := to_slv(2, DEST_LEN) ; 
@@ -145,7 +145,7 @@ begin
 
     for i in 0 to 6 loop 
 --      log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
-      GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
+      GetBurst (StreamRxRec, NumBytes, RxParam) ;
       AffirmIfEqual(NumBytes, 32 + 5*i, "Receiver: NumBytes Received") ;
       ID    := ID + i mod 2 ; 
       Dest  := Dest + (i+1) mod 2 ; 
@@ -155,10 +155,10 @@ begin
       CheckBurstIncrement(RxBurstFifo, i*32, NumBytes, DATA_WIDTH) ;
     end loop ; 
     
-    Check (StreamReceiverTransRec, Data, (ID+2) & (Dest+2) & User & '0') ;
+    Check (StreamRxRec, Data, (ID+2) & (Dest+2) & User & '0') ;
      
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

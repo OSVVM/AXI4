@@ -61,15 +61,15 @@ entity TestCtrl is
   ) ;
   port (
       -- Global Signal Interface
-      Clk                           : In    std_logic ;
-      nReset                        : In    std_logic ;
+      Clk                : In    std_logic ;
+      nReset             : In    std_logic ;
 
       -- Transaction Interfaces
-      StreamTransmitterTransRec     : InOut StreamRecType ;
-      StreamReceiverTransRec        : InOut StreamRecType 
+      StreamTxRec        : InOut StreamRecType ;
+      StreamRxRec        : InOut StreamRecType 
 
   ) ;
-  constant DATA_WIDTH : integer := StreamTransmitterTransRec.DataToModel'length ; 
+  constant DATA_WIDTH : integer := StreamTxRec.DataToModel'length ; 
   constant DATA_BYTES : integer := DATA_WIDTH/8 ; 
   
   alias TxBurstFifo is <<variable .TbStream.AxiStreamTransmitter_1.BurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;

@@ -93,8 +93,8 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
-    SetBurstMode(StreamTransmitterTransRec, STREAM_BURST_BYTE_MODE) ;
+    WaitForClock(StreamTxRec, 2) ; 
+    SetBurstMode(StreamTxRec, STREAM_BURST_BYTE_MODE) ;
     
     ID   := to_slv(1, ID_LEN);
     Dest := to_slv(2, DEST_LEN) ; 
@@ -102,20 +102,20 @@ begin
 
     log("Transmit 32 Bytes -- word aligned") ;
     PushBurstIncrement(TxBurstFifo, 3, 32) ;
-    SendBurstAsync(StreamTransmitterTransRec, 32, ID & Dest & User & '0') ;
+    SendBurstAsync(StreamTxRec, 32, ID & Dest & User & '0') ;
 
-    WaitForClock(StreamTransmitterTransRec, 4) ; 
+    WaitForClock(StreamTxRec, 4) ; 
 
     log("Transmit 30 Bytes -- unaligned") ;
     PushBurst(TxBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25,27,29)) ;
     PushBurst(TxBurstFifo, (31,33,35,37,39,41,43,45,47,49,51,53,55,57,59)) ;
-    SendBurstAsync(StreamTransmitterTransRec, 30, (ID+1) & (Dest+1) & (User+1) & '0') ;
+    SendBurstAsync(StreamTxRec, 30, (ID+1) & (Dest+1) & (User+1) & '0') ;
 
-    WaitForClock(StreamTransmitterTransRec, 4) ; 
+    WaitForClock(StreamTxRec, 4) ; 
 
     log("Transmit 34 Bytes -- unaligned") ;
     PushBurstRandom(TxBurstFifo, 7, 34) ;
-    SendBurstAsync(StreamTransmitterTransRec, 34, (ID+2) & (Dest+2) & (User+2) & '0') ;
+    SendBurstAsync(StreamTxRec, 34, (ID+2) & (Dest+2) & (User+2) & '0') ;
     
     ID   := to_slv(8, ID_LEN);
     Dest := to_slv(9, DEST_LEN) ; 
@@ -124,12 +124,12 @@ begin
     for i in 0 to 6 loop 
       log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
       PushBurstIncrement(TxBurstFifo, i*32, 32 + 5*i) ;
-      SendBurstAsync(StreamTransmitterTransRec, 32 + 5*i, (ID+i/2) & (Dest+i/2) & (User+i/2) & '0') ;
+      SendBurstAsync(StreamTxRec, 32 + 5*i, (ID+i/2) & (Dest+i/2) & (User+i/2) & '0') ;
     end loop ; 
 
 
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -152,8 +152,8 @@ begin
     variable TryCount  : integer ; 
     variable Available : boolean ; 
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
-    SetBurstMode(StreamReceiverTransRec, STREAM_BURST_BYTE_MODE) ;
+    WaitForClock(StreamRxRec, 2) ; 
+    SetBurstMode(StreamRxRec, STREAM_BURST_BYTE_MODE) ;
     
     ID   := to_slv(1, ID_LEN);
     Dest := to_slv(2, DEST_LEN) ; 
@@ -162,9 +162,9 @@ begin
 --    log("Transmit 32 Bytes -- word aligned") ;
     TryCount := 0 ; 
     loop 
-      TryGetBurst (StreamReceiverTransRec, NumBytes, RxParam, Available) ;
+      TryGetBurst (StreamRxRec, NumBytes, RxParam, Available) ;
       exit when Available ; 
-      WaitForClock(StreamReceiverTransRec, 1) ; 
+      WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -177,9 +177,9 @@ begin
 --    log("Transmit 30 Bytes -- unaligned") ;
     TryCount := 0 ; 
     loop 
-      TryGetBurst (StreamReceiverTransRec, NumBytes, RxParam, Available) ;
+      TryGetBurst (StreamRxRec, NumBytes, RxParam, Available) ;
       exit when Available ; 
-      WaitForClock(StreamReceiverTransRec, 1) ; 
+      WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -193,9 +193,9 @@ begin
 --    log("Transmit 34 Bytes -- unaligned") ;
     TryCount := 0 ; 
     loop 
-      TryGetBurst (StreamReceiverTransRec, NumBytes, RxParam, Available) ;
+      TryGetBurst (StreamRxRec, NumBytes, RxParam, Available) ;
       exit when Available ; 
-      WaitForClock(StreamReceiverTransRec, 1) ; 
+      WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -213,9 +213,9 @@ begin
 --      log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
       TryCount := 0 ; 
       loop 
-        TryGetBurst (StreamReceiverTransRec, NumBytes, RxParam, Available) ;
+        TryGetBurst (StreamRxRec, NumBytes, RxParam, Available) ;
         exit when Available ; 
-        WaitForClock(StreamReceiverTransRec, 1) ; 
+        WaitForClock(StreamRxRec, 1) ; 
         TryCount := TryCount + 1 ;
       end loop ;
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -227,7 +227,7 @@ begin
     end loop ; 
      
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

@@ -90,21 +90,21 @@ begin
     variable Data : std_logic_vector(DATA_WIDTH-1 downto 0) ;
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
     
 log("Ready before Valid Tests.") ;
 WaitForBarrier(TestPhaseStart) ;
     -- Cycle to allow settings to update
-    WaitForClock(StreamTransmitterTransRec, 5) ; 
+    WaitForClock(StreamTxRec, 5) ; 
     Data := (others => '0') ;
-    Send(StreamTransmitterTransRec,  Data) ;  
+    Send(StreamTxRec,  Data) ;  
 
     Data := Data + 4096 ;
     for i in 0 to 4 loop 
-      WaitForClock(StreamTransmitterTransRec, 5) ; 
+      WaitForClock(StreamTxRec, 5) ; 
     
       for j in 1 to 3 loop 
-        Send(StreamTransmitterTransRec,  Data) ;  
+        Send(StreamTxRec,  Data) ;  
         Data := Data + 1 ; 
       end loop ; 
       Data := Data + 253 ; 
@@ -113,23 +113,23 @@ WaitForBarrier(TestPhaseStart) ;
 log("Ready after Valid Tests.") ;
 WaitForBarrier(TestPhaseStart) ;
     -- Cycle to allow settings to update
-    WaitForClock(StreamTransmitterTransRec, 5) ; 
+    WaitForClock(StreamTxRec, 5) ; 
     Data := (others => '0') ;
-    Send(StreamTransmitterTransRec,  Data) ;  
+    Send(StreamTxRec,  Data) ;  
 
     Data := Data + 8192 ;
     for i in 0 to 4 loop 
-      WaitForClock(StreamTransmitterTransRec, 5) ; 
+      WaitForClock(StreamTxRec, 5) ; 
     
       for j in 1 to 3 loop 
-        Send(StreamTransmitterTransRec,  Data) ;  
+        Send(StreamTxRec,  Data) ;  
         Data := Data + 1 ; 
       end loop ; 
       Data := Data + 253 ; 
     end loop ; 
        
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -142,24 +142,24 @@ WaitForBarrier(TestPhaseStart) ;
   AxiReceiverProc : process
     variable Data : std_logic_vector(DATA_WIDTH-1 downto 0) ;  
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
+    WaitForClock(StreamRxRec, 2) ; 
     
 -- Start test phase 1:  
 WaitForBarrier(TestPhaseStart) ;
 -- log("Ready before Valid Tests.") ;
-SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_BEFORE_VALID, TRUE) ;
+SetAxiStreamOptions(StreamRxRec, RECEIVE_READY_BEFORE_VALID, TRUE) ;
     -- Cycle to allow settings to update
-    -- WaitForClock(StreamReceiverTransRec, 5) ; 
+    -- WaitForClock(StreamRxRec, 5) ; 
     Data := (others => '0') ;
-    Check(StreamReceiverTransRec,   Data) ;  
+    Check(StreamRxRec,   Data) ;  
 
     Data := Data + 4096 ;
     for i in 0 to 4 loop 
-      SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_DELAY_CYCLES, i) ;
-      -- WaitForClock(StreamReceiverTransRec, 5) ; 
+      SetAxiStreamOptions(StreamRxRec, RECEIVE_READY_DELAY_CYCLES, i) ;
+      -- WaitForClock(StreamRxRec, 5) ; 
     
       for j in 1 to 3 loop 
-        Check(StreamReceiverTransRec,  Data) ;  
+        Check(StreamRxRec,  Data) ;  
         Data := Data + 1 ; 
       end loop ; 
       Data := Data + 253 ; 
@@ -167,27 +167,27 @@ SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_BEFORE_VALID, TRUE) ;
           
 WaitForBarrier(TestPhaseStart) ;
 -- log("Ready after Valid Tests.") ;
-    SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_BEFORE_VALID, FALSE) ;
-    SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_DELAY_CYCLES, 0) ;
+    SetAxiStreamOptions(StreamRxRec, RECEIVE_READY_BEFORE_VALID, FALSE) ;
+    SetAxiStreamOptions(StreamRxRec, RECEIVE_READY_DELAY_CYCLES, 0) ;
     -- Cycle to allow settings to update
-    -- WaitForClock(StreamReceiverTransRec, 5) ; 
+    -- WaitForClock(StreamRxRec, 5) ; 
     Data := (others => '0') ;
-    Check(StreamReceiverTransRec,   Data) ;  
+    Check(StreamRxRec,   Data) ;  
 
     Data := Data + 8192 ;
     for i in 0 to 4 loop 
-      SetAxiStreamOptions(StreamReceiverTransRec, RECEIVE_READY_DELAY_CYCLES, i) ;
-      -- WaitForClock(StreamReceiverTransRec, 5) ; 
+      SetAxiStreamOptions(StreamRxRec, RECEIVE_READY_DELAY_CYCLES, i) ;
+      -- WaitForClock(StreamRxRec, 5) ; 
 
       for j in 1 to 3 loop 
-        Check(StreamReceiverTransRec,  Data) ;  
+        Check(StreamRxRec,  Data) ;  
         Data := Data + 1 ; 
       end loop ; 
       Data := Data + 253 ; 
     end loop ;   
      
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

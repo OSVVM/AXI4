@@ -104,14 +104,14 @@ architecture TestHarness of TbStream is
 --      DataToModel(AXI_DATA_WIDTH-1 downto 0),
 --      DataFromModel(XI_DATA_WIDTH-1 downto 0)
 --    ) ;  
---    signal StreamTransmitterTransRec : TransactionRecType ;
---    signal StreamReceiverTransRec : TransactionRecType ;
+--    signal StreamTxRec : TransactionRecType ;
+--    signal StreamRxRec : TransactionRecType ;
   
   -- MTI fails with the following ...
-  -- alias StreamTransmitterTransRec : TransactionRecType is TransRec ; 
+  -- alias StreamTxRec : TransactionRecType is TransRec ; 
   -- however it is ok with:
-  signal StreamTransmitterTransRec : TransactionRecType ;
-  signal StreamReceiverTransRec    : TransactionRecType ;
+  signal StreamTxRec : TransactionRecType ;
+  signal StreamRxRec : TransactionRecType ;
   
 
   component TestCtrl is
@@ -122,12 +122,12 @@ architecture TestHarness of TbStream is
     ) ;
     port (
       -- Global Signal Interface
-      Clk                           : In    std_logic ;
-      nReset                        : In    std_logic ;
+      Clk             : In    std_logic ;
+      nReset          : In    std_logic ;
 
       -- Transaction Interfaces
-      StreamTransmitterTransRec  : inout StreamRecType ;
-      StreamReceiverTransRec     : inout StreamRecType 
+      StreamTxRec     : inout StreamRecType ;
+      StreamRxRec     : inout StreamRecType 
     ) ;
   end component TestCtrl ;
 
@@ -184,7 +184,7 @@ begin
       TLast     => TLast ,
 
       -- Testbench Transaction Interface
-      TransRec  => StreamTransmitterTransRec
+      TransRec  => StreamTxRec
     ) ;
   
   AxiStreamReceiver_1 : AxiStreamReceiver
@@ -214,7 +214,7 @@ begin
       TLast     => TLast ,
 
       -- Testbench Transaction Interface
-      TransRec  => StreamReceiverTransRec
+      TransRec  => StreamRxRec
     ) ;
   
   
@@ -226,12 +226,12 @@ begin
   ) 
   port map ( 
     -- Globals
-    Clk                      => Clk,
-    nReset                   => nReset,
+    Clk          => Clk,
+    nReset       => nReset,
     
     -- Testbench Transaction Interfaces
-    StreamTransmitterTransRec  => StreamTransmitterTransRec, 
-    StreamReceiverTransRec     => StreamReceiverTransRec  
+    StreamTxRec  => StreamTxRec, 
+    StreamRxRec  => StreamRxRec  
   ) ; 
 
 end architecture TestHarness ;

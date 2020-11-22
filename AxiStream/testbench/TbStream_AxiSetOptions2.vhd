@@ -95,54 +95,54 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
     
     ID   := (others => '0') ;
     Dest := (others => '0') ;
     User := (others => '0') ;
     Data := (others => '0') ;
 
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID,   ID   + 3) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, Dest + 2) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, User + 1) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_ID,   ID   + 3) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_DEST, Dest + 2) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_USER, User + 1) ;
     
     for i in 1 to 4 loop 
-      Send(StreamTransmitterTransRec, Data) ;
+      Send(StreamTxRec, Data) ;
       Data := Data + 1; 
     end loop ;
     
     for i in 1 to 4 loop 
-      Send(StreamTransmitterTransRec, Data, (USER+5) & "0") ;
+      Send(StreamTxRec, Data, (USER+5) & "0") ;
       Data := Data + 1; 
     end loop ;
     
     for i in 1 to 4 loop 
-      Send(StreamTransmitterTransRec, Data, (Dest+6) & (USER+5) & "0") ;
+      Send(StreamTxRec, Data, (Dest+6) & (USER+5) & "0") ;
       Data := Data + 1; 
     end loop ;
     
     for i in 1 to 4 loop 
-      Send(StreamTransmitterTransRec, Data, (ID+7) & (Dest+6) & (USER+5) & "0") ;
+      Send(StreamTxRec, Data, (ID+7) & (Dest+6) & (USER+5) & "0") ;
       Data := Data + 1; 
     end loop ;
     
     for i in 1 to 4 loop 
-      Send(StreamTransmitterTransRec, Data, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
+      Send(StreamTxRec, Data, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
       Data := Data + 1; 
     end loop ;
 
     for i in 1 to 4 loop 
-      Send(StreamTransmitterTransRec, Data, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
+      Send(StreamTxRec, Data, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
       Data := Data + 1; 
     end loop ;
 
     for i in 1 to 4 loop 
-      Send(StreamTransmitterTransRec, Data, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-") ;
+      Send(StreamTxRec, Data, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-") ;
       Data := Data + 1; 
     end loop ;
    
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -160,28 +160,28 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
     variable Param, RxParam : std_logic_vector(ID_LEN + DEST_LEN + USER_LEN downto 0) ;
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
+    WaitForClock(StreamRxRec, 2) ; 
     
     ID   := (others => '0') ;
     Dest := (others => '0') ;
     User := (others => '0') ;
     Data := (others => '0') ;
 
-    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_ID,   ID   + 3) ;
-    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_DEST, Dest + 2) ;
-    SetAxiStreamOptions(StreamReceiverTransRec, DEFAULT_USER, User + 1) ;
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_ID,   ID   + 3) ;
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_DEST, Dest + 2) ;
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_USER, User + 1) ;
     
     Param := (ID+3) & (Dest+2) & (User+1) & "0" ;
     for i in 1 to 4 loop 
       case i is 
         when 1 =>
-          Get(StreamReceiverTransRec, RxData, RxParam) ;
+          Get(StreamRxRec, RxData, RxParam) ;
           AffirmIfEqual(RxData,  Data,    "Data ") ; 
           AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
         when 2 => 
-          Check(StreamReceiverTransRec, Data, Param) ;
+          Check(StreamRxRec, Data, Param) ;
         when others =>
-          Check(StreamReceiverTransRec, Data) ;
+          Check(StreamRxRec, Data) ;
       end case ; 
       Data := Data + 1; 
     end loop ;
@@ -190,13 +190,13 @@ begin
     for i in 1 to 4 loop 
       case i is 
         when 1 =>
-          Get(StreamReceiverTransRec, RxData, RxParam) ;
+          Get(StreamRxRec, RxData, RxParam) ;
           AffirmIfEqual(RxData,  Data,    "Data ") ; 
           AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
         when 2 => 
-          Check(StreamReceiverTransRec, Data, Param) ;
+          Check(StreamRxRec, Data, Param) ;
         when others =>
-          Check(StreamReceiverTransRec, Data, (USER+5) & "0") ;
+          Check(StreamRxRec, Data, (USER+5) & "0") ;
       end case ; 
       Data := Data + 1; 
     end loop ;
@@ -205,13 +205,13 @@ begin
     for i in 1 to 4 loop 
       case i is 
         when 1 =>
-          Get(StreamReceiverTransRec, RxData, RxParam) ;
+          Get(StreamRxRec, RxData, RxParam) ;
           AffirmIfEqual(RxData,  Data,    "Data ") ; 
           AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
         when 2 => 
-          Check(StreamReceiverTransRec, Data, Param) ;
+          Check(StreamRxRec, Data, Param) ;
         when others =>
-          Check(StreamReceiverTransRec, Data, (Dest+6) & (USER+5) & "0") ;
+          Check(StreamRxRec, Data, (Dest+6) & (USER+5) & "0") ;
       end case ; 
       Data := Data + 1; 
     end loop ;
@@ -220,13 +220,13 @@ begin
     for i in 1 to 4 loop 
       case i is 
         when 1 =>
-          Get(StreamReceiverTransRec, RxData, RxParam) ;
+          Get(StreamRxRec, RxData, RxParam) ;
           AffirmIfEqual(RxData,  Data,    "Data ") ; 
           AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
         when 2 => 
-          Check(StreamReceiverTransRec, Data, Param) ;
+          Check(StreamRxRec, Data, Param) ;
         when others =>
-          Check(StreamReceiverTransRec, Data, (ID+7) & (Dest+6) & (USER+5) & "0") ;
+          Check(StreamRxRec, Data, (ID+7) & (Dest+6) & (USER+5) & "0") ;
       end case ; 
       Data := Data + 1; 
     end loop ;
@@ -235,13 +235,13 @@ begin
     for i in 1 to 4 loop 
       case i is 
         when 1 =>
-          Get(StreamReceiverTransRec, RxData, RxParam) ;
+          Get(StreamRxRec, RxData, RxParam) ;
           AffirmIfEqual(RxData,  Data,    "Data ") ; 
           AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
         when 2 => 
-          Check(StreamReceiverTransRec, Data, Param) ;
+          Check(StreamRxRec, Data, Param) ;
         when others =>
-          Check(StreamReceiverTransRec, Data, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
+          Check(StreamRxRec, Data, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
       end case ; 
       Data := Data + 1; 
     end loop ;
@@ -250,13 +250,13 @@ begin
     for i in 1 to 4 loop 
       case i is 
         when 1 =>
-          Get(StreamReceiverTransRec, RxData, RxParam) ;
+          Get(StreamRxRec, RxData, RxParam) ;
           AffirmIfEqual(RxData,  Data,    "Data ") ; 
           AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
         when 2 => 
-          Check(StreamReceiverTransRec, Data, Param) ;
+          Check(StreamRxRec, Data, Param) ;
         when others =>
-          Check(StreamReceiverTransRec, Data, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
+          Check(StreamRxRec, Data, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
       end case ; 
       Data := Data + 1; 
     end loop ;
@@ -265,20 +265,20 @@ begin
     for i in 1 to 4 loop 
       case i is 
         when 1 =>
-          Get(StreamReceiverTransRec, RxData, RxParam) ;
+          Get(StreamRxRec, RxData, RxParam) ;
           AffirmIfEqual(RxData,  Data,    "Data ") ; 
           AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
         when 2 => 
-          Check(StreamReceiverTransRec, Data, Param) ;
+          Check(StreamRxRec, Data, Param) ;
         when others =>
-          Check(StreamReceiverTransRec, Data, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-") ;
+          Check(StreamRxRec, Data, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-") ;
       end case ; 
       Data := Data + 1; 
     end loop ;     
     
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

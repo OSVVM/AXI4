@@ -90,34 +90,34 @@ begin
   AxiTransmitterProc : process
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
     
     log("Transmit 32 Bytes -- word aligned") ;
     PushBurstIncrement(TxBurstFifo, 3, 32, DATA_WIDTH) ;
-    SendBurst(StreamTransmitterTransRec, 32) ;
+    SendBurst(StreamTxRec, 32) ;
 
-    WaitForClock(StreamTransmitterTransRec, 4) ; 
+    WaitForClock(StreamTxRec, 4) ; 
 
     log("Transmit 30 Bytes -- unaligned") ;
     PushBurst(TxBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25,27,29), DATA_WIDTH) ;
     PushBurst(TxBurstFifo, (31,33,35,37,39,41,43,45,47,49,51,53,55,57,59), DATA_WIDTH) ;
-    SendBurst(StreamTransmitterTransRec, 30) ;
+    SendBurst(StreamTxRec, 30) ;
 
-    WaitForClock(StreamTransmitterTransRec, 4) ; 
+    WaitForClock(StreamTxRec, 4) ; 
 
     log("Transmit 34 Bytes -- unaligned") ;
     PushBurstRandom(TxBurstFifo, 7, 34, DATA_WIDTH) ;
-    SendBurst(StreamTransmitterTransRec, 34) ;
+    SendBurst(StreamTxRec, 34) ;
     
     for i in 0 to 6 loop 
       log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
       PushBurstIncrement(TxBurstFifo, i*32, 32 + 5*i, DATA_WIDTH) ;
-      SendBurst(StreamTransmitterTransRec, 32 + 5*i) ;
+      SendBurst(StreamTxRec, 32 + 5*i) ;
     end loop ; 
 
 
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -130,33 +130,33 @@ begin
   AxiReceiverProc : process
     variable NumBytes : integer ; 
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
+    WaitForClock(StreamRxRec, 2) ; 
     
 --    log("Transmit 32 Bytes -- word aligned") ;
-    GetBurst (StreamReceiverTransRec, NumBytes) ;
+    GetBurst (StreamRxRec, NumBytes) ;
     AffirmIfEqual(NumBytes, 32, "Receiver: NumBytes Received") ;
     CheckBurstIncrement(RxBurstFifo, 3, NumBytes, DATA_WIDTH) ;
     
 --    log("Transmit 30 Bytes -- unaligned") ;
-    GetBurst (StreamReceiverTransRec, NumBytes) ;
+    GetBurst (StreamRxRec, NumBytes) ;
     AffirmIfEqual(NumBytes, 30, "Receiver: NumBytes Received") ;
     CheckBurst(RxBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25,27,29), DATA_WIDTH) ;
     CheckBurst(RxBurstFifo, (31,33,35,37,39,41,43,45,47,49,51,53,55,57,59), DATA_WIDTH) ;
 
 --    log("Transmit 34 Bytes -- unaligned") ;
-    GetBurst (StreamReceiverTransRec, NumBytes) ;
+    GetBurst (StreamRxRec, NumBytes) ;
     AffirmIfEqual(NumBytes, 34, "Receiver: NumBytes Received") ;
     CheckBurstRandom(RxBurstFifo, 7, NumBytes, DATA_WIDTH) ;
     
     for i in 0 to 6 loop 
 --      log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
-      GetBurst (StreamReceiverTransRec, NumBytes) ;
+      GetBurst (StreamRxRec, NumBytes) ;
       AffirmIfEqual(NumBytes, 32 + 5*i, "Receiver: NumBytes Received") ;
       CheckBurstIncrement(RxBurstFifo, i*32, NumBytes, DATA_WIDTH) ;
     end loop ; 
      
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

@@ -93,38 +93,38 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
-    SetBurstMode(StreamTransmitterTransRec, STREAM_BURST_BYTE_MODE) ;
+    WaitForClock(StreamTxRec, 2) ; 
+    SetBurstMode(StreamTxRec, STREAM_BURST_BYTE_MODE) ;
     
     ID   := to_slv(1, ID_LEN);
     Dest := to_slv(2, DEST_LEN) ; 
     User := to_slv(3, USER_LEN) ; 
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID,   ID) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, Dest) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, User) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_ID,   ID) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_DEST, Dest) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_USER, User) ;
 
     log("Transmit 32 Bytes -- word aligned") ;
     PushBurstIncrement(TxBurstFifo, 3, 32) ;
-    SendBurst(StreamTransmitterTransRec, 32) ;
+    SendBurst(StreamTxRec, 32) ;
 
-    WaitForClock(StreamTransmitterTransRec, 4) ; 
+    WaitForClock(StreamTxRec, 4) ; 
 
     log("Transmit 30 Bytes -- unaligned") ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID  , (  ID+1)) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, (Dest+1)) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, (User+1)) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_ID  , (  ID+1)) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_DEST, (Dest+1)) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_USER, (User+1)) ;
     PushBurst(TxBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25,27,29)) ;
     PushBurst(TxBurstFifo, (31,33,35,37,39,41,43,45,47,49,51,53,55,57,59)) ;
-    SendBurst(StreamTransmitterTransRec, 30) ;
+    SendBurst(StreamTxRec, 30) ;
 
-    WaitForClock(StreamTransmitterTransRec, 4) ; 
+    WaitForClock(StreamTxRec, 4) ; 
 
     log("Transmit 34 Bytes -- unaligned") ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID  , (  ID+2)) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, (Dest+2)) ;
-    SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, (User+2)) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_ID  , (  ID+2)) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_DEST, (Dest+2)) ;
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_USER, (User+2)) ;
     PushBurstRandom(TxBurstFifo, 7, 34) ;
-    SendBurst(StreamTransmitterTransRec, 34) ;
+    SendBurst(StreamTxRec, 34) ;
     
     ID   := to_slv(8, ID_LEN);
     Dest := to_slv(9, DEST_LEN) ; 
@@ -132,16 +132,16 @@ begin
 
     for i in 0 to 6 loop 
       log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
-      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_ID  , (  ID+i/2)) ;
-      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_DEST, (Dest+i/2)) ;
-      SetAxiStreamOptions(StreamTransmitterTransRec, DEFAULT_USER, (User+i/2)) ;
+      SetAxiStreamOptions(StreamTxRec, DEFAULT_ID  , (  ID+i/2)) ;
+      SetAxiStreamOptions(StreamTxRec, DEFAULT_DEST, (Dest+i/2)) ;
+      SetAxiStreamOptions(StreamTxRec, DEFAULT_USER, (User+i/2)) ;
       PushBurstIncrement(TxBurstFifo, i*32, 32 + 5*i) ;
-      SendBurst(StreamTransmitterTransRec, 32 + 5*i) ;
+      SendBurst(StreamTxRec, 32 + 5*i) ;
     end loop ; 
 
 
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -162,15 +162,15 @@ begin
     variable Dest : std_logic_vector(DEST_LEN-1 downto 0) ;  -- 4
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
-    SetBurstMode(StreamReceiverTransRec, STREAM_BURST_BYTE_MODE) ;
+    WaitForClock(StreamRxRec, 2) ; 
+    SetBurstMode(StreamRxRec, STREAM_BURST_BYTE_MODE) ;
     
     ID   := to_slv(1, ID_LEN);
     Dest := to_slv(2, DEST_LEN) ; 
     User := to_slv(3, USER_LEN) ; 
     
 --    log("Transmit 32 Bytes -- word aligned") ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
+    GetBurst (StreamRxRec, NumBytes, RxParam) ;
     AffirmIfEqual(NumBytes, 32, "Receiver: NumBytes Received") ;
     AffirmIfEqual(RxID,   ID,   "Receiver, ID: ") ; 
     AffirmIfEqual(RxDest, Dest, "Receiver, Dest: ") ; 
@@ -178,7 +178,7 @@ begin
     CheckBurstIncrement(RxBurstFifo, 3, NumBytes) ;
     
 --    log("Transmit 30 Bytes -- unaligned") ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
+    GetBurst (StreamRxRec, NumBytes, RxParam) ;
     AffirmIfEqual(NumBytes, 30, "Receiver: NumBytes Received") ;
     AffirmIfEqual(RxID,   (ID  +1), "Receiver, ID: ") ; 
     AffirmIfEqual(RxDest, (Dest+1), "Receiver, Dest: ") ; 
@@ -187,7 +187,7 @@ begin
     CheckBurst(RxBurstFifo, (31,33,35,37,39,41,43,45,47,49,51,53,55,57,59)) ;
 
 --    log("Transmit 34 Bytes -- unaligned") ;
-    GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
+    GetBurst (StreamRxRec, NumBytes, RxParam) ;
     AffirmIfEqual(NumBytes, 34, "Receiver: NumBytes Received") ;
     AffirmIfEqual(RxID,   (ID  +2), "Receiver, ID: ") ; 
     AffirmIfEqual(RxDest, (Dest+2), "Receiver, Dest: ") ; 
@@ -200,7 +200,7 @@ begin
 
     for i in 0 to 6 loop 
 --      log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
-      GetBurst (StreamReceiverTransRec, NumBytes, RxParam) ;
+      GetBurst (StreamRxRec, NumBytes, RxParam) ;
       AffirmIfEqual(NumBytes, 32 + 5*i, "Receiver: NumBytes Received") ;
       AffirmIfEqual(RxID,   (ID  +i/2), "Receiver, ID: ") ; 
       AffirmIfEqual(RxDest, (Dest+i/2), "Receiver, Dest: ") ; 
@@ -209,7 +209,7 @@ begin
     end loop ; 
      
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

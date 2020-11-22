@@ -93,7 +93,7 @@ begin
     variable BytesToSend : integer ; 
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
     
     -- Single Bytes - with Z
     BytesToSend := 0 ; 
@@ -137,7 +137,7 @@ begin
       end loop ; 
     end if; 
     
-    SendBurstAsync(StreamTransmitterTransRec, BytesToSend) ; -- 18 
+    SendBurstAsync(StreamTxRec, BytesToSend) ; -- 18 
     
     -- Single Bytes - with U
     BytesToSend := 0 ;
@@ -180,12 +180,12 @@ begin
       end loop ; 
     end if; 
    
-    SendBurstAsync(StreamTransmitterTransRec, BytesToSend) ; -- 18 
+    SendBurstAsync(StreamTxRec, BytesToSend) ; -- 18 
 
-    WaitForTransaction(StreamTransmitterTransRec) ;
+    WaitForTransaction(StreamTxRec) ;
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -202,15 +202,15 @@ begin
     variable TryCount  : integer ; 
     variable Available : boolean ; 
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
+    WaitForClock(StreamRxRec, 2) ; 
     
     Data2 := to_slv(1, Data2'length) ;
     for i in 1 to 2 loop 
       TryCount := 0 ; 
       loop 
-        TryGetBurst (StreamReceiverTransRec, NumBytes, Available) ;
+        TryGetBurst (StreamRxRec, NumBytes, Available) ;
         exit when Available ; 
-        WaitForClock(StreamReceiverTransRec, 1) ; 
+        WaitForClock(StreamRxRec, 1) ; 
         TryCount := TryCount + 1 ;
       end loop ;
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
@@ -261,7 +261,7 @@ begin
     end loop ;
      
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

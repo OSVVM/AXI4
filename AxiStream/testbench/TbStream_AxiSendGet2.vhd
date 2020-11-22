@@ -94,7 +94,7 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
   begin
     wait until nReset = '1' ;  
-    WaitForClock(StreamTransmitterTransRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
     
     log("Send 256 words with each byte incrementing") ;
     for i in 1 to 256 loop 
@@ -108,11 +108,11 @@ begin
       Dest := to_slv((256 - i)/16, DEST_LEN) ; 
       User := to_slv((i-1)/16, USER_LEN) ; 
       
-      Send(StreamTransmitterTransRec, Data, ID & Dest & User & '0') ;
+      Send(StreamTxRec, Data, ID & Dest & User & '0') ;
     end loop ;
    
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamTransmitterTransRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiTransmitterProc ;
@@ -130,7 +130,7 @@ begin
     variable ExpUser : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
     variable ExpParam, RxParam : std_logic_vector(ID_LEN + DEST_LEN + USER_LEN downto 0) ;
   begin
-    WaitForClock(StreamReceiverTransRec, 2) ; 
+    WaitForClock(StreamRxRec, 2) ; 
     
     -- Get and check the 256 words
     log("Send 256 words with each byte incrementing") ;
@@ -148,30 +148,30 @@ begin
        
       -- Alternate using Get and Check
       if (i mod 2) /= 0 and i < 252 then 
-        Get(StreamReceiverTransRec, RxData, RxParam) ; 
+        Get(StreamRxRec, RxData, RxParam) ; 
         AffirmIfEqual(RxData, ExpData, "Get, Data: ") ;
         AffirmIfEqual(RxParam, ExpParam, "Get, Param: ") ;
       else 
         -- Inject Errors on last 5 transfers
         case i is
           when 252 =>   -- Error in Data
-            Check(StreamReceiverTransRec, ExpData+1, ExpParam) ; 
+            Check(StreamRxRec, ExpData+1, ExpParam) ; 
           when 253 =>   -- Error in LAST
-            Check(StreamReceiverTransRec, ExpData, ExpID & ExpDest & ExpUser & '1') ; 
+            Check(StreamRxRec, ExpData, ExpID & ExpDest & ExpUser & '1') ; 
           when 254 =>   -- Error in USER
-            Check(StreamReceiverTransRec, ExpData, ExpID & ExpDest & (ExpUser+1) & '0') ; 
+            Check(StreamRxRec, ExpData, ExpID & ExpDest & (ExpUser+1) & '0') ; 
           when 255 =>   -- Error in DEST
-            Check(StreamReceiverTransRec, ExpData, ExpID & (ExpDest+1) & ExpUser & '0') ; 
+            Check(StreamRxRec, ExpData, ExpID & (ExpDest+1) & ExpUser & '0') ; 
           when 256 =>   -- Error in ID
-            Check(StreamReceiverTransRec, ExpData, (ExpID + 1) & ExpDest & ExpUser & '0') ; 
+            Check(StreamRxRec, ExpData, (ExpID + 1) & ExpDest & ExpUser & '0') ; 
           when others =>  -- No Errors 
-            Check(StreamReceiverTransRec, ExpData, ExpParam) ; 
+            Check(StreamRxRec, ExpData, ExpParam) ; 
         end case ; 
       end if ; 
      end loop ;
      
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(StreamReceiverTransRec, 2) ;
+    WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiReceiverProc ;

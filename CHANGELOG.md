@@ -1,6 +1,7 @@
 # AXI4 Verification Component Change Log
 
 Revision      Date             Comments
+**2020.10**   October 2020     Added Bursting to AxiStream
 **2020.07**   July 2020        Major release for Axi4Lite.  First release of Axi4 (full)
                                All verification components now use AddressBusTransactionpkg in OSVVM-Common
                                Name Responder replaced Slave

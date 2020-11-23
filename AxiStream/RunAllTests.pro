@@ -38,67 +38,67 @@
 #  limitations under the License.
 #  
 library osvvm_TbAxiStream
-analyze ./testbench/TbStream.vhd
-analyze ./testbench/TestCtrl_e.vhd
+analyze ./Testbench/TestCtrl_e.vhd
+analyze ./Testbench/TbStream.vhd
 
 # Tests for any Stream MIT
-analyze ./testbench/TbStream_SendGet1.vhd
-analyze ./testbench/TbStream_SendGetAsync1.vhd
-analyze ./testbench/TbStream_SendGetBurst1.vhd
-analyze ./testbench/TbStream_SendGetBurstAsync1.vhd
+analyze ./TestCases/TbStream_SendGet1.vhd
+analyze ./TestCases/TbStream_SendGetAsync1.vhd
+analyze ./TestCases/TbStream_SendGetBurst1.vhd
+analyze ./TestCases/TbStream_SendGetBurstAsync1.vhd
 
-analyze ./testbench/TbStream_SendGetBurstByte1.vhd
-analyze ./testbench/TbStream_SendGetBurstByteAsync1.vhd
+analyze ./TestCases/TbStream_SendGetBurstByte1.vhd
+analyze ./TestCases/TbStream_SendGetBurstByteAsync1.vhd
 
-analyze ./testbench/TbStream_SendCheckBurst1.vhd
-analyze ./testbench/TbStream_SendCheckBurstAsync1.vhd
-analyze ./testbench/TbStream_SendCheckBurstByte1.vhd
-analyze ./testbench/TbStream_SendCheckBurstByteAsync1.vhd
+analyze ./TestCases/TbStream_SendCheckBurst1.vhd
+analyze ./TestCases/TbStream_SendCheckBurstAsync1.vhd
+analyze ./TestCases/TbStream_SendCheckBurstByte1.vhd
+analyze ./TestCases/TbStream_SendCheckBurstByteAsync1.vhd
 
-analyze ./testbench/TbStream_ByteHandling1.vhd
-analyze ./testbench/TbStream_ByteHandlingAsync1.vhd
-analyze ./testbench/TbStream_ByteHandlingBurst1.vhd
-analyze ./testbench/TbStream_ByteHandlingBurstAsync1.vhd
+analyze ./TestCases/TbStream_ByteHandling1.vhd
+analyze ./TestCases/TbStream_ByteHandlingAsync1.vhd
+analyze ./TestCases/TbStream_ByteHandlingBurst1.vhd
+analyze ./TestCases/TbStream_ByteHandlingBurstAsync1.vhd
 
-analyze ./testbench/TbStream_ByteHandlingBurstByte1.vhd
-analyze ./testbench/TbStream_ByteHandlingBurstByteAsync1.vhd
+analyze ./TestCases/TbStream_ByteHandlingBurstByte1.vhd
+analyze ./TestCases/TbStream_ByteHandlingBurstByteAsync1.vhd
 
 
 # Tests for AXI Stream
-analyze ./testbench/TbStream_AxiSendGet2.vhd
-analyze ./testbench/TbStream_AxiSendGetAsync2.vhd
-analyze ./testbench/TbStream_AxiSendGetBurst2.vhd
-analyze ./testbench/TbStream_AxiSendGetBurstAsync2.vhd
+analyze ./TestCases/TbStream_AxiSendGet2.vhd
+analyze ./TestCases/TbStream_AxiSendGetAsync2.vhd
+analyze ./TestCases/TbStream_AxiSendGetBurst2.vhd
+analyze ./TestCases/TbStream_AxiSendGetBurstAsync2.vhd
 
-analyze ./testbench/TbStream_AxiLastParam1.vhd
-analyze ./testbench/TbStream_AxiLastParamAsync1.vhd
-analyze ./testbench/TbStream_AxiLastOption1.vhd
-analyze ./testbench/TbStream_AxiLastOptionAsync1.vhd
+analyze ./TestCases/TbStream_AxiLastParam1.vhd
+analyze ./TestCases/TbStream_AxiLastParamAsync1.vhd
+analyze ./TestCases/TbStream_AxiLastOption1.vhd
+analyze ./TestCases/TbStream_AxiLastOptionAsync1.vhd
 
-analyze ./testbench/TbStream_AxiSetOptions1.vhd
-analyze ./testbench/TbStream_AxiSetOptionsAsync1.vhd
-analyze ./testbench/TbStream_AxiSetOptionsBurst1.vhd
-analyze ./testbench/TbStream_AxiSetOptionsBurstAsync1.vhd
+analyze ./TestCases/TbStream_AxiSetOptions1.vhd
+analyze ./TestCases/TbStream_AxiSetOptionsAsync1.vhd
+analyze ./TestCases/TbStream_AxiSetOptionsBurst1.vhd
+analyze ./TestCases/TbStream_AxiSetOptionsBurstAsync1.vhd
 
-analyze ./testbench/TbStream_AxiTiming1.vhd
-analyze ./testbench/TbStream_AxiTiming2.vhd
-analyze ./testbench/TbStream_AxiTimingBurst2.vhd
+analyze ./TestCases/TbStream_AxiTiming1.vhd
+analyze ./TestCases/TbStream_AxiTiming2.vhd
+analyze ./TestCases/TbStream_AxiTimingBurst2.vhd
 
-analyze ./testbench/TbStream_AxiSetOptions2.vhd
-analyze ./testbench/TbStream_AxiSetOptionsAsync2.vhd
-analyze ./testbench/TbStream_AxiSetOptionsBurst2.vhd
-analyze ./testbench/TbStream_AxiSetOptionsBurstAsync2.vhd
-analyze ./testbench/TbStream_AxiSetOptionsBurstByte2.vhd
-analyze ./testbench/TbStream_AxiSetOptionsBurstByteAsync2.vhd
+analyze ./TestCases/TbStream_AxiSetOptions2.vhd
+analyze ./TestCases/TbStream_AxiSetOptionsAsync2.vhd
+analyze ./TestCases/TbStream_AxiSetOptionsBurst2.vhd
+analyze ./TestCases/TbStream_AxiSetOptionsBurstAsync2.vhd
+analyze ./TestCases/TbStream_AxiSetOptionsBurstByte2.vhd
+analyze ./TestCases/TbStream_AxiSetOptionsBurstByteAsync2.vhd
 
-analyze ./testbench/TbStream_AxiSetOptionsBurst3.vhd
-analyze ./testbench/TbStream_AxiSetOptionsBurstAsync3.vhd
+analyze ./TestCases/TbStream_AxiSetOptionsBurst3.vhd
+analyze ./TestCases/TbStream_AxiSetOptionsBurstAsync3.vhd
 
-analyze ./testbench/TbStream_AxiSetOptionsBurstCheck3.vhd
-analyze ./testbench/TbStream_AxiSetOptionsBurstCheckAsync3.vhd
+analyze ./TestCases/TbStream_AxiSetOptionsBurstCheck3.vhd
+analyze ./TestCases/TbStream_AxiSetOptionsBurstCheckAsync3.vhd
 
-analyze ./testbench/TbStream_AxiBurstNoLast1.vhd
-analyze ./testbench/TbStream_AxiBurstAsyncNoLast1.vhd
+analyze ./TestCases/TbStream_AxiBurstNoLast1.vhd
+analyze ./TestCases/TbStream_AxiBurstAsyncNoLast1.vhd
 
 
 

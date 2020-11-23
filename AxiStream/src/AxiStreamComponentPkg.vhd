@@ -95,6 +95,43 @@ package AxiStreamComponentPkg is
     ) ;
   end component AxiStreamTransmitter ;
   
+  component AxiStreamTransmitter_VTI is
+    generic (
+      MODEL_ID_NAME  : string :="" ;
+      INIT_ID        : std_logic_vector := "" ; 
+      INIT_DEST      : std_logic_vector := "" ; 
+      INIT_USER      : std_logic_vector := "" ; 
+      INIT_LAST      : natural := 0 ; 
+      
+      tperiod_Clk    : time := 10 ns ;
+      
+      tpd_Clk_TValid : time := 2 ns ; 
+      tpd_Clk_TID    : time := 2 ns ; 
+      tpd_Clk_TDest  : time := 2 ns ; 
+      tpd_Clk_TUser  : time := 2 ns ; 
+      tpd_Clk_TData  : time := 2 ns ; 
+      tpd_Clk_TStrb  : time := 2 ns ; 
+      tpd_Clk_TKeep  : time := 2 ns ; 
+      tpd_Clk_TLast  : time := 2 ns 
+    ) ;
+    port (
+      -- Globals
+      Clk       : in  std_logic ;
+      nReset    : in  std_logic ;
+      
+      -- AXI Transmitter Functional Interface
+      TValid    : out std_logic ;
+      TReady    : in  std_logic ; 
+      TID       : out std_logic_vector ; 
+      TDest     : out std_logic_vector ; 
+      TUser     : out std_logic_vector ; 
+      TData     : out std_logic_vector ; 
+      TStrb     : out std_logic_vector ; 
+      TKeep     : out std_logic_vector ; 
+      TLast     : out std_logic 
+    ) ;
+  end component AxiStreamTransmitter_VTI ;
+
   component AxiStreamReceiver is
     generic (
       MODEL_ID_NAME  : string :="" ;
@@ -126,5 +163,35 @@ package AxiStreamComponentPkg is
       TransRec  : inout StreamRecType 
     ) ;
   end component AxiStreamReceiver ;
+  
+  component AxiStreamReceiver_VTI is
+    generic (
+      MODEL_ID_NAME  : string :="" ;
+      INIT_ID        : std_logic_vector := "" ; 
+      INIT_DEST      : std_logic_vector := "" ; 
+      INIT_USER      : std_logic_vector := "" ; 
+      INIT_LAST      : natural := 0 ; 
+      tperiod_Clk    : time := 10 ns ;
+    
+    tpd_Clk_TReady : time := 2 ns  
+    ) ;
+    port (
+      -- Globals
+      Clk       : in  std_logic ;
+      nReset    : in  std_logic ;
+      
+      -- AXI Transmitter Functional Interface
+      TValid    : in  std_logic ;
+      TReady    : out std_logic ; 
+      TID       : in  std_logic_vector ; 
+      TDest     : in  std_logic_vector ; 
+      TUser     : in  std_logic_vector ; 
+      TData     : in  std_logic_vector ; 
+      TStrb     : in  std_logic_vector ; 
+      TKeep     : in  std_logic_vector ; 
+      TLast     : in  std_logic  
+    ) ;
+  end component AxiStreamReceiver_VTI ;
+
 
 end package AxiStreamComponentPkg ;

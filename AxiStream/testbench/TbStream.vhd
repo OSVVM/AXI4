@@ -53,7 +53,7 @@ library osvvm_common ;
 
 library osvvm_AXI4 ;
     context osvvm_AXI4.AxiStreamContext ;
-    use     osvvm_AXI4.AxiStreamSignalsPkg_32.all ;
+--    use     osvvm_AXI4.AxiStreamSignalsPkg_32.all ;
     
 entity TbStream is
 end entity TbStream ; 
@@ -110,8 +110,37 @@ architecture TestHarness of TbStream is
   -- MTI fails with the following ...
   -- alias StreamTxRec : TransactionRecType is TransRec ; 
   -- however it is ok with:
-  signal StreamTxRec : TransactionRecType ;
-  signal StreamRxRec : TransactionRecType ;
+--  signal StreamTxRec : TransactionRecType ;
+--  signal StreamRxRec : TransactionRecType ;
+
+  constant AXI_DATA_WIDTH   : integer := 32 ;
+  constant AXI_BYTE_WIDTH   : integer := AXI_DATA_WIDTH/8 ; 
+  constant TID_MAX_WIDTH    : integer := 8 ;
+  constant TDEST_MAX_WIDTH  : integer := 4 ;
+  constant TUSER_MAX_WIDTH  : integer := 4 ;
+
+  constant INIT_ID     : std_logic_vector(TID_MAX_WIDTH-1 downto 0)   := (others => '0') ; 
+  constant INIT_DEST   : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) := (others => '0') ; 
+  constant INIT_USER   : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) := (others => '0') ; 
+  
+  signal TValid    : std_logic ;
+  signal TReady    : std_logic ; 
+  signal TID       : std_logic_vector(TID_MAX_WIDTH-1 downto 0) ; 
+  signal TDest     : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) ; 
+  signal TUser     : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) ; 
+  signal TData     : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ; 
+  signal TStrb     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
+  signal TKeep     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
+  signal TLast     : std_logic ; 
+  
+  constant AXI_PARAM_WIDTH : integer := TID_MAX_WIDTH + TDEST_MAX_WIDTH + TUSER_MAX_WIDTH + 1 ;
+
+  signal StreamTxRec, StreamRxRec : StreamRecType(
+      DataToModel   (AXI_DATA_WIDTH-1  downto 0),
+      DataFromModel (AXI_DATA_WIDTH-1  downto 0),
+      ParamToModel  (AXI_PARAM_WIDTH-1 downto 0),
+      ParamFromModel(AXI_PARAM_WIDTH-1 downto 0)
+    ) ;  
   
 
   component TestCtrl is

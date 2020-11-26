@@ -87,10 +87,6 @@ entity AxiStreamReceiver_VTI is
     TKeep     : in  std_logic_vector ; 
     TLast     : in  std_logic
   ) ;
-
-end entity AxiStreamReceiver_VTI ;
-architecture behavioral of AxiStreamReceiver_VTI is
--- ============ Move to Entity Declarative Region when Mentor supports it ==============
   constant AXI_STREAM_DATA_WIDTH   : integer := TData'length ;
   constant AXI_STREAM_PARAM_WIDTH  : integer := TID'length + TDest'length + TUser'length + 1 ;
 
@@ -101,7 +97,11 @@ architecture behavioral of AxiStreamReceiver_VTI is
     ParamToModel  (AXI_STREAM_PARAM_WIDTH-1 downto 0),
     ParamFromModel(AXI_STREAM_PARAM_WIDTH-1 downto 0)
   ) ;  
--- ===============================================================================
+
+  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
+
+end entity AxiStreamReceiver_VTI ;
+architecture behavioral of AxiStreamReceiver_VTI is
 
   constant AXI_STREAM_DATA_BYTE_WIDTH : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
   constant ID_LEN       : integer := TID'length ;
@@ -118,7 +118,6 @@ architecture behavioral of AxiStreamReceiver_VTI is
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID, BurstFifoID : AlertLogIDType ; 
   
-  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
   shared variable ReceiveFifo   : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
 
   signal ReceiveCount : integer := 0 ;   

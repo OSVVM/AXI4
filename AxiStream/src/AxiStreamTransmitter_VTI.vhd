@@ -94,10 +94,6 @@ entity AxiStreamTransmitter_VTI is
     TKeep     : out std_logic_vector ; 
     TLast     : out std_logic 
   ) ;
-  
-
-end entity AxiStreamTransmitter_VTI ;
-architecture SimpleTransmitter of AxiStreamTransmitter_VTI is
   constant AXI_STREAM_DATA_WIDTH   : integer := TData'length ;
   constant AXI_STREAM_PARAM_WIDTH  : integer := TID'length + TDest'length + TUser'length + 1 ;
 
@@ -108,6 +104,11 @@ architecture SimpleTransmitter of AxiStreamTransmitter_VTI is
     ParamToModel  (AXI_STREAM_PARAM_WIDTH-1 downto 0),
     ParamFromModel(AXI_STREAM_PARAM_WIDTH-1 downto 0)
   ) ;  
+  
+  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
+
+end entity AxiStreamTransmitter_VTI ;
+architecture SimpleTransmitter of AxiStreamTransmitter_VTI is
 
 
   constant AXI_STREAM_DATA_BYTE_WIDTH  : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
@@ -119,7 +120,6 @@ architecture SimpleTransmitter of AxiStreamTransmitter_VTI is
   signal ModelID, BusFailedID : AlertLogIDType ; 
 --  signal ProtocolID, DataCheckID : AlertLogIDType ; 
   
-  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
   shared variable TransmitFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
 
   signal TransmitRequestCount, TransmitDoneCount      : integer := 0 ;   

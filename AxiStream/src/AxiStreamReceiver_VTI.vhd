@@ -264,7 +264,8 @@ begin
                         Count      => ReceiveCount - LastOffsetCount
                       ) ;
             AffirmIf( DataCheckID, 
-                (Data ?= ExpectedData and Param ?= ExpectedParam) = '1',
+--                (Data ?= ExpectedData and Param ?= ExpectedParam) = '1',
+                (MetaMatch(Data, ExpectedData) and MetaMatch(Param, ExpectedParam)),
                 "Operation# " & to_string (DispatcherReceiveCount) & " " & 
                 " Received.  Data: " & to_hstring(Data) &         param_to_string(Param),
                 " Expected.  Data: " & to_hstring(ExpectedData) & param_to_string(ExpectedParam), 

@@ -37,7 +37,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
-library osvvm_AxiStream
+library osvvm_TbAxiStream_VTI
 analyze TestCtrl_e.vhd
 analyze TbStream.vhd
 

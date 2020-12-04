@@ -73,7 +73,7 @@ package Axi4LiteResponderComponentPkg is
       nReset      : in   std_logic ;
 
       -- Testbench Transaction Interface
-      TransRec    : inout AddressBusTransactionRecType ;
+      TransRec    : inout AddressBusRecType ;
 
       -- AXI Master Functional Interface
       AxiBus      : inout Axi4LiteRecType 

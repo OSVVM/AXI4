@@ -86,7 +86,7 @@ port (
   nReset      : in   std_logic ;
 
   -- Testbench Transaction Interface
-  TransRec    : inout AddressBusTransactionRecType ;
+  TransRec    : inout AddressBusRecType ;
 
   -- AXI Responder Interface
   AxiBus      : inout Axi4LiteRecType
@@ -235,7 +235,7 @@ begin
     ) ;
 
     case TransRec.Operation is
-      when WAIT_CLOCK =>
+      when WAIT_FOR_CLOCK =>
         WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
         wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
         wait until Clk = '1' ;

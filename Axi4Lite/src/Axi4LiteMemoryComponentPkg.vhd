@@ -78,7 +78,7 @@ package Axi4LiteMemoryComponentPkg is
     nReset      : in   std_logic ;
 
     -- Testbench Transaction Interface
-    TransRec    : inout AddressBusTransactionRecType ;
+    TransRec    : inout AddressBusRecType ;
 
     -- AXI Slave Interface
     AxiBus      : inout Axi4LiteRecType

@@ -49,8 +49,8 @@ analyze ./testbench/TbAxi4_RandomReadWriteByte.vhd
 analyze ./testbench/TbAxi4_TimeOut.vhd
 analyze ./testbench/TbAxi4_WriteOptions.vhd
 analyze ./testbench/TbAxi4_BasicBurst.vhd
-analyze ./testbench/TbAxi4_MemoryReadWrite.vhd
-analyze ./testbench/TbAxi4_MemoryBurst.vhd
+analyze ./testbench/TbAxi4_MemoryReadWrite1.vhd
+analyze ./testbench/TbAxi4_MemoryBurst1.vhd
 
 simulate TbAxi4_BasicReadWrite
 simulate TbAxi4_ReadWriteAsync1    
@@ -61,5 +61,5 @@ simulate TbAxi4_RandomReadWriteByte
 simulate TbAxi4_TimeOut    
 simulate TbAxi4_WriteOptions 
 simulate TbAxi4_BasicBurst
-simulate TbAxi4_MemoryReadWrite
-simulate TbAxi4_MemoryBurst
+simulate TbAxi4_MemoryReadWrite1
+simulate TbAxi4_MemoryBurst1

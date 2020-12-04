@@ -21,6 +21,7 @@
 --    Date      Version    Description
 --    05/2018   2018       Initial revision
 --    01/2020   2020.01    Updated license notice
+--    12/2020   2020.12    Updated signal and port names
 --
 --
 --  This file is part of OSVVM.
@@ -43,8 +44,8 @@
 architecture WriteOptions of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
-  signal TbSuperID : AlertLogIDType ; 
-  signal TbMinionID  : AlertLogIDType ; 
+  signal TbMasterID : AlertLogIDType ; 
+  signal TbResponderID  : AlertLogIDType ; 
 
 begin
 
@@ -56,8 +57,8 @@ begin
   begin
     -- Initialization of test
     SetAlertLogName("TbAxi4_WriteOptions") ;
-    TbSuperID <= GetAlertLogID("TB Super Proc") ;
-    TbMinionID <= GetAlertLogID("TB Minion Proc") ;
+    TbMasterID <= GetAlertLogID("TB Master Proc") ;
+    TbResponderID <= GetAlertLogID("TB Responder Proc") ;
     SetLogEnable(PASSED, TRUE) ;  -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
@@ -89,96 +90,96 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- AxiSuperProc
-  --   Generate transactions for AxiSuper
+  -- MasterProc
+  --   Generate transactions for AxiMaster
   ------------------------------------------------------------
-  AxiSuperProc : process
+  MasterProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
   begin
     wait until nReset = '1' ;  
-    NoOp(AxiSuperTransRec, 4) ; 
+    WaitForClock(MasterRec, 4) ; 
     -- Do 6 sets of 4 write operations
     for j in 0 to 5 loop 
       Addr := X"0000_0000" + j*16 ; 
       Data := X"0000_0000" + j*16 ; 
-      log(TbSuperID, "AxiSuperTransRec, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
-      Write(AxiSuperTransRec, Addr,    Data) ;
-      if j = 4 then NoOp(AxiSuperTransRec, 6) ;  end if ; 
-      Write(AxiSuperTransRec, Addr+4,  Data+1) ;
-      if j = 4 then NoOp(AxiSuperTransRec, 6) ;  end if ; 
-      Write(AxiSuperTransRec, Addr+8,  Data+2) ;
-      if j = 4 then NoOp(AxiSuperTransRec, 6) ;  end if ; 
-      Write(AxiSuperTransRec, Addr+12, Data+3) ;
-      NoOp(AxiSuperTransRec, 16) ; 
+      log(TbMasterID, "MasterRec, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
+      Write(MasterRec, Addr,    Data) ;
+      if j = 4 then WaitForClock(MasterRec, 6) ;  end if ; 
+      Write(MasterRec, Addr+4,  Data+1) ;
+      if j = 4 then WaitForClock(MasterRec, 6) ;  end if ; 
+      Write(MasterRec, Addr+8,  Data+2) ;
+      if j = 4 then WaitForClock(MasterRec, 6) ;  end if ; 
+      Write(MasterRec, Addr+12, Data+3) ;
+      WaitForClock(MasterRec, 16) ; 
     end loop ; 
 
 
     -- Wait for outputs to propagate and signal TestDone
-    NoOp(AxiSuperTransRec, 4) ;  
+    WaitForClock(MasterRec, 4) ;  
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiSuperProc ;
+  end process MasterProc ;
 
 
   ------------------------------------------------------------
-  -- AxiMinionProc
-  --   Generate transactions for AxiMinion
+  -- ResponderProc
+  --   Generate transactions for AxiResponder
   ------------------------------------------------------------
-  AxiMinionProc : process
+  ResponderProc : process
     variable Addr, ExpAddr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data, ExpData : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
   begin
-    -- Must set Minion options before start otherwise, ready will be active on first cycle.
+    -- Must set Responder options before start otherwise, ready will be active on first cycle.
     wait for 0 ns ; 
-    WaitForClock(AxiMinionTransRec, 2) ; 
+    WaitForClock(ResponderRec, 2) ; 
 
     for j in 0 to 5 loop 
       case j is 
         when 0 => 
-          log(TbMinionID, "Write Address:  Valid Before Ready, Delay Cycles 0") ;
-          SetModelOptions(AxiMinionTransRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 0) ;
-          SetModelOptions(AxiMinionTransRec, WRITE_ADDRESS_READY_BEFORE_VALID, FALSE) ;
+          log(TbResponderID, "Write Address:  Valid Before Ready, Delay Cycles 0") ;
+          SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 0) ;
+          SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, FALSE) ;
         when 1 => 
-          log(TbMinionID, "Write Address:  Valid Before Ready, Delay Cycles 2") ;
-          SetModelOptions(AxiMinionTransRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 2) ;
-          SetModelOptions(AxiMinionTransRec, WRITE_ADDRESS_READY_BEFORE_VALID, FALSE) ;
+          log(TbResponderID, "Write Address:  Valid Before Ready, Delay Cycles 2") ;
+          SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 2) ;
+          SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, FALSE) ;
         when 2 => 
-          log(TbMinionID, "Write Address:  Valid Before Ready, Delay Cycles 4") ;
-          SetModelOptions(AxiMinionTransRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 4) ;
-          SetModelOptions(AxiMinionTransRec, WRITE_ADDRESS_READY_BEFORE_VALID, FALSE) ;
+          log(TbResponderID, "Write Address:  Valid Before Ready, Delay Cycles 4") ;
+          SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 4) ;
+          SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, FALSE) ;
         when 3 => 
-          log(TbMinionID, "Write Address:  Ready Before Valid, Delay Cycles 4") ;
-          SetModelOptions(AxiMinionTransRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 4) ;
-          SetModelOptions(AxiMinionTransRec, WRITE_ADDRESS_READY_BEFORE_VALID, TRUE) ;
+          log(TbResponderID, "Write Address:  Ready Before Valid, Delay Cycles 4") ;
+          SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 4) ;
+          SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, TRUE) ;
         when 4 => 
-          log(TbMinionID, "Write Address:  Ready Before Valid, Delay Cycles 4") ;
-          SetModelOptions(AxiMinionTransRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 4) ;
-          SetModelOptions(AxiMinionTransRec, WRITE_ADDRESS_READY_BEFORE_VALID, TRUE) ;
+          log(TbResponderID, "Write Address:  Ready Before Valid, Delay Cycles 4") ;
+          SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 4) ;
+          SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, TRUE) ;
         when 5 => 
-          log(TbMinionID, "Write Address:  Ready Before Valid, Delay Cycles 0") ;
-          SetModelOptions(AxiMinionTransRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 0) ;
-          SetModelOptions(AxiMinionTransRec, WRITE_ADDRESS_READY_BEFORE_VALID, TRUE) ;
-        when others => Alert(TbMinionID, "Unimplemented test case", FAILURE)  ; 
+          log(TbResponderID, "Write Address:  Ready Before Valid, Delay Cycles 0") ;
+          SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 0) ;
+          SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, TRUE) ;
+        when others => Alert(TbResponderID, "Unimplemented test case", FAILURE)  ; 
       end case ; 
       -- Check Set of 4 Data items      
       for i in 0 to 3 loop 
         ExpAddr := X"0000_0000" + j*16 + i*4; 
         ExpData := X"0000_0000" + j*16 + i ; 
-        GetWrite(AxiMinionTransRec, Addr, Data) ;
-        AffirmIfEqual(TbMinionID, Addr, ExpAddr, "Minion Write Addr: ") ;
-        AffirmIfEqual(TbMinionID, Data, ExpData, "Minion Write Data: ") ;
+        GetWrite(ResponderRec, Addr, Data) ;
+        AffirmIfEqual(TbResponderID, Addr, ExpAddr, "Responder Write Addr: ") ;
+        AffirmIfEqual(TbResponderID, Data, ExpData, "Responder Write Data: ") ;
       end loop ; 
-      NoOp(AxiMinionTransRec, 8) ;  
+      WaitForClock(ResponderRec, 8) ;  
       print("") ; print("") ;
     end loop ; 
 
 
     -- Wait for outputs to propagate and signal TestDone
-    NoOp(AxiMinionTransRec, 2) ;
+    WaitForClock(ResponderRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiMinionProc ;
+  end process ResponderProc ;
 
 
 end WriteOptions ;

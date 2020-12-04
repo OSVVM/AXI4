@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_MemoryBurst.vhd
+--  File Name:         TbAxi4_MemoryBurst1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -19,7 +19,8 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    09/2017   2020.04    Initial revision
+--    04/2020   2020.04    Initial revision
+--    12/2020   2020.12    Updated signal and port names
 --
 --
 --  This file is part of OSVVM.
@@ -39,15 +40,9 @@
 --  limitations under the License.
 --  
 
-architecture MemoryBurst of TestCtrl is
+architecture MemoryBurst1 of TestCtrl is
 
   signal TestDone, WriteDone : integer_barrier := 1 ;
-  
-  alias WriteBurstFifo is <<variable .TbAxi4.Axi4Super_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
-  alias ReadBurstFifo  is <<variable .TbAxi4.Axi4Super_1.ReadBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
-
---  alias AxiBus is <<signal .TbAxi4.AxiBus : Axi4RecType>> ;
-
 
 begin
 
@@ -58,14 +53,14 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_MemoryBurst") ;
+    SetAlertLogName("TbAxi4_MemoryBurst1") ;
     SetLogEnable(PASSED, TRUE) ;   -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;     -- Enable INFO logs
     SetLogEnable(DEBUG, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_MemoryBurst.txt") ;
+    TranscriptOpen("./results/TbAxi4_MemoryBurst1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -79,7 +74,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_MemoryBurst.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MemoryBurst.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_MemoryBurst1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MemoryBurst1.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 
@@ -89,91 +84,91 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- AxiSuperProc
-  --   Generate transactions for AxiSuper
+  -- MasterProc
+  --   Generate transactions for AxiMaster
   ------------------------------------------------------------
-  AxiSuperProc : process
+  MasterProc : process
     variable ByteData : std_logic_vector(7 downto 0) ;
   begin
     wait until nReset = '1' ;  
-    NoOp(AxiSuperTransRec, 2) ; 
+    WaitForClock(MasterRec, 2) ; 
     
     log("Write with ByteAddr = 8, 12 Bytes -- word aligned") ;
     PushBurstIncrement(WriteBurstFifo, 3, 12) ;
-    WriteBurst(AxiSuperTransRec, X"0000_0008", 12) ;
+    WriteBurst(MasterRec, X"0000_0008", 12) ;
 
-    ReadBurst (AxiSuperTransRec, X"0000_0008", 12) ;
+    ReadBurst (MasterRec, X"0000_0008", 12) ;
     CheckBurstIncrement(ReadBurstFifo, 3, 12) ;
     
     log("Write with ByteAddr = x1A, 13 Bytes -- unaligned") ;
     PushBurst(WriteBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25)) ;
-    WriteBurst(AxiSuperTransRec, X"0000_001A", 13) ;
+    WriteBurst(MasterRec, X"0000_001A", 13) ;
 
-    ReadBurst (AxiSuperTransRec, X"0000_001A", 13) ;
+    ReadBurst (MasterRec, X"0000_001A", 13) ;
     CheckBurst(ReadBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25)) ;
 
     log("Write with ByteAddr = 31, 12 Bytes -- unaligned") ;
     PushBurstRandom(WriteBurstFifo, 7, 12) ;
-    WriteBurst(AxiSuperTransRec, X"0000_0031", 12) ;
+    WriteBurst(MasterRec, X"0000_0031", 12) ;
 
-    ReadBurst (AxiSuperTransRec, X"0000_0031", 12) ;
+    ReadBurst (MasterRec, X"0000_0031", 12) ;
     CheckBurstRandom(ReadBurstFifo, 7, 12) ;
 
     log("Write with ByteAddr = 8, 12 Bytes -- word aligned") ;
     PushBurstIncrement(WriteBurstFifo, 1, 16) ;
-    WriteBurst(AxiSuperTransRec, X"0000_0050", 1) ;
-    WriteBurst(AxiSuperTransRec, X"0000_0051", 1) ;
-    WriteBurst(AxiSuperTransRec, X"0000_0052", 1) ;
-    WriteBurst(AxiSuperTransRec, X"0000_0053", 1) ;
+    WriteBurst(MasterRec, X"0000_0050", 1) ;
+    WriteBurst(MasterRec, X"0000_0051", 1) ;
+    WriteBurst(MasterRec, X"0000_0052", 1) ;
+    WriteBurst(MasterRec, X"0000_0053", 1) ;
     
-    WriteBurst(AxiSuperTransRec, X"0000_0060", 2) ;
-    WriteBurst(AxiSuperTransRec, X"0000_0062", 2) ;
-    WriteBurst(AxiSuperTransRec, X"0000_0065", 2) ;
+    WriteBurst(MasterRec, X"0000_0060", 2) ;
+    WriteBurst(MasterRec, X"0000_0062", 2) ;
+    WriteBurst(MasterRec, X"0000_0065", 2) ;
     
-    WriteBurst(AxiSuperTransRec, X"0000_0070", 3) ;
-    WriteBurst(AxiSuperTransRec, X"0000_0075", 3) ;
+    WriteBurst(MasterRec, X"0000_0070", 3) ;
+    WriteBurst(MasterRec, X"0000_0075", 3) ;
 
 
-    ReadBurst (AxiSuperTransRec, X"0000_0050", 1) ;
+    ReadBurst (MasterRec, X"0000_0050", 1) ;
     CheckBurst(ReadBurstFifo, (1 => 1)) ;
-    ReadBurst (AxiSuperTransRec, X"0000_0051", 1) ;
+    ReadBurst (MasterRec, X"0000_0051", 1) ;
     CheckBurst(ReadBurstFifo, (1 => 2)) ;
-    ReadBurst (AxiSuperTransRec, X"0000_0052", 1) ;
+    ReadBurst (MasterRec, X"0000_0052", 1) ;
     CheckBurst(ReadBurstFifo, (1 => 3)) ;
-    ReadBurst (AxiSuperTransRec, X"0000_0053", 1) ;
+    ReadBurst (MasterRec, X"0000_0053", 1) ;
     CheckBurst(ReadBurstFifo, (1 => 4)) ;
     
-    ReadBurst (AxiSuperTransRec, X"0000_0060", 2) ;
+    ReadBurst (MasterRec, X"0000_0060", 2) ;
     CheckBurst(ReadBurstFifo, (5, 6)) ;
-    ReadBurst (AxiSuperTransRec, X"0000_0062", 2) ;
+    ReadBurst (MasterRec, X"0000_0062", 2) ;
     CheckBurst(ReadBurstFifo, (7, 8)) ;
-    ReadBurst (AxiSuperTransRec, X"0000_0065", 2) ;
+    ReadBurst (MasterRec, X"0000_0065", 2) ;
     CheckBurst(ReadBurstFifo, (9, 10)) ;
 
-    ReadBurst (AxiSuperTransRec, X"0000_0070", 3) ;
+    ReadBurst (MasterRec, X"0000_0070", 3) ;
     CheckBurst(ReadBurstFifo, (11, 12, 13)) ;
-    ReadBurst (AxiSuperTransRec, X"0000_0075", 3) ;
+    ReadBurst (MasterRec, X"0000_0075", 3) ;
     CheckBurst(ReadBurstFifo, (14, 15, 16)) ;
 
     WaitForBarrier(WriteDone) ;
     
     -- Wait for outputs to propagate and signal TestDone
-    NoOp(AxiSuperTransRec, 2) ;
+    WaitForClock(MasterRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiSuperProc ;
+  end process MasterProc ;
 
 
   ------------------------------------------------------------
   -- AxiMemoryProc
-  --   Generate transactions for AxiMinion
+  --   Generate transactions for AxiResponder
   ------------------------------------------------------------
   AxiMemoryProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ; 
-    alias AxiMemoryTransRec is AxiMinionTransRec ;        
+    alias AxiMemoryTransRec is ResponderRec ;        
   begin
-    NoOp(AxiMemoryTransRec, 2) ; 
+    WaitForClock(AxiMemoryTransRec, 2) ; 
     
     
     WaitForBarrier(WriteDone) ;
@@ -184,23 +179,23 @@ begin
     ReadCheck(AxiMemoryTransRec, X"0000_0010", X"0E0D_0C0B") ;
 
     -- Wait for outputs to propagate and signal TestDone
-    NoOp(AxiMemoryTransRec, 2) ;
+    WaitForClock(AxiMemoryTransRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiMemoryProc ;
 
 
-end MemoryBurst ;
+end MemoryBurst1 ;
 
 library osvvm_Axi4 ;
 
-Configuration TbAxi4_MemoryBurst of TbAxi4 is
+Configuration TbAxi4_MemoryBurst1 of TbAxi4 is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(MemoryBurst) ; 
+      use entity work.TestCtrl(MemoryBurst1) ; 
     end for ; 
-  for Axi4Minion_1 : Axi4LiteResponder 
+  for Responder_1 : Axi4LiteResponder 
       use entity osvvm_Axi4.Axi4LiteMemory ; 
     end for ; 
   end for ; 
-end TbAxi4_MemoryBurst ; 
+end TbAxi4_MemoryBurst1 ; 

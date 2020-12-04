@@ -48,9 +48,10 @@ analyze TbAxi4_RandomReadWrite.vhd
 analyze TbAxi4_RandomReadWriteByte.vhd
 analyze TbAxi4_TimeOut.vhd
 analyze TbAxi4_WriteOptions.vhd
-analyze TbAxi4_MemoryReadWrite.vhd
+# analyze TbAxi4_MemoryReadWrite1.vhd
 
-# simulate TbAxi4_BasicReadWrite
+
+simulate TbAxi4_BasicReadWrite
 # simulate TbAxi4_ReadWriteAsync1    
 # simulate TbAxi4_ReadWriteAsync2    
 # simulate TbAxi4_ReadWriteAsync3    
@@ -58,4 +59,4 @@ analyze TbAxi4_MemoryReadWrite.vhd
 # simulate TbAxi4_RandomReadWriteByte    
 # simulate TbAxi4_TimeOut    
 # simulate TbAxi4_WriteOptions 
-simulate TbAxi4_MemoryReadWrite
+# simulate TbAxi4_MemoryReadWrite1

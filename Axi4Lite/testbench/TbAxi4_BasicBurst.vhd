@@ -19,7 +19,8 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    09/2017   2020.04    Initial revision
+--    20/2020   2020.04    Initial revision
+--    12/2020   2020.12    Updated signal and port names
 --
 --
 --  This file is part of OSVVM.
@@ -43,7 +44,7 @@ architecture BasicBurst of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
   
-  alias WriteBurstFifo is <<variable .TbAxi4.Axi4Super_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+--  alias WriteBurstFifo is <<variable .TbAxi4.Axi4Master_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
 
 --  alias AxiLiteBus is <<signal .TbAxi4.AxiLiteBus : Axi4RecType>> ;
 
@@ -88,62 +89,62 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- AxiSuperProc
-  --   Generate transactions for AxiSuper
+  -- MasterProc
+  --   Generate transactions for AxiMaster
   ------------------------------------------------------------
-  AxiSuperProc : process
+  MasterProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
 
   begin
     wait until nReset = '1' ;  
-    NoOp(AxiSuperTransRec, 2) ; 
+    WaitForClock(MasterRec, 2) ; 
     log("Write with ByteAddr = 0, 4 Bytes") ;
     for i in 3 to 10 loop
       WriteBurstFifo.Push(to_slv(i, 8)) ;
     end loop ;
-    WriteBurst(AxiSuperTransRec, X"0000_1002", 8) ;
+    WriteBurst(MasterRec, X"0000_1002", 8) ;
     
---    NoOp(AxiSuperTransRec, 18) ; 
+--    WaitForClock(MasterRec, 18) ; 
     
     -- Wait for outputs to propagate and signal TestDone
-    NoOp(AxiSuperTransRec, 2) ;
+    WaitForClock(MasterRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiSuperProc ;
+  end process MasterProc ;
 
 
   ------------------------------------------------------------
-  -- AxiMinionProc
-  --   Generate transactions for AxiMinion
+  -- ResponderProc
+  --   Generate transactions for AxiResponder
   ------------------------------------------------------------
-  AxiMinionProc : process
+  ResponderProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;  
 --    alias  WReady    : std_logic        is AxiLiteBus.WriteData.WReady ;
     
   begin
 --    WReady <= 'Z' ; 
-    NoOp(AxiMinionTransRec, 2) ; 
+    WaitForClock(ResponderRec, 2) ; 
     -- Write and Read with ByteAddr = 0, 4 Bytes
-    GetWrite(AxiMinionTransRec, Addr, Data) ;
-    AffirmIfEqual(Addr, X"0000_1002", "Minion Write Addr: ") ;
-    AffirmIfEqual(Data, X"0403_0000", "Minion Write Data: ") ;
-    GetWriteData(AxiMinionTransRec, Data) ;
-    AffirmIfEqual(Data, X"0807_0605", "Minion Write Data: ") ;
-    GetWriteData(AxiMinionTransRec, Data) ;
-    AffirmIfEqual(Data, X"0000_0A09", "Minion Write Data: ") ;
+    GetWrite(ResponderRec, Addr, Data) ;
+    AffirmIfEqual(Addr, X"0000_1002", "Responder Write Addr: ") ;
+    AffirmIfEqual(Data, X"0403_0000", "Responder Write Data: ") ;
+    GetWriteData(ResponderRec, Data) ;
+    AffirmIfEqual(Data, X"0807_0605", "Responder Write Data: ") ;
+    GetWriteData(ResponderRec, Data) ;
+    AffirmIfEqual(Data, X"0000_0A09", "Responder Write Data: ") ;
 
     
-    -- Force the Minion to allow the bus to transfer the write burst
+    -- Force the Responder to allow the bus to transfer the write burst
 --    WReady <= force '1' ; 
     
---    NoOp(AxiMinionTransRec, 18) ; 
+--    WaitForClock(ResponderRec, 18) ; 
 
     -- Wait for outputs to propagate and signal TestDone
---    NoOp(AxiMinionTransRec, 2) ;
+--    WaitForClock(ResponderRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiMinionProc ;
+  end process ResponderProc ;
 
 
 end BasicBurst ;

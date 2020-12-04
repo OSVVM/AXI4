@@ -22,6 +22,7 @@
 --    09/2017   2017.09    Initial revision
 --    05/2019   2019.05    Added context reference
 --    01/2020   2020.01    Updated license notice
+--    12/2020   2020.12    Updated port names
 --
 --
 --  This file is part of OSVVM.
@@ -55,14 +56,17 @@ library osvvm_Axi4 ;
 entity TestCtrl is
   port (
     -- Global Signal Interface
-    Clk                 : In    std_logic ;
-    nReset              : In    std_logic ;
+    Clk            : In    std_logic ;
+    nReset         : In    std_logic ;
 
     -- Transaction Interfaces
-    AxiSuperTransRec    : inout AddressBusTransactionRecType ;
-    AxiMinionTransRec   : inout AddressBusTransactionRecType 
+    MasterRec      : inout AddressBusRecType ;
+    ResponderRec   : inout AddressBusRecType 
 
   ) ;
-    constant AXI_ADDR_WIDTH : integer := AxiSuperTransRec.Address'length ; 
-    constant AXI_DATA_WIDTH : integer := AxiSuperTransRec.DataToModel'length ;  
+    constant AXI_ADDR_WIDTH : integer := MasterRec.Address'length ; 
+    constant AXI_DATA_WIDTH : integer := MasterRec.DataToModel'length ;  
+    
+  alias WriteBurstFifo is <<variable .TbAxi4.Master_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+  alias ReadBurstFifo  is <<variable .TbAxi4.Master_1.ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
 end entity TestCtrl ;

@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_MemoryReadWrite.vhd
+--  File Name:         TbAxi4_MemoryReadWrite1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -21,6 +21,7 @@
 --    Date      Version    Description
 --    09/2017   2017       Initial revision
 --    01/2020   2020.01    Updated license notice
+--    12/2020   2020.12    Updated signal and port names
 --
 --
 --  This file is part of OSVVM.
@@ -40,9 +41,9 @@
 --  limitations under the License.
 --  
 
-architecture MemoryReadWrite of TestCtrl is
+architecture MemoryReadWrite1 of TestCtrl is
 
-  signal TestDone, SuperDone : integer_barrier := 1 ;
+  signal TestDone, MasterDone : integer_barrier := 1 ;
  
 begin
 
@@ -53,13 +54,13 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_MemoryReadWrite") ;
+    SetAlertLogName("TbAxi4_MemoryReadWrite1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_MemoryReadWrite.txt") ;
+    TranscriptOpen("./results/TbAxi4_MemoryReadWrite1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -74,7 +75,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_MemoryReadWrite.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MemoryReadWrite.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_MemoryReadWrite1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MemoryReadWrite1.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 
@@ -84,53 +85,53 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- AxiSuperProc
-  --   Generate transactions for AxiSuper
+  -- MasterProc
+  --   Generate transactions for AxiMaster
   ------------------------------------------------------------
-  AxiSuperProc : process
+  MasterProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
   begin
     wait until nReset = '1' ;  
-    NoOp(AxiSuperTransRec, 2) ; 
+    WaitForClock(MasterRec, 2) ; 
     log("Write and Read with ByteAddr = 0, 4 Bytes") ;
-    Write(AxiSuperTransRec, X"0000_0000", X"5555_5555" ) ;
-    Read(AxiSuperTransRec,  X"0000_0000", Data) ;
-    AffirmIfEqual(Data, X"5555_5555", "Super Read Data: ") ;
+    Write(MasterRec, X"0000_0000", X"5555_5555" ) ;
+    Read(MasterRec,  X"0000_0000", Data) ;
+    AffirmIfEqual(Data, X"5555_5555", "Master Read Data: ") ;
     
     log("Write and Read with 1 Byte, and ByteAddr = 0, 1, 2, 3") ; 
-    Write(AxiSuperTransRec, X"0000_0010", X"11" ) ;
-    Write(AxiSuperTransRec, X"0000_0011", X"22" ) ;
-    Write(AxiSuperTransRec, X"0000_0012", X"33" ) ;
-    Write(AxiSuperTransRec, X"0000_0013", X"44" ) ;
+    Write(MasterRec, X"0000_0010", X"11" ) ;
+    Write(MasterRec, X"0000_0011", X"22" ) ;
+    Write(MasterRec, X"0000_0012", X"33" ) ;
+    Write(MasterRec, X"0000_0013", X"44" ) ;
     
-    ReadCheck(AxiSuperTransRec, X"0000_0010", X"11" ) ;
-    ReadCheck(AxiSuperTransRec, X"0000_0011", X"22" ) ;
-    ReadCheck(AxiSuperTransRec, X"0000_0012", X"33" ) ;
-    ReadCheck(AxiSuperTransRec, X"0000_0013", X"44" ) ;
+    ReadCheck(MasterRec, X"0000_0010", X"11" ) ;
+    ReadCheck(MasterRec, X"0000_0011", X"22" ) ;
+    ReadCheck(MasterRec, X"0000_0012", X"33" ) ;
+    ReadCheck(MasterRec, X"0000_0013", X"44" ) ;
     
 
     log("Write and Read with 2 Bytes, and ByteAddr = 0, 1, 2") ;
-    Write(AxiSuperTransRec, X"0000_0020", X"2211"  ) ;
-    Write(AxiSuperTransRec, X"0000_0031", X"44_33" ) ;
-    Write(AxiSuperTransRec, X"0000_0042", X"6655"  ) ;
+    Write(MasterRec, X"0000_0020", X"2211"  ) ;
+    Write(MasterRec, X"0000_0031", X"44_33" ) ;
+    Write(MasterRec, X"0000_0042", X"6655"  ) ;
     
-    ReadCheck(AxiSuperTransRec, X"0000_0020", X"2211"  ) ;
-    ReadCheck(AxiSuperTransRec, X"0000_0031", X"44_33" ) ;
-    ReadCheck(AxiSuperTransRec, X"0000_0042", X"6655"  ) ;
+    ReadCheck(MasterRec, X"0000_0020", X"2211"  ) ;
+    ReadCheck(MasterRec, X"0000_0031", X"44_33" ) ;
+    ReadCheck(MasterRec, X"0000_0042", X"6655"  ) ;
 
     log("Write and Read with 3 Bytes and ByteAddr = 0. 1") ;
-    Write(AxiSuperTransRec, X"0000_0050", X"33_2211" ) ;
-    Write(AxiSuperTransRec, X"0000_0061", X"6655_44" ) ;
+    Write(MasterRec, X"0000_0050", X"33_2211" ) ;
+    Write(MasterRec, X"0000_0061", X"6655_44" ) ;
 
-    ReadCheck(AxiSuperTransRec, X"0000_0050", X"33_2211" ) ;
-    ReadCheck(AxiSuperTransRec, X"0000_0061", X"6655_44" ) ;
+    ReadCheck(MasterRec, X"0000_0050", X"33_2211" ) ;
+    ReadCheck(MasterRec, X"0000_0061", X"6655_44" ) ;
     
-    WaitForBarrier(SuperDone) ;
+    WaitForBarrier(MasterDone) ;
     -- Wait for outputs to propagate and signal TestDone
-    NoOp(AxiSuperTransRec, 2) ;
+    WaitForClock(MasterRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiSuperProc ;
+  end process MasterProc ;
 
 
   ------------------------------------------------------------
@@ -140,12 +141,12 @@ begin
   AxiMemoryProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;   
-    alias AxiMemoryTransRec is AxiMinionTransRec ;    
+    alias AxiMemoryTransRec is ResponderRec ;    
   begin
-    NoOp(AxiMemoryTransRec, 2) ;
+    WaitForClock(AxiMemoryTransRec, 2) ;
     
-    -- ReadBack after Super finishes
-    WaitForBarrier(SuperDone) ;
+    -- ReadBack after Master finishes
+    WaitForBarrier(MasterDone) ;
     ReadCheck(AxiMemoryTransRec, X"0000_0000", X"5555_5555" ) ;
     
     ReadCheck(AxiMemoryTransRec, X"0000_0010", X"11" ) ;
@@ -161,23 +162,23 @@ begin
     ReadCheck(AxiMemoryTransRec, X"0000_0061", X"6655_44" ) ;
     
     -- Wait for outputs to propagate and signal TestDone
-    NoOp(AxiMemoryTransRec, 2) ;
+    WaitForClock(AxiMemoryTransRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiMemoryProc ;
 
 
-end MemoryReadWrite ;
+end MemoryReadWrite1 ;
 
 library osvvm_Axi4 ;
 
-Configuration TbAxi4_MemoryReadWrite of TbAxi4 is
+Configuration TbAxi4_MemoryReadWrite1 of TbAxi4 is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(MemoryReadWrite) ; 
+      use entity work.TestCtrl(MemoryReadWrite1) ; 
     end for ; 
-  for Axi4Minion_1 : Axi4LiteResponder 
+  for Responder_1 : Axi4LiteResponder 
       use entity osvvm_Axi4.Axi4LiteMemory ; 
     end for ; 
   end for ; 
-end TbAxi4_MemoryReadWrite ; 
+end TbAxi4_MemoryReadWrite1 ; 

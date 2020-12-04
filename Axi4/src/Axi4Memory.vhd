@@ -85,11 +85,11 @@ port (
   Clk         : in   std_logic ;
   nReset      : in   std_logic ;
 
-  -- Testbench Transaction Interface
-  TransRec    : inout AddressBusTransactionRecType ;
-
   -- AXI Responder Interface
-  AxiBus      : inout Axi4RecType
+  AxiBus      : inout Axi4RecType ;
+
+  -- Testbench Transaction Interface
+  TransRec    : inout AddressBusRecType
 ) ;
 end entity Axi4Memory ;
 
@@ -223,6 +223,7 @@ begin
     variable ByteData         : std_logic_vector(7 downto 0) ;
     variable DataWidth        : integer ;
     variable NumBytes         : integer ;
+    variable Count            : integer ; 
   begin
     WaitForTransaction(
        Clk      => Clk,
@@ -231,26 +232,41 @@ begin
     ) ;
 
     case TransRec.Operation is
-      when WAIT_CLOCK =>
+      when WAIT_FOR_TRANSACTION =>
+        -- Wait for either next write or read access of memory to complete
+        Count := WriteAddressReceiveCount + ReadAddressReceiveCount ; 
+        wait until (WriteAddressReceiveCount + ReadAddressReceiveCount) = Count + 1 ; 
+      
+      when WAIT_FOR_WRITE_TRANSACTION =>
+        -- Wait for next write to memory to complete
+        Count := WriteAddressReceiveCount ; 
+        wait until WriteAddressReceiveCount = Count + 1 ; 
+
+      when WAIT_FOR_READ_TRANSACTION =>
+        -- Wait for next read from memory to complete
+        Count := ReadAddressReceiveCount ; 
+        wait until ReadAddressReceiveCount = Count + 1 ; 
+
+      when WAIT_FOR_CLOCK =>
         WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
         wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
         wait until Clk = '1' ;
 
       when GET_ALERTLOG_ID =>
         TransRec.IntFromModel <= integer(ModelID) ;
-        wait until Clk = '1' ;
+        wait for 0 ns ; 
 
       when GET_TRANSACTION_COUNT =>
         TransRec.IntFromModel <= WriteAddressReceiveCount + ReadAddressReceiveCount ;
-        wait until Clk = '1' ;
+        wait for 0 ns ; 
 
       when GET_WRITE_TRANSACTION_COUNT =>
         TransRec.IntFromModel <= WriteAddressReceiveCount ;
-        wait until Clk = '1' ;
+        wait for 0 ns ; 
 
       when GET_READ_TRANSACTION_COUNT =>
         TransRec.IntFromModel <= ReadAddressReceiveCount ;
-        wait until Clk = '1' ;
+        wait for 0 ns ; 
 
       when WRITE_OP =>
         -- Back door Write access to memory.  Completes without time passing.

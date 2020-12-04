@@ -23,6 +23,7 @@
 --    04/2018   2018.04    First Release
 --    01/2020   2020.01    Updated license notice
 --    07/2020   2020.07    Created Axi4 FULL from Axi4Lite
+--    12/2020   2020.12    Created Axi4 FULL from Axi4Lite
 --
 --
 --  This file is part of OSVVM.
@@ -110,12 +111,17 @@ port (
   Clk         : in   std_logic ;
   nReset      : in   std_logic ;
 
-  -- Testbench Transaction Interface
-  TransRec    : inout AddressBusTransactionRecType ;
-
   -- AXI Master Functional Interface
-  AxiBus      : inout Axi4RecType
+  AxiBus      : inout Axi4RecType ;
+
+  -- Testbench Transaction Interface
+  TransRec    : inout AddressBusRecType 
 ) ;
+
+  -- External Burst Interface
+  shared variable WriteBurstFifo              : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+  shared variable ReadBurstFifo               : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+
 end entity Axi4Master ;
 architecture AxiFull of Axi4Master is
 
@@ -131,10 +137,6 @@ architecture AxiFull of Axi4Master is
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Master'PATH_NAME))) ;
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
-
-  -- External Burst Interface
-  shared variable WriteBurstFifo              : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable ReadBurstFifo               : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
 
   -- Internal Resources
   shared variable WriteAddressFifo            : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
@@ -282,10 +284,12 @@ begin
   begin
     AxiDefaults := InitAxi4Rec(AxiDefaults, '0') ;
     AxiDefaults.WriteAddress.Size  := to_slv(AXI_BYTE_ADDR_WIDTH, LAW.Size'length) ;
+    AxiDefaults.WriteAddress.Burst := "01" ;  -- INCR
     AxiDefaults.WriteResponse.Resp := to_Axi4RespType(OKAY);
     AxiDefaults.ReadAddress.Size   := to_slv(AXI_BYTE_ADDR_WIDTH, LAR.Size'length) ;
+    AxiDefaults.ReadAddress.Burst  := "01" ;  -- INCR
     AxiDefaults.ReadData.Resp      := to_Axi4RespType(OKAY) ;
-
+--!! AWCache, ARCache Defaults
     loop
       WaitForTransaction(
          Clk      => Clk,
@@ -297,26 +301,76 @@ begin
 
       case Operation is
         -- Execute Standard Directive Transactions
-        when WAIT_CLOCK =>
+        when WAIT_FOR_TRANSACTION =>
+          -- Waits for All WRITE and READ Transactions to complete
+          if WriteAddressRequestCount /= WriteAddressDoneCount then
+            -- Block until both write address done.
+            wait until WriteAddressRequestCount = WriteAddressDoneCount ;
+          end if ;
+          if WriteDataRequestCount /= WriteDataDoneCount then
+            -- Block until both write data done.
+            wait until WriteDataRequestCount = WriteDataDoneCount ;
+          end if ;
+          if WriteResponseExpectCount /= WriteResponseReceiveCount then
+            -- Block until both write response done.
+            wait until WriteResponseExpectCount = WriteResponseReceiveCount ;
+          end if ;
+
+          if ReadAddressRequestCount /= ReadAddressDoneCount then
+            -- Block until both read address done.
+            wait until ReadAddressRequestCount = ReadAddressDoneCount ;
+          end if ;
+          if ReadDataExpectCount /= ReadDataReceiveCount then
+            -- Block until both read data done.
+            wait until ReadDataExpectCount = ReadDataReceiveCount ;
+          end if ;
+
+        when WAIT_FOR_WRITE_TRANSACTION =>
+          if WriteAddressRequestCount /= WriteAddressDoneCount then
+            -- Block until both write address done.
+            wait until WriteAddressRequestCount = WriteAddressDoneCount ;
+          end if ;
+          if WriteDataRequestCount /= WriteDataDoneCount then
+            -- Block until both write data done.
+            wait until WriteDataRequestCount = WriteDataDoneCount ;
+          end if ;
+          if WriteResponseExpectCount /= WriteResponseReceiveCount then
+            -- Block until both write response done.
+            wait until WriteResponseExpectCount = WriteResponseReceiveCount ;
+          end if ;
+          wait for 0 ns ; 
+
+        when WAIT_FOR_READ_TRANSACTION =>
+          if ReadAddressRequestCount /= ReadAddressDoneCount then
+            -- Block until both read address done.
+            wait until ReadAddressRequestCount = ReadAddressDoneCount ;
+          end if ;
+          if ReadDataExpectCount /= ReadDataReceiveCount then
+            -- Block until both read data done.
+            wait until ReadDataExpectCount = ReadDataReceiveCount ;
+          end if ;
+          wait for 0 ns ; 
+
+        when WAIT_FOR_CLOCK =>
           WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
           wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
           wait until Clk = '1' ;
 
         when GET_ALERTLOG_ID =>
           TransRec.IntFromModel <= integer(ModelID) ;
-          wait until Clk = '1' ;
+          wait for 0 ns ; 
 
         when GET_TRANSACTION_COUNT =>
           TransRec.IntFromModel <= WriteAddressDoneCount + ReadAddressDoneCount ;
-          wait until Clk = '1' ;
+          wait for 0 ns ; 
 
         when GET_WRITE_TRANSACTION_COUNT =>
           TransRec.IntFromModel <= WriteAddressDoneCount ;
-          wait until Clk = '1' ;
+          wait for 0 ns ; 
 
         when GET_READ_TRANSACTION_COUNT =>
           TransRec.IntFromModel <= ReadAddressDoneCount ;
-          wait until Clk = '1' ;
+          wait for 0 ns ; 
 
         -- Model Transaction Dispatch
         when WRITE_OP | WRITE_ADDRESS | WRITE_DATA | ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>

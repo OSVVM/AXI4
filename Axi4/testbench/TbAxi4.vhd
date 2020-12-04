@@ -21,6 +21,7 @@
 --    Date      Version    Description
 --    04/2018   2018       Initial revision
 --    01/2020   2020.01    Updated license notice
+--    12/2020   2020.12    Updated signal and port names
 --
 --
 --  This file is part of OSVVM.
@@ -66,14 +67,14 @@ architecture TestHarness of TbAxi4 is
   signal nReset      : std_logic ;
 
 --  -- Testbench Transaction Interface
---  subtype LocalTransactionRecType is AddressBusTransactionRecType(
+--  subtype LocalTransactionRecType is AddressBusRecType(
 --    Address(AXI_ADDR_WIDTH-1 downto 0),
 --    DataToModel(AXI_DATA_WIDTH-1 downto 0),
 --    DataFromModel(AXI_DATA_WIDTH-1 downto 0)
 --  ) ;
---  signal AxiSuperTransRec   : LocalTransactionRecType ;
---  signal AxiMinionTransRec  : LocalTransactionRecType ;
-  signal AxiSuperTransRec, AxiMinionTransRec  : AddressBusTransactionRecType(
+--  signal MasterRec   : LocalTransactionRecType ;
+--  signal ResponderRec  : LocalTransactionRecType ;
+  signal MasterRec, ResponderRec  : AddressBusRecType(
           Address(AXI_ADDR_WIDTH-1 downto 0),
           DataToModel(AXI_DATA_WIDTH-1 downto 0),
           DataFromModel(AXI_DATA_WIDTH-1 downto 0)
@@ -191,13 +192,12 @@ architecture TestHarness of TbAxi4 is
   component TestCtrl is
     port (
       -- Global Signal Interface
-      Clk                 : In    std_logic ;
-      nReset              : In    std_logic ;
+      Clk            : In    std_logic ;
+      nReset         : In    std_logic ;
 
       -- Transaction Interfaces
-      AxiSuperTransRec    : inout AddressBusTransactionRecType ;
-      AxiMinionTransRec   : inout AddressBusTransactionRecType
-
+      MasterRec      : inout AddressBusRecType ;
+      ResponderRec   : inout AddressBusRecType
     ) ;
   end component TestCtrl ;
 
@@ -220,14 +220,11 @@ begin
   ) ;
 
   -- Behavioral model.  Replaces DUT for labs
-  Axi4Minion_1 : Axi4Responder
+  Responder_1 : Axi4Responder
   port map (
     -- Globals
     Clk         => Clk,
     nReset      => nReset,
-
-    -- Testbench Transaction Interface
-    TransRec    => AxiMinionTransRec,
 
     -- AXI Master Functional Interface
 --    AxiBus  => AxiBus
@@ -258,43 +255,46 @@ begin
     -- Mapping bus subrecords on left hand side (because it is easy)
     AxiBus.WriteResponse           => AxiBus.WriteResponse ,
     AxiBus.ReadAddress             => AxiBus.ReadAddress ,
-    AxiBus.ReadData                => AxiBus.ReadData
+    AxiBus.ReadData                => AxiBus.ReadData ,
+    
+    -- Testbench Transaction Interface
+    TransRec    => ResponderRec
   ) ;
 
-  Axi4Super_1 : Axi4Master
+  Master_1 : Axi4Master
   port map (
     -- Globals
     Clk         => Clk,
     nReset      => nReset,
 
+    -- AXI Master Functional Interface
+    AxiBus      => AxiBus,
+
     -- Testbench Transaction Interface
-    TransRec    => AxiSuperTransRec,
+    TransRec    => MasterRec
+  ) ;
+
+
+  Monitor_1 : Axi4Monitor
+  port map (
+    -- Globals
+    Clk         => Clk,
+    nReset      => nReset,
 
     -- AXI Master Functional Interface
     AxiBus      => AxiBus
   ) ;
 
 
-  Axi4Monitor_1 : Axi4Monitor
-  port map (
-    -- Globals
-    Clk         => Clk,
-    nReset      => nReset,
-
-    -- AXI Master Functional Interface
-    AxiBus     => AxiBus
-  ) ;
-
-
   TestCtrl_1 : TestCtrl
   port map (
     -- Globals
-    Clk                => Clk,
-    nReset             => nReset,
+    Clk           => Clk,
+    nReset        => nReset,
 
     -- Testbench Transaction Interfaces
-    AxiSuperTransRec   => AxiSuperTransRec,
-    AxiMinionTransRec  => AxiMinionTransRec
+    MasterRec     => MasterRec,
+    ResponderRec  => ResponderRec
   ) ;
 
 end architecture TestHarness ;

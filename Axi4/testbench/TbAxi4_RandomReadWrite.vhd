@@ -21,6 +21,7 @@
 --    Date      Version    Description
 --    09/2017   2017       Initial revision
 --    01/2020   2020.01    Updated license notice
+--    12/2020   2020.12    Updated signal and port names
 --
 --
 --  This file is part of OSVVM.
@@ -44,13 +45,10 @@ architecture RandomReadWrite of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
   
-  type OpType is (WRITE_OP_ENUM, READ_OP_ENUM) ;  -- Add TEST_DONE?
-  -- constant NO_OP_INDEX    : integer := OpType'pos(NO_OP) ;
-  constant WRITE_OP_INDEX : integer := OpType'pos(WRITE_OP_ENUM) ;
-  constant READ_OP_INDEX  : integer := OpType'pos(READ_OP_ENUM) ;
-  subtype OperationType is std_logic_vector(0 downto 0) ;
-  constant WRITE_OP : OperationType := to_slv(WRITE_OP_INDEX, OperationType'length) ;
-  constant READ_OP : OperationType := to_slv(READ_OP_INDEX, OperationType'length) ;
+  type OperationType is (WRITE_OP, READ_OP) ;  -- Add TEST_DONE?
+  constant WRITE_OP_INDEX : integer := OperationType'pos(WRITE_OP) ;
+  constant READ_OP_INDEX  : integer := OperationType'pos(READ_OP) ;
+  subtype OperationSlvType is std_logic_vector(0 downto 0) ;
 
   shared variable OperationFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
   
@@ -98,26 +96,27 @@ begin
 
   
   ------------------------------------------------------------
-  -- AxiSuperProc
-  --   Generate transactions for AxiSuper
+  -- MasterProc
+  --   Generate transactions for AxiMaster
   ------------------------------------------------------------
-  AxiSuperProc : process
+  MasterProc : process
     variable OpRV      : RandomPType ;   
-    variable NoOpRV    : RandomPType ;   
-    variable Operation : OperationType ; 
+    variable WaitForClockRV    : RandomPType ;   
+    variable OperationInt : integer ; 
+    variable OperationSlv : OperationSlvType ; 
     variable Address   : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data      : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
     variable ReadData  : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
     
-    variable counts : integer_vector(0 to OpType'Pos(OpType'Right)) ; 
+    variable counts : integer_vector(0 to OperationType'Pos(OperationType'Right)) ; 
   begin
     -- Initialize Randomization Objects
     OpRV.InitSeed(OpRv'instance_name) ;
-    NoOpRV.InitSeed(NoOpRV'instance_name) ;
+    WaitForClockRV.InitSeed(WaitForClockRV'instance_name) ;
     
     -- Find exit of reset
     wait until nReset = '1' ;  
-    NoOp(AxiSuperTransRec, 2) ; 
+    WaitForClock(MasterRec, 2) ; 
     
     -- Distribution for Test Operations
     counts := (WRITE_OP_INDEX => 500, READ_OP_INDEX => 500) ;
@@ -126,27 +125,29 @@ begin
       -- Calculate Address and Data if Write or Read Operation
       Address   := OpRV.RandSlv(size => AXI_ADDR_WIDTH - 2) & "00" ;  -- Keep address word aligned
       Data      := OpRV.RandSlv(size => AXI_DATA_WIDTH) ;
-      Operation := to_slv(OpRV.DistInt(counts), Operation'length) ;
-      OperationFifo.push(Operation & Address & Data) ;
+--      Operation := to_slv(OpRV.DistInt(counts), Operation'length) ;
+      OperationInt := OpRV.DistInt(counts) ;
+      OperationSlv := to_slv(OperationInt, OperationSlv'length) ;
+      OperationFifo.push(OperationSlv & Address & Data) ;
       Increment(OperationCount) ;
       
       -- 20 % of the time add a no-op cycle with a delay of 1 to 5 clocks
-      if NoOpRV.DistInt((8, 2)) = 1 then 
-        NoOp(AxiSuperTransRec, NoOpRV.RandInt(1, 5)) ; 
+      if WaitForClockRV.DistInt((8, 2)) = 1 then 
+        WaitForClock(MasterRec, WaitForClockRV.RandInt(1, 5)) ; 
       end if ; 
       
       -- Do the Operation
-      case Operation is
+      case OperationType'val(OperationInt) is
         when WRITE_OP =>  
           counts(WRITE_OP_INDEX) := counts(WRITE_OP_INDEX) - 1 ; 
-          -- Log("Starting: Super Write with Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
-          Write(AxiSuperTransRec, Address, Data) ;
+          -- Log("Starting: Master Write with Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
+          Write(MasterRec, Address, Data) ;
           
         when READ_OP =>  
           counts(READ_OP_INDEX) := counts(READ_OP_INDEX) - 1 ; 
-          -- Log("Starting: Super Read with Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
-          Read(AxiSuperTransRec, Address, ReadData) ;
-          AffirmIf(ReadData = Data, "AXI Super Read Data: "& to_hstring(ReadData), 
+          -- Log("Starting: Master Read with Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
+          Read(MasterRec, Address, ReadData) ;
+          AffirmIf(ReadData = Data, "AXI Master Read Data: "& to_hstring(ReadData), 
                    "  Expected: " & to_hstring(Data)) ;
 
         when others =>
@@ -157,31 +158,31 @@ begin
     end loop OperationLoop ; 
     
     TestActive <= FALSE ; 
-    -- Allow Minion to catch up before signaling OperationCount (needed when WRITE_OP is last)
+    -- Allow Responder to catch up before signaling OperationCount (needed when WRITE_OP is last)
     -- wait for 0 ns ;  -- this is enough
-    NoOp(AxiSuperTransRec, 2) ;
+    WaitForClock(MasterRec, 2) ;
     Increment(OperationCount) ;
     
     -- Wait for outputs to propagate and signal TestDone
-    NoOp(AxiSuperTransRec, 2) ;
+    WaitForClock(MasterRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiSuperProc ;
+  end process MasterProc ;
 
 
   ------------------------------------------------------------
-  -- AxiMinionProc
-  --   Generate transactions for AxiMinion
+  -- ResponderProc
+  --   Generate transactions for AxiResponder
   ------------------------------------------------------------
-  AxiMinionProc : process
-    variable NoOpRV         : RandomPType ;   
-    variable Operation      : OperationType ; 
+  ResponderProc : process
+    variable WaitForClockRV         : RandomPType ;   
+    variable OperationSlv   : OperationSlvType ; 
     variable Address        : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable ActualAddress  : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data           : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
     variable WriteData      : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
   begin
-    NoOpRV.InitSeed(NoOpRV'instance_name) ;
+    WaitForClockRV.InitSeed(WaitForClockRV'instance_name) ;
 
     OperationLoop : loop   
       if OperationFifo.empty then
@@ -191,27 +192,27 @@ begin
       exit OperationLoop when TestActive = FALSE ; 
       
       -- 20 % of the time add a no-op cycle with a delay of 1 to 5 clocks
-      if NoOpRV.DistInt((8, 2)) = 1 then 
-        NoOp(AxiMinionTransRec, NoOpRV.RandInt(1, 5)) ; 
+      if WaitForClockRV.DistInt((8, 2)) = 1 then 
+        WaitForClock(ResponderRec, WaitForClockRV.RandInt(1, 5)) ; 
       end if ; 
       
       -- Get the Operation
-      (Operation, Address, Data) := OperationFifo.pop ; 
+      (OperationSlv, Address, Data) := OperationFifo.pop ; 
       
       -- Do the Operation
-      case Operation is
+      case OperationType'val(to_integer(OperationSlv)) is
         when WRITE_OP =>  
-          -- Log("Starting: Minion Write with Expected Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
-          GetWrite(AxiMinionTransRec, ActualAddress, WriteData) ;
-          AffirmIf(ActualAddress = Address, "AXI Minion Write Address: " & to_hstring(ActualAddress), 
+          -- Log("Starting: Responder Write with Expected Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
+          GetWrite(ResponderRec, ActualAddress, WriteData) ;
+          AffirmIf(ActualAddress = Address, "AXI Responder Write Address: " & to_hstring(ActualAddress), 
                    "  Expected: " & to_hstring(Address)) ;
-          AffirmIf(WriteData = Data, "AXI Minion Write Data: "& to_hstring(WriteData), 
+          AffirmIf(WriteData = Data, "AXI Responder Write Data: "& to_hstring(WriteData), 
                    "  Expected: " & to_hstring(Data)) ;
           
         when READ_OP =>  
-          -- Log("Starting: Minion Read with Expected Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
-          SendRead(AxiMinionTransRec, ActualAddress, Data) ; 
-          AffirmIf(ActualAddress = Address, "AXI Minion Read Address: " & to_hstring(ActualAddress), 
+          -- Log("Starting: Responder Read with Expected Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
+          SendRead(ResponderRec, ActualAddress, Data) ; 
+          AffirmIf(ActualAddress = Address, "AXI Responder Read Address: " & to_hstring(ActualAddress), 
                    "  Expected: " & to_hstring(Address)) ;
 
         when others =>
@@ -222,10 +223,10 @@ begin
     end loop OperationLoop ; 
 
     -- Wait for outputs to propagate and signal TestDone
-    -- NoOp(AxiMinionTransRec, 2) ;
+    -- WaitForClock(ResponderRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiMinionProc ;
+  end process ResponderProc ;
 
 
 end RandomReadWrite ;

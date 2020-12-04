@@ -21,6 +21,7 @@
 --    Date      Version    Description
 --    05/2018   2018       Initial revision
 --    01/2020   2020.01    Updated license notice
+--    12/2020   2020.12    Updated signal and port names
 --
 --
 --  This file is part of OSVVM.
@@ -44,8 +45,8 @@ architecture ReadWriteAsync3 of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
   signal TestStart : integer_barrier := 1 ;
-  signal TbSuperID : AlertLogIDType ; 
-  signal TbMinionID  : AlertLogIDType ; 
+  signal TbMasterID : AlertLogIDType ; 
+  signal TbResponderID  : AlertLogIDType ; 
 
 begin
 
@@ -57,8 +58,8 @@ begin
   begin
     -- Initialization of test
     SetAlertLogName("TbAxi4_ReadWriteAsync3") ;
-    TbSuperID <= GetAlertLogID("TestCtrl: AxiSuper") ;
-    TbMinionID <= GetAlertLogID("TestCtrl: AxiMinion") ;
+    TbMasterID <= GetAlertLogID("TestCtrl: AxiMaster") ;
+    TbResponderID <= GetAlertLogID("TestCtrl: AxiResponder") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
 --    SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
@@ -90,130 +91,130 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- AxiSuperProc
-  --   Generate transactions for AxiSuper
+  -- MasterProc
+  --   Generate transactions for AxiMaster
   ------------------------------------------------------------
-  AxiSuperProc : process
+  MasterProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
   begin
     WaitForBarrier(TestStart) ;  -- Wait for initialization in ControlProc
     SetLogEnable(INFO, FALSE) ;    -- Enable INFO logs
-    NoOp(AxiSuperTransRec, 2) ; 
+    WaitForClock(MasterRec, 2) ; 
     
-    log(TbSuperID, "Testing 32 Bit Write Asynchronous Transaction", INFO) ;
-    WriteAsync(AxiSuperTransRec, X"AAAA_AAA0", X"5555_5555" ) ;
+    log(TbMasterID, "Testing 32 Bit Write Asynchronous Transaction", INFO) ;
+    WriteAsync(MasterRec, X"AAAA_AAA0", X"5555_5555" ) ;
     
-    NoOp(AxiSuperTransRec, 4) ; 
+    WaitForClock(MasterRec, 4) ; 
     blankline(1);
     
-    log(TbSuperID, "Testing 32 Bit Read Address Asynchronous Transaction", INFO) ;
-    ReadAddressAsync(AxiSuperTransRec, X"1111_1110") ;
-    log(TbSuperID, "Testing 32 Bit Read Data Transaction", INFO) ;
-    ReadData(AxiSuperTransRec, Data) ;
-    AffirmIfEqual(TbSuperID, Data, X"2222_2222", "Super Read Data: ") ;
+    log(TbMasterID, "Testing 32 Bit Read Address Asynchronous Transaction", INFO) ;
+    ReadAddressAsync(MasterRec, X"1111_1110") ;
+    log(TbMasterID, "Testing 32 Bit Read Data Transaction", INFO) ;
+    ReadData(MasterRec, Data) ;
+    AffirmIfEqual(TbMasterID, Data, X"2222_2222", "Master Read Data: ") ;
     
-    NoOp(AxiSuperTransRec, 2) ; 
+    WaitForClock(MasterRec, 2) ; 
     blankline(2);
     
 --%% ADD Your Test Code After Here:
 
 
     -- 5.2, 8 bit Writes
-    log(TbSuperID, "Testing 8 Bit Write Asynchronous Transaction", INFO) ; 
-    WriteAsync(AxiSuperTransRec, X"AAAA_AAA0", X"11" ) ;
-    WriteAsync(AxiSuperTransRec, X"AAAA_AAA1", X"22" ) ;
-    WriteAsync(AxiSuperTransRec, X"AAAA_AAA2", X"33" ) ;
-    WriteAsync(AxiSuperTransRec, X"AAAA_AAA3", X"44" ) ;
+    log(TbMasterID, "Testing 8 Bit Write Asynchronous Transaction", INFO) ; 
+    WriteAsync(MasterRec, X"AAAA_AAA0", X"11" ) ;
+    WriteAsync(MasterRec, X"AAAA_AAA1", X"22" ) ;
+    WriteAsync(MasterRec, X"AAAA_AAA2", X"33" ) ;
+    WriteAsync(MasterRec, X"AAAA_AAA3", X"44" ) ;
     
-    NoOp(AxiSuperTransRec, 8) ; 
+    WaitForClock(MasterRec, 8) ; 
     blankline(2);
     
     -- 5.2, 8 bit Reads
-    log(TbSuperID, "Testing 8 Bit Read Address Asynchronous Transaction", INFO) ; 
-    ReadAddressAsync(AxiSuperTransRec,  X"1111_1110") ;
-    ReadAddressAsync(AxiSuperTransRec,  X"1111_1111") ;
-    ReadAddressAsync(AxiSuperTransRec,  X"1111_1112") ;
-    ReadAddressAsync(AxiSuperTransRec,  X"1111_1113") ;
+    log(TbMasterID, "Testing 8 Bit Read Address Asynchronous Transaction", INFO) ; 
+    ReadAddressAsync(MasterRec,  X"1111_1110") ;
+    ReadAddressAsync(MasterRec,  X"1111_1111") ;
+    ReadAddressAsync(MasterRec,  X"1111_1112") ;
+    ReadAddressAsync(MasterRec,  X"1111_1113") ;
     
-    log(TbSuperID, "Testing 8 Bit Read Data Transaction", INFO) ; 
-    ReadData(AxiSuperTransRec,  Data(7 downto 0)) ;
-    AffirmIfEqual(TbSuperID, Data(7 downto 0), X"AA", "Super Read Data: ") ;
-    ReadData(AxiSuperTransRec,  Data(7 downto 0)) ;
-    AffirmIfEqual(TbSuperID, Data(7 downto 0), X"BB", "Super Read Data: ") ;
-    ReadData(AxiSuperTransRec,  Data(7 downto 0)) ;
-    AffirmIfEqual(TbSuperID, Data(7 downto 0), X"CC", "Super Read Data: ") ;
-    ReadData(AxiSuperTransRec,  Data(7 downto 0)) ;
-    AffirmIfEqual(TbSuperID, Data(7 downto 0), X"DD", "Super Read Data: ") ;
+    log(TbMasterID, "Testing 8 Bit Read Data Transaction", INFO) ; 
+    ReadData(MasterRec,  Data(7 downto 0)) ;
+    AffirmIfEqual(TbMasterID, Data(7 downto 0), X"AA", "Master Read Data: ") ;
+    ReadData(MasterRec,  Data(7 downto 0)) ;
+    AffirmIfEqual(TbMasterID, Data(7 downto 0), X"BB", "Master Read Data: ") ;
+    ReadData(MasterRec,  Data(7 downto 0)) ;
+    AffirmIfEqual(TbMasterID, Data(7 downto 0), X"CC", "Master Read Data: ") ;
+    ReadData(MasterRec,  Data(7 downto 0)) ;
+    AffirmIfEqual(TbMasterID, Data(7 downto 0), X"DD", "Master Read Data: ") ;
     
-    NoOp(AxiSuperTransRec, 2) ; 
+    WaitForClock(MasterRec, 2) ; 
     blankline(2);
     -- SetLogEnable(INFO, FALSE) ;    -- Disable INFO logs
     
 
     -- 5.3, 16 bit Write Address
-    log(TbSuperID, "Testing 16 Bit Write Address Asynchronous Transaction", INFO) ; 
-    WriteAddressAsync(AxiSuperTransRec, X"BBBB_BBB0" ) ;
-    WriteAddressAsync(AxiSuperTransRec, X"BBBB_BBB1" ) ;
-    WriteAddressAsync(AxiSuperTransRec, X"BBBB_BBB2" ) ;
+    log(TbMasterID, "Testing 16 Bit Write Address Asynchronous Transaction", INFO) ; 
+    WriteAddressAsync(MasterRec, X"BBBB_BBB0" ) ;
+    WriteAddressAsync(MasterRec, X"BBBB_BBB1" ) ;
+    WriteAddressAsync(MasterRec, X"BBBB_BBB2" ) ;
     
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
-    NoOp(AxiSuperTransRec, 2) ; 
+    WaitForClock(MasterRec, 2) ; 
     blankline(2);
 
     -- 5.3, 16 bit Write Data
-    log(TbSuperID, "Testing 16 Bit Write Data Asynchronous Transaction", INFO) ; 
-    WriteDataAsync(AxiSuperTransRec, X"2211" ) ;
-    WriteDataAsync(AxiSuperTransRec, X"01", X"33_22" ) ;
-    WriteDataAsync(AxiSuperTransRec, X"02", X"4433" ) ;
+    log(TbMasterID, "Testing 16 Bit Write Data Asynchronous Transaction", INFO) ; 
+    WriteDataAsync(MasterRec, X"2211" ) ;
+    WriteDataAsync(MasterRec, X"01", X"33_22" ) ;
+    WriteDataAsync(MasterRec, X"02", X"4433" ) ;
 
     blankline(2);
 
     -- 5.3, 16 bit Reads
-    log(TbSuperID, "Testing 16 Bit Read Address Asynchronous Transaction", INFO) ; 
-    ReadAddressAsync(AxiSuperTransRec,  X"1111_1110") ;
-    ReadAddressAsync(AxiSuperTransRec,  X"1111_1111") ;
-    ReadAddressAsync(AxiSuperTransRec,  X"1111_1112") ;
+    log(TbMasterID, "Testing 16 Bit Read Address Asynchronous Transaction", INFO) ; 
+    ReadAddressAsync(MasterRec,  X"1111_1110") ;
+    ReadAddressAsync(MasterRec,  X"1111_1111") ;
+    ReadAddressAsync(MasterRec,  X"1111_1112") ;
     
-    log(TbSuperID, "Testing 16 Bit Read Data Transaction", INFO) ; 
-    ReadData(AxiSuperTransRec,  Data(15 downto 0)) ;
-    AffirmIfEqual(TbSuperID, Data(15 downto 0), X"BBAA", "Super Read Data: ") ;
-    ReadData(AxiSuperTransRec,  Data(15 downto 0)) ;
-    AffirmIfEqual(TbSuperID, Data(15 downto 0), X"CCBB", "Super Read Data: ") ;
-    ReadData(AxiSuperTransRec,  Data(15 downto 0)) ;
-    AffirmIfEqual(TbSuperID, Data(15 downto 0), X"DDCC", "Super Read Data: ") ;
+    log(TbMasterID, "Testing 16 Bit Read Data Transaction", INFO) ; 
+    ReadData(MasterRec,  Data(15 downto 0)) ;
+    AffirmIfEqual(TbMasterID, Data(15 downto 0), X"BBAA", "Master Read Data: ") ;
+    ReadData(MasterRec,  Data(15 downto 0)) ;
+    AffirmIfEqual(TbMasterID, Data(15 downto 0), X"CCBB", "Master Read Data: ") ;
+    ReadData(MasterRec,  Data(15 downto 0)) ;
+    AffirmIfEqual(TbMasterID, Data(15 downto 0), X"DDCC", "Master Read Data: ") ;
 
-    NoOp(AxiSuperTransRec, 2) ; 
+    WaitForClock(MasterRec, 2) ; 
     blankline(2);
     
 
     -- 5.4, 24 bit Write Data
-    log(TbSuperID, "Testing 24 Bit Write Data Asynchronous Transaction", INFO) ;
-    WriteDataAsync(AxiSuperTransRec, X"33_2211" ) ;
-    WriteDataAsync(AxiSuperTransRec, X"01", X"4433_22" ) ;
+    log(TbMasterID, "Testing 24 Bit Write Data Asynchronous Transaction", INFO) ;
+    WriteDataAsync(MasterRec, X"33_2211" ) ;
+    WriteDataAsync(MasterRec, X"01", X"4433_22" ) ;
 
-    NoOp(AxiSuperTransRec, 1) ; 
+    WaitForClock(MasterRec, 1) ; 
     blankline(2);
 
     -- 5.4, 24 bit Write Address
-    log(TbSuperID, "Testing 24 Bit Write Address Asynchronous Transaction", INFO) ;
-    WriteAddressAsync(AxiSuperTransRec, X"CCCC_CCC0" ) ;
-    WriteAddressAsync(AxiSuperTransRec, X"CCCC_CCC1" ) ;
+    log(TbMasterID, "Testing 24 Bit Write Address Asynchronous Transaction", INFO) ;
+    WriteAddressAsync(MasterRec, X"CCCC_CCC0" ) ;
+    WriteAddressAsync(MasterRec, X"CCCC_CCC1" ) ;
 
     blankline(2);
 
     -- 5.3, 24 bit Reads
-    log(TbSuperID, "Testing 24 Bit Read Address Asynchronous Transaction", INFO) ;
-    log(TbSuperID, "ReadAddressAsync, Addr: 1111_1110") ;
-    ReadAddressAsync(AxiSuperTransRec,  X"1111_1110") ;
-    log(TbSuperID, "ReadAddressAsync, Addr: 1111_1111") ;
-    ReadAddressAsync(AxiSuperTransRec,  X"1111_1111") ;
-    log(TbSuperID, "ReadData, Data: CC_BBAA") ;
-    ReadData(AxiSuperTransRec,  Data(23 downto 0)) ;
-    AffirmIfEqual(TbSuperID, Data(23 downto 0), X"CC_BBAA", "Super Read Data: ") ;
-    log(TbSuperID, "ReadData, Data: DDCC_BB") ;
-    ReadData(AxiSuperTransRec,  Data(23 downto 0)) ;
-    AffirmIfEqual(TbSuperID, Data(23 downto 0), X"DDCC_BB", "Super Read Data: ") ;
+    log(TbMasterID, "Testing 24 Bit Read Address Asynchronous Transaction", INFO) ;
+    log(TbMasterID, "ReadAddressAsync, Addr: 1111_1110") ;
+    ReadAddressAsync(MasterRec,  X"1111_1110") ;
+    log(TbMasterID, "ReadAddressAsync, Addr: 1111_1111") ;
+    ReadAddressAsync(MasterRec,  X"1111_1111") ;
+    log(TbMasterID, "ReadData, Data: CC_BBAA") ;
+    ReadData(MasterRec,  Data(23 downto 0)) ;
+    AffirmIfEqual(TbMasterID, Data(23 downto 0), X"CC_BBAA", "Master Read Data: ") ;
+    log(TbMasterID, "ReadData, Data: DDCC_BB") ;
+    ReadData(MasterRec,  Data(23 downto 0)) ;
+    AffirmIfEqual(TbMasterID, Data(23 downto 0), X"DDCC_BB", "Master Read Data: ") ;
     
 -- %% ADD Your Test Code Before Here
 
@@ -224,100 +225,100 @@ begin
 
 
     -- Wait for outputs to propagate and signal TestDone
-    NoOp(AxiSuperTransRec, 2) ;
+    WaitForClock(MasterRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiSuperProc ;
+  end process MasterProc ;
 
 
   ------------------------------------------------------------
-  -- AxiMinionProc
-  --   Generate transactions for AxiMinion
+  -- ResponderProc
+  --   Generate transactions for AxiResponder
   ------------------------------------------------------------
-  AxiMinionProc : process
+  ResponderProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
   begin
-    NoOp(AxiMinionTransRec, 2) ; 
+    WaitForClock(ResponderRec, 2) ; 
     -- Write and Read with ByteAddr = 0, 4 Bytes
-    GetWrite(AxiMinionTransRec, Addr, Data) ;
-    AffirmIfEqual(TbMinionID, Addr, X"AAAA_AAA0", "Minion Write Addr: ") ;
-    AffirmIfEqual(TbMinionID, Data, X"5555_5555", "Minion Write Data: ") ;
+    GetWrite(ResponderRec, Addr, Data) ;
+    AffirmIfEqual(TbResponderID, Addr, X"AAAA_AAA0", "Responder Write Addr: ") ;
+    AffirmIfEqual(TbResponderID, Data, X"5555_5555", "Responder Write Data: ") ;
     
-    SendRead(AxiMinionTransRec, Addr, X"2222_2222") ; 
-    AffirmIfEqual(TbMinionID, Addr, X"1111_1110", "Minion Read Addr: ") ;
+    SendRead(ResponderRec, Addr, X"2222_2222") ; 
+    AffirmIfEqual(TbResponderID, Addr, X"1111_1110", "Responder Read Addr: ") ;
 
     
     -- Write and Read with 1 Byte, and ByteAddr = 0, 1, 2, 3
-    -- Write(AxiSuperTransRec, X"AAAA_AAA0", X"11" ) ;
-    GetWrite(AxiMinionTransRec, Addr, Data) ;
-    AffirmIfEqual(TbMinionID, Addr, X"AAAA_AAA0", "Minion Write Addr: ") ;
-    AffirmIfEqual(TbMinionID, Data, X"0000_0011", "Minion Write Data: ") ;
-    -- Write(AxiSuperTransRec, X"AAAA_AAA1", X"22" ) ;
-    GetWrite(AxiMinionTransRec, Addr, Data) ;
-    AffirmIfEqual(TbMinionID, Addr, X"AAAA_AAA1", "Minion Write Addr: ") ;
-    AffirmIfEqual(TbMinionID, Data, X"0000_2200", "Minion Write Data: ") ;
-    -- Write(AxiSuperTransRec, X"AAAA_AAA2", X"33" ) ;
-    GetWrite(AxiMinionTransRec, Addr, Data) ;
-    AffirmIfEqual(TbMinionID, Addr, X"AAAA_AAA2", "Minion Write Addr: ") ;
-    AffirmIfEqual(TbMinionID, Data, X"0033_0000", "Minion Write Data: ") ;
-    -- Write(AxiSuperTransRec, X"AAAA_AAA3", X"44" ) ;
-    GetWrite(AxiMinionTransRec, Addr, Data) ;
-    AffirmIfEqual(TbMinionID, Addr, X"AAAA_AAA3", "Minion Write Addr: ") ;
-    AffirmIfEqual(TbMinionID, Data, X"4400_0000", "Minion Write Data: ") ;
+    -- Write(MasterRec, X"AAAA_AAA0", X"11" ) ;
+    GetWrite(ResponderRec, Addr, Data) ;
+    AffirmIfEqual(TbResponderID, Addr, X"AAAA_AAA0", "Responder Write Addr: ") ;
+    AffirmIfEqual(TbResponderID, Data, X"0000_0011", "Responder Write Data: ") ;
+    -- Write(MasterRec, X"AAAA_AAA1", X"22" ) ;
+    GetWrite(ResponderRec, Addr, Data) ;
+    AffirmIfEqual(TbResponderID, Addr, X"AAAA_AAA1", "Responder Write Addr: ") ;
+    AffirmIfEqual(TbResponderID, Data, X"0000_2200", "Responder Write Data: ") ;
+    -- Write(MasterRec, X"AAAA_AAA2", X"33" ) ;
+    GetWrite(ResponderRec, Addr, Data) ;
+    AffirmIfEqual(TbResponderID, Addr, X"AAAA_AAA2", "Responder Write Addr: ") ;
+    AffirmIfEqual(TbResponderID, Data, X"0033_0000", "Responder Write Data: ") ;
+    -- Write(MasterRec, X"AAAA_AAA3", X"44" ) ;
+    GetWrite(ResponderRec, Addr, Data) ;
+    AffirmIfEqual(TbResponderID, Addr, X"AAAA_AAA3", "Responder Write Addr: ") ;
+    AffirmIfEqual(TbResponderID, Data, X"4400_0000", "Responder Write Data: ") ;
 
-    SendRead(AxiMinionTransRec, Addr, X"0000_00AA") ; 
-    AffirmIfEqual(TbMinionID, Addr, X"1111_1110", "Minion Read Addr: ") ;
-    SendRead(AxiMinionTransRec, Addr, X"0000_BB00") ; 
-    AffirmIfEqual(TbMinionID, Addr, X"1111_1111", "Minion Read Addr: ") ;
-    SendRead(AxiMinionTransRec, Addr, X"00CC_0000") ; 
-    AffirmIfEqual(TbMinionID, Addr, X"1111_1112", "Minion Read Addr: ") ;
-    SendRead(AxiMinionTransRec, Addr, X"DD00_0000") ; 
-    AffirmIfEqual(TbMinionID, Addr, X"1111_1113", "Minion Read Addr: ") ;
+    SendRead(ResponderRec, Addr, X"0000_00AA") ; 
+    AffirmIfEqual(TbResponderID, Addr, X"1111_1110", "Responder Read Addr: ") ;
+    SendRead(ResponderRec, Addr, X"0000_BB00") ; 
+    AffirmIfEqual(TbResponderID, Addr, X"1111_1111", "Responder Read Addr: ") ;
+    SendRead(ResponderRec, Addr, X"00CC_0000") ; 
+    AffirmIfEqual(TbResponderID, Addr, X"1111_1112", "Responder Read Addr: ") ;
+    SendRead(ResponderRec, Addr, X"DD00_0000") ; 
+    AffirmIfEqual(TbResponderID, Addr, X"1111_1113", "Responder Read Addr: ") ;
 
 
     -- Write and Read with 2 Bytes, and ByteAddr = 0, 1, 2
-    -- Write(AxiSuperTransRec, X"BBBB_BBB0", X"2211" ) ;
-    GetWrite(AxiMinionTransRec, Addr, Data) ;
-    AffirmIfEqual(TbMinionID, Addr, X"BBBB_BBB0", "Minion Write Addr: ") ;
-    AffirmIfEqual(TbMinionID, Data, X"0000_2211", "Minion Write Data: ") ;
-    -- Write(AxiSuperTransRec, X"BBBB_BBB1", X"3322" ) ;
-    GetWrite(AxiMinionTransRec, Addr, Data) ;
-    AffirmIfEqual(TbMinionID, Addr, X"BBBB_BBB1", "Minion Write Addr: ") ;
-    AffirmIfEqual(TbMinionID, Data, X"0033_2200", "Minion Write Data: ") ;
-    -- Write(AxiSuperTransRec, X"BBBB_BBB2", X"4433" ) ;
-    GetWrite(AxiMinionTransRec, Addr, Data) ;
-    AffirmIfEqual(TbMinionID, Addr, X"BBBB_BBB2", "Minion Write Addr: ") ;
-    AffirmIfEqual(TbMinionID, Data, X"4433_0000", "Minion Write Data: ") ;
+    -- Write(MasterRec, X"BBBB_BBB0", X"2211" ) ;
+    GetWrite(ResponderRec, Addr, Data) ;
+    AffirmIfEqual(TbResponderID, Addr, X"BBBB_BBB0", "Responder Write Addr: ") ;
+    AffirmIfEqual(TbResponderID, Data, X"0000_2211", "Responder Write Data: ") ;
+    -- Write(MasterRec, X"BBBB_BBB1", X"3322" ) ;
+    GetWrite(ResponderRec, Addr, Data) ;
+    AffirmIfEqual(TbResponderID, Addr, X"BBBB_BBB1", "Responder Write Addr: ") ;
+    AffirmIfEqual(TbResponderID, Data, X"0033_2200", "Responder Write Data: ") ;
+    -- Write(MasterRec, X"BBBB_BBB2", X"4433" ) ;
+    GetWrite(ResponderRec, Addr, Data) ;
+    AffirmIfEqual(TbResponderID, Addr, X"BBBB_BBB2", "Responder Write Addr: ") ;
+    AffirmIfEqual(TbResponderID, Data, X"4433_0000", "Responder Write Data: ") ;
 
-    SendRead(AxiMinionTransRec, Addr, X"0000_BBAA") ; 
-    AffirmIfEqual(TbMinionID, Addr, X"1111_1110", "Minion Read Addr: ") ;
-    SendRead(AxiMinionTransRec, Addr, X"00CC_BB00") ; 
-    AffirmIfEqual(TbMinionID, Addr, X"1111_1111", "Minion Read Addr: ") ;
-    SendRead(AxiMinionTransRec, Addr, X"DDCC_0000") ; 
-    AffirmIfEqual(TbMinionID, Addr, X"1111_1112", "Minion Read Addr: ") ;
+    SendRead(ResponderRec, Addr, X"0000_BBAA") ; 
+    AffirmIfEqual(TbResponderID, Addr, X"1111_1110", "Responder Read Addr: ") ;
+    SendRead(ResponderRec, Addr, X"00CC_BB00") ; 
+    AffirmIfEqual(TbResponderID, Addr, X"1111_1111", "Responder Read Addr: ") ;
+    SendRead(ResponderRec, Addr, X"DDCC_0000") ; 
+    AffirmIfEqual(TbResponderID, Addr, X"1111_1112", "Responder Read Addr: ") ;
 
     -- Write and Read with 3 Bytes and ByteAddr = 0. 1
-    -- Write(AxiSuperTransRec, X"CCCC_CCC0", X"332211" ) ;
-    GetWrite(AxiMinionTransRec, Addr, Data) ;
-    AffirmIfEqual(TbMinionID, Addr, X"CCCC_CCC0", "Minion Write Addr: ") ;
-    AffirmIfEqual(TbMinionID, Data, X"0033_2211", "Minion Write Data: ") ;
-    -- Write(AxiSuperTransRec, X"CCCC_CCC1", X"443322" ) ;
-    GetWrite(AxiMinionTransRec, Addr, Data) ;
-    AffirmIfEqual(TbMinionID, Addr, X"CCCC_CCC1", "Minion Write Addr: ") ;
-    AffirmIfEqual(TbMinionID, Data, X"4433_2200", "Minion Write Data: ") ;
+    -- Write(MasterRec, X"CCCC_CCC0", X"332211" ) ;
+    GetWrite(ResponderRec, Addr, Data) ;
+    AffirmIfEqual(TbResponderID, Addr, X"CCCC_CCC0", "Responder Write Addr: ") ;
+    AffirmIfEqual(TbResponderID, Data, X"0033_2211", "Responder Write Data: ") ;
+    -- Write(MasterRec, X"CCCC_CCC1", X"443322" ) ;
+    GetWrite(ResponderRec, Addr, Data) ;
+    AffirmIfEqual(TbResponderID, Addr, X"CCCC_CCC1", "Responder Write Addr: ") ;
+    AffirmIfEqual(TbResponderID, Data, X"4433_2200", "Responder Write Data: ") ;
 
-    SendRead(AxiMinionTransRec, Addr, X"00CC_BBAA") ; 
-    AffirmIfEqual(TbMinionID, Addr, X"1111_1110", "Minion Read Addr: ") ;
-    SendRead(AxiMinionTransRec, Addr, X"DDCC_BB00") ; 
-    AffirmIfEqual(TbMinionID, Addr, X"1111_1111", "Minion Read Addr: ") ;
+    SendRead(ResponderRec, Addr, X"00CC_BBAA") ; 
+    AffirmIfEqual(TbResponderID, Addr, X"1111_1110", "Responder Read Addr: ") ;
+    SendRead(ResponderRec, Addr, X"DDCC_BB00") ; 
+    AffirmIfEqual(TbResponderID, Addr, X"1111_1111", "Responder Read Addr: ") ;
 
 
     -- Wait for outputs to propagate and signal TestDone
-    NoOp(AxiMinionTransRec, 2) ;
+    WaitForClock(ResponderRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process AxiMinionProc ;
+  end process ResponderProc ;
 
 
 end ReadWriteAsync3 ;

@@ -21,6 +21,7 @@
 --    Date      Version    Description
 --    09/2017   2017       Initial revision
 --    01/2020   2020.01    Updated license notice
+--    12/2020   2020.12    Updated signal and port names
 --
 --
 --  This file is part of OSVVM.
@@ -89,7 +90,7 @@ begin
   ------------------------------------------------------------
   InitiatorProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
-    alias AddrRec is AxiSuperTransRec ;
+    alias AddrRec is MasterRec ;
   begin
     wait until nReset = '1' ;  
     WaitForClock(AddrRec, 2) ; 
@@ -163,13 +164,13 @@ begin
 
 
   ------------------------------------------------------------
-  -- AxiMemoryProc
+  -- MemoryProc
   --   Generate transactions for AxiMemory
   ------------------------------------------------------------
   MemoryTransProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;   
-    alias MemoryTransRec is AxiMinionTransRec ;    
+    alias MemoryTransRec is ResponderRec ;    
   begin
     WaitForClock(MemoryTransRec, 2) ;
     
@@ -200,7 +201,7 @@ Configuration TbAxi4_MemoryAsync of TbAxi4 is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(MemoryAsync) ; 
     end for ; 
-  for Axi4Minion_1 : Axi4Responder 
+  for Responder_1 : Axi4Responder 
       use entity OSVVM_AXI4.Axi4Memory ; 
     end for ; 
   end for ; 

@@ -110,13 +110,35 @@ package Axi4ModelPkg is
 
   ------------------------------------------------------------
   procedure GetWriteBurstData (
-  -- Align Write Data and Check Widths 
   ------------------------------------------------------------
     variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
     variable WriteData       : InOut std_logic_vector ;
     variable WriteStrb       : InOut std_logic_vector ;
     constant BytesInTransfer : In    integer ; 
     constant ByteAddr        : In    Integer := 0 
+  ) ;
+
+  ------------------------------------------------------------
+  procedure PopWriteBurstByteData (
+  -- Get Byte Data from Burst Data.   
+  -- Fill in WriteData and WriteStrb based on ByteAddress and BytesToSend
+  -- WriteData must have WriteStrb'length bytes
+  ------------------------------------------------------------
+    variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+    variable WriteData       : InOut std_logic_vector ;
+    variable WriteStrb       : InOut std_logic_vector ;
+    variable BytesToSend     : InOut integer ; 
+    constant ByteAddress     : In    Integer := 0 
+  ) ;
+
+  ------------------------------------------------------------
+  procedure PushReadBurstByteData (
+  -- Push Burst Data into Byte Burst FIFO.   
+  ------------------------------------------------------------
+    variable ReadBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+    variable ReadData       : InOut std_logic_vector ;
+    variable BytesToReceive : InOut integer ; 
+    constant ByteAddress    : In    integer := 0 
   ) ;
 
   ------------------------------------------------------------
@@ -224,6 +246,7 @@ package body Axi4ModelPkg is
     WriteStrobe(NumberOfBytes downto 1) := (others => '1') ;
         
     -- Adjust WriteStrobe for Address
+    -- replace by sll? WriteStrobe sll ByteAddr 
     return WriteStrobe(MaxBytes - ByteAddr downto 1) & (ByteAddr downto 1 => '0') ;
   end function CalculateAxiWriteStrobe ; 
   
@@ -236,6 +259,7 @@ package body Axi4ModelPkg is
   ) is
     alias    aData         : std_logic_vector(Data'length-1 downto 0) is Data ; 
   begin    
+  -- Deprecate this and Use "Data sll ByteAddr * 8" instead of calling this?
       Data := aData(Data'length - ByteAddr*8 - 1 downto 0) & (ByteAddr*8 downto 1 => '0') ; 
   end procedure AlignAxiWriteData ; 
   
@@ -324,7 +348,6 @@ package body Axi4ModelPkg is
   
   ------------------------------------------------------------
   procedure GetWriteBurstData (
-  -- Align Write Data and Check Widths 
   ------------------------------------------------------------
     variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
     variable WriteData       : InOut std_logic_vector ;
@@ -334,19 +357,72 @@ package body Axi4ModelPkg is
   ) is
     alias aWriteData : std_logic_vector(WriteData'length-1 downto 0) is WriteData ; 
     alias aWriteStrb : std_logic_vector(WriteStrb'length-1 downto 0) is WriteStrb ;
-    constant BIT_ADDR : integer := ByteAddr * 8 ; 
-    variable DataBitOffset : integer ; 
+    variable DataBitOffset : integer := ByteAddr * 8 ; 
   begin
     aWriteData := (others => '0') ;
     aWriteStrb := (others => '0') ;
     -- First Byte is put in right side of word
     for i in 0 to BytesInTransfer - 1 loop
-       DataBitOffset := BIT_ADDR + i*8 ; 
        aWriteData(DataBitOffset+7 downto DataBitOffset) := WriteBurstFifo.Pop ; 
        aWriteStrb(i+ByteAddr) := '1' ; 
+       DataBitOffset := DataBitOffset + 8 ; 
     end loop ; 
   end procedure GetWriteBurstData ; 
   
+  ------------------------------------------------------------
+  procedure PopWriteBurstByteData (
+  -- Get Byte Data from Burst Data.   
+  -- Fill in WriteData and WriteStrb based on ByteAddress and BytesToSend
+  -- WriteData must have WriteStrb'length bytes
+  ------------------------------------------------------------
+    variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+    variable WriteData       : InOut std_logic_vector ;
+    variable WriteStrb       : InOut std_logic_vector ;
+    variable BytesToSend     : InOut integer ; 
+    constant ByteAddress     : In    integer := 0 
+  ) is
+    constant DataLeft : integer := WriteData'length-1; 
+    alias aWriteData : std_logic_vector(DataLeft downto 0) is WriteData ; 
+    alias aWriteStrb : std_logic_vector(WriteStrb'length-1 downto 0) is WriteStrb ;
+    variable DataIndex    : integer := ByteAddress * 8 ; 
+    variable StrbIndex    : integer := ByteAddress ; 
+  begin
+    aWriteData := (others => 'U') ;
+    aWriteStrb := (others => '0') ;
+    -- First Byte is put in right side of word
+    PopByte : while DataIndex <= DataLeft loop  
+      aWriteData(DataIndex+7 downto DataIndex) := WriteBurstFifo.Pop ; 
+      aWriteStrb(StrbIndex) := '1' ; 
+      BytesToSend := BytesToSend - 1 ; 
+      exit when BytesToSend = 0 ; 
+      DataIndex := DataIndex + 8 ; 
+      StrbIndex := StrbIndex + 1 ; 
+    end loop PopByte ;
+  end procedure PopWriteBurstByteData ; 
+
+  ------------------------------------------------------------
+  procedure PushReadBurstByteData (
+  -- Push Burst Data into Byte Burst FIFO.   
+  ------------------------------------------------------------
+    variable ReadBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+    variable ReadData       : InOut std_logic_vector ;
+    variable BytesToReceive : InOut integer ; 
+    constant ByteAddress    : In    integer := 0 
+  ) is
+    constant DataLeft : integer := ReadData'length-1; 
+    alias aReadData : std_logic_vector(DataLeft downto 0) is ReadData ; 
+    variable DataIndex    : integer := ByteAddress * 8 ; 
+    variable StrbIndex    : integer := ByteAddress ; 
+  begin
+    -- First Byte is put in right side of word
+    PushByte : while DataIndex <= DataLeft loop  
+      ReadBurstFifo.push(aReadData(DataIndex+7 downto DataIndex)) ;
+      BytesToReceive := BytesToReceive - 1 ; 
+      exit when BytesToReceive = 0 ; 
+      DataIndex := DataIndex + 8 ; 
+    end loop PushByte ;
+  end procedure PushReadBurstByteData ; 
+
   ------------------------------------------------------------
   procedure AlignAxiReadData (
   -- Shift Data Right and MASK unused bytes. 

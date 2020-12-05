@@ -123,11 +123,11 @@ begin
     -- Write and Read with ByteAddr = 0, 4 Bytes
     GetWrite(ResponderRec, Addr, Data) ;
     AffirmIfEqual(Addr, X"0000_1002", "Responder Write Addr: ") ;
-    AffirmIfEqual(Data, X"0403_0000", "Responder Write Data: ") ;
+    AffirmIfEqual(Data, X"0403_----", "Responder Write Data: ") ;
     GetWriteData(ResponderRec, Data) ;
     AffirmIfEqual(Data, X"0807_0605", "Responder Write Data: ") ;
     GetWriteData(ResponderRec, Data) ;
-    AffirmIfEqual(Data, X"0000_0A09", "Responder Write Data: ") ;
+    AffirmIfEqual(Data, X"----_0A09", "Responder Write Data: ") ;
 
     
     -- Force the Responder to allow the bus to transfer the write burst

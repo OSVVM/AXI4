@@ -216,7 +216,7 @@ begin
                     ParamLast  => ParamLast,           
                     Count      => ((TransmitRequestCount+1) - LastOffsetCount)
                   ) ;
-        If BurstFifoByteMode then 
+        if BurstFifoByteMode then 
           BytesToSend := TransRec.IntToModel ;
           NumberTransfers := integer(ceil(real(BytesToSend) / real(AXI_STREAM_DATA_BYTE_WIDTH))) ;
         else 

@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Simple AXI Lite Slave Tansactor Model
+--      Simple AXI Lite Slave Transactor Model
 --
 --
 --  Developed by:
@@ -445,6 +445,9 @@ begin
 
         wait for 0 ns ;
 
+--!!
+--!! Update in a similar fashion to Axi4Master InterfaceDefault / Parameter handling
+--!!
       when SET_MODEL_OPTIONS =>
         -- Set Model Options
         case Axi4OptionsType'val(TransRec.Options) is

@@ -98,6 +98,26 @@ package Axi4ModelPkg is
   ) ; 
 
   ------------------------------------------------------------
+  function AlignAxiWriteData (
+  -- Shift Data to Align it. 
+  ------------------------------------------------------------
+    constant Data          : In    std_logic_vector ;
+    constant DataWidth     : In    integer ;
+    constant ByteAddr      : In    integer 
+  ) return std_logic_vector ; 
+
+  ------------------------------------------------------------
+  procedure CheckWriteDataWidth (
+  -- Check AXI Write Data Width - BYTE and < WordWidth adjusted for ByteAddr 
+  ------------------------------------------------------------
+    constant ModelID         : In    AlertLogIDType ; 
+    constant WriteData       : In    std_logic_vector ; 
+    constant WriteDataWidth  : In    integer ; 
+    constant WriteByteAddr   : In    integer ;
+    constant MaxDataBytes    : In    integer 
+  ) ; 
+
+  ------------------------------------------------------------
   procedure AlignCheckWriteData (
   -- Align Write Data and Check Widths 
   ------------------------------------------------------------
@@ -263,6 +283,50 @@ package body Axi4ModelPkg is
       Data := aData(Data'length - ByteAddr*8 - 1 downto 0) & (ByteAddr*8 downto 1 => '0') ; 
   end procedure AlignAxiWriteData ; 
   
+  ------------------------------------------------------------
+  function AlignAxiWriteData (
+  -- Shift Data to Align it. 
+  ------------------------------------------------------------
+    constant Data          : In    std_logic_vector ;
+    constant DataWidth     : In    integer ;
+    constant ByteAddr      : In    integer 
+  ) return std_logic_vector is
+    alias    aData         : std_logic_vector(Data'length-1 downto 0) is Data ; 
+    variable result        : std_logic_vector(Data'length-1 downto 0) := (others => 'U') ; 
+  begin    
+    result(DataWidth + ByteAddr*8 - 1 downto ByteAddr*8) := aData(DataWidth-1 downto 0) ;
+    return result ; 
+  end function AlignAxiWriteData ; 
+
+  ------------------------------------------------------------
+  procedure CheckWriteDataWidth (
+  -- Check AXI Write Data Width - BYTE and < WordWidth adjusted for ByteAddr 
+  ------------------------------------------------------------
+    constant ModelID         : In    AlertLogIDType ; 
+    constant WriteData       : In    std_logic_vector ; 
+    constant WriteDataWidth  : In    integer ; 
+    constant WriteByteAddr   : In    integer ;
+    constant MaxDataBytes    : In    integer 
+  ) is
+    variable BytesInTransfer : integer ; 
+  begin
+    -- Calculate BytesInTransfer
+    BytesInTransfer := WriteDataWidth / 8 ;
+
+    -- Check:  Byte Oriented 
+    AlertIf(ModelID, WriteDataWidth mod 8 /= 0, 
+      "Master Write, Data not on a byte boundary." & 
+      "  DataWidth: " & to_string(WriteDataWidth), 
+      FAILURE) ;
+    -- Check:  BytesInTransfer <= MaxDataBytes - WriteByteAddr
+    AlertIf(ModelID, BytesInTransfer > MaxDataBytes - WriteByteAddr, 
+      "Master Write, Data length too large." & 
+      "  Data: " & to_hstring(WriteData) & 
+      "  ByteAddr: " & to_string(WriteByteAddr) & 
+      "  BytesInTransfer: " & to_string(BytesInTransfer), 
+      FAILURE) ;
+  end procedure CheckWriteDataWidth ; 
+
   ------------------------------------------------------------
   procedure AlignCheckWriteData (
   -- Align Write Data and Check Widths 

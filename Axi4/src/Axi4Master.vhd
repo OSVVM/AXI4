@@ -407,9 +407,14 @@ begin
 --            WriteByteAddr := CalculateAxiByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH);
 
             -- Single Transfer Write Data Handling
-            WriteData     := FromTransaction(TransRec.DataToModel) ;
-            AlignCheckWriteData (ModelID, WriteData, WriteStrb, TransRec.DataWidth, WriteByteAddr) ;
-            WriteDataFifo.Push(WriteData & WriteStrb & '1' & LWD.User & LWD.ID) ;
+--!!            WriteData     := FromTransaction(TransRec.DataToModel) ;
+--!!            AlignCheckWriteData (ModelID, WriteData, WriteStrb, TransRec.DataWidth, WriteByteAddr) ;
+            WriteData  := AlignAxiWriteData(FromTransaction(TransRec.DataToModel), TransRec.DataWidth, WriteByteAddr) ;
+            CheckWriteDataWidth (ModelID, WriteData, TransRec.DataWidth, WriteByteAddr, AXI_DATA_BYTE_WIDTH) ;
+            WriteStrb  := CalculateAxiWriteStrobe (WriteByteAddr, TransRec.DataWidth/8, AXI_DATA_BYTE_WIDTH) ;
+--!!            WriteStrb := (others => '1') ;  -- Temporary ok since WriteData has 'U' in appropriate places
+            -- Maintain temporarily during refactor
+            WriteDataFifo.Push('0' & '1' & WriteData & WriteStrb & LWD.User & LWD.ID) ;
 
             Increment(WriteDataRequestCount) ;
           end if ;
@@ -481,14 +486,14 @@ begin
               
               WriteByteAddr := 0 ;
 -----------------
-              exit when BurstLoop = 1 ; -- special handle last WriteDataFifo.Push
+              exit when BurstLoop = 1 ; -- exit to special handle last WriteDataFifo.Push
 
-              WriteDataFifo.Push(WriteData & WriteStrb & '0' & LWD.User & LWD.ID) ;
+              WriteDataFifo.Push('1' & '0' & WriteData & WriteStrb & LWD.User & LWD.ID) ;
 
             end loop ;
             
             -- Special handle last push
-            WriteDataFifo.Push(WriteData & WriteStrb & '1' & LWD.User & LWD.ID) ;
+            WriteDataFifo.Push('1' & '1' & WriteData & WriteStrb & LWD.User & LWD.ID) ;
 
             -- Increment(WriteDataRequestCount) ;
             WriteDataRequestCount <= WriteDataRequestCount + TransfersInBurst ;
@@ -548,7 +553,7 @@ begin
             -- Check or Log Read Data
             if IsReadCheck(TransRec.Operation) then
               ExpectedData := FromTransaction(TransRec.DataToModel) ;
-  --!!9 TODO:  Change format to Address, Data Transaction #, Read Data
+  --!!9 TODO:  Change format to Transaction #, Address, Prot, Read Data
   --!! Run regressions before changing
               AffirmIf( DataCheckID, ReadData = ExpectedData,
                 "Read Data: " & to_hstring(ReadData) &
@@ -557,7 +562,7 @@ begin
                 "  Expected: " & to_hstring(ExpectedData),
                 TransRec.StatusMsgOn or IsLogEnabled(ModelID, INFO) ) ;
             else
-  --!!9 TODO:  Change format to Address, Data Transaction #, Read Data
+  --!!9 TODO:  Change format to Transaction #, Address, Prot, Read Data
   --!! Run regressions before changing
               Log( ModelID,
                 "Read Data: " & to_hstring(ReadData) &
@@ -660,18 +665,18 @@ begin
         when SET_MODEL_OPTIONS =>
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
           if IsAxiInterface(Axi4Option) then
-            SetAxiParameter(AxiDefaults, Axi4Option, TransRec.IntToModel) ;
+            SetAxi4InterfaceDefault(AxiDefaults, Axi4Option, TransRec.IntToModel) ;
           else
-            SetAxiOption(Params, Axi4Option, TransRec.IntToModel) ;
+            SetAxi4Parameter(Params, Axi4Option, TransRec.IntToModel) ;
           end if ;
           wait for 0 ns ;  wait for 0 ns ;
 
         when GET_MODEL_OPTIONS =>
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
           if IsAxiInterface(Axi4Option) then
-            TransRec.IntFromModel <= GetAxiParameter(AxiDefaults, Axi4Option) ;
+            TransRec.IntFromModel <= GetAxi4InterfaceDefault(AxiDefaults, Axi4Option) ;
           else
-            GetAxiOption(Params, Axi4Option, Axi4OptionVal) ;
+            GetAxi4Parameter(Params, Axi4Option, Axi4OptionVal) ;
             TransRec.IntToModel <= Axi4OptionVal ;
           end if ;
           wait for 0 ns ;  wait for 0 ns ;
@@ -680,7 +685,7 @@ begin
           Alert(ModelID, "Unimplemented Transaction", FAILURE) ;
           wait for 0 ns ;  wait for 0 ns ;
       end case ;
-  end loop ;
+    end loop ;
   end process TransactionDispatcher ;
 
   ------------------------------------------------------------
@@ -743,7 +748,7 @@ begin
         INFO
       ) ;
 
-      GetAxiOption(Params, WRITE_ADDRESS_READY_TIME_OUT, WriteAddressReadyTimeOut) ;
+      GetAxi4Parameter(Params, WRITE_ADDRESS_READY_TIME_OUT, WriteAddressReadyTimeOut) ;
 
       ---------------------
       DoAxiValidHandshake (
@@ -786,13 +791,15 @@ begin
 
 --!!GHDL    variable Local : AxiBus.WriteData'subtype ;
     variable Local : Axi4WriteDataRecType (
-                      Data(WD.Data'range),
-                      Strb(WD.Strb'range),
+                      Data(WD.Data'length-1 downto 0),
+                      Strb(WD.Strb'length-1 downto 0),
                       User(WD.User'range),
                       ID(WD.ID'range)
                     );
 
       variable WriteDataReadyTimeOut : integer ;
+      variable Burst    : std_logic ; 
+      variable NewBurst : std_logic := '1' ; 
   begin
     -- initialize
     WD.Valid <= '0' ;
@@ -809,7 +816,23 @@ begin
       if WriteDataFifo.Empty then
          WaitForToggle(WriteDataRequestCount) ;
       end if ;
-      (Local.Data, Local.Strb, Local.Last, Local.User, Local.ID) := WriteDataFifo.Pop ;
+      (Burst, Local.Last, Local.Data, Local.Strb, Local.User, Local.ID) := WriteDataFifo.Pop ;
+      
+      for i in Local.Strb'range loop
+        if Local.Data(i*8) = 'U' then 
+          Local.Strb(i) := '0' ; 
+        -- else
+        --   Retain current value
+        end if ; 
+      end loop ; 
+      
+      if Burst and NewBurst then
+        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_DATA_BURST_START_DELAY)))) ; 
+      elsif Burst then 
+        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_DATA_BURST_DELAY)))) ; 
+      end if ; 
+      
+      NewBurst := Local.Last ; -- Last is '1' for burst end and single word transfers
 
       -- Do Transaction
       WD.Data  <= Local.Data after tpd_clk_WStrb ;
@@ -828,7 +851,7 @@ begin
         INFO
       ) ;
 
-      GetAxiOption(Params, WRITE_DATA_READY_TIME_OUT, WriteDataReadyTimeOut) ;
+      GetAxi4Parameter(Params, WRITE_DATA_READY_TIME_OUT, WriteDataReadyTimeOut) ;
 
       ---------------------
       DoAxiValidHandshake (
@@ -880,9 +903,9 @@ begin
       Log(ModelID, "Waiting for Write Response.", DEBUG) ;
 
 
-      GetAxiOption(Params, WRITE_RESPONSE_READY_BEFORE_VALID, WriteResponseReadyBeforeValid) ;
-      GetAxiOption(Params, WRITE_RESPONSE_READY_DELAY_CYCLES, WriteResponseReadyDelayCycles) ;
-      GetAxiOption(Params, WRITE_RESPONSE_VALID_TIME_OUT,     WriteResponseValidTimeOut) ;
+      GetAxi4Parameter(Params, WRITE_RESPONSE_READY_BEFORE_VALID, WriteResponseReadyBeforeValid) ;
+      GetAxi4Parameter(Params, WRITE_RESPONSE_READY_DELAY_CYCLES, WriteResponseReadyDelayCycles) ;
+      GetAxi4Parameter(Params, WRITE_RESPONSE_VALID_TIME_OUT,     WriteResponseValidTimeOut) ;
 
       ---------------------
       DoAxiReadyHandshake (
@@ -985,7 +1008,7 @@ begin
         INFO
       ) ;
 
-      GetAxiOption(Params, READ_ADDRESS_READY_TIME_OUT, ReadAddressReadyTimeOut) ;
+      GetAxi4Parameter(Params, READ_ADDRESS_READY_TIME_OUT, ReadAddressReadyTimeOut) ;
 
       ---------------------
       DoAxiValidHandshake (
@@ -1040,9 +1063,9 @@ begin
       end if ;
       ReadDataActive <= TRUE ;
 
-      GetAxiOption(Params, READ_DATA_READY_BEFORE_VALID, ReadDataReadyBeforeValid) ;
-      GetAxiOption(Params, READ_DATA_READY_DELAY_CYCLES, ReadDataReadyDelayCycles) ;
-      GetAxiOption(Params, READ_DATA_VALID_TIME_OUT,     ReadDataValidTimeOut) ;
+      GetAxi4Parameter(Params, READ_DATA_READY_BEFORE_VALID, ReadDataReadyBeforeValid) ;
+      GetAxi4Parameter(Params, READ_DATA_READY_DELAY_CYCLES, ReadDataReadyDelayCycles) ;
+      GetAxi4Parameter(Params, READ_DATA_VALID_TIME_OUT,     ReadDataValidTimeOut) ;
 
       ---------------------
       DoAxiReadyHandshake (

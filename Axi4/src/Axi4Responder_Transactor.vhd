@@ -136,6 +136,8 @@ architecture TransactorResponder of Axi4Responder is
   signal WriteDataReadyDelayCycles     : integer := 0 ;
   signal ReadAddressReadyBeforeValid   : boolean := TRUE ;
   signal ReadAddressReadyDelayCycles   : integer := 0 ;
+  
+  signal ZeroUndrivenWriteData         : boolean := TRUE ; 
 
   signal ModelWProt  : Axi4ProtType := (others => '0') ;
   signal ModelRProt  : Axi4ProtType := (others => '0') ;
@@ -562,6 +564,8 @@ begin
   ------------------------------------------------------------
   WriteDataHandler : process
     alias    WD is AxiBus.WriteData ;
+    alias    Strb : std_logic_vector(WD.Strb'length-1 downto 0) is WD.Strb ; 
+    variable Data : std_logic_vector(WD.Data'length-1 downto 0) ;
   begin
     WD.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -582,11 +586,19 @@ begin
 
       -- capture Data, wstrb
 -- Planned Upgrade, Axi4Lite always sets WLast to 1
+      Data := WD.Data ; 
+      if ZeroUndrivenWriteData then
+        for i in Strb'range loop
+          if Strb(i) = '0' then 
+            Data(i*8+7 downto i*8) := (others => '0') ;
+          end if ; 
+        end loop ; 
+      end if ; 
       if WD.Valid = '1' then 
-        WriteDataFifo.push(WD.Data & WD.Strb & WD.Last & WD.User) ;
+        WriteDataFifo.push(Data & WD.Strb & WD.Last & WD.User) ;
       else
         -- On failure to receive Valid, assert LAST
-        WriteDataFifo.push(WD.Data & WD.Strb & '1' & WD.User) ;
+        WriteDataFifo.push(Data & WD.Strb & '1' & WD.User) ;
       end if ; 
 
       -- Log this operation

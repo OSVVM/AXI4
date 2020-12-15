@@ -137,6 +137,9 @@ architecture TransactorResponder of Axi4LiteResponder is
   signal ReadAddressReadyBeforeValid   : boolean := TRUE ;
   signal ReadAddressReadyDelayCycles   : integer := 0 ;
 
+  signal FilterUndrivenWriteData       : boolean := TRUE ; 
+  signal UndrivenWriteDataValue        : std_logic := '0' ; 
+
   signal ModelWProt  : Axi4ProtType := (others => '0') ;
   signal ModelRProt  : Axi4ProtType := (others => '0') ;
 
@@ -289,9 +292,16 @@ begin
           end if ;
 
           (WriteData, WriteStrb) := WriteDataFifo.pop ;
--- Adjust handling for Byte Location?
--- Requires updating tests.
-          TransRec.DataFromModel  <= ToTransaction(Extend(WriteData, TransRec.DataFromModel'length)) ;
+          if FilterUndrivenWriteData then
+            FilterUndrivenAxiData(WriteData, WriteStrb, UndrivenWriteDataValue) ;
+          end if ; 
+
+--!! Move this to a procedure and normalize IO
+--!! Adjust handling for Byte Location?
+--          if TransRec.DataWidth < AXI_DATA_WIDTH then 
+--            WriteData := WriteData srl ByteAddr * 8 ; 
+--          end if ; 
+          TransRec.DataFromModel  <= ToTransaction(WriteData) ;
 --          if WriteLast = '1' then
             FoundLastWriteData := TRUE ;
             WriteResponseFifo.push(ModelWResp) ;

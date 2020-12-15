@@ -110,12 +110,17 @@ port (
   Clk         : in   std_logic ;
   nReset      : in   std_logic ;
 
-  -- Testbench Transaction Interface
-  TransRec    : inout AddressBusRecType ;
-
   -- AXI Master Functional Interface
-  AxiBus      : inout Axi4LiteRecType
+  AxiBus      : inout Axi4LiteRecType ;
+
+  -- Testbench Transaction Interface
+  TransRec    : inout AddressBusRecType
 ) ;
+
+  -- External Burst Interface
+  shared variable WriteBurstFifo              : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+  shared variable ReadBurstFifo               : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+
 end entity Axi4LiteMaster ;
 architecture AxiFull of Axi4LiteMaster is
 
@@ -131,10 +136,6 @@ architecture AxiFull of Axi4LiteMaster is
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, to_lower(PathTail(Axi4LiteMaster'PATH_NAME))) ;
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
-
-  -- External Burst Interface
-  shared variable WriteBurstFifo              : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable ReadBurstFifo               : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
 
   -- Internal Resources
   shared variable WriteAddressFifo            : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
@@ -157,6 +158,10 @@ architecture AxiFull of Axi4LiteMaster is
 
   -- Model Configuration
   shared variable params : ModelParametersPType ;
+
+--  signal BurstFifoMode     : integer := ADDRESS_BUS_BURST_WORD_MODE ;
+  signal BurstFifoMode     : integer := ADDRESS_BUS_BURST_BYTE_MODE ;
+  signal BurstFifoByteMode : boolean := (BurstFifoMode = ADDRESS_BUS_BURST_BYTE_MODE) ; 
 
 begin
 
@@ -274,6 +279,56 @@ begin
 
       case Operation is
         -- Execute Standard Directive Transactions
+        when WAIT_FOR_TRANSACTION =>
+          -- Waits for All WRITE and READ Transactions to complete
+          if WriteAddressRequestCount /= WriteAddressDoneCount then
+            -- Block until both write address done.
+            wait until WriteAddressRequestCount = WriteAddressDoneCount ;
+          end if ;
+          if WriteDataRequestCount /= WriteDataDoneCount then
+            -- Block until both write data done.
+            wait until WriteDataRequestCount = WriteDataDoneCount ;
+          end if ;
+          if WriteResponseExpectCount /= WriteResponseReceiveCount then
+            -- Block until both write response done.
+            wait until WriteResponseExpectCount = WriteResponseReceiveCount ;
+          end if ;
+
+          if ReadAddressRequestCount /= ReadAddressDoneCount then
+            -- Block until both read address done.
+            wait until ReadAddressRequestCount = ReadAddressDoneCount ;
+          end if ;
+          if ReadDataExpectCount /= ReadDataReceiveCount then
+            -- Block until both read data done.
+            wait until ReadDataExpectCount = ReadDataReceiveCount ;
+          end if ;
+
+        when WAIT_FOR_WRITE_TRANSACTION =>
+          if WriteAddressRequestCount /= WriteAddressDoneCount then
+            -- Block until both write address done.
+            wait until WriteAddressRequestCount = WriteAddressDoneCount ;
+          end if ;
+          if WriteDataRequestCount /= WriteDataDoneCount then
+            -- Block until both write data done.
+            wait until WriteDataRequestCount = WriteDataDoneCount ;
+          end if ;
+          if WriteResponseExpectCount /= WriteResponseReceiveCount then
+            -- Block until both write response done.
+            wait until WriteResponseExpectCount = WriteResponseReceiveCount ;
+          end if ;
+          wait for 0 ns ; 
+
+        when WAIT_FOR_READ_TRANSACTION =>
+          if ReadAddressRequestCount /= ReadAddressDoneCount then
+            -- Block until both read address done.
+            wait until ReadAddressRequestCount = ReadAddressDoneCount ;
+          end if ;
+          if ReadDataExpectCount /= ReadDataReceiveCount then
+            -- Block until both read data done.
+            wait until ReadDataExpectCount = ReadDataReceiveCount ;
+          end if ;
+          wait for 0 ns ; 
+
         when WAIT_FOR_CLOCK =>
           WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
           wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
@@ -282,6 +337,16 @@ begin
         when GET_ALERTLOG_ID =>
           TransRec.IntFromModel <= integer(ModelID) ;
           wait until Clk = '1' ;
+
+        when SET_BURST_MODE =>                      
+          BurstFifoMode       <= TransRec.IntToModel ;
+          BurstFifoByteMode   <= (TransRec.IntToModel = STREAM_BURST_BYTE_MODE) ;
+          wait for 0 ns ; 
+          AlertIf(ModelID, IsAddressBusBurstMode(BurstFifoMode), 
+            "Invalid Burst Mode " & to_string(BurstFifoMode), FAILURE) ;
+              
+        when GET_BURST_MODE =>                      
+          TransRec.IntToModel <= BurstFifoMode ;
 
         when GET_TRANSACTION_COUNT =>
           TransRec.IntFromModel <= WriteAddressDoneCount + ReadAddressDoneCount ;
@@ -321,9 +386,14 @@ begin
 --            WriteByteAddr := CalculateAxiByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH);
 
             -- Single Transfer Write Data Handling
-            WriteData     := FromTransaction(TransRec.DataToModel) ;
-            AlignCheckWriteData (ModelID, WriteData, WriteStrb, TransRec.DataWidth, WriteByteAddr) ;
---            WriteDataFifo.Push(WriteData & WriteStrb & '1' & LWD.User & LWD.ID) ;
+--!!            WriteData     := FromTransaction(TransRec.DataToModel) ;
+--!!            AlignCheckWriteData (ModelID, WriteData, WriteStrb, TransRec.DataWidth, WriteByteAddr) ;
+
+            CheckDataIsBytes(ModelID, WriteDataRequestCount+1, TransRec.DataWidth) ;
+            CheckDataWidth  (ModelID, WriteDataRequestCount+1, TransRec.DataWidth, WriteByteAddr, AXI_DATA_WIDTH) ;
+            WriteData  := AlignAxiWriteData(FromTransaction(TransRec.DataToModel), TransRec.DataWidth, WriteByteAddr) ;
+            WriteStrb  := CalculateAxiWriteStrobe(WriteData) ;
+
             WriteDataFifo.Push(WriteData & WriteStrb) ;
 
             Increment(WriteDataRequestCount) ;
@@ -370,47 +440,64 @@ begin
           end if ;
 
           if IsWriteData(Operation) then
-            WriteAddress  := FromTransaction(TransRec.Address) ;
-            WriteByteAddr := CalculateAxiByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH);
-
-            -- Burst Transfer Write Data Handling
-  --!! WriteBurstData -  must have BytesToSend in TransRec.DataWidth
-            BytesToSend       := TransRec.DataWidth ;
---            BytesPerTransfer  := 2 ** to_integer(LAW.Size) ;
-            BytesPerTransfer := AXI_DATA_BYTE_WIDTH ;
-            MaxBytesInFirstTransfer := BytesPerTransfer - WriteByteAddr ;
-            AlertIf(ModelID, BytesPerTransfer /= AXI_DATA_BYTE_WIDTH,
-              "Write Bytes Per Transfer (" & to_string(BytesPerTransfer) & ") " &
-              "/= AXI_DATA_BYTE_WIDTH (" & to_string(AXI_DATA_BYTE_WIDTH) & ")"
-            );
-
-            TransfersInBurst := 1 + CalculateAxiBurstLen(BytesToSend, WriteByteAddr, BytesPerTransfer) ;
-
-            -- First Word of Burst, maybe a 1 word burst
-            if BytesToSend > MaxBytesInFirstTransfer then
-              -- More than 1 transfer in burst
-              GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, MaxBytesInFirstTransfer, WriteByteAddr) ;
-              WriteDataFifo.Push(WriteData & WriteStrb) ;
-              BytesToSend       := BytesToSend - MaxBytesInFirstTransfer;
+-----------------
+            if BurstFifoByteMode then 
+              BytesToSend       := TransRec.DataWidth ;
+              TransfersInBurst  := 1 + CalculateAxiBurstLen(BytesToSend, WriteByteAddr, BytesPerTransfer) ;
             else
-              -- Only one transfer in Burst.  # Bytes may be less than a whole word
-              GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, BytesToSend, WriteByteAddr) ;
-              WriteDataFifo.Push(WriteData & WriteStrb) ;
-              BytesToSend := 0 ;
-            end if ;
+              TransfersInBurst := TransRec.DataWidth ;
+            end if ; 
+            
+           PopWriteBurstData(WriteBurstFifo, BurstFifoMode, WriteData, WriteStrb, BytesToSend, WriteByteAddr) ;
 
-            -- Middle words of burst
-            while BytesToSend >= BytesPerTransfer loop
-              GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, BytesPerTransfer) ;
+            for BurstLoop in TransfersInBurst downto 2 loop    
               WriteDataFifo.Push(WriteData & WriteStrb) ;
-              BytesToSend := BytesToSend - BytesPerTransfer ;
-            end loop ;
-
-            -- End of Burst
-            if BytesToSend > 0 then
-              GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, BytesToSend) ;
-              WriteDataFifo.Push(WriteData & WriteStrb) ;
-            end if ;
+              PopWriteBurstData(WriteBurstFifo, BurstFifoMode, WriteData, WriteStrb, BytesToSend, 0) ;
+            end loop ; 
+            
+            -- Special handle last push
+            WriteDataFifo.Push(WriteData & WriteStrb) ;
+-----------------
+-----------------
+--!!            -- Burst Transfer Write Data Handling
+--!!  --!! WriteBurstData -  must have BytesToSend in TransRec.DataWidth
+--!!            BytesToSend       := TransRec.DataWidth ;
+--!!--            BytesPerTransfer  := 2 ** to_integer(LAW.Size) ;
+--!!            BytesPerTransfer := AXI_DATA_BYTE_WIDTH ;
+--!!            MaxBytesInFirstTransfer := BytesPerTransfer - WriteByteAddr ;
+--!!            AlertIf(ModelID, BytesPerTransfer /= AXI_DATA_BYTE_WIDTH,
+--!!              "Write Bytes Per Transfer (" & to_string(BytesPerTransfer) & ") " &
+--!!              "/= AXI_DATA_BYTE_WIDTH (" & to_string(AXI_DATA_BYTE_WIDTH) & ")"
+--!!            );
+--!!
+--!!            TransfersInBurst := 1 + CalculateAxiBurstLen(BytesToSend, WriteByteAddr, BytesPerTransfer) ;
+--!!
+--!!            -- First Word of Burst, maybe a 1 word burst
+--!!            if BytesToSend > MaxBytesInFirstTransfer then
+--!!              -- More than 1 transfer in burst
+--!!              GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, MaxBytesInFirstTransfer, WriteByteAddr) ;
+--!!              WriteDataFifo.Push(WriteData & WriteStrb) ;
+--!!              BytesToSend       := BytesToSend - MaxBytesInFirstTransfer;
+--!!            else
+--!!              -- Only one transfer in Burst.  # Bytes may be less than a whole word
+--!!              GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, BytesToSend, WriteByteAddr) ;
+--!!              WriteDataFifo.Push(WriteData & WriteStrb) ;
+--!!              BytesToSend := 0 ;
+--!!            end if ;
+--!!
+--!!            -- Middle words of burst
+--!!            while BytesToSend >= BytesPerTransfer loop
+--!!              GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, BytesPerTransfer) ;
+--!!              WriteDataFifo.Push(WriteData & WriteStrb) ;
+--!!              BytesToSend := BytesToSend - BytesPerTransfer ;
+--!!            end loop ;
+--!!
+--!!            -- End of Burst
+--!!            if BytesToSend > 0 then
+--!!              GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, BytesToSend) ;
+--!!              WriteDataFifo.Push(WriteData & WriteStrb) ;
+--!!            end if ;
+-----------------
 
             -- Increment(WriteDataRequestCount) ;
             WriteDataRequestCount <= WriteDataRequestCount + TransfersInBurst ;
@@ -521,7 +608,8 @@ begin
             ReadDataExpectCount <= ReadDataExpectCount + 1 ;
           end if ;
 
-  --!!3 For Bursts, any TryReadData would need to specify length and
+  --!!3 Implies that any separate ReadDataBurst or TryReadDataBurst
+  --!!3 must include the transfer length and for Try
   --!!3 if ReadDataFifo has that number of transfers.
   --!!3 First Check IsReadData, then Calculate #Transfers,
   --!!3 Then if TryRead, and ReadDataFifo.FifoCount < #Transfers, then FALSE
@@ -531,50 +619,59 @@ begin
             -- ReadDataReceiveCount < ReadDataTransactionCount then
             TransRec.BoolFromModel <= FALSE ;
           elsif IsReadData(Operation) then
+            TransRec.BoolFromModel <= TRUE ;
             (ReadAddress, ReadProt) := ReadAddressTransactionFifo.Pop ;
-
-  --!!** Implies that any separate ReadDataBurst must TryReadDataBurst
-  --!!** must include the transfer length
-  --!!19 update to handle different interface size - see Axi4Memory
-            -- Pull Burst out of Read Data FIFO (Word Oriented) and put in ReadBurstFifo (ByteOriented)
-            -- Address
-            -- First and Last bytes
-  --!! f(ReadAddress, TransRec, Params, AXI_DATA_BYTE_WIDTH, ReadDataFifo, ReadDataReceiveCount, ReadBurstFifo)
             ReadByteAddr := CalculateAxiByteAddress(ReadAddress, AXI_BYTE_ADDR_WIDTH);
-            BytesToReceive    := TransRec.DataWidth ;
---            BytesPerTransfer  := 2 ** to_integer(LAR.Size) ;
-            BytesPerTransfer  := AXI_DATA_BYTE_WIDTH ;
-            AlertIf(ModelID, BytesPerTransfer /= AXI_DATA_BYTE_WIDTH,
-              "Write Bytes Per Transfer (" & to_string(BytesPerTransfer) & ") " &
-              "/= AXI_DATA_BYTE_WIDTH (" & to_string(AXI_DATA_BYTE_WIDTH) & ")"
-            );
+--            BytesPerTransfer := 2**to_integer(LAR.Size);
+            BytesPerTransfer := AXI_DATA_BYTE_WIDTH ;
+            
+--!!            BytesPerTransfer  := 2 ** to_integer(LAR.Size) ;
+--!!            AlertIf(ModelID, BytesPerTransfer /= AXI_DATA_BYTE_WIDTH,
+--!!              "Write Bytes Per Transfer (" & to_string(BytesPerTransfer) & ") " &
+--!!              "/= AXI_DATA_BYTE_WIDTH (" & to_string(AXI_DATA_BYTE_WIDTH) & ")"
+--!!            );
+---------------
+            if BurstFifoByteMode then 
+              BytesToReceive    := TransRec.DataWidth ;
+              TransfersInBurst  := 1 + CalculateAxiBurstLen(BytesToReceive, ReadByteAddr, BytesPerTransfer) ;
+            else
+              TransfersInBurst  := TransRec.DataWidth ;
+            end if ; 
+---------------
+---------------
+--!!            BytesToReceive    := TransRec.DataWidth ;
+--!!            TransfersInBurst := 1 + CalculateAxiBurstLen(BytesToReceive, ReadByteAddr, BytesPerTransfer) ;
+--!!            BytesInTransfer   := BytesPerTransfer - ReadByteAddr ;
+---------------
 
-            TransfersInBurst := 1 + CalculateAxiBurstLen(BytesToReceive, ReadByteAddr, BytesPerTransfer) ;
-
-            BytesInTransfer   := BytesPerTransfer - ReadByteAddr ;
 
             for i in 1 to TransfersInBurst loop
               if ReadDataFifo.Empty then
                 WaitForToggle(ReadDataReceiveCount) ;
               end if ;
               ReadData := ReadDataFifo.Pop ;
-              TransRec.BoolFromModel <= TRUE ;
 
-              -- Adjust for last transfer
-              if BytesInTransfer > BytesToReceive then
-                BytesInTransfer := BytesToReceive ;
-              end if ;
-
-  --!!f(ReadData, ReadBurstFifo, BytesInTransfer, ByteAddr)
-              -- Move ReadData into ReadBurstFifo
-              for Byte in 0 to BytesInTransfer - 1 loop
-                 DataBitOffset := ReadByteAddr*8 + Byte*8 ;
-                 ReadBurstFifo.Push(ReadData(DataBitOffset+7 downto DataBitOffset)) ;
-              end loop ;
-
-              BytesToReceive := BytesToReceive - BytesInTransfer ;
+---------------
+              PushReadBurstData(ReadBurstFifo, BurstFifoMode, ReadData, BytesToReceive, ReadByteAddr) ;
               ReadByteAddr := 0 ;
-              BytesInTransfer := AXI_DATA_BYTE_WIDTH ;
+---------------
+--!!
+--!!              -- Adjust for last transfer
+--!!              if BytesInTransfer > BytesToReceive then
+--!!                BytesInTransfer := BytesToReceive ;
+--!!              end if ;
+--!!
+--!!  --!!f(ReadData, ReadBurstFifo, BytesInTransfer, ByteAddr)
+--!!              -- Move ReadData into ReadBurstFifo
+--!!              for Byte in 0 to BytesInTransfer - 1 loop
+--!!                 DataBitOffset := ReadByteAddr*8 + Byte*8 ;
+--!!                 ReadBurstFifo.Push(ReadData(DataBitOffset+7 downto DataBitOffset)) ;
+--!!              end loop ;
+--!!
+--!!              BytesToReceive := BytesToReceive - BytesInTransfer ;
+--!!              ReadByteAddr := 0 ;
+--!!              BytesInTransfer := AXI_DATA_BYTE_WIDTH ;
+---------------             
             end loop ;
           end if ;
 

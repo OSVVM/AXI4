@@ -362,17 +362,14 @@ begin
 
         -- Model Transaction Dispatch
         when WRITE_OP | WRITE_ADDRESS | WRITE_DATA | ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
+          -- For All Write Operations - Write Address and Write Data
           WriteAddress  := FromTransaction(TransRec.Address, WriteAddress'length) ;
           WriteByteAddr := CalculateAxiByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH);
 
           if IsWriteAddress(Operation) then
-            -- Write Address Handling
             -- AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Write Address length does not match", FAILURE) ;
 
---            WriteBurstLen := (others => '0') ;
-
             -- Initiate Write Address
---            WriteAddressFifo.Push(WriteAddress  & WriteBurstLen & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
             WriteAddressFifo.Push(WriteAddress  & LAW.Prot) ;
             Increment(WriteAddressRequestCount) ;
 
@@ -382,18 +379,11 @@ begin
           end if ;
 
           if IsWriteData(Operation) then
---            WriteAddress  := FromTransaction(TransRec.Address) ;
---            WriteByteAddr := CalculateAxiByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH);
-
             -- Single Transfer Write Data Handling
---!!            WriteData     := FromTransaction(TransRec.DataToModel) ;
---!!            AlignCheckWriteData (ModelID, WriteData, WriteStrb, TransRec.DataWidth, WriteByteAddr) ;
-
             CheckDataIsBytes(ModelID, WriteDataRequestCount+1, TransRec.DataWidth) ;
             CheckDataWidth  (ModelID, WriteDataRequestCount+1, TransRec.DataWidth, WriteByteAddr, AXI_DATA_WIDTH) ;
             WriteData  := AlignAxiWriteData(FromTransaction(TransRec.DataToModel), TransRec.DataWidth, WriteByteAddr) ;
             WriteStrb  := CalculateAxiWriteStrobe(WriteData) ;
-
             WriteDataFifo.Push(WriteData & WriteStrb) ;
 
             Increment(WriteDataRequestCount) ;
@@ -418,18 +408,15 @@ begin
         when WRITE_BURST | ASYNC_WRITE_BURST =>
           WriteAddress  := FromTransaction(TransRec.Address) ;
           WriteByteAddr := CalculateAxiByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH);
+          BytesPerTransfer := AXI_DATA_BYTE_WIDTH ;
 
           if IsWriteAddress(Operation) then
             -- Write Address Handling
-            AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Write Address length does not match", FAILURE) ;
---            BytesPerTransfer := 2**to_integer(LAW.Size) ;
-            BytesPerTransfer := AXI_DATA_BYTE_WIDTH ;
-
-            -- Burst transfer, calcualte burst length
+--!! Translate into multiple single cycle addresses          
+            -- Burst transfer, calculate burst length
 --            WriteBurstLen := to_slv(CalculateAxiBurstLen(TransRec.DataWidth, WriteByteAddr, BytesPerTransfer), WriteBurstLen'length) ;
 
             -- Initiate Write Address
---            WriteAddressFifo.Push(WriteAddress  & WriteBurstLen & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
             WriteAddressFifo.Push(WriteAddress  & LAW.Prot) ;
 
             Increment(WriteAddressRequestCount) ;
@@ -440,7 +427,6 @@ begin
           end if ;
 
           if IsWriteData(Operation) then
------------------
             if BurstFifoByteMode then 
               BytesToSend       := TransRec.DataWidth ;
               TransfersInBurst  := 1 + CalculateAxiBurstLen(BytesToSend, WriteByteAddr, BytesPerTransfer) ;
@@ -457,47 +443,6 @@ begin
             
             -- Special handle last push
             WriteDataFifo.Push(WriteData & WriteStrb) ;
------------------
------------------
---!!            -- Burst Transfer Write Data Handling
---!!  --!! WriteBurstData -  must have BytesToSend in TransRec.DataWidth
---!!            BytesToSend       := TransRec.DataWidth ;
---!!--            BytesPerTransfer  := 2 ** to_integer(LAW.Size) ;
---!!            BytesPerTransfer := AXI_DATA_BYTE_WIDTH ;
---!!            MaxBytesInFirstTransfer := BytesPerTransfer - WriteByteAddr ;
---!!            AlertIf(ModelID, BytesPerTransfer /= AXI_DATA_BYTE_WIDTH,
---!!              "Write Bytes Per Transfer (" & to_string(BytesPerTransfer) & ") " &
---!!              "/= AXI_DATA_BYTE_WIDTH (" & to_string(AXI_DATA_BYTE_WIDTH) & ")"
---!!            );
---!!
---!!            TransfersInBurst := 1 + CalculateAxiBurstLen(BytesToSend, WriteByteAddr, BytesPerTransfer) ;
---!!
---!!            -- First Word of Burst, maybe a 1 word burst
---!!            if BytesToSend > MaxBytesInFirstTransfer then
---!!              -- More than 1 transfer in burst
---!!              GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, MaxBytesInFirstTransfer, WriteByteAddr) ;
---!!              WriteDataFifo.Push(WriteData & WriteStrb) ;
---!!              BytesToSend       := BytesToSend - MaxBytesInFirstTransfer;
---!!            else
---!!              -- Only one transfer in Burst.  # Bytes may be less than a whole word
---!!              GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, BytesToSend, WriteByteAddr) ;
---!!              WriteDataFifo.Push(WriteData & WriteStrb) ;
---!!              BytesToSend := 0 ;
---!!            end if ;
---!!
---!!            -- Middle words of burst
---!!            while BytesToSend >= BytesPerTransfer loop
---!!              GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, BytesPerTransfer) ;
---!!              WriteDataFifo.Push(WriteData & WriteStrb) ;
---!!              BytesToSend := BytesToSend - BytesPerTransfer ;
---!!            end loop ;
---!!
---!!            -- End of Burst
---!!            if BytesToSend > 0 then
---!!              GetWriteBurstData(WriteBurstFifo, WriteData, WriteStrb, BytesToSend) ;
---!!              WriteDataFifo.Push(WriteData & WriteStrb) ;
---!!            end if ;
------------------
 
             -- Increment(WriteDataRequestCount) ;
             WriteDataRequestCount <= WriteDataRequestCount + TransfersInBurst ;
@@ -526,7 +471,6 @@ begin
 --            BytesPerTransfer := 2**to_integer(LAR.Size);
             BytesPerTransfer := AXI_DATA_BYTE_WIDTH ;
 
---            ReadAddressFifo.Push(ReadAddress & ReadBurstLen & LAR.Prot & LAR.ID & LAR.Size & LAR.Burst & LAR.Lock & LAR.Cache & LAR.QOS & LAR.Region & LAR.User) ;
             ReadAddressFifo.Push(ReadAddress & LAR.Prot) ;
             ReadAddressTransactionFifo.Push(ReadAddress & LAR.Prot);
             Increment(ReadAddressRequestCount) ;
@@ -557,7 +501,7 @@ begin
             -- Check or Log Read Data
             if IsReadCheck(TransRec.Operation) then
               ExpectedData := FromTransaction(TransRec.DataToModel) ;
-  --!!9 TODO:  Change format to Address, Data Transaction #, Read Data
+  --!!9 TODO:  Change format to Transaction #, Address, Prot, Read Data
   --!! Run regressions before changing
               AffirmIf( DataCheckID, ReadData = ExpectedData,
                 "Read Data: " & to_hstring(ReadData) &
@@ -566,7 +510,7 @@ begin
                 "  Expected: " & to_hstring(ExpectedData),
                 TransRec.StatusMsgOn or IsLogEnabled(ModelID, INFO) ) ;
             else
-  --!!9 TODO:  Change format to Address, Data Transaction #, Read Data
+  --!!9 TODO:  Change format to Transaction #, Address, Prot, Read Data
   --!! Run regressions before changing
               Log( ModelID,
                 "Read Data: " & to_hstring(ReadData) &
@@ -586,15 +530,13 @@ begin
             -- Send Read Address to Read Address Handler and Read Data Handler
             ReadAddress   :=  FromTransaction(TransRec.Address) ;
             ReadByteAddr  :=  CalculateAxiByteAddress(ReadAddress, AXI_BYTE_ADDR_WIDTH);
-            AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Read Address length does not match", FAILURE) ;
+--            AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Read Address length does not match", FAILURE) ;
 --            BytesPerTransfer := 2**to_integer(LAR.Size);
             BytesPerTransfer := AXI_DATA_BYTE_WIDTH ;
 
-            -- Burst transfer, calcualte burst length
+            -- Burst transfer, calculate burst length
             TransfersInBurst := 1 + CalculateAxiBurstLen(TransRec.DataWidth, ReadByteAddr, BytesPerTransfer) ;
---            ReadBurstLen := to_slv(TransfersInBurst - 1, ReadBurstLen'length) ;
 
---            ReadAddressFifo.Push(ReadAddress & ReadBurstLen & LAR.Prot & LAR.ID & LAR.Size & LAR.Burst & LAR.Lock & LAR.Cache & LAR.QOS & LAR.Region & LAR.User) ;
             ReadAddressFifo.Push(ReadAddress & LAR.Prot) ;
             ReadAddressTransactionFifo.Push(ReadAddress & LAR.Prot);
             Increment(ReadAddressRequestCount) ;
@@ -622,28 +564,20 @@ begin
             TransRec.BoolFromModel <= TRUE ;
             (ReadAddress, ReadProt) := ReadAddressTransactionFifo.Pop ;
             ReadByteAddr := CalculateAxiByteAddress(ReadAddress, AXI_BYTE_ADDR_WIDTH);
---            BytesPerTransfer := 2**to_integer(LAR.Size);
             BytesPerTransfer := AXI_DATA_BYTE_WIDTH ;
+--!!            BytesPerTransfer := 2**to_integer(LAR.Size);
             
---!!            BytesPerTransfer  := 2 ** to_integer(LAR.Size) ;
 --!!            AlertIf(ModelID, BytesPerTransfer /= AXI_DATA_BYTE_WIDTH,
 --!!              "Write Bytes Per Transfer (" & to_string(BytesPerTransfer) & ") " &
 --!!              "/= AXI_DATA_BYTE_WIDTH (" & to_string(AXI_DATA_BYTE_WIDTH) & ")"
 --!!            );
----------------
+
             if BurstFifoByteMode then 
               BytesToReceive    := TransRec.DataWidth ;
               TransfersInBurst  := 1 + CalculateAxiBurstLen(BytesToReceive, ReadByteAddr, BytesPerTransfer) ;
             else
               TransfersInBurst  := TransRec.DataWidth ;
             end if ; 
----------------
----------------
---!!            BytesToReceive    := TransRec.DataWidth ;
---!!            TransfersInBurst := 1 + CalculateAxiBurstLen(BytesToReceive, ReadByteAddr, BytesPerTransfer) ;
---!!            BytesInTransfer   := BytesPerTransfer - ReadByteAddr ;
----------------
-
 
             for i in 1 to TransfersInBurst loop
               if ReadDataFifo.Empty then
@@ -651,27 +585,8 @@ begin
               end if ;
               ReadData := ReadDataFifo.Pop ;
 
----------------
               PushReadBurstData(ReadBurstFifo, BurstFifoMode, ReadData, BytesToReceive, ReadByteAddr) ;
               ReadByteAddr := 0 ;
----------------
---!!
---!!              -- Adjust for last transfer
---!!              if BytesInTransfer > BytesToReceive then
---!!                BytesInTransfer := BytesToReceive ;
---!!              end if ;
---!!
---!!  --!!f(ReadData, ReadBurstFifo, BytesInTransfer, ByteAddr)
---!!              -- Move ReadData into ReadBurstFifo
---!!              for Byte in 0 to BytesInTransfer - 1 loop
---!!                 DataBitOffset := ReadByteAddr*8 + Byte*8 ;
---!!                 ReadBurstFifo.Push(ReadData(DataBitOffset+7 downto DataBitOffset)) ;
---!!              end loop ;
---!!
---!!              BytesToReceive := BytesToReceive - BytesInTransfer ;
---!!              ReadByteAddr := 0 ;
---!!              BytesInTransfer := AXI_DATA_BYTE_WIDTH ;
----------------             
             end loop ;
           end if ;
 
@@ -682,18 +597,18 @@ begin
         when SET_MODEL_OPTIONS =>
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
           if IsAxiInterface(Axi4Option) then
---            SetAxiParameter(AxiDefaults, Axi4Option, TransRec.IntToModel) ;
+--            SetAxi4InterfaceDefault(AxiDefaults, Axi4Option, TransRec.IntToModel) ;
           else
-            SetAxiOption(Params, Axi4Option, TransRec.IntToModel) ;
+            SetAxi4Parameter(Params, Axi4Option, TransRec.IntToModel) ;
           end if ;
           wait for 0 ns ;  wait for 0 ns ;
 
         when GET_MODEL_OPTIONS =>
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
           if IsAxiInterface(Axi4Option) then
---            TransRec.IntFromModel <= GetAxiParameter(AxiDefaults, Axi4Option) ;
+--            TransRec.IntFromModel <= GetAxi4InterfaceDefault(AxiDefaults, Axi4Option) ;
           else
-            GetAxiOption(Params, Axi4Option, Axi4OptionVal) ;
+            GetAxi4Parameter(Params, Axi4Option, Axi4OptionVal) ;
             TransRec.IntToModel <= Axi4OptionVal ;
           end if ;
           wait for 0 ns ;  wait for 0 ns ;

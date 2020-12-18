@@ -83,13 +83,13 @@ package Axi4ModelPkg is
     constant ByteWidth      : In  integer 
   ) return integer ;
 
-  ------------------------------------------------------------
-  function CalculateAxiWriteStrobe (
-  ------------------------------------------------------------
-    constant ByteAddr      : In  integer ;
-    constant NumberOfBytes : In  integer ; 
-    constant MaxBytes      : In  integer 
-  ) return std_logic_vector ; 
+--!!  ------------------------------------------------------------
+--!!  function CalculateAxiWriteStrobe (
+--!!  ------------------------------------------------------------
+--!!    constant ByteAddr      : In  integer ;
+--!!    constant NumberOfBytes : In  integer ; 
+--!!    constant MaxBytes      : In  integer 
+--!!  ) return std_logic_vector ; 
 
   ------------------------------------------------------------
   function CalculateAxiWriteStrobe (
@@ -142,54 +142,54 @@ package Axi4ModelPkg is
     constant MaxDataBits     : In    integer 
   ) ;
 
--- deprecated
-  ------------------------------------------------------------
-  procedure CheckWriteDataWidth (
-  -- Check AXI Write Data Width - BYTE and < WordWidth adjusted for ByteAddr 
-  ------------------------------------------------------------
-    constant ModelID         : In    AlertLogIDType ; 
-    constant TransferNumber  : In    integer ; 
-    constant WriteDataWidth  : In    integer ; 
-    constant WriteByteAddr   : In    integer ;
-    constant MaxDataBits     : In    integer 
-  ) ; 
-
--- deprecated
-  ------------------------------------------------------------
-  procedure AlignCheckWriteData (
-  -- Align Write Data and Check Widths 
-  ------------------------------------------------------------
-    constant ModelID         : In    AlertLogIDType ; 
-    variable WriteData       : InOut std_logic_vector ;
-    variable WriteStrb       : InOut std_logic_vector ;
-    constant WriteDataWidth  : In    integer ; 
-    constant WriteByteAddr   : In    integer 
-  ) ;
-
--- deprecated?? 
-  ------------------------------------------------------------
-  procedure GetWriteBurstData (
-  ------------------------------------------------------------
-    variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-    variable WriteData       : InOut std_logic_vector ;
-    variable WriteStrb       : InOut std_logic_vector ;
-    constant BytesInTransfer : In    integer ; 
-    constant ByteAddr        : In    Integer := 0 
-  ) ;
-
--- Local Only??
-  ------------------------------------------------------------
-  procedure PopWriteBurstByteData (
-  -- Get Byte Data from Burst Data.   
-  -- Fill in WriteData and WriteStrb based on ByteAddress and BytesToSend
-  -- WriteData must have WriteStrb'length bytes
-  ------------------------------------------------------------
-    variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-    variable WriteData       : Out   std_logic_vector ;
-    variable WriteStrb       : Out   std_logic_vector ;
-    variable BytesToSend     : InOut integer ; 
-    constant ByteAddress     : In    Integer := 0 
-  ) ;
+--!! deprecated
+--!!  ------------------------------------------------------------
+--!!  procedure CheckWriteDataWidth (
+--!!  -- Check AXI Write Data Width - BYTE and < WordWidth adjusted for ByteAddr 
+--!!  ------------------------------------------------------------
+--!!    constant ModelID         : In    AlertLogIDType ; 
+--!!    constant TransferNumber  : In    integer ; 
+--!!    constant WriteDataWidth  : In    integer ; 
+--!!    constant WriteByteAddr   : In    integer ;
+--!!    constant MaxDataBits     : In    integer 
+--!!  ) ; 
+--!!
+--!! deprecated
+--!!  ------------------------------------------------------------
+--!!  procedure AlignCheckWriteData (
+--!!  -- Align Write Data and Check Widths 
+--!!  ------------------------------------------------------------
+--!!    constant ModelID         : In    AlertLogIDType ; 
+--!!    variable WriteData       : InOut std_logic_vector ;
+--!!    variable WriteStrb       : InOut std_logic_vector ;
+--!!    constant WriteDataWidth  : In    integer ; 
+--!!    constant WriteByteAddr   : In    integer 
+--!!  ) ;
+--!!
+--!! deprecated
+--!!  ------------------------------------------------------------
+--!!  procedure GetWriteBurstData (
+--!!  ------------------------------------------------------------
+--!!    variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+--!!    variable WriteData       : InOut std_logic_vector ;
+--!!    variable WriteStrb       : InOut std_logic_vector ;
+--!!    constant BytesInTransfer : In    integer ; 
+--!!    constant ByteAddr        : In    Integer := 0 
+--!!  ) ;
+--!!
+--!! Local Only??
+--!!  ------------------------------------------------------------
+--!!  procedure PopWriteBurstByteData (
+--!!  -- Get Byte Data from Burst Data.   
+--!!  -- Fill in WriteData and WriteStrb based on ByteAddress and BytesToSend
+--!!  -- WriteData must have WriteStrb'length bytes
+--!!  ------------------------------------------------------------
+--!!    variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+--!!    variable WriteData       : Out   std_logic_vector ;
+--!!    variable WriteStrb       : Out   std_logic_vector ;
+--!!    variable BytesToSend     : InOut integer ; 
+--!!    constant ByteAddress     : In    Integer := 0 
+--!!  ) ;
 
   ------------------------------------------------------------
   procedure PopWriteBurstData (
@@ -202,16 +202,16 @@ package Axi4ModelPkg is
     constant ByteAddress     : In    integer := 0 
   ) ;
 
--- Local Only??
-  ------------------------------------------------------------
-  procedure PushReadBurstByteData (
-  -- Push Burst Data into Byte Burst FIFO.   
-  ------------------------------------------------------------
-    variable ReadBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-    variable ReadData       : InOut std_logic_vector ;
-    variable BytesToReceive : InOut integer ; 
-    constant ByteAddress    : In    integer := 0 
-  ) ;
+--!! Local Only??
+--!!  ------------------------------------------------------------
+--!!  procedure PushReadBurstByteData (
+--!!  -- Push Burst Data into Byte Burst FIFO.   
+--!!  ------------------------------------------------------------
+--!!    variable ReadBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+--!!    variable ReadData       : InOut std_logic_vector ;
+--!!    variable BytesToReceive : InOut integer ; 
+--!!    constant ByteAddress    : In    integer := 0 
+--!!  ) ;
 
   ------------------------------------------------------------
   procedure PushReadBurstData (
@@ -568,7 +568,7 @@ package body Axi4ModelPkg is
     end loop ; 
     
     for i in ByteAddress to WriteStrb'length-1 loop 
-      if aWriteData(DataIndex) = 'U' then 
+      if aWriteData(DataIndex) /= 'U' then 
         aWriteStrb(i) := '1' ; 
       end if ; 
       DataIndex := DataIndex + 8 ;

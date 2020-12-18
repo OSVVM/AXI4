@@ -40,26 +40,5 @@
 library osvvm_TbAxi4
 analyze ./testbench/TestCtrl_e.vhd
 analyze ./testbench/TbAxi4.vhd
-analyze ./testbench/TbAxi4_BasicReadWrite.vhd
-analyze ./testbench/TbAxi4_ReadWriteAsync1.vhd
-analyze ./testbench/TbAxi4_ReadWriteAsync2.vhd
-analyze ./testbench/TbAxi4_ReadWriteAsync3.vhd
-analyze ./testbench/TbAxi4_RandomReadWrite.vhd
-analyze ./testbench/TbAxi4_RandomReadWriteByte.vhd
-analyze ./testbench/TbAxi4_TimeOut.vhd
-analyze ./testbench/TbAxi4_WriteOptions.vhd
-analyze ./testbench/TbAxi4_BasicBurst.vhd
-analyze ./testbench/TbAxi4_MemoryReadWrite1.vhd
-analyze ./testbench/TbAxi4_MemoryBurst1.vhd
 
-simulate TbAxi4_BasicReadWrite
-simulate TbAxi4_ReadWriteAsync1    
-simulate TbAxi4_ReadWriteAsync2    
-simulate TbAxi4_ReadWriteAsync3    
-simulate TbAxi4_RandomReadWrite    
-simulate TbAxi4_RandomReadWriteByte    
-simulate TbAxi4_TimeOut    
-simulate TbAxi4_WriteOptions 
-simulate TbAxi4_BasicBurst
-simulate TbAxi4_MemoryReadWrite1
-simulate TbAxi4_MemoryBurst1
+include RunAllTestCases.pro

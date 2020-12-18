@@ -60,21 +60,21 @@ library OSVVM_Common ;
 
 entity Axi4Responder is
 generic (
-  MODEL_ID_NAME   : string :="" ;
-  tperiod_Clk     : time := 10 ns ;
+  MODEL_ID_NAME   : string := "" ;
+  tperiod_Clk     : time   := 10 ns ;
 
-  tpd_Clk_AWReady : time := 2 ns ;
+  tpd_Clk_AWReady : time   := 2 ns ;
 
-  tpd_Clk_WReady  : time := 2 ns ;
+  tpd_Clk_WReady  : time   := 2 ns ;
 
-  tpd_Clk_BValid  : time := 2 ns ;
-  tpd_Clk_BResp   : time := 2 ns ;
+  tpd_Clk_BValid  : time   := 2 ns ;
+  tpd_Clk_BResp   : time   := 2 ns ;
 
-  tpd_Clk_ARReady : time := 2 ns ;
+  tpd_Clk_ARReady : time   := 2 ns ;
 
-  tpd_Clk_RValid  : time := 2 ns ;
-  tpd_Clk_RData   : time := 2 ns ;
-  tpd_Clk_RResp   : time := 2 ns
+  tpd_Clk_RValid  : time   := 2 ns ;
+  tpd_Clk_RData   : time   := 2 ns ;
+  tpd_Clk_RResp   : time   := 2 ns
 ) ;
 port (
   -- Globals
@@ -136,9 +136,9 @@ architecture TransactorResponder of Axi4Responder is
   signal WriteDataReadyDelayCycles     : integer := 0 ;
   signal ReadAddressReadyBeforeValid   : boolean := TRUE ;
   signal ReadAddressReadyDelayCycles   : integer := 0 ;
-  
-  signal FilterUndrivenWriteData       : boolean := TRUE ; 
-  signal UndrivenWriteDataValue        : std_logic := '0' ; 
+
+  signal FilterUndrivenWriteData       : boolean := TRUE ;
+  signal UndrivenWriteDataValue        : std_logic := '0' ;
 
   signal ModelWProt  : Axi4ProtType := (others => '0') ;
   signal ModelRProt  : Axi4ProtType := (others => '0') ;
@@ -197,7 +197,7 @@ begin
 	  alias    WR is AxiBus.WriteResponse ;
 	  alias    AR is AxiBus.ReadAddress ;
 	  alias    RD is AxiBus.ReadData ;
-    
+
 --!!GHDL    variable AxiLocal    : AxiBus'subtype ;
     variable AxiLocal : Axi4RecType(
       WriteAddress(
@@ -268,12 +268,12 @@ begin
     case TransRec.Operation is
       when WAIT_FOR_TRANSACTION =>
         -- wait for write or read transaction to be available
-        loop 
+        loop
           exit when not WriteAddressFifo.empty and not WriteDataFifo.empty ; -- Write Available
-          exit when not ReadAddressFifo.empty ; -- Read Available 
+          exit when not ReadAddressFifo.empty ; -- Read Available
           wait on WriteAddressReceiveCount, WriteDataReceiveCount, ReadAddressReceiveCount ;
-        end loop ; 
-        
+        end loop ;
+
       when WAIT_FOR_WRITE_TRANSACTION =>
         -- wait for write transaction to be available
         if WriteAddressFifo.empty then
@@ -292,15 +292,15 @@ begin
 --  Alternate interpretation of wait for transaction
 --      when WAIT_FOR_WRITE_TRANSACTION =>
 --        -- Wait for next write to memory to complete
---        if (WriteAddressReceiveCount /= WriteReceiveCount) or (WriteReceiveCount /= WriteResponseDoneCount) then 
---          wait until (WriteAddressReceiveCount = WriteReceiveCount) and (WriteReceiveCount = WriteResponseDoneCount) ; 
---        end if ; 
+--        if (WriteAddressReceiveCount /= WriteReceiveCount) or (WriteReceiveCount /= WriteResponseDoneCount) then
+--          wait until (WriteAddressReceiveCount = WriteReceiveCount) and (WriteReceiveCount = WriteResponseDoneCount) ;
+--        end if ;
 --
 --      when WAIT_FOR_READ_TRANSACTION =>
 --        -- Wait for a requested Read Data Transaction to complete
---        if ReadDataRequestCount /= ReadDataDoneCount then 
---          wait until ReadDataRequestCount = ReadDataDoneCount ; 
---        end if ; 
+--        if ReadDataRequestCount /= ReadDataDoneCount then
+--          wait until ReadDataRequestCount = ReadDataDoneCount ;
+--        end if ;
 --
       when WAIT_FOR_CLOCK =>
         WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
@@ -309,19 +309,19 @@ begin
 
       when GET_ALERTLOG_ID =>
         TransRec.IntFromModel <= integer(ModelID) ;
-        wait for 0 ns ; 
+        wait for 0 ns ;
 
       when GET_TRANSACTION_COUNT =>
         TransRec.IntFromModel <= WriteAddressReceiveCount + ReadAddressReceiveCount ;
-        wait for 0 ns ; 
+        wait for 0 ns ;
 
       when GET_WRITE_TRANSACTION_COUNT =>
         TransRec.IntFromModel <= WriteAddressReceiveCount ;
-        wait for 0 ns ; 
+        wait for 0 ns ;
 
       when GET_READ_TRANSACTION_COUNT =>
         TransRec.IntFromModel <= ReadAddressReceiveCount ;
-        wait for 0 ns ; 
+        wait for 0 ns ;
 
       when WRITE_OP | WRITE_ADDRESS | WRITE_DATA |
            ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
@@ -332,7 +332,7 @@ begin
         else
           WriteAvailable         := TRUE ;
         end if ;
-        TransRec.BoolFromModel <= WriteAvailable ; 
+        TransRec.BoolFromModel <= WriteAvailable ;
 
         if WriteAvailable and IsWriteAddress(TransRec.Operation) then
           -- Find Write Address transaction
@@ -359,14 +359,14 @@ begin
           (WriteData, WriteStrb, WriteLast, WriteUser, WriteID) := WriteDataFifo.pop ;
           if FilterUndrivenWriteData then
             FilterUndrivenAxiData(WriteData, WriteStrb, UndrivenWriteDataValue) ;
-          end if ; 
+          end if ;
 
 --!! Move this to a procedure and normalize IO
 --!! Adjust handling for Byte Location?
---          if TransRec.DataWidth < AXI_DATA_WIDTH then 
---            WriteData := WriteData srl ByteAddr * 8 ; 
---          end if ; 
-          
+--          if TransRec.DataWidth < AXI_DATA_WIDTH then
+--            WriteData := WriteData srl ByteAddr * 8 ;
+--          end if ;
+
           TransRec.DataFromModel  <= ToTransaction(WriteData) ;
           if WriteLast = '1' then
             FoundLastWriteData := TRUE ;
@@ -592,12 +592,12 @@ begin
       ) ;
 
       -- capture Data, wstrb
-      if WD.Valid = '1' then 
+      if WD.Valid = '1' then
         WriteDataFifo.push(WD.Data & WD.Strb & WD.Last & WD.User) ;
       else
         -- On failure to receive Valid, assert LAST
         WriteDataFifo.push(WD.Data & WD.Strb & '1' & WD.User) ;
-      end if ; 
+      end if ;
 
       -- Log this operation
       Log(ModelID,
@@ -785,7 +785,7 @@ begin
       RD.Resp  <= not Local.Resp after tpd_Clk_RResp ;
 
       -- Signal completion
-      Increment(ReadDataDoneCount) ; 
+      Increment(ReadDataDoneCount) ;
       wait for 0 ns ;
     end loop ReadDataLoop ;
   end process ReadDataHandler ;

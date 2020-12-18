@@ -59,26 +59,26 @@ library osvvm_common ;
 
 entity Axi4Memory is
 generic (
-  MODEL_ID_NAME   : string :="" ;
-  tperiod_Clk     : time := 10 ns ;
+  MODEL_ID_NAME   : string := "" ;
+  tperiod_Clk     : time   := 10 ns ;
 
-  tpd_Clk_AWReady : time := 2 ns ;
+  tpd_Clk_AWReady : time   := 2 ns ;
 
-  tpd_Clk_WReady  : time := 2 ns ;
+  tpd_Clk_WReady  : time   := 2 ns ;
 
-  tpd_Clk_BValid  : time := 2 ns ;
-  tpd_Clk_BResp   : time := 2 ns ;
-  tpd_Clk_BID     : time := 2 ns ;
-  tpd_Clk_BUser   : time := 2 ns ;
+  tpd_Clk_BValid  : time   := 2 ns ;
+  tpd_Clk_BResp   : time   := 2 ns ;
+  tpd_Clk_BID     : time   := 2 ns ;
+  tpd_Clk_BUser   : time   := 2 ns ;
 
-  tpd_Clk_ARReady : time := 2 ns ;
+  tpd_Clk_ARReady : time   := 2 ns ;
 
-  tpd_Clk_RValid  : time := 2 ns ;
-  tpd_Clk_RData   : time := 2 ns ;
-  tpd_Clk_RResp   : time := 2 ns ;
-  tpd_Clk_RID     : time := 2 ns ;
-  tpd_Clk_RUser   : time := 2 ns ;
-  tpd_Clk_RLast   : time := 2 ns
+  tpd_Clk_RValid  : time   := 2 ns ;
+  tpd_Clk_RData   : time   := 2 ns ;
+  tpd_Clk_RResp   : time   := 2 ns ;
+  tpd_Clk_RID     : time   := 2 ns ;
+  tpd_Clk_RUser   : time   := 2 ns ;
+  tpd_Clk_RLast   : time   := 2 ns
 ) ;
 port (
   -- Globals
@@ -223,7 +223,7 @@ begin
     variable ByteData         : std_logic_vector(7 downto 0) ;
     variable DataWidth        : integer ;
     variable NumBytes         : integer ;
-    variable Count            : integer ; 
+    variable Count            : integer ;
   begin
     WaitForTransaction(
        Clk      => Clk,
@@ -234,18 +234,18 @@ begin
     case TransRec.Operation is
       when WAIT_FOR_TRANSACTION =>
         -- Wait for either next write or read access of memory to complete
-        Count := WriteAddressReceiveCount + ReadAddressReceiveCount ; 
-        wait until (WriteAddressReceiveCount + ReadAddressReceiveCount) = Count + 1 ; 
-      
+        Count := WriteAddressReceiveCount + ReadAddressReceiveCount ;
+        wait until (WriteAddressReceiveCount + ReadAddressReceiveCount) = Count + 1 ;
+
       when WAIT_FOR_WRITE_TRANSACTION =>
         -- Wait for next write to memory to complete
-        Count := WriteAddressReceiveCount ; 
-        wait until WriteAddressReceiveCount = Count + 1 ; 
+        Count := WriteAddressReceiveCount ;
+        wait until WriteAddressReceiveCount = Count + 1 ;
 
       when WAIT_FOR_READ_TRANSACTION =>
         -- Wait for next read from memory to complete
-        Count := ReadAddressReceiveCount ; 
-        wait until ReadAddressReceiveCount = Count + 1 ; 
+        Count := ReadAddressReceiveCount ;
+        wait until ReadAddressReceiveCount = Count + 1 ;
 
       when WAIT_FOR_CLOCK =>
         WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
@@ -254,19 +254,19 @@ begin
 
       when GET_ALERTLOG_ID =>
         TransRec.IntFromModel <= integer(ModelID) ;
-        wait for 0 ns ; 
+        wait for 0 ns ;
 
       when GET_TRANSACTION_COUNT =>
         TransRec.IntFromModel <= WriteAddressReceiveCount + ReadAddressReceiveCount ;
-        wait for 0 ns ; 
+        wait for 0 ns ;
 
       when GET_WRITE_TRANSACTION_COUNT =>
         TransRec.IntFromModel <= WriteAddressReceiveCount ;
-        wait for 0 ns ; 
+        wait for 0 ns ;
 
       when GET_READ_TRANSACTION_COUNT =>
         TransRec.IntFromModel <= ReadAddressReceiveCount ;
-        wait for 0 ns ; 
+        wait for 0 ns ;
 
       when WRITE_OP =>
         -- Back door Write access to memory.  Completes without time passing.

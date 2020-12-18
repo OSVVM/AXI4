@@ -51,7 +51,7 @@ library osvvm_common ;
 package Axi4MemoryComponentPkg is
   component Axi4Memory is
   generic (
-    MODEL_ID_NAME   : string :="" ;
+    MODEL_ID_NAME   : string := "" ;
     tperiod_Clk     : time := 10 ns ;
 
     tpd_Clk_AWReady : time := 2 ns ;

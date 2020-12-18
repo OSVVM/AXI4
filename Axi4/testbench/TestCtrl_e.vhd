@@ -46,6 +46,7 @@ library ieee ;
   use ieee.std_logic_1164.all ;
   use ieee.numeric_std.all ;
   use ieee.numeric_std_unsigned.all ;
+  use ieee.math_real.all ;
   
 library OSVVM ; 
   context OSVVM.OsvvmContext ; 
@@ -66,6 +67,8 @@ entity TestCtrl is
   ) ;
   constant AXI_ADDR_WIDTH : integer := MasterRec.Address'length ; 
   constant AXI_DATA_WIDTH : integer := MasterRec.DataToModel'length ;  
+  constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
+  constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
     
   alias WriteBurstFifo is <<variable .TbAxi4.Master_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
   alias ReadBurstFifo  is <<variable .TbAxi4.Master_1.ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;

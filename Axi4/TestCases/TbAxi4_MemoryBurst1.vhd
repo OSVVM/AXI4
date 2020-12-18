@@ -43,6 +43,9 @@
 architecture MemoryBurst1 of TestCtrl is
 
   signal TestDone, WriteDone : integer_barrier := 1 ;
+  constant BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;   
+--  constant BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_BYTE_MODE ;   
+  constant DATA_WIDTH : integer := IfElse(BURST_MODE = ADDRESS_BUS_BURST_BYTE_MODE, 8, AXI_DATA_WIDTH)  ;  
 
 begin
 
@@ -89,66 +92,91 @@ begin
   ------------------------------------------------------------
   MasterProc : process
     variable ByteData : std_logic_vector(7 downto 0) ;
+    variable BurstVal : AddressBusFifoBurstModeType ; 
   begin
     wait until nReset = '1' ;  
     WaitForClock(MasterRec, 2) ; 
     
+    GetBurstMode(MasterRec, BurstVal) ;
+    AffirmIf(BurstVal = ADDRESS_BUS_BURST_WORD_MODE, "Default BurstMode is ADDRESS_BUS_BURST_WORD_MODE " & to_string(BurstVal)) ; 
+    SetBurstMode(MasterRec, BURST_MODE) ;
+    GetBurstMode(MasterRec, BurstVal) ;
+    AffirmIfEqual(BurstVal, BURST_MODE, "BurstMode") ; 
+    
     log("Write with ByteAddr = 8, 12 Bytes -- word aligned") ;
-    PushBurstIncrement(WriteBurstFifo, 3, 12) ;
+    PushBurstIncrement(WriteBurstFifo, 3, 12, DATA_WIDTH) ;
     WriteBurst(MasterRec, X"0000_0008", 12) ;
 
     ReadBurst (MasterRec, X"0000_0008", 12) ;
-    CheckBurstIncrement(ReadBurstFifo, 3, 12) ;
+    CheckBurstIncrement(ReadBurstFifo, 3, 12, DATA_WIDTH) ;
     
     log("Write with ByteAddr = x1A, 13 Bytes -- unaligned") ;
-    PushBurst(WriteBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25)) ;
-    WriteBurst(MasterRec, X"0000_001A", 13) ;
+    WriteBurstFifo.Push(X"0001_UUUU") ;
+    PushBurst(WriteBurstFifo, (3,5,7,9,11,13,15,17,19,21,23,25), DATA_WIDTH) ;
+    WriteBurst(MasterRec, X"0000_100A", 13) ;
 
-    ReadBurst (MasterRec, X"0000_001A", 13) ;
-    CheckBurst(ReadBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25)) ;
+    ReadBurst (MasterRec, X"0000_100A", 13) ;
+    ReadBurstFifo.Check(X"0001_----") ; -- First Byte not aligned
+    CheckBurst(ReadBurstFifo, (3,5,7,9,11,13,15,17,19,21,23,25), DATA_WIDTH) ;
 
     log("Write with ByteAddr = 31, 12 Bytes -- unaligned") ;
-    PushBurstRandom(WriteBurstFifo, 7, 12) ;
-    WriteBurst(MasterRec, X"0000_0031", 12) ;
+    WriteBurstFifo.Push(X"A015_28UU") ;
+    PushBurstRandom(WriteBurstFifo, 7, 12, DATA_WIDTH) ;
+    WriteBurst(MasterRec, X"0000_3001", 13) ;
 
-    ReadBurst (MasterRec, X"0000_0031", 12) ;
-    CheckBurstRandom(ReadBurstFifo, 7, 12) ;
+    ReadBurst (MasterRec, X"0000_3001", 13) ;
+    ReadBurstFifo.Check(X"A015_28--") ; -- First Byte not aligned
+    CheckBurstRandom(ReadBurstFifo, 7, 12, DATA_WIDTH) ;
 
     log("Write with ByteAddr = 8, 12 Bytes -- word aligned") ;
-    PushBurstIncrement(WriteBurstFifo, 1, 16) ;
-    WriteBurst(MasterRec, X"0000_0050", 1) ;
-    WriteBurst(MasterRec, X"0000_0051", 1) ;
-    WriteBurst(MasterRec, X"0000_0052", 1) ;
-    WriteBurst(MasterRec, X"0000_0053", 1) ;
+    WriteBurstFIFO.push(X"UUUU_UU01") ;
+    WriteBurstFIFO.push(X"UUUU_02UU") ;
+    WriteBurstFIFO.push(X"UU03_UUUU") ;
+    WriteBurstFIFO.push(X"04UU_UUUU") ;
     
-    WriteBurst(MasterRec, X"0000_0060", 2) ;
-    WriteBurst(MasterRec, X"0000_0062", 2) ;
-    WriteBurst(MasterRec, X"0000_0065", 2) ;
+    WriteBurstFIFO.push(X"UUUU_0605") ;
+    WriteBurstFIFO.push(X"UU08_07UU") ;
+    WriteBurstFIFO.push(X"0A09_UUUU") ;
+
+    WriteBurstFIFO.push(X"UU0D_0C0B") ;
+    WriteBurstFIFO.push(X"100F_0EUU") ;
     
-    WriteBurst(MasterRec, X"0000_0070", 3) ;
-    WriteBurst(MasterRec, X"0000_0075", 3) ;
+    WriteBurst(MasterRec, X"0000_5050", 1) ;
+    WriteBurst(MasterRec, X"0000_5051", 1) ;
+    WriteBurst(MasterRec, X"0000_5052", 1) ;
+    WriteBurst(MasterRec, X"0000_5053", 1) ;
+    
+    WriteBurst(MasterRec, X"0000_5060", 1) ;
+    WriteBurst(MasterRec, X"0000_5071", 1) ;
+    WriteBurst(MasterRec, X"0000_5082", 1) ;
+    
+    WriteBurst(MasterRec, X"0000_5090", 1) ;
+    WriteBurst(MasterRec, X"0000_50A1", 1) ;
 
 
-    ReadBurst (MasterRec, X"0000_0050", 1) ;
-    CheckBurst(ReadBurstFifo, (1 => 1)) ;
-    ReadBurst (MasterRec, X"0000_0051", 1) ;
-    CheckBurst(ReadBurstFifo, (1 => 2)) ;
-    ReadBurst (MasterRec, X"0000_0052", 1) ;
-    CheckBurst(ReadBurstFifo, (1 => 3)) ;
-    ReadBurst (MasterRec, X"0000_0053", 1) ;
-    CheckBurst(ReadBurstFifo, (1 => 4)) ;
+    ReadBurst (MasterRec, X"0000_5050", 1) ;
+    ReadBurst (MasterRec, X"0000_5051", 1) ;
+    ReadBurst (MasterRec, X"0000_5052", 1) ;
+    ReadBurst (MasterRec, X"0000_5053", 1) ;
     
-    ReadBurst (MasterRec, X"0000_0060", 2) ;
-    CheckBurst(ReadBurstFifo, (5, 6)) ;
-    ReadBurst (MasterRec, X"0000_0062", 2) ;
-    CheckBurst(ReadBurstFifo, (7, 8)) ;
-    ReadBurst (MasterRec, X"0000_0065", 2) ;
-    CheckBurst(ReadBurstFifo, (9, 10)) ;
+    ReadBurst (MasterRec, X"0000_5060", 1) ;
+    ReadBurst (MasterRec, X"0000_5071", 1) ;
+    ReadBurst (MasterRec, X"0000_5082", 1) ;
 
-    ReadBurst (MasterRec, X"0000_0070", 3) ;
-    CheckBurst(ReadBurstFifo, (11, 12, 13)) ;
-    ReadBurst (MasterRec, X"0000_0075", 3) ;
-    CheckBurst(ReadBurstFifo, (14, 15, 16)) ;
+    ReadBurst (MasterRec, X"0000_5090", 1) ;
+    ReadBurst (MasterRec, X"0000_50A1", 1) ;
+    
+    ReadBurstFIFO.Check(X"----_--01") ;
+    ReadBurstFIFO.Check(X"----_02--") ;
+    ReadBurstFIFO.Check(X"--03_----") ;
+    ReadBurstFIFO.Check(X"04--_----") ;
+    
+    ReadBurstFIFO.Check(X"----_0605") ;
+    ReadBurstFIFO.Check(X"--08_07--") ;
+    ReadBurstFIFO.Check(X"0A09_----") ;
+
+    ReadBurstFIFO.Check(X"--0D_0C0B") ;
+    ReadBurstFIFO.Check(X"100F_0E--") ;
 
     WaitForBarrier(WriteDone) ;
     
@@ -173,9 +201,12 @@ begin
     WaitForBarrier(WriteDone) ;
 
     -- Check that write burst was received correctly
-    ReadCheck(ResponderRec, X"0000_0008", X"0605_0403") ;
-    ReadCheck(ResponderRec, X"0000_000C", X"0A09_0807") ;
-    ReadCheck(ResponderRec, X"0000_0010", X"0E0D_0C0B") ;
+    ReadCheck(ResponderRec, X"0000_0008", X"0000_0003") ;
+    ReadCheck(ResponderRec, X"0000_000C", X"0000_0004") ;
+    ReadCheck(ResponderRec, X"0000_0010", X"0000_0005") ;
+    ReadCheck(ResponderRec, X"0000_0014", X"0000_0006") ;
+    ReadCheck(ResponderRec, X"0000_0018", X"0000_0007") ;
+    ReadCheck(ResponderRec, X"0000_001C", X"0000_0008") ;
 
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(ResponderRec, 2) ;

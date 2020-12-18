@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_ReadWriteAsync3.vhd
+--  File Name:         TbAxi4_ReadWriteAsync1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -41,10 +41,9 @@
 --  limitations under the License.
 --  
 
-architecture ReadWriteAsync3 of TestCtrl is
+architecture ReadWriteAsync1 of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
-  signal TestStart : integer_barrier := 1 ;
   signal TbMasterID : AlertLogIDType ; 
   signal TbResponderID  : AlertLogIDType ; 
 
@@ -57,31 +56,29 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_ReadWriteAsync3") ;
-    TbMasterID <= GetAlertLogID("TestCtrl: AxiMaster") ;
-    TbResponderID <= GetAlertLogID("TestCtrl: AxiResponder") ;
+    SetAlertLogName("TbAxi4_ReadWriteAsync1") ;
+    TbMasterID <= GetAlertLogID("TB Master Proc") ;
+    TbResponderID <= GetAlertLogID("TB Responder Proc") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
 --    SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_ReadWriteAsync3.txt") ;
+    TranscriptOpen("./results/TbAxi4_ReadWriteAsync1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
     wait until nReset = '1' ;  
     ClearAlerts ;
-    WaitForBarrier(TestStart, 1 ns) ; -- every process should be waiting
 
     -- Wait for test to finish
     WaitForBarrier(TestDone, 35 ms) ;
     AlertIf(now >= 35 ms, "Test finished due to timeout") ;
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
-    
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_ReadWriteAsync3.txt", "../sim_shared/validated_results/TbAxi4_ReadWriteAsync3.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_ReadWriteAsync1.txt", "../sim_shared/validated_results/TbAxi4_ReadWriteAsync1.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 
@@ -97,114 +94,92 @@ begin
   MasterProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
   begin
-    WaitForBarrier(TestStart) ;  -- Wait for initialization in ControlProc
-    SetLogEnable(INFO, FALSE) ;    -- Enable INFO logs
+    wait until nReset = '1' ;  
+    SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
     WaitForClock(MasterRec, 2) ; 
-    
-    log(TbMasterID, "Testing 32 Bit Write Asynchronous Transaction", INFO) ;
+    log(TbMasterID, "Write and Read with ByteAddr = 0, 4 Bytes") ;
+    log(TbMasterID, "WriteAsync, Addr: AAAA_AAA0, Data: 5555_5555") ;
     WriteAsync(MasterRec, X"AAAA_AAA0", X"5555_5555" ) ;
-    
     WaitForClock(MasterRec, 4) ; 
-    blankline(1);
-    
-    log(TbMasterID, "Testing 32 Bit Read Address Asynchronous Transaction", INFO) ;
+
+    print("") ; 
+    log(TbMasterID, "ReadAddressAsync, Addr 1111_1110") ;
     ReadAddressAsync(MasterRec, X"1111_1110") ;
-    log(TbMasterID, "Testing 32 Bit Read Data Transaction", INFO) ;
+    log(TbMasterID, "ReadData, Data 2222_2222") ;
     ReadData(MasterRec, Data) ;
     AffirmIfEqual(TbMasterID, Data, X"2222_2222", "Master Read Data: ") ;
-    
     WaitForClock(MasterRec, 2) ; 
-    blankline(2);
     
---%% ADD Your Test Code After Here:
-
-
-    -- 5.2, 8 bit Writes
-    log(TbMasterID, "Testing 8 Bit Write Asynchronous Transaction", INFO) ; 
+    print("") ;     print("") ; 
+    log(TbMasterID, "Write with 1 Byte, and ByteAddr = 0, 1, 2, 3") ; 
+    log(TbMasterID, "WriteAsync,  Addr: AAAA_AAA0, Data: 11") ;
     WriteAsync(MasterRec, X"AAAA_AAA0", X"11" ) ;
+    log(TbMasterID, "WriteAsync,  Addr: AAAA_AAA1, Data: 22") ;
     WriteAsync(MasterRec, X"AAAA_AAA1", X"22" ) ;
+    log(TbMasterID, "WriteAsync,  Addr: AAAA_AAA2, Data: 33") ;
     WriteAsync(MasterRec, X"AAAA_AAA2", X"33" ) ;
+    log(TbMasterID, "WriteAsync,  Addr: AAAA_AAA3, Data: 44") ;
     WriteAsync(MasterRec, X"AAAA_AAA3", X"44" ) ;
-    
     WaitForClock(MasterRec, 8) ; 
-    blankline(2);
     
-    -- 5.2, 8 bit Reads
-    log(TbMasterID, "Testing 8 Bit Read Address Asynchronous Transaction", INFO) ; 
+    print("") ; 
+    log(TbMasterID, "Read with 1 Byte, and ByteAddr = 0, 1, 2, 3") ; 
+    log(TbMasterID, "ReadAddressAsync, Addr: 1111_1110") ;
     ReadAddressAsync(MasterRec,  X"1111_1110") ;
+    log(TbMasterID, "ReadAddressAsync, Addr: 1111_1111") ;
     ReadAddressAsync(MasterRec,  X"1111_1111") ;
+    log(TbMasterID, "ReadAddressAsync, Addr: 1111_1112") ;
     ReadAddressAsync(MasterRec,  X"1111_1112") ;
+    log(TbMasterID, "ReadAddressAsync, Addr: 1111_1113") ;
     ReadAddressAsync(MasterRec,  X"1111_1113") ;
-    
-    log(TbMasterID, "Testing 8 Bit Read Data Transaction", INFO) ; 
+    log(TbMasterID, "ReadData, Data: AA") ;
     ReadData(MasterRec,  Data(7 downto 0)) ;
     AffirmIfEqual(TbMasterID, Data(7 downto 0), X"AA", "Master Read Data: ") ;
+    log(TbMasterID, "ReadData, Data: BB") ;
     ReadData(MasterRec,  Data(7 downto 0)) ;
     AffirmIfEqual(TbMasterID, Data(7 downto 0), X"BB", "Master Read Data: ") ;
+    log(TbMasterID, "ReadData, Data: CC") ;
     ReadData(MasterRec,  Data(7 downto 0)) ;
     AffirmIfEqual(TbMasterID, Data(7 downto 0), X"CC", "Master Read Data: ") ;
+    log(TbMasterID, "ReadData, Data: DD") ;
     ReadData(MasterRec,  Data(7 downto 0)) ;
     AffirmIfEqual(TbMasterID, Data(7 downto 0), X"DD", "Master Read Data: ") ;
-    
-    WaitForClock(MasterRec, 2) ; 
-    blankline(2);
-    -- SetLogEnable(INFO, FALSE) ;    -- Disable INFO logs
-    
+    SetLogEnable(INFO, FALSE) ;    -- Disable INFO logs
 
-    -- 5.3, 16 bit Write Address
-    log(TbMasterID, "Testing 16 Bit Write Address Asynchronous Transaction", INFO) ; 
-    WriteAddressAsync(MasterRec, X"BBBB_BBB0" ) ;
-    WriteAddressAsync(MasterRec, X"BBBB_BBB1" ) ;
-    WriteAddressAsync(MasterRec, X"BBBB_BBB2" ) ;
-    
-    SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
+    print("") ;     print("") ; 
+    log(TbMasterID, "Write and Read with 2 Bytes, and ByteAddr = 0, 1, 2") ;
+    log(TbMasterID, "WriteAsync,  Addr: BBBB_BBB0, Data: 2211") ;
+    WriteAsync(MasterRec, X"BBBB_BBB0", X"2211" ) ;
+    log(TbMasterID, "WriteAsync,  Addr: BBBB_BBB1, Data: 33_22") ;
+    WriteAsync(MasterRec, X"BBBB_BBB1", X"33_22" ) ;
+    log(TbMasterID, "WriteAsync,  Addr: BBBB_BBB2, Data: 4433") ;
+    WriteAsync(MasterRec, X"BBBB_BBB2", X"4433" ) ;
 
-    WaitForClock(MasterRec, 2) ; 
-    blankline(2);
-
-    -- 5.3, 16 bit Write Data
-    log(TbMasterID, "Testing 16 Bit Write Data Asynchronous Transaction", INFO) ; 
-    WriteDataAsync(MasterRec, X"2211" ) ;
-    WriteDataAsync(MasterRec, X"01", X"33_22" ) ;
-    WriteDataAsync(MasterRec, X"02", X"4433" ) ;
-
-    blankline(2);
-
-    -- 5.3, 16 bit Reads
-    log(TbMasterID, "Testing 16 Bit Read Address Asynchronous Transaction", INFO) ; 
+    print("") ; 
+    log(TbMasterID, "ReadAddressAsync, Addr: 1111_1110") ;
     ReadAddressAsync(MasterRec,  X"1111_1110") ;
+    log(TbMasterID, "ReadAddressAsync, Addr: 1111_1111") ;
     ReadAddressAsync(MasterRec,  X"1111_1111") ;
+    log(TbMasterID, "ReadAddressAsync, Addr: 1111_1112") ;
     ReadAddressAsync(MasterRec,  X"1111_1112") ;
-    
-    log(TbMasterID, "Testing 16 Bit Read Data Transaction", INFO) ; 
+    log(TbMasterID, "ReadData, Data: BBAA") ;
     ReadData(MasterRec,  Data(15 downto 0)) ;
     AffirmIfEqual(TbMasterID, Data(15 downto 0), X"BBAA", "Master Read Data: ") ;
+    log(TbMasterID, "ReadData, Data: CCBB") ;
     ReadData(MasterRec,  Data(15 downto 0)) ;
     AffirmIfEqual(TbMasterID, Data(15 downto 0), X"CCBB", "Master Read Data: ") ;
+    log(TbMasterID, "ReadData, Data: DDCC") ;
     ReadData(MasterRec,  Data(15 downto 0)) ;
     AffirmIfEqual(TbMasterID, Data(15 downto 0), X"DDCC", "Master Read Data: ") ;
 
-    WaitForClock(MasterRec, 2) ; 
-    blankline(2);
-    
+    print("") ;     print("") ; 
+    log(TbMasterID, "Write and Read with 3 Bytes and ByteAddr = 0. 1") ;
+    log(TbMasterID, "WriteAsync,  Addr: CCCC_CCC0, Data: 33_2211") ;
+    WriteAsync(MasterRec, X"CCCC_CCC0", X"33_2211" ) ;
+    log(TbMasterID, "WriteAsync,  Addr: CCCC_CCC1, Data: 4433_22") ;
+    WriteAsync(MasterRec, X"CCCC_CCC1", X"4433_22" ) ;
 
-    -- 5.4, 24 bit Write Data
-    log(TbMasterID, "Testing 24 Bit Write Data Asynchronous Transaction", INFO) ;
-    WriteDataAsync(MasterRec, X"33_2211" ) ;
-    WriteDataAsync(MasterRec, X"01", X"4433_22" ) ;
-
-    WaitForClock(MasterRec, 1) ; 
-    blankline(2);
-
-    -- 5.4, 24 bit Write Address
-    log(TbMasterID, "Testing 24 Bit Write Address Asynchronous Transaction", INFO) ;
-    WriteAddressAsync(MasterRec, X"CCCC_CCC0" ) ;
-    WriteAddressAsync(MasterRec, X"CCCC_CCC1" ) ;
-
-    blankline(2);
-
-    -- 5.3, 24 bit Reads
-    log(TbMasterID, "Testing 24 Bit Read Address Asynchronous Transaction", INFO) ;
+    print("") ; 
     log(TbMasterID, "ReadAddressAsync, Addr: 1111_1110") ;
     ReadAddressAsync(MasterRec,  X"1111_1110") ;
     log(TbMasterID, "ReadAddressAsync, Addr: 1111_1111") ;
@@ -216,14 +191,6 @@ begin
     ReadData(MasterRec,  Data(23 downto 0)) ;
     AffirmIfEqual(TbMasterID, Data(23 downto 0), X"DDCC_BB", "Master Read Data: ") ;
     
--- %% ADD Your Test Code Before Here
-
-    blankline(1) ;
-    ReportAlerts ; 
-    print("") ;
-    std.env.stop ; 
-
-
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(MasterRec, 2) ;
     WaitForBarrier(TestDone) ;
@@ -321,12 +288,12 @@ begin
   end process ResponderProc ;
 
 
-end ReadWriteAsync3 ;
+end ReadWriteAsync1 ;
 
-Configuration TbAxi4_ReadWriteAsync3 of TbAxi4 is
+Configuration TbAxi4_ReadWriteAsync1 of TbAxi4 is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(ReadWriteAsync3) ; 
+      use entity work.TestCtrl(ReadWriteAsync1) ; 
     end for ; 
   end for ; 
-end TbAxi4_ReadWriteAsync3 ; 
+end TbAxi4_ReadWriteAsync1 ; 

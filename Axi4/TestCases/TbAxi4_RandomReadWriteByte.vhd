@@ -137,7 +137,7 @@ begin
       NumberOfBytes  := OpRv.RandInt(1, AXI_DATA_BYTES - ByteAddress) ;
 
       -- Get MasterData right aligned and ResponderData word aligned
-      ResponderData      := (others => '0') ;
+      ResponderData  := (others => '0') ;
       MasterData     := (others => '0') ;
       for i in AXI_DATA_BYTES - 1 downto 0 loop
         ResponderData := ResponderData(AXI_DATA_BYTES*8 - 9 downto 0) & (0 to 7 => '0') ;
@@ -167,9 +167,13 @@ begin
           counts(READ_OP_INDEX) := counts(READ_OP_INDEX) - 1 ; 
           -- Log("Starting: Master Read with Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
           ReadData := (others => '0') ;  -- Clear out all data values for short reads
-          Read(MasterRec, Address, ReadData(NumberOfBytes*8-1 downto 0)) ;
-          AffirmIf(ReadData = MasterData, "AXI Master Read Data: "& to_hstring(ReadData), 
-                   "  Expected: " & to_hstring(MasterData) & "  ByteAddress: " & to_string(ByteAddress)) ;
+          if counts(READ_OP_INDEX) mod 2 = 0 then 
+            Read(MasterRec, Address, ReadData(NumberOfBytes*8-1 downto 0)) ;
+            AffirmIf(ReadData = MasterData, "AXI Master Read Data: "& to_hstring(ReadData), 
+                     "  Expected: " & to_hstring(MasterData) & "  ByteAddress: " & to_string(ByteAddress)) ;
+          else
+            ReadCheck(MasterRec, Address, MasterData(NumberOfBytes*8-1 downto 0)) ;
+          end if ; 
 
         when others =>
           Alert("Invalid Operation Generated", FAILURE) ;

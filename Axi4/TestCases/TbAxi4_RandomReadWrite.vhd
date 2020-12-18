@@ -123,7 +123,7 @@ begin
     
     OperationLoop : loop
       -- Calculate Address and Data if Write or Read Operation
-      Address   := OpRV.RandSlv(size => AXI_ADDR_WIDTH - 2) & "00" ;  -- Keep address word aligned
+      Address   := OpRV.RandSlv(size => AXI_ADDR_WIDTH - AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH-1 downto 0 => '0') ;  -- Keep address word aligned
       Data      := OpRV.RandSlv(size => AXI_DATA_WIDTH) ;
 --      Operation := to_slv(OpRV.DistInt(counts), Operation'length) ;
       OperationInt := OpRV.DistInt(counts) ;
@@ -146,9 +146,13 @@ begin
         when READ_OP =>  
           counts(READ_OP_INDEX) := counts(READ_OP_INDEX) - 1 ; 
           -- Log("Starting: Master Read with Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
-          Read(MasterRec, Address, ReadData) ;
-          AffirmIf(ReadData = Data, "AXI Master Read Data: "& to_hstring(ReadData), 
-                   "  Expected: " & to_hstring(Data)) ;
+          if counts(READ_OP_INDEX) mod 2 = 0 then 
+            Read(MasterRec, Address, ReadData) ;
+            AffirmIf(ReadData = Data, "AXI Master Read Data: "& to_hstring(ReadData), 
+                     "  Expected: " & to_hstring(Data)) ;
+          else
+            ReadCheck(MasterRec, Address, Data) ;
+          end if ; 
 
         when others =>
           Alert("Invalid Operation Generated", FAILURE) ;

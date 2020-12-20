@@ -466,9 +466,9 @@ begin
           when WRITE_RESPONSE_READY_TIME_OUT =>       WriteResponseReadyTimeOut     <= TransRec.IntToModel ;
           when READ_DATA_READY_TIME_OUT =>            ReadDataReadyTimeOut          <= TransRec.IntToModel ;
           -- Slave Ready Before Valid
-          when WRITE_ADDRESS_READY_BEFORE_VALID =>    WriteAddressReadyBeforeValid  <= TransRec.BoolToModel ;
-          when WRITE_DATA_READY_BEFORE_VALID =>       WriteDataReadyBeforeValid     <= TransRec.BoolToModel ;
-          when READ_ADDRESS_READY_BEFORE_VALID =>     ReadAddressReadyBeforeValid   <= TransRec.BoolToModel ;
+          when WRITE_ADDRESS_READY_BEFORE_VALID =>    WriteAddressReadyBeforeValid  <= (TransRec.IntToModel = 1) ;
+          when WRITE_DATA_READY_BEFORE_VALID =>       WriteDataReadyBeforeValid     <= (TransRec.IntToModel = 1) ;
+          when READ_ADDRESS_READY_BEFORE_VALID =>     ReadAddressReadyBeforeValid   <= (TransRec.IntToModel = 1) ;
           -- Slave Ready Delay Cycles
           when WRITE_ADDRESS_READY_DELAY_CYCLES =>    WriteAddressReadyDelayCycles  <= TransRec.IntToModel ;
           when WRITE_DATA_READY_DELAY_CYCLES =>       WriteDataReadyDelayCycles     <= TransRec.IntToModel ;
@@ -493,9 +493,9 @@ begin
           when WRITE_RESPONSE_READY_TIME_OUT =>       TransRec.IntFromModel  <= WriteResponseReadyTimeOut ;
           when READ_DATA_READY_TIME_OUT =>            TransRec.IntFromModel  <= ReadDataReadyTimeOut ;
           -- Slave Ready Before Valid
-          when WRITE_ADDRESS_READY_BEFORE_VALID =>    TransRec.BoolFromModel <= WriteAddressReadyBeforeValid ;
-          when WRITE_DATA_READY_BEFORE_VALID =>       TransRec.BoolFromModel <= WriteDataReadyBeforeValid    ;
-          when READ_ADDRESS_READY_BEFORE_VALID =>     TransRec.BoolFromModel <= ReadAddressReadyBeforeValid  ;
+          when WRITE_ADDRESS_READY_BEFORE_VALID =>    TransRec.IntFromModel <= 1 when WriteAddressReadyBeforeValid else 0 ;
+          when WRITE_DATA_READY_BEFORE_VALID =>       TransRec.IntFromModel <= 1 when WriteDataReadyBeforeValid    else 0 ;
+          when READ_ADDRESS_READY_BEFORE_VALID =>     TransRec.IntFromModel <= 1 when ReadAddressReadyBeforeValid  else 0 ;
           -- Slave Ready Delay Cycles
           when WRITE_ADDRESS_READY_DELAY_CYCLES =>    TransRec.IntFromModel  <= WriteAddressReadyDelayCycles ;
           when WRITE_DATA_READY_DELAY_CYCLES =>       TransRec.IntFromModel  <= WriteDataReadyDelayCycles    ;

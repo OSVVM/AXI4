@@ -127,14 +127,14 @@ architecture AxiFull of Axi4Master is
 
   alias AxiAddr is AxiBus.WriteAddress.Addr ;
   alias AxiData is AxiBus.WriteData.Data ;
-  constant AXI_ADDR_WIDTH : integer := AxiAddr'length ;
-  constant AXI_DATA_WIDTH : integer := AxiData'length ;
+  constant AXI_ADDR_WIDTH      : integer := AxiAddr'length ;
+  constant AXI_DATA_WIDTH      : integer := AxiData'length ;
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
-  constant AXI_STRB_WIDTH : integer := AXI_DATA_WIDTH/8 ;
+  constant AXI_STRB_WIDTH      : integer := AXI_DATA_WIDTH/8 ;
 
+  -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
-    -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Master'PATH_NAME))) ;
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
 
@@ -650,7 +650,7 @@ begin
             TransRec.IntFromModel <= GetAxi4InterfaceDefault(AxiDefaults, Axi4Option) ;
           else
             GetAxi4Parameter(Params, Axi4Option, Axi4OptionVal) ;
-            TransRec.IntToModel <= Axi4OptionVal ;
+            TransRec.IntFromModel <= Axi4OptionVal ;
           end if ;
           wait for 0 ns ;  wait for 0 ns ;
 

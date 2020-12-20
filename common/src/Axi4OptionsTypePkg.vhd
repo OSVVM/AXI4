@@ -352,7 +352,11 @@ package body Axi4OptionsTypePkg is
     constant OptVal         : In    boolean
   ) is
   begin
-    SetModelOptions(TransactionRec, Axi4OptionsType'POS(Option), OptVal) ;
+    if OptVal then 
+      SetModelOptions(TransactionRec, Axi4OptionsType'POS(Option), 1) ;
+    else
+      SetModelOptions(TransactionRec, Axi4OptionsType'POS(Option), 0) ;
+    end if ; 
   end procedure SetAxi4Options ;
 
   ------------------------------------------------------------
@@ -384,8 +388,10 @@ package body Axi4OptionsTypePkg is
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   boolean
   ) is
+    variable IntOptVal : integer ; 
   begin
-    GetModelOptions(TransactionRec, Axi4OptionsType'POS(Option), OptVal) ;
+    GetModelOptions(TransactionRec, Axi4OptionsType'POS(Option), IntOptVal) ;
+    OptVal := IntOptVal >= 1 ;
   end procedure GetAxi4Options ;
 
   ------------------------------------------------------------

@@ -50,10 +50,11 @@ context Axi4Context is
     use osvvm_axi4.Axi4ModelPkg.all ;
     
     
-    use osvvm_axi4.Axi4MasterComponentPkg.all ;
-    use osvvm_axi4.Axi4ResponderComponentPkg.all ;
-    use osvvm_axi4.Axi4MemoryComponentPkg.all ;
-    use osvvm_axi4.Axi4MonitorComponentPkg.all ;
+    use osvvm_axi4.Axi4ComponentPkg.all ;
+--    use osvvm_axi4.Axi4MasterComponentPkg.all ;
+--    use osvvm_axi4.Axi4ResponderComponentPkg.all ;
+--    use osvvm_axi4.Axi4MemoryComponentPkg.all ;
+--    use osvvm_axi4.Axi4MonitorComponentPkg.all ;
     
     -- Temporary inclusion of Axi4 things that become deprecated with changes
     use osvvm_axi4.Axi4VersionCompatibilityPkg.all ;

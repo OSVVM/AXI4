@@ -135,18 +135,6 @@ architecture MemoryResponder of Axi4Memory is
   signal ReadDataRequestCount        : integer := 0 ;
   signal ReadDataDoneCount           : integer := 0 ;
 
-
---!! Refactor s.t. these come from Params
-  signal WriteResponseReadyTimeOut, ReadDataReadyTimeOut : integer := 25 ;
-
-  signal WriteAddressReadyBeforeValid  : boolean := TRUE ;
-  signal WriteAddressReadyDelayCycles  : integer := 0 ;
-  signal WriteDataReadyBeforeValid     : boolean := TRUE ;
-  signal WriteDataReadyDelayCycles     : integer := 0 ;
-  signal ReadAddressReadyBeforeValid   : boolean := TRUE ;
-  signal ReadAddressReadyDelayCycles   : integer := 0 ;
-
-
   shared variable Params : ModelParametersPType ;
 
 begin
@@ -343,11 +331,15 @@ begin
   ------------------------------------------------------------
   WriteAddressHandler : process
     alias    AW is AxiBus.WriteAddress ;
+    variable WriteAddressReadyBeforeValid  : boolean := TRUE ;
+    variable WriteAddressReadyDelayCycles  : integer := 0 ;
   begin
     AW.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
 
     WriteAddressOperation : loop
+      GetAxi4Parameter(Params, WRITE_ADDRESS_READY_BEFORE_VALID, WriteAddressReadyBeforeValid) ;
+      GetAxi4Parameter(Params, WRITE_ADDRESS_READY_DELAY_CYCLES, WriteAddressReadyDelayCycles) ;
       ---------------------
       DoAxiReadyHandshake (
       ---------------------
@@ -392,11 +384,15 @@ begin
   ------------------------------------------------------------
   WriteDataHandler : process
     alias    WD is AxiBus.WriteData ;
+    variable WriteDataReadyBeforeValid     : boolean := TRUE ;
+    variable WriteDataReadyDelayCycles     : integer := 0 ;
   begin
     WD.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
 
     WriteDataOperation : loop
+      GetAxi4Parameter(Params, WRITE_DATA_READY_BEFORE_VALID, WriteDataReadyBeforeValid) ;
+      GetAxi4Parameter(Params, WRITE_DATA_READY_DELAY_CYCLES, WriteDataReadyDelayCycles) ;
       ---------------------
       DoAxiReadyHandshake(
       ---------------------
@@ -472,11 +468,11 @@ begin
     end if ;
 
     if LAW.Size'length > 0 then
-      ByteAddressBits := to_integer(LAW.Size) ;
-      BytesPerTransfer    := 2 ** ByteAddressBits ;
+      ByteAddressBits   := to_integer(LAW.Size) ;
+      BytesPerTransfer  := 2 ** ByteAddressBits ;
     else
-      ByteAddressBits := AXI_BYTE_ADDR_WIDTH ;
-      BytesPerTransfer    := AXI_DATA_BYTE_WIDTH ;
+      ByteAddressBits   := AXI_BYTE_ADDR_WIDTH ;
+      BytesPerTransfer  := AXI_DATA_BYTE_WIDTH ;
     end if ;
 
     -- first word in a burst or single word transfer
@@ -546,6 +542,7 @@ begin
                           ID(WR.ID'range),
                           User(WR.User'range)
                         ) ;
+    variable WriteResponseReadyTimeOut : integer := 25 ;
   begin
     -- initialize
     WR.Valid <= '0' ;
@@ -608,12 +605,17 @@ begin
   ------------------------------------------------------------
   ReadAddressHandler : process
     alias    AR is AxiBus.ReadAddress ;
+    variable ReadAddressReadyBeforeValid   : boolean := TRUE ;
+    variable ReadAddressReadyDelayCycles   : integer := 0 ;
   begin
     -- Initialize
     AR.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
 
     ReadAddressOperation : loop
+      GetAxi4Parameter(Params, READ_ADDRESS_READY_BEFORE_VALID, ReadAddressReadyBeforeValid) ;
+      GetAxi4Parameter(Params, READ_ADDRESS_READY_DELAY_CYCLES, ReadAddressReadyDelayCycles) ;
+  
       ---------------------
       DoAxiReadyHandshake (
       ---------------------
@@ -756,6 +758,7 @@ begin
                       User(RD.User'range),
                       ID(RD.ID'range)
                     );
+    variable ReadDataReadyTimeOut : integer := 25 ;
   begin
     -- initialize
     RD.Valid <= '0' ;
@@ -788,6 +791,8 @@ begin
         "  Operation# " & to_string(ReadDataDoneCount + 1),
         DEBUG
       ) ;
+
+      GetAxi4Parameter(Params, READ_DATA_READY_TIME_OUT, ReadDataReadyTimeOut) ;
 
       ---------------------
       DoAxiValidHandshake (

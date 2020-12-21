@@ -59,7 +59,7 @@ package Axi4CommonPkg is
     constant tpd_Clk_Valid          : in    time ;
     constant AlertLogID             : in    AlertLogIDType := ALERTLOG_DEFAULT_ID; 
     constant TimeOutMessage         : in    string := "" ; 
-    constant TimeOutPeriod          : in    time := std.env.resolution_limit * 2 ** 30 *2**30
+    constant TimeOutPeriod          : in    time := - 1 sec 
   ) ;
 
   ------------------------------------------------------------
@@ -73,7 +73,7 @@ package Axi4CommonPkg is
     constant tpd_Clk_Ready          : in    time ;
     constant AlertLogID             : in    AlertLogIDType := ALERTLOG_DEFAULT_ID; 
     constant TimeOutMessage         : in    string := "" ; 
-    constant TimeOutPeriod          : in    time := std.env.resolution_limit * 2 ** 30 *2**30
+    constant TimeOutPeriod          : in    time := - 1 sec 
   ) ;
   
 end package Axi4CommonPkg ;
@@ -92,22 +92,29 @@ package body Axi4CommonPkg is
     constant tpd_Clk_Valid          : in    time ;
     constant AlertLogID             : in    AlertLogIDType := ALERTLOG_DEFAULT_ID; 
     constant TimeOutMessage         : in    string := "" ; 
-    constant TimeOutPeriod          : in    time := std.env.resolution_limit * 2 ** 30 *2**30
+    constant TimeOutPeriod          : in    time := - 1 sec 
   ) is
   begin 
     
     Valid <= '1' after tpd_Clk_Valid ;
-    wait on Clk until Clk = '1' and Ready = '1' for TimeOutPeriod ;
+    
+    if TimeOutPeriod > 0 sec then 
+      wait on Clk until Clk = '1' and Ready = '1' for TimeOutPeriod ;
+    else
+      wait on Clk until Clk = '1' and Ready = '1' ;
+    end if ;
     
     Valid <= '0' after tpd_Clk_Valid ;
 
+    if Ready /= '1' then 
     -- Check for TimeOut
-    AlertIf(
-      AlertLogID, 
-      Ready /= '1', 
-      TimeOutMessage & ".  Ready: " & to_string(Ready) & "  Expected: 1",
-      FAILURE
-    ) ;
+      Alert(
+        AlertLogID, 
+        TimeOutMessage & ".  Ready: " & to_string(Ready) & "  Expected: 1",
+        FAILURE
+      ) ;
+      wait until Clk = '1' ; 
+    end if ; 
   end procedure DoAxiValidHandshake ;
 
   ------------------------------------------------------------
@@ -121,7 +128,7 @@ package body Axi4CommonPkg is
     constant tpd_Clk_Ready          : in    time ;
     constant AlertLogID             : in    AlertLogIDType := ALERTLOG_DEFAULT_ID; 
     constant TimeOutMessage         : in    string := "" ; 
-    constant TimeOutPeriod          : in    time := std.env.resolution_limit * 2 ** 30 *2**30
+    constant TimeOutPeriod          : in    time := - 1 sec 
   ) is
   begin 
     
@@ -130,37 +137,46 @@ package body Axi4CommonPkg is
     end if ;  
     
     -- Wait to Receive Transaction
-    wait on Clk until Clk = '1' and Valid = '1' for TimeOutPeriod ;
+    if TimeOutPeriod > 0 sec then 
+      wait on Clk until Clk = '1' and Valid = '1' for TimeOutPeriod ;
+    else
+      wait on Clk until Clk = '1' and Valid = '1' ;
+    end if ;
     
-    -- Check for TimeOut
-    AlertIf(
-      AlertLogID, 
-      Valid /= '1', 
-      TimeOutMessage & " Valid: " & to_string(Valid) & "  Expected: 1",
-      FAILURE
-    ) ;
-
-    if not ReadyBeforeValid then 
-      Ready <= '1' after ReadyDelayCycles + tpd_Clk_Ready ;
-    end if ; 
-    
-    -- If ready not signaled yet, find ready at a rising edge of clk
-    if Ready /= '1' then
-      wait on Clk until Clk = '1' and (Ready = '1' or Valid /= '1') ;
-      AlertIf(
+    if Valid = '1' then 
+      -- Proper handling
+      if not ReadyBeforeValid then 
+        Ready <= '1' after ReadyDelayCycles + tpd_Clk_Ready ;
+      end if ; 
+      
+      -- If ready not signaled yet, find ready at a rising edge of clk
+      if Ready /= '1' then
+        wait on Clk until Clk = '1' and (Ready = '1' or Valid /= '1') ;
+        AlertIf(
+          AlertLogID, 
+          Valid /= '1', 
+          TimeOutMessage & 
+          " Valid (" & to_string(Valid) & ") " & 
+          "deasserted before Ready asserted (" & to_string(Ready) & ") ",
+          FAILURE
+        ) ;
+      end if ; 
+    else 
+      -- TimeOut handling
+      Alert(
         AlertLogID, 
-        Valid /= '1', 
-        TimeOutMessage & 
-        " Valid (" & to_string(Valid) & ") " & 
-        "deasserted before Ready asserted (" & to_string(Ready) & ") ",
+        TimeOutMessage & " Valid: " & to_string(Valid) & "  Expected: 1",
         FAILURE
       ) ;
     end if ; 
-
-    -- State after operation
+    
+    -- End of operation
     Ready <= '0' after tpd_Clk_Ready ;
+    
+    if Valid /= '1' then 
+      -- TimeOut or Valid deasserted after before Ready asserted
+      wait until Clk = '1' ;
+    end if ; 
   end procedure DoAxiReadyHandshake ;
-  
-  
 
 end package body Axi4CommonPkg ; 

@@ -72,7 +72,7 @@ package Axi4OptionsTypePkg is
     READ_ADDRESS_READY_BEFORE_VALID,    -- S
     READ_DATA_READY_BEFORE_VALID,
     
-    -- Ready Controls
+    -- Ready Delays
     WRITE_ADDRESS_READY_DELAY_CYCLES,   -- S
     WRITE_DATA_READY_DELAY_CYCLES,      -- S
     WRITE_RESPONSE_READY_DELAY_CYCLES,
@@ -83,9 +83,18 @@ package Axi4OptionsTypePkg is
     WRITE_RESPONSE_VALID_TIME_OUT,
     READ_DATA_VALID_TIME_OUT,
     
-    -- Write Data Burst Delays 
-    WRITE_DATA_BURST_START_DELAY,
-    WRITE_DATA_BURST_DELAY,
+    -- Valid Delays
+    WRITE_ADDRESS_VALID_DELAY_CYCLES,
+    WRITE_DATA_VALID_DELAY_CYCLES,      
+    WRITE_DATA_VALID_DELAY_BURST_CYCLES,      
+    WRITE_RESPONSE_VALID_DELAY_CYCLES,  -- S
+    READ_ADDRESS_VALID_DELAY_CYCLES,    
+    READ_DATA_VALID_DELAY_CYCLES,       -- S
+    READ_DATA_VALID_DELAY_BURST_CYCLES, -- S      
+
+    -- Write Data Filtering 
+    WRITE_DATA_FILTER_UNDRIVEN, 
+    WRITE_DATA_UNDRIVEN_VALUE,
     
     -- Marker 
     OPTIONS_MARKER,
@@ -185,6 +194,14 @@ package Axi4OptionsTypePkg is
   ------------------------------------------------------------
     signal   TransactionRec : InOut AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
+    constant OptVal         : In    std_logic
+  ) ;  
+  
+  ------------------------------------------------------------
+  procedure SetAxi4Options (
+  ------------------------------------------------------------
+    signal   TransactionRec : InOut AddressBusRecType ;
+    constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    integer
   ) ;
 
@@ -203,6 +220,14 @@ package Axi4OptionsTypePkg is
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   boolean
   ) ;
+
+  ------------------------------------------------------------
+  procedure GetAxi4Options (
+  ------------------------------------------------------------
+    signal   TransactionRec : InOut AddressBusRecType ;
+    constant Option         : In    Axi4OptionsType ;
+    variable OptVal         : Out   std_logic
+  ) ;  
 
   ------------------------------------------------------------
   procedure GetAxi4Options (
@@ -252,7 +277,7 @@ package Axi4OptionsTypePkg is
   -----------------------------------------------------------
     variable Params        : InOut ModelParametersPType ;
     constant Operation     : in    Axi4OptionsType ;
-    constant OpVal         : in    boolean  
+    constant OptVal        : in    boolean  
   ) ; 
   
   ------------------------------------------------------------
@@ -260,7 +285,15 @@ package Axi4OptionsTypePkg is
   -----------------------------------------------------------
     variable Params        : InOut ModelParametersPType ;
     constant Operation     : in    Axi4OptionsType ;
-    constant OpVal         : in    integer  
+    constant OptVal        : in    std_logic  
+  ) ;
+
+  ------------------------------------------------------------
+  procedure SetAxi4Parameter (
+  -----------------------------------------------------------
+    variable Params        : InOut ModelParametersPType ;
+    constant Operation     : in    Axi4OptionsType ;
+    constant OptVal        : in    integer  
   ) ; 
   
   ------------------------------------------------------------
@@ -268,7 +301,7 @@ package Axi4OptionsTypePkg is
   -----------------------------------------------------------
     variable Params        : InOut ModelParametersPType ;
     constant Operation     : in    Axi4OptionsType ;
-    constant OpVal         : in    std_logic_vector  
+    constant OptVal        : in    std_logic_vector  
   ) ; 
   
   ------------------------------------------------------------
@@ -276,7 +309,7 @@ package Axi4OptionsTypePkg is
   -----------------------------------------------------------
     variable Params        : InOut ModelParametersPType ;
     constant Operation     : in    Axi4OptionsType ;
-    variable OpVal         : out   boolean  
+    variable OptVal        : out   boolean  
   ) ; 
 
   ------------------------------------------------------------
@@ -284,7 +317,15 @@ package Axi4OptionsTypePkg is
   -----------------------------------------------------------
     variable Params        : InOut ModelParametersPType ;
     constant Operation     : in    Axi4OptionsType ;
-    variable OpVal         : out   integer  
+    variable OptVal        : out   std_logic  
+  ) ;
+
+  ------------------------------------------------------------
+  procedure GetAxi4Parameter (
+  -----------------------------------------------------------
+    variable Params        : InOut ModelParametersPType ;
+    constant Operation     : in    Axi4OptionsType ;
+    variable OptVal        : out   integer  
   ) ; 
 
   ------------------------------------------------------------
@@ -292,7 +333,7 @@ package Axi4OptionsTypePkg is
   -----------------------------------------------------------
     variable Params        : InOut ModelParametersPType ;
     constant Operation     : in    Axi4OptionsType ;
-    variable OpVal         : out   std_logic_vector  
+    variable OptVal        : out   std_logic_vector  
   ) ;  
   --
   -- Remove after updating Axi4Lite VC
@@ -316,7 +357,7 @@ package Axi4OptionsTypePkg is
   -----------------------------------------------------------
     variable AxiBus        : out Axi4BaseRecType ;
     constant Operation     : in  Axi4OptionsType ;
-    constant OpVal         : in  integer  
+    constant OptVal        : in  integer  
   ) ;
   alias SetAxiParameter is SetAxi4InterfaceDefault[Axi4BaseRecType, Axi4OptionsType, integer];
 
@@ -352,12 +393,19 @@ package body Axi4OptionsTypePkg is
     constant OptVal         : In    boolean
   ) is
   begin
-    if OptVal then 
-      SetModelOptions(TransactionRec, Axi4OptionsType'POS(Option), 1) ;
-    else
-      SetModelOptions(TransactionRec, Axi4OptionsType'POS(Option), 0) ;
-    end if ; 
+    SetModelOptions(TransactionRec, Axi4OptionsType'POS(Option), boolean'pos(OptVal)) ;
   end procedure SetAxi4Options ;
+
+  ------------------------------------------------------------
+  procedure SetAxi4Options (
+  ------------------------------------------------------------
+    signal   TransactionRec : InOut AddressBusRecType ;
+    constant Option         : In    Axi4OptionsType ;
+    constant OptVal         : In    std_logic
+  ) is
+  begin
+    SetModelOptions(TransactionRec, Axi4OptionsType'POS(Option), std_logic'pos(OptVal)) ;
+  end procedure SetAxi4Options ;  
 
   ------------------------------------------------------------
   procedure SetAxi4Options (
@@ -392,6 +440,19 @@ package body Axi4OptionsTypePkg is
   begin
     GetModelOptions(TransactionRec, Axi4OptionsType'POS(Option), IntOptVal) ;
     OptVal := IntOptVal >= 1 ;
+  end procedure GetAxi4Options ;
+
+  ------------------------------------------------------------
+  procedure GetAxi4Options (
+  ------------------------------------------------------------
+    signal   TransactionRec : InOut AddressBusRecType ;
+    constant Option         : In    Axi4OptionsType ;
+    variable OptVal         : Out   std_logic
+  ) is
+    variable IntOptVal : integer ; 
+  begin
+    GetModelOptions(TransactionRec, Axi4OptionsType'POS(Option), IntOptVal) ;
+    OptVal := std_logic'val(IntOptVal) ;
   end procedure GetAxi4Options ;
 
   ------------------------------------------------------------
@@ -442,10 +503,10 @@ package body Axi4OptionsTypePkg is
   -----------------------------------------------------------
     variable Params        : InOut ModelParametersPType ;
     constant Operation     : in    Axi4OptionsType ;
-    constant OpVal         : in    boolean  
+    constant OptVal        : in    boolean  
   ) is
   begin
-    Params.Set(Axi4OptionsType'POS(Operation), OpVal) ;
+    Params.Set(Axi4OptionsType'POS(Operation), OptVal) ;
   end procedure SetAxi4Parameter ; 
  
   ------------------------------------------------------------
@@ -453,10 +514,10 @@ package body Axi4OptionsTypePkg is
   -----------------------------------------------------------
     variable Params        : InOut ModelParametersPType ;
     constant Operation     : in    Axi4OptionsType ;
-    constant OpVal         : in    integer  
+    constant OptVal        : in    std_logic  
   ) is
   begin
-    Params.Set(Axi4OptionsType'POS(Operation), OpVal) ;
+    Params.Set(Axi4OptionsType'POS(Operation), std_logic'pos(OptVal)) ;
   end procedure SetAxi4Parameter ; 
   
   ------------------------------------------------------------
@@ -464,10 +525,21 @@ package body Axi4OptionsTypePkg is
   -----------------------------------------------------------
     variable Params        : InOut ModelParametersPType ;
     constant Operation     : in    Axi4OptionsType ;
-    constant OpVal         : in    std_logic_vector  
+    constant OptVal        : in    integer  
   ) is
   begin
-    Params.Set(Axi4OptionsType'POS(Operation), OpVal) ;
+    Params.Set(Axi4OptionsType'POS(Operation), OptVal) ;
+  end procedure SetAxi4Parameter ; 
+  
+  ------------------------------------------------------------
+  procedure SetAxi4Parameter (
+  -----------------------------------------------------------
+    variable Params        : InOut ModelParametersPType ;
+    constant Operation     : in    Axi4OptionsType ;
+    constant OptVal        : in    std_logic_vector  
+  ) is
+  begin
+    Params.Set(Axi4OptionsType'POS(Operation), OptVal) ;
   end procedure SetAxi4Parameter ; 
   
 --!!
@@ -478,10 +550,10 @@ package body Axi4OptionsTypePkg is
   -----------------------------------------------------------
     variable Params        : InOut ModelParametersPType ;
     constant Operation     : in    Axi4OptionsType ;
-    variable OpVal         : out   boolean  
+    variable OptVal        : out   boolean  
   ) is
   begin
-    OpVal := Params.Get(Axi4OptionsType'POS(Operation)) ;
+    OptVal:= Params.Get(Axi4OptionsType'POS(Operation)) ;
   end procedure GetAxi4Parameter ; 
   
   ------------------------------------------------------------
@@ -489,10 +561,12 @@ package body Axi4OptionsTypePkg is
   -----------------------------------------------------------
     variable Params        : InOut ModelParametersPType ;
     constant Operation     : in    Axi4OptionsType ;
-    variable OpVal         : out   integer  
+    variable OptVal        : out   std_logic  
   ) is
+    variable IntOptval : integer ;
   begin
-    OpVal := Params.Get(Axi4OptionsType'POS(Operation)) ;
+    IntOptVal:= Params.Get(Axi4OptionsType'POS(Operation)) ;
+    OptVal := std_logic'val(IntOptVal) ;
   end procedure GetAxi4Parameter ; 
   
   ------------------------------------------------------------
@@ -500,10 +574,21 @@ package body Axi4OptionsTypePkg is
   -----------------------------------------------------------
     variable Params        : InOut ModelParametersPType ;
     constant Operation     : in    Axi4OptionsType ;
-    variable OpVal         : out   std_logic_vector  
+    variable OptVal        : out   integer  
   ) is
   begin
-    OpVal := Params.Get(Axi4OptionsType'POS(Operation), OpVal'length) ;
+    OptVal:= Params.Get(Axi4OptionsType'POS(Operation)) ;
+  end procedure GetAxi4Parameter ; 
+  
+  ------------------------------------------------------------
+  procedure GetAxi4Parameter (
+  -----------------------------------------------------------
+    variable Params        : InOut ModelParametersPType ;
+    constant Operation     : in    Axi4OptionsType ;
+    variable OptVal        : out   std_logic_vector  
+  ) is
+  begin
+    OptVal:= Params.Get(Axi4OptionsType'POS(Operation), OptVal'length) ;
   end procedure GetAxi4Parameter ; 
   
   ------------------------------------------------------------
@@ -531,7 +616,7 @@ package body Axi4OptionsTypePkg is
     SetAxi4Parameter(Params, READ_ADDRESS_READY_BEFORE_VALID,    TRUE) ; -- S
     SetAxi4Parameter(Params, READ_DATA_READY_BEFORE_VALID,       TRUE) ; 
     
-    -- Ready Controls
+    -- Ready Delay
     SetAxi4Parameter(Params, WRITE_ADDRESS_READY_DELAY_CYCLES,   0) ;  -- S
     SetAxi4Parameter(Params, WRITE_DATA_READY_DELAY_CYCLES,      0) ;  -- S
     SetAxi4Parameter(Params, WRITE_RESPONSE_READY_DELAY_CYCLES,  0) ;  
@@ -542,9 +627,18 @@ package body Axi4OptionsTypePkg is
     SetAxi4Parameter(Params, WRITE_RESPONSE_VALID_TIME_OUT,      25) ; 
     SetAxi4Parameter(Params, READ_DATA_VALID_TIME_OUT,           25) ; 
     
-    -- Write Data Burst Delays 
-    SetAxi4Parameter(Params, WRITE_DATA_BURST_START_DELAY,       0) ; 
-    SetAxi4Parameter(Params, WRITE_DATA_BURST_DELAY,             0) ; 
+    -- Valid Delays
+    SetAxi4Parameter(Params, WRITE_ADDRESS_VALID_DELAY_CYCLES,     0) ;  
+    SetAxi4Parameter(Params, WRITE_DATA_VALID_DELAY_CYCLES,        0) ;  
+    SetAxi4Parameter(Params, WRITE_DATA_VALID_DELAY_BURST_CYCLES,  0) ;        
+    SetAxi4Parameter(Params, WRITE_RESPONSE_VALID_DELAY_CYCLES,    0) ;  -- S
+    SetAxi4Parameter(Params, READ_ADDRESS_VALID_DELAY_CYCLES,      0) ;  
+    SetAxi4Parameter(Params, READ_DATA_VALID_DELAY_CYCLES,         0) ;  -- S
+    SetAxi4Parameter(Params, READ_DATA_VALID_DELAY_BURST_CYCLES,   0) ;  -- S      
+
+    -- Write Data Filtering 
+    SetAxi4Parameter(Params, WRITE_DATA_FILTER_UNDRIVEN,            TRUE) ; 
+    SetAxi4Parameter(Params, WRITE_DATA_UNDRIVEN_VALUE,             '0') ; 
 
 --    -- AXI Interface Settings    
 --    -- Set all AXI bus parameters to 0 and Size them to match the corresponding AXI Bus signal.
@@ -589,58 +683,58 @@ package body Axi4OptionsTypePkg is
   -----------------------------------------------------------
     variable AxiBus        : out Axi4BaseRecType ;
     constant Operation     : in  Axi4OptionsType ;
-    constant OpVal         : in  integer  
+    constant OptVal        : in  integer  
   ) is
   begin
     case Operation is
       -- AXI
-      when AWPROT =>       AxiBus.WriteAddress.Prot   := to_slv(OpVal, AxiBus.WriteAddress.Prot'length) ;
+      when AWPROT =>       AxiBus.WriteAddress.Prot   := to_slv(OptVal, AxiBus.WriteAddress.Prot'length) ;
         
       -- AXI4 Full
-      when AWID =>         AxiBus.WriteAddress.ID     := to_slv(OpVal, AxiBus.WriteAddress.ID'length) ;
-      when AWSIZE =>       AxiBus.WriteAddress.Size   := to_slv(OpVal, AxiBus.WriteAddress.Size'length) ;
-      when AWBURST =>      AxiBus.WriteAddress.Burst  := to_slv(OpVal, AxiBus.WriteAddress.Burst'length) ;
-      when AWLOCK =>       AxiBus.WriteAddress.Lock   := '1' when OpVal mod 2 = 1 else '0' ;
-      when AWCACHE =>      AxiBus.WriteAddress.Cache  := to_slv(OpVal, AxiBus.WriteAddress.Cache'length) ;
-      when AWQOS =>        AxiBus.WriteAddress.QOS    := to_slv(OpVal, AxiBus.WriteAddress.QOS'length) ;
-      when AWREGION =>     AxiBus.WriteAddress.Region := to_slv(OpVal, AxiBus.WriteAddress.Region'length) ;
-      when AWUSER =>       AxiBus.WriteAddress.User   := to_slv(OpVal, AxiBus.WriteAddress.User'length) ;
+      when AWID =>         AxiBus.WriteAddress.ID     := to_slv(OptVal, AxiBus.WriteAddress.ID'length) ;
+      when AWSIZE =>       AxiBus.WriteAddress.Size   := to_slv(OptVal, AxiBus.WriteAddress.Size'length) ;
+      when AWBURST =>      AxiBus.WriteAddress.Burst  := to_slv(OptVal, AxiBus.WriteAddress.Burst'length) ;
+      when AWLOCK =>       AxiBus.WriteAddress.Lock   := '1' when OptVal mod 2 = 1 else '0' ;
+      when AWCACHE =>      AxiBus.WriteAddress.Cache  := to_slv(OptVal, AxiBus.WriteAddress.Cache'length) ;
+      when AWQOS =>        AxiBus.WriteAddress.QOS    := to_slv(OptVal, AxiBus.WriteAddress.QOS'length) ;
+      when AWREGION =>     AxiBus.WriteAddress.Region := to_slv(OptVal, AxiBus.WriteAddress.Region'length) ;
+      when AWUSER =>       AxiBus.WriteAddress.User   := to_slv(OptVal, AxiBus.WriteAddress.User'length) ;
 
       -- Write Data:  AXI
       -- AXI4 Full
-      when WLAST =>        AxiBus.WriteData.Last       := '1' when OpVal mod 2 = 1 else '0' ;
-      when WUSER =>        AxiBus.WriteData.User       := to_slv(OpVal, AxiBus.WriteData.User'length) ;
+      when WLAST =>        AxiBus.WriteData.Last       := '1' when OptVal mod 2 = 1 else '0' ;
+      when WUSER =>        AxiBus.WriteData.User       := to_slv(OptVal, AxiBus.WriteData.User'length) ;
                                                        
       -- AXI3                                          
-      when WID =>          AxiBus.WriteData.ID         := to_slv(OpVal, AxiBus.WriteData.ID'length) ; 
+      when WID =>          AxiBus.WriteData.ID         := to_slv(OptVal, AxiBus.WriteData.ID'length) ; 
               
       -- Write Response:  AXI
-      when BRESP =>        AxiBus.WriteResponse.Resp   := to_slv(OpVal, AxiBus.WriteResponse.Resp'length) ;
+      when BRESP =>        AxiBus.WriteResponse.Resp   := to_slv(OptVal, AxiBus.WriteResponse.Resp'length) ;
                                                        
       -- AXI4 Full                                     
-      when BID =>          AxiBus.WriteResponse.ID     := to_slv(OpVal, AxiBus.WriteResponse.ID'length) ;
-      when BUSER =>        AxiBus.WriteResponse.User   := to_slv(OpVal, AxiBus.WriteResponse.User'length) ; 
+      when BID =>          AxiBus.WriteResponse.ID     := to_slv(OptVal, AxiBus.WriteResponse.ID'length) ;
+      when BUSER =>        AxiBus.WriteResponse.User   := to_slv(OptVal, AxiBus.WriteResponse.User'length) ; 
                                                         
       -- Read Address:  AXI
-      when ARPROT =>       AxiBus.ReadAddress.Prot    := to_slv(OpVal, AxiBus.ReadAddress.Prot'length) ;
+      when ARPROT =>       AxiBus.ReadAddress.Prot    := to_slv(OptVal, AxiBus.ReadAddress.Prot'length) ;
         
       -- AXI4 Full
-      when ARID =>         AxiBus.ReadAddress.ID      := to_slv(OpVal, AxiBus.ReadAddress.ID'length) ;
-      when ARSIZE =>       AxiBus.ReadAddress.Size    := to_slv(OpVal, AxiBus.ReadAddress.Size'length) ;
-      when ARBURST =>      AxiBus.ReadAddress.Burst   := to_slv(OpVal, AxiBus.ReadAddress.Burst'length) ;
-      when ARLOCK =>       AxiBus.ReadAddress.Lock    := '1' when OpVal mod 2 = 1 else '0' ;
-      when ARCACHE =>      AxiBus.ReadAddress.Cache   := to_slv(OpVal, AxiBus.ReadAddress.Cache'length) ;
-      when ARQOS =>        AxiBus.ReadAddress.QOS     := to_slv(OpVal, AxiBus.ReadAddress.QOS'length) ;
-      when ARREGION =>     AxiBus.ReadAddress.Region  := to_slv(OpVal, AxiBus.ReadAddress.Region'length) ;
-      when ARUSER =>       AxiBus.ReadAddress.User    := to_slv(OpVal, AxiBus.ReadAddress.User'length) ;
+      when ARID =>         AxiBus.ReadAddress.ID      := to_slv(OptVal, AxiBus.ReadAddress.ID'length) ;
+      when ARSIZE =>       AxiBus.ReadAddress.Size    := to_slv(OptVal, AxiBus.ReadAddress.Size'length) ;
+      when ARBURST =>      AxiBus.ReadAddress.Burst   := to_slv(OptVal, AxiBus.ReadAddress.Burst'length) ;
+      when ARLOCK =>       AxiBus.ReadAddress.Lock    := '1' when OptVal mod 2 = 1 else '0' ;
+      when ARCACHE =>      AxiBus.ReadAddress.Cache   := to_slv(OptVal, AxiBus.ReadAddress.Cache'length) ;
+      when ARQOS =>        AxiBus.ReadAddress.QOS     := to_slv(OptVal, AxiBus.ReadAddress.QOS'length) ;
+      when ARREGION =>     AxiBus.ReadAddress.Region  := to_slv(OptVal, AxiBus.ReadAddress.Region'length) ;
+      when ARUSER =>       AxiBus.ReadAddress.User    := to_slv(OptVal, AxiBus.ReadAddress.User'length) ;
 
       -- Read Data: AXI
-      when RRESP =>         AxiBus.ReadData.Resp       := to_slv(OpVal, AxiBus.ReadData.Resp'length) ;
+      when RRESP =>         AxiBus.ReadData.Resp       := to_slv(OptVal, AxiBus.ReadData.Resp'length) ;
         
       -- AXI4 Full
-      when RID =>           AxiBus.ReadData.ID         := to_slv(OpVal, AxiBus.ReadData.ID'length) ; 
-      when RLAST =>         AxiBus.ReadData.Last       := '1' when OpVal mod 2 = 1 else '0' ;
-      when RUSER =>         AxiBus.ReadData.User       := to_slv(OpVal, AxiBus.ReadData.User'length) ; 
+      when RID =>           AxiBus.ReadData.ID         := to_slv(OptVal, AxiBus.ReadData.ID'length) ; 
+      when RLAST =>         AxiBus.ReadData.Last       := '1' when OptVal mod 2 = 1 else '0' ;
+      when RUSER =>         AxiBus.ReadData.User       := to_slv(OptVal, AxiBus.ReadData.User'length) ; 
 
       -- The End -- Done
       when others =>

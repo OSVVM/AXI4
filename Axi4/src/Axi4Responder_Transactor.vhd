@@ -99,8 +99,8 @@ architecture TransactorResponder of Axi4Responder is
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 
+  -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
-    -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Responder'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
@@ -127,24 +127,13 @@ architecture TransactorResponder of Axi4Responder is
   signal ReadDataRequestCount        : integer := 0 ;
   signal ReadDataDoneCount           : integer := 0 ;
 
-
-  signal WriteResponseReadyTimeOut, ReadDataReadyTimeOut : integer := 25 ;
-
-  signal WriteAddressReadyBeforeValid  : boolean := TRUE ;
-  signal WriteAddressReadyDelayCycles  : integer := 0 ;
-  signal WriteDataReadyBeforeValid     : boolean := TRUE ;
-  signal WriteDataReadyDelayCycles     : integer := 0 ;
-  signal ReadAddressReadyBeforeValid   : boolean := TRUE ;
-  signal ReadAddressReadyDelayCycles   : integer := 0 ;
-
-  signal FilterUndrivenWriteData       : boolean := TRUE ;
-  signal UndrivenWriteDataValue        : std_logic := '0' ;
-
   signal ModelWProt  : Axi4ProtType := (others => '0') ;
   signal ModelRProt  : Axi4ProtType := (others => '0') ;
 
   signal ModelWResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
   signal ModelRResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
+
+  shared variable Params : ModelParametersPType ;
 
 begin
 
@@ -160,6 +149,8 @@ begin
   Initalize : process
     variable ID : AlertLogIDType ;
   begin
+    InitAxiOptions(Params) ;
+
     -- Alerts
     ID                      := GetAlertLogID(MODEL_INSTANCE_NAME) ;
     ModelID                 <= ID ;
@@ -258,6 +249,11 @@ begin
     alias ReadData            is LRD.Data ;
 --    alias ReadResp            is LRD.Resp ;
 
+    variable Axi4Option    : Axi4OptionsType ; 
+    variable Axi4OptionVal : integer ; 
+    
+    variable FilterUndrivenWriteData       : boolean := TRUE ;
+    variable UndrivenWriteDataValue        : std_logic := '0' ;
   begin
     WaitForTransaction(
        Clk      => Clk,
@@ -357,6 +353,8 @@ begin
           end if ;
 
           (WriteData, WriteStrb, WriteLast, WriteUser, WriteID) := WriteDataFifo.pop ;
+          GetAxi4Parameter(Params, WRITE_DATA_FILTER_UNDRIVEN, FilterUndrivenWriteData) ;
+          GetAxi4Parameter(Params, WRITE_DATA_UNDRIVEN_VALUE,  UndrivenWriteDataValue) ;
           if FilterUndrivenWriteData then
             FilterUndrivenAxiData(WriteData, WriteStrb, UndrivenWriteDataValue) ;
           end if ;
@@ -459,59 +457,101 @@ begin
 --!!
 --!! Update in a similar fashion to Axi4Master InterfaceDefault / Parameter handling
 --!!
+--!!      when SET_MODEL_OPTIONS =>
+--!!        -- Set Model Options
+--!!        
+--!!        case Axi4OptionsType'val(TransRec.Options) is
+--!!          -- Slave Ready TimeOut Checks
+--!!          when WRITE_RESPONSE_READY_TIME_OUT =>       WriteResponseReadyTimeOut     <= TransRec.IntToModel ;
+--!!          when READ_DATA_READY_TIME_OUT =>            ReadDataReadyTimeOut          <= TransRec.IntToModel ;
+--!!          -- Slave Ready Before Valid
+--!!          when WRITE_ADDRESS_READY_BEFORE_VALID =>    WriteAddressReadyBeforeValid  <= (TransRec.IntToModel = 1) ;
+--!!          when WRITE_DATA_READY_BEFORE_VALID =>       WriteDataReadyBeforeValid     <= (TransRec.IntToModel = 1) ;
+--!!          when READ_ADDRESS_READY_BEFORE_VALID =>     ReadAddressReadyBeforeValid   <= (TransRec.IntToModel = 1) ;
+--!!          -- Slave Ready Delay Cycles
+--!!          when WRITE_ADDRESS_READY_DELAY_CYCLES =>    WriteAddressReadyDelayCycles  <= TransRec.IntToModel ;
+--!!          when WRITE_DATA_READY_DELAY_CYCLES =>       WriteDataReadyDelayCycles     <= TransRec.IntToModel ;
+--!!          when READ_ADDRESS_READY_DELAY_CYCLES =>     ReadAddressReadyDelayCycles   <= TransRec.IntToModel ;
+--!!          -- Slave PROT Settings
+--!!          when AWPROT =>                              ModelWProt <= to_slv(TransRec.IntToModel, ModelWProt'length) ;
+--!!          when ARPROT =>                              ModelRProt  <= to_slv(TransRec.IntToModel, ModelRProt'length) ;
+--!!          -- Slave RESP Settings
+--!!          when BRESP =>                               ModelWResp <= to_slv(TransRec.IntToModel, ModelWResp'length) ;
+--!!          when RRESP =>                               ModelRResp  <= to_slv(TransRec.IntToModel, ModelRResp'length) ;
+--!!          --
+--!!          -- The End -- Done
+--!!          when others =>
+--!!            Alert(ModelID, "Unimplemented Option", FAILURE) ;
+--!!        end case ;
+--!!        wait for 0 ns ;
+        
       when SET_MODEL_OPTIONS =>
         -- Set Model Options
-        case Axi4OptionsType'val(TransRec.Options) is
-          -- Slave Ready TimeOut Checks
-          when WRITE_RESPONSE_READY_TIME_OUT =>       WriteResponseReadyTimeOut     <= TransRec.IntToModel ;
-          when READ_DATA_READY_TIME_OUT =>            ReadDataReadyTimeOut          <= TransRec.IntToModel ;
-          -- Slave Ready Before Valid
-          when WRITE_ADDRESS_READY_BEFORE_VALID =>    WriteAddressReadyBeforeValid  <= (TransRec.IntToModel = 1) ;
-          when WRITE_DATA_READY_BEFORE_VALID =>       WriteDataReadyBeforeValid     <= (TransRec.IntToModel = 1) ;
-          when READ_ADDRESS_READY_BEFORE_VALID =>     ReadAddressReadyBeforeValid   <= (TransRec.IntToModel = 1) ;
-          -- Slave Ready Delay Cycles
-          when WRITE_ADDRESS_READY_DELAY_CYCLES =>    WriteAddressReadyDelayCycles  <= TransRec.IntToModel ;
-          when WRITE_DATA_READY_DELAY_CYCLES =>       WriteDataReadyDelayCycles     <= TransRec.IntToModel ;
-          when READ_ADDRESS_READY_DELAY_CYCLES =>     ReadAddressReadyDelayCycles   <= TransRec.IntToModel ;
-          -- Slave PROT Settings
-          when AWPROT =>                              ModelWProt <= to_slv(TransRec.IntToModel, ModelWProt'length) ;
-          when ARPROT =>                              ModelRProt  <= to_slv(TransRec.IntToModel, ModelRProt'length) ;
-          -- Slave RESP Settings
-          when BRESP =>                               ModelWResp <= to_slv(TransRec.IntToModel, ModelWResp'length) ;
-          when RRESP =>                               ModelRResp  <= to_slv(TransRec.IntToModel, ModelRResp'length) ;
-          --
-          -- The End -- Done
-          when others =>
-            Alert(ModelID, "Unimplemented Option", FAILURE) ;
-        end case ;
-        wait for 0 ns ;
+        Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
+        if IsAxiParameter(Axi4Option) then
+          SetAxi4Parameter(Params, Axi4Option, TransRec.IntToModel) ;
+        else
+          case Axi4Option is
+            -- Slave PROT Settings
+            when AWPROT =>               ModelWProt <= to_slv(TransRec.IntToModel, ModelWProt'length) ;
+            when ARPROT =>               ModelRProt <= to_slv(TransRec.IntToModel, ModelRProt'length) ;
+            -- Slave RESP Settings
+            when BRESP =>                ModelWResp <= to_slv(TransRec.IntToModel, ModelWResp'length) ;
+            when RRESP =>                ModelRResp <= to_slv(TransRec.IntToModel, ModelRResp'length) ;
+            --
+            -- The End -- Done
+            when others =>               Alert(ModelID, "Unimplemented Option", FAILURE) ;
+          end case ;
+        end if ;
+        wait for 0 ns ; 
 
       when GET_MODEL_OPTIONS =>
-        -- Set Model Options
-        case Axi4OptionsType'val(TransRec.Options) is
-          -- Slave Ready TimeOut Checks
-          when WRITE_RESPONSE_READY_TIME_OUT =>       TransRec.IntFromModel  <= WriteResponseReadyTimeOut ;
-          when READ_DATA_READY_TIME_OUT =>            TransRec.IntFromModel  <= ReadDataReadyTimeOut ;
-          -- Slave Ready Before Valid
-          when WRITE_ADDRESS_READY_BEFORE_VALID =>    TransRec.IntFromModel <= 1 when WriteAddressReadyBeforeValid else 0 ;
-          when WRITE_DATA_READY_BEFORE_VALID =>       TransRec.IntFromModel <= 1 when WriteDataReadyBeforeValid    else 0 ;
-          when READ_ADDRESS_READY_BEFORE_VALID =>     TransRec.IntFromModel <= 1 when ReadAddressReadyBeforeValid  else 0 ;
-          -- Slave Ready Delay Cycles
-          when WRITE_ADDRESS_READY_DELAY_CYCLES =>    TransRec.IntFromModel  <= WriteAddressReadyDelayCycles ;
-          when WRITE_DATA_READY_DELAY_CYCLES =>       TransRec.IntFromModel  <= WriteDataReadyDelayCycles    ;
-          when READ_ADDRESS_READY_DELAY_CYCLES =>     TransRec.IntFromModel  <= ReadAddressReadyDelayCycles  ;
-          -- Slave PROT Settings
-          when AWPROT =>                              TransRec.IntFromModel <= to_integer(ModelWProt) ;
-          when ARPROT =>                              TransRec.IntFromModel <= to_integer(ModelRProt ) ;
-          -- Slave RESP Settings
-          when BRESP =>                               TransRec.IntFromModel <= to_integer(ModelWResp) ;
-          when RRESP =>                               TransRec.IntFromModel <= to_integer(ModelRResp) ;
-          --
-          -- The End -- Done
-          when others =>
-            Alert(ModelID, "Unimplemented Option", FAILURE) ;
-        end case ;
-        wait for 0 ns ;
+        Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
+        if IsAxiParameter(Axi4Option) then
+          GetAxi4Parameter(Params, Axi4Option, Axi4OptionVal) ;
+          TransRec.IntFromModel <= Axi4OptionVal ;
+        else
+--          TransRec.IntFromModel <= GetAxi4InterfaceDefault(AxiDefaults, Axi4Option) ;
+          case Axi4Option is
+            -- Slave PROT Settings
+            when AWPROT =>               TransRec.IntFromModel <= to_integer(ModelWProt) ;
+            when ARPROT =>               TransRec.IntFromModel <= to_integer(ModelRProt ) ;
+            -- Slave RESP Settings
+            when BRESP =>                TransRec.IntFromModel <= to_integer(ModelWResp) ;
+            when RRESP =>                TransRec.IntFromModel <= to_integer(ModelRResp) ;
+            --
+            -- The End -- Done
+            when others =>               Alert(ModelID, "Unimplemented Option", FAILURE) ;
+          end case ;
+        end if ;
+        wait for 0 ns ; 
+
+--!!      when GET_MODEL_OPTIONS =>
+--!!        -- Set Model Options
+--!!        case Axi4OptionsType'val(TransRec.Options) is
+--!!          -- Slave Ready TimeOut Checks
+--!!          when WRITE_RESPONSE_READY_TIME_OUT =>       TransRec.IntFromModel  <= WriteResponseReadyTimeOut ;
+--!!          when READ_DATA_READY_TIME_OUT =>            TransRec.IntFromModel  <= ReadDataReadyTimeOut ;
+--!!          -- Slave Ready Before Valid
+--!!          when WRITE_ADDRESS_READY_BEFORE_VALID =>    TransRec.IntFromModel <= 1 when WriteAddressReadyBeforeValid else 0 ;
+--!!          when WRITE_DATA_READY_BEFORE_VALID =>       TransRec.IntFromModel <= 1 when WriteDataReadyBeforeValid    else 0 ;
+--!!          when READ_ADDRESS_READY_BEFORE_VALID =>     TransRec.IntFromModel <= 1 when ReadAddressReadyBeforeValid  else 0 ;
+--!!          -- Slave Ready Delay Cycles
+--!!          when WRITE_ADDRESS_READY_DELAY_CYCLES =>    TransRec.IntFromModel  <= WriteAddressReadyDelayCycles ;
+--!!          when WRITE_DATA_READY_DELAY_CYCLES =>       TransRec.IntFromModel  <= WriteDataReadyDelayCycles    ;
+--!!          when READ_ADDRESS_READY_DELAY_CYCLES =>     TransRec.IntFromModel  <= ReadAddressReadyDelayCycles  ;
+--!!          -- Slave PROT Settings
+--!!          when AWPROT =>                              TransRec.IntFromModel <= to_integer(ModelWProt) ;
+--!!          when ARPROT =>                              TransRec.IntFromModel <= to_integer(ModelRProt ) ;
+--!!          -- Slave RESP Settings
+--!!          when BRESP =>                               TransRec.IntFromModel <= to_integer(ModelWResp) ;
+--!!          when RRESP =>                               TransRec.IntFromModel <= to_integer(ModelRResp) ;
+--!!          --
+--!!          -- The End -- Done
+--!!          when others =>
+--!!            Alert(ModelID, "Unimplemented Option", FAILURE) ;
+--!!        end case ;
+--!!        wait for 0 ns ;
 
       when others =>
         Alert(ModelID, "Unimplemented Transaction", FAILURE) ;
@@ -530,11 +570,16 @@ begin
   ------------------------------------------------------------
   WriteAddressHandler : process
     alias    AW is AxiBus.WriteAddress ;
+    variable WriteAddressReadyBeforeValid  : boolean := TRUE ;
+    variable WriteAddressReadyDelayCycles  : integer := 0 ;
   begin
     AW.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
 
     WriteAddressOperation : loop
+      GetAxi4Parameter(Params, WRITE_ADDRESS_READY_BEFORE_VALID, WriteAddressReadyBeforeValid) ;
+      GetAxi4Parameter(Params, WRITE_ADDRESS_READY_DELAY_CYCLES, WriteAddressReadyDelayCycles) ;
+
       ---------------------
       DoAxiReadyHandshake (
       ---------------------
@@ -543,9 +588,9 @@ begin
         Ready                   => AW.Ready,
         ReadyBeforeValid        => WriteAddressReadyBeforeValid,
         ReadyDelayCycles        => WriteAddressReadyDelayCycles * tperiod_Clk,
-        tpd_Clk_Ready           => tpd_Clk_AWReady,
-        AlertLogID              => BusFailedID,
-        TimeOutMessage          => "Write Address # " & to_string(WriteAddressReceiveCount + 1)
+        tpd_Clk_Ready           => tpd_Clk_AWReady  --,
+--        AlertLogID              => BusFailedID,
+--        TimeOutMessage          => "Write Address # " & to_string(WriteAddressReceiveCount + 1)
       ) ;
 
       -- capture address, prot
@@ -573,11 +618,15 @@ begin
   ------------------------------------------------------------
   WriteDataHandler : process
     alias    WD is AxiBus.WriteData ;
+    variable WriteDataReadyBeforeValid     : boolean := TRUE ;
+    variable WriteDataReadyDelayCycles     : integer := 0 ;
   begin
     WD.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
 
     WriteDataOperation : loop
+      GetAxi4Parameter(Params, WRITE_DATA_READY_BEFORE_VALID, WriteDataReadyBeforeValid) ;
+      GetAxi4Parameter(Params, WRITE_DATA_READY_DELAY_CYCLES, WriteDataReadyDelayCycles) ;
       ---------------------
       DoAxiReadyHandshake(
       ---------------------
@@ -586,9 +635,9 @@ begin
         Ready                   => WD.Ready,
         ReadyBeforeValid        => WriteDataReadyBeforeValid,
         ReadyDelayCycles        => WriteDataReadyDelayCycles * tperiod_Clk,
-        tpd_Clk_Ready           => tpd_Clk_WReady,
-        AlertLogID              => BusFailedID,
-        TimeOutMessage          => "Write Data # " & to_string(WriteDataReceiveCount + 1)
+        tpd_Clk_Ready           => tpd_Clk_WReady  -- ,
+--        AlertLogID              => BusFailedID,
+--        TimeOutMessage          => "Write Data # " & to_string(WriteDataReceiveCount + 1)
       ) ;
 
       -- capture Data, wstrb
@@ -626,6 +675,8 @@ begin
                           ID(WR.ID'range),
                           User(WR.User'range)
                         ) ;
+    variable WriteResponseReadyTimeOut: integer := 25 ;
+    
   begin
     -- initialize
     WR.Valid <= '0' ;
@@ -643,6 +694,8 @@ begin
       else
         Local.Resp := AXI4_RESP_OKAY ;
       end if ;
+      
+      WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_RESPONSE_VALID_DELAY_CYCLES)))) ; 
 
       -- Do Transaction
       WR.Resp  <= Local.Resp  after tpd_Clk_BResp ;
@@ -653,6 +706,8 @@ begin
         "  Operation# " & to_string(WriteResponseDoneCount + 1),
         INFO
       ) ;
+      
+      GetAxi4Parameter(Params, WRITE_RESPONSE_READY_TIME_OUT, WriteResponseReadyTimeOut) ;
 
       ---------------------
       DoAxiValidHandshake (
@@ -682,12 +737,16 @@ begin
   ------------------------------------------------------------
   ReadAddressHandler : process
     alias    AR is AxiBus.ReadAddress ;
+    variable ReadAddressReadyBeforeValid   : boolean := TRUE ;
+    variable ReadAddressReadyDelayCycles   : integer := 0 ;
   begin
     -- Initialize
     AR.Ready <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
 
     ReadAddressOperation : loop
+      GetAxi4Parameter(Params, READ_ADDRESS_READY_BEFORE_VALID, ReadAddressReadyBeforeValid) ;
+      GetAxi4Parameter(Params, READ_ADDRESS_READY_DELAY_CYCLES, ReadAddressReadyDelayCycles) ;
       ---------------------
       DoAxiReadyHandshake (
       ---------------------
@@ -697,8 +756,8 @@ begin
         ReadyBeforeValid        => ReadAddressReadyBeforeValid,
         ReadyDelayCycles        => ReadAddressReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_ARReady,
-        AlertLogID              => BusFailedID,
-        TimeOutMessage          => "Read Address # " & to_string(ReadAddressReceiveCount + 1)
+        AlertLogID              => BusFailedID  --,
+--        TimeOutMessage          => "Read Address # " & to_string(ReadAddressReceiveCount + 1)
       ) ;
 
       -- capture address, prot
@@ -729,6 +788,7 @@ begin
                       User(RD.User'range),
                       ID(RD.ID'range)
                     );
+    variable ReadDataReadyTimeOut: integer := 25 ;
   begin
     -- initialize
     RD.Valid <= '0' ;
@@ -740,6 +800,8 @@ begin
       if ReadAddressReceiveCount <= ReadDataDoneCount then
         WaitForToggle(ReadAddressReceiveCount) ;
       end if ;
+
+      WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_DELAY_CYCLES)))) ; 
 
       if ReadDataFifo.Empty then
         WaitForToggle(ReadDataRequestCount) ;
@@ -767,6 +829,8 @@ begin
         INFO
       ) ;
 
+      GetAxi4Parameter(Params, READ_DATA_READY_TIME_OUT, ReadDataReadyTimeOut) ;
+      
       ---------------------
       DoAxiValidHandshake (
       ---------------------

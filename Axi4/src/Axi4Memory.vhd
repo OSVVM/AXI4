@@ -557,6 +557,8 @@ begin
       end if ;
       (Local.Resp, Local.ID, Local.User) := WriteResponseFifo.pop ;
 
+      WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_RESPONSE_VALID_DELAY_CYCLES)))) ; 
+
       -- Do Transaction
       WR.Resp  <= Local.Resp  after tpd_Clk_BResp ;
       WR.ID    <= Local.ID    after tpd_Clk_BID ;
@@ -570,6 +572,8 @@ begin
         "  Operation# " & to_string(WriteResponseDoneCount + 1),
         DEBUG
       ) ;
+
+      GetAxi4Parameter(Params, WRITE_RESPONSE_READY_TIME_OUT, WriteResponseReadyTimeOut) ;
 
       ---------------------
       DoAxiValidHandshake (
@@ -759,6 +763,7 @@ begin
                       ID(RD.ID'range)
                     );
     variable ReadDataReadyTimeOut : integer := 25 ;
+    variable NewTransfer : std_logic := '1' ; 
   begin
     -- initialize
     RD.Valid <= '0' ;
@@ -773,6 +778,15 @@ begin
         WaitForToggle(ReadDataRequestCount) ;
       end if ;
       (Local.Data, Local.Last, Local.Resp, Local.ID, Local.User) := ReadDataFifo.pop ;
+
+      if NewTransfer then
+        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_DELAY_CYCLES)))) ; 
+--      elsif Burst then 
+      else 
+        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_DELAY_BURST_CYCLES)))) ; 
+      end if ; 
+      
+      NewTransfer := Local.Last ; -- Last is '1' for burst end and single word transfers
 
       -- Transaction Values
       RD.Data  <= Local.Data  after tpd_Clk_RDATA ;

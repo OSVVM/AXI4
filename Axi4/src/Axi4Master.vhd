@@ -698,6 +698,7 @@ begin
       end if ;
       (Local.Addr, Local.Len, Local.Prot, Local.ID, Local.Size, Local.Burst, Local.Lock, Local.Cache, Local.QOS, Local.Region, Local.User) := WriteAddressFifo.Pop ;
 
+      WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_ADDRESS_VALID_DELAY_CYCLES)))) ; 
 
       -- Do Transaction
       AW.Addr   <= Local.Addr      after tpd_Clk_AWAddr   ;
@@ -772,7 +773,7 @@ begin
 
       variable WriteDataReadyTimeOut : integer ;
       variable Burst    : std_logic ; 
-      variable NewBurst : std_logic := '1' ; 
+      variable NewTransfer : std_logic := '1' ; 
   begin
     -- initialize
     WD.Valid <= '0' ;
@@ -791,13 +792,13 @@ begin
       end if ;
       (Burst, Local.Last, Local.Data, Local.Strb, Local.User, Local.ID) := WriteDataFifo.Pop ;
             
-      if Burst and NewBurst then
-        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_DATA_BURST_START_DELAY)))) ; 
+      if NewTransfer then
+        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_DATA_VALID_DELAY_CYCLES)))) ; 
       elsif Burst then 
-        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_DATA_BURST_DELAY)))) ; 
+        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_DATA_VALID_DELAY_BURST_CYCLES)))) ; 
       end if ; 
       
-      NewBurst := Local.Last ; -- Last is '1' for burst end and single word transfers
+      NewTransfer := Local.Last ; -- Last is '1' for burst end and single word transfers
 
       -- Do Transaction
       WD.Data  <= Local.Data after tpd_clk_WStrb ;
@@ -853,6 +854,7 @@ begin
     variable WriteResponseReadyBeforeValid  : boolean ;
     variable WriteResponseReadyDelayCycles  : integer ;
     variable WriteResponseValidTimeOut : integer ;
+    variable WriteResponseTimeOut : boolean ; 
   begin
     -- initialize
     AxiBus.WriteResponse.Ready <= '0' ;
@@ -950,6 +952,8 @@ begin
          WaitForToggle(ReadAddressRequestCount) ;
       end if ;
       (Local.Addr, Local.Len, Local.Prot, Local.ID, Local.Size, Local.Burst, Local.Lock, Local.Cache, Local.QOS, Local.Region, Local.User) := ReadAddressFifo.Pop ;
+
+      WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_ADDRESS_VALID_DELAY_CYCLES)))) ; 
 
       -- Do Transaction
       AR.Addr   <= Local.Addr   after tpd_Clk_ARAddr   ;

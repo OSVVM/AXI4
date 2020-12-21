@@ -58,9 +58,11 @@ analyze TbAxi4_ReadWriteAsync2.vhd
 analyze TbAxi4_ReadWriteAsync3.vhd
 analyze TbAxi4_ReadWriteAsync4.vhd
 
-# analyze deprecated_TbAxi4_TimeOut.vhd
-# analyze deprecated_TbAxi4_WriteOptions.vhd
 analyze TbAxi4_MemoryAsync.vhd
+
+analyze TbAxi4_TimeOutMaster.vhd
+analyze TbAxi4_TimeOutResponder.vhd
+analyze TbAxi4_TimeOutMemory.vhd
 
 analyze TbAxi4_ReadyTimingMaster.vhd
 analyze TbAxi4_ReadyTimingResponder.vhd
@@ -81,8 +83,10 @@ analyze TbAxi4_ReadyTimingMemory.vhd
 
 # simulate TbAxi4_MemoryAsync
 
-# deprecated simulate TbAxi4_TimeOut    
+# simulate TbAxi4_TimeOutMaster    
+# simulate TbAxi4_TimeOutResponder    
+simulate TbAxi4_TimeOutMemory    
 
-simulate TbAxi4_ReadyTimingMaster
+# simulate TbAxi4_ReadyTimingMaster
 # simulate TbAxi4_ReadyTimingResponder
 # simulate TbAxi4_ReadyTimingMemory

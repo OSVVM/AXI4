@@ -39,25 +39,48 @@
 #  
 
 analyze ./TestCases/TbAxi4_BasicReadWrite.vhd
+analyze ./TestCases/TbAxi4_RandomReadWrite.vhd
+analyze ./TestCases/TbAxi4_RandomReadWriteByte.vhd
+analyze ./TestCases/TbAxi4_MemoryReadWrite1.vhd
+analyze ./TestCases/TbAxi4_MemoryReadWrite2.vhd
+analyze ./TestCases/TbAxi4_MemoryBurst1.vhd
+analyze ./TestCases/TbAxi4_MemoryBurstByte1.vhd
+
 analyze ./TestCases/TbAxi4_ReadWriteAsync1.vhd
 analyze ./TestCases/TbAxi4_ReadWriteAsync2.vhd
 analyze ./TestCases/TbAxi4_ReadWriteAsync3.vhd
-analyze ./TestCases/TbAxi4_RandomReadWrite.vhd
-analyze ./TestCases/TbAxi4_RandomReadWriteByte.vhd
-analyze ./TestCases/TbAxi4_TimeOut.vhd
-analyze ./TestCases/TbAxi4_WriteOptions.vhd
-analyze ./TestCases/TbAxi4_BasicBurst.vhd
-analyze ./TestCases/TbAxi4_MemoryReadWrite1.vhd
-analyze ./TestCases/TbAxi4_MemoryBurst1.vhd
+analyze ./TestCases/TbAxi4_ReadWriteAsync4.vhd
+
+analyze ./TestCases/TbAxi4_MemoryAsync.vhd
+
+analyze ./TestCases/TbAxi4_TimeOutMaster.vhd
+analyze ./TestCases/TbAxi4_TimeOutResponder.vhd
+analyze ./TestCases/TbAxi4_TimeOutMemory.vhd
+
+analyze ./TestCases/TbAxi4_ReadyTimingMaster.vhd
+analyze ./TestCases/TbAxi4_ReadyTimingResponder.vhd
+analyze ./TestCases/TbAxi4_ReadyTimingMemory.vhd
+
 
 simulate TbAxi4_BasicReadWrite
-simulate TbAxi4_ReadWriteAsync1    
-simulate TbAxi4_ReadWriteAsync2    
-simulate TbAxi4_ReadWriteAsync3    
 simulate TbAxi4_RandomReadWrite    
 simulate TbAxi4_RandomReadWriteByte    
-simulate TbAxi4_TimeOut    
-simulate TbAxi4_WriteOptions 
-simulate TbAxi4_BasicBurst
 simulate TbAxi4_MemoryReadWrite1
+simulate TbAxi4_MemoryReadWrite2
 simulate TbAxi4_MemoryBurst1
+simulate TbAxi4_MemoryBurstByte1
+
+simulate TbAxi4_ReadWriteAsync1    
+simulate TbAxi4_ReadWriteAsync2    
+simulate TbAxi4_ReadWriteAsync3  
+simulate TbAxi4_ReadWriteAsync4  
+
+simulate TbAxi4_MemoryAsync
+
+simulate TbAxi4_TimeOutMaster    
+simulate TbAxi4_TimeOutResponder    
+simulate TbAxi4_TimeOutMemory    
+
+simulate TbAxi4_ReadyTimingMaster
+simulate TbAxi4_ReadyTimingResponder
+simulate TbAxi4_ReadyTimingMemory

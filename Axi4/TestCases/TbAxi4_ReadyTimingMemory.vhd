@@ -204,27 +204,27 @@ begin
       for j in 0 to 5 loop 
         case j is 
           when 0 => 
-            log(TbResponderID, "Write Address:  Valid Before Ready, Delay Cycles 0") ;
+            log(TbResponderID, "Valid Before Ready, Delay Cycles 0") ;
             SetAxi4Options(ResponderRec, ReadyDelayCycleOption, 0) ;
             SetAxi4Options(ResponderRec, ReadyBeforeValidOption, FALSE) ;
           when 1 => 
-            log(TbResponderID, "Write Address:  Valid Before Ready, Delay Cycles 2") ;
+            log(TbResponderID, "Valid Before Ready, Delay Cycles 2") ;
             SetAxi4Options(ResponderRec, ReadyDelayCycleOption, 2) ;
             SetAxi4Options(ResponderRec, ReadyBeforeValidOption, FALSE) ;
           when 2 => 
-            log(TbResponderID, "Write Address:  Valid Before Ready, Delay Cycles 4") ;
+            log(TbResponderID, "Valid Before Ready, Delay Cycles 4") ;
             SetAxi4Options(ResponderRec, ReadyDelayCycleOption, 4) ;
             SetAxi4Options(ResponderRec, ReadyBeforeValidOption, FALSE) ;
           when 3 => 
-            log(TbResponderID, "Write Address:  Ready Before Valid, Delay Cycles 4") ;
+            log(TbResponderID, "Ready Before Valid, Delay Cycles 4") ;
             SetAxi4Options(ResponderRec, ReadyDelayCycleOption, 4) ;
             SetAxi4Options(ResponderRec, ReadyBeforeValidOption, TRUE) ;
           when 4 => 
-            log(TbResponderID, "Write Address:  Ready Before Valid, Delay Cycles 4") ;
+            log(TbResponderID, "Ready Before Valid, Delay Cycles 4") ;
             SetAxi4Options(ResponderRec, ReadyDelayCycleOption, 4) ;
             SetAxi4Options(ResponderRec, ReadyBeforeValidOption, TRUE) ;
           when 5 => 
-            log(TbResponderID, "Write Address:  Ready Before Valid, Delay Cycles 0") ;
+            log(TbResponderID, "Ready Before Valid, Delay Cycles 0") ;
             SetAxi4Options(ResponderRec, ReadyDelayCycleOption, 0) ;
             SetAxi4Options(ResponderRec, ReadyBeforeValidOption, TRUE) ;
           when others => 

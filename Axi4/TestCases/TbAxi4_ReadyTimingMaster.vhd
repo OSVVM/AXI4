@@ -135,27 +135,27 @@ begin
       for j in 0 to 5 loop 
         case j is 
           when 0 => 
-            log(TbMasterID, "Write Address:  Valid Before Ready, Delay Cycles 0") ;
+            log(TbMasterID, "Valid Before Ready, Delay Cycles 0") ;
             SetAxi4Options(MasterRec, ReadyDelayCycleOption, 0) ;
             SetAxi4Options(MasterRec, ReadyBeforeValidOption, FALSE) ;
           when 1 => 
-            log(TbMasterID, "Write Address:  Valid Before Ready, Delay Cycles 2") ;
+            log(TbMasterID, "Valid Before Ready, Delay Cycles 2") ;
             SetAxi4Options(MasterRec, ReadyDelayCycleOption, 2) ;
             SetAxi4Options(MasterRec, ReadyBeforeValidOption, FALSE) ;
           when 2 => 
-            log(TbMasterID, "Write Address:  Valid Before Ready, Delay Cycles 4") ;
+            log(TbMasterID, "Valid Before Ready, Delay Cycles 4") ;
             SetAxi4Options(MasterRec, ReadyDelayCycleOption, 4) ;
             SetAxi4Options(MasterRec, ReadyBeforeValidOption, FALSE) ;
           when 3 => 
-            log(TbMasterID, "Write Address:  Ready Before Valid, Delay Cycles 4") ;
+            log(TbMasterID, "Ready Before Valid, Delay Cycles 4") ;
             SetAxi4Options(MasterRec, ReadyDelayCycleOption, 4) ;
             SetAxi4Options(MasterRec, ReadyBeforeValidOption, TRUE) ;
           when 4 => 
-            log(TbMasterID, "Write Address:  Ready Before Valid, Delay Cycles 4") ;
+            log(TbMasterID, "Ready Before Valid, Delay Cycles 4") ;
             SetAxi4Options(MasterRec, ReadyDelayCycleOption, 4) ;
             SetAxi4Options(MasterRec, ReadyBeforeValidOption, TRUE) ;
           when 5 => 
-            log(TbMasterID, "Write Address:  Ready Before Valid, Delay Cycles 0") ;
+            log(TbMasterID, "Ready Before Valid, Delay Cycles 0") ;
             SetAxi4Options(MasterRec, ReadyDelayCycleOption, 0) ;
             SetAxi4Options(MasterRec, ReadyBeforeValidOption, TRUE) ;
           when others => 

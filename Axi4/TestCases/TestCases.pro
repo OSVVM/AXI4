@@ -68,6 +68,12 @@ analyze TbAxi4_ReadyTimingMaster.vhd
 analyze TbAxi4_ReadyTimingResponder.vhd
 analyze TbAxi4_ReadyTimingMemory.vhd
 
+analyze TbAxi4_ValidTimingMaster.vhd
+analyze TbAxi4_ValidTimingMemory.vhd
+analyze TbAxi4_ValidTimingResponder.vhd
+analyze TbAxi4_ValidTimingBurstMaster.vhd
+analyze TbAxi4_ValidTimingBurstMemory.vhd
+
 # simulate TbAxi4_BasicReadWrite
 # simulate TbAxi4_RandomReadWrite    
 # simulate TbAxi4_RandomReadWriteByte    
@@ -85,8 +91,15 @@ analyze TbAxi4_ReadyTimingMemory.vhd
 
 # simulate TbAxi4_TimeOutMaster    
 # simulate TbAxi4_TimeOutResponder    
-simulate TbAxi4_TimeOutMemory    
+# simulate TbAxi4_TimeOutMemory    
 
 # simulate TbAxi4_ReadyTimingMaster
 # simulate TbAxi4_ReadyTimingResponder
 # simulate TbAxi4_ReadyTimingMemory
+
+# simulate TbAxi4_ValidTimingMaster    
+# simulate TbAxi4_ValidTimingMemory 
+# simulate TbAxi4_ValidTimingResponder
+# simulate TbAxi4_ValidTimingBurstMaster    
+simulate TbAxi4_ValidTimingBurstMemory    
+

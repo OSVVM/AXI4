@@ -76,6 +76,8 @@ analyze ./TestCases/TbAxi4_TransactionApiMaster.vhd
 analyze ./TestCases/TbAxi4_AxiIfOptionsMasterMemory.vhd
 analyze ./TestCases/TbAxi4_AxiIfOptionsMasterResponder.vhd
 
+analyze ./TestCases/TbAxi4_AxSizeMasterMemory.vhd
+
 
 simulate TbAxi4_BasicReadWrite
 simulate TbAxi4_RandomReadWrite    
@@ -114,4 +116,6 @@ simulate TbAxi4_TransactionApiMaster
 
 simulate TbAxi4_AxiIfOptionsMasterMemory
 simulate TbAxi4_AxiIfOptionsMasterResponder
+
+simulate TbAxi4_AxSizeMasterMemory
 

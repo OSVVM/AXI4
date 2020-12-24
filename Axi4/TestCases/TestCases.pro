@@ -77,11 +77,13 @@
 ##  analyze TbAxi4_MultipleDriversMaster.vhd
 ##  analyze TbAxi4_MultipleDriversResponder.vhd
 ##  analyze TbAxi4_MultipleDriversMemory.vhd
+##  
+##  analyze TbAxi4_TransactionApiMaster.vhd
+##  
+##  analyze TbAxi4_AxiIfOptionsMasterMemory.vhd
+##  analyze TbAxi4_AxiIfOptionsMasterResponder.vhd
 
-analyze TbAxi4_TransactionApiMaster.vhd
-
-analyze TbAxi4_AxiIfOptionsMasterMemory.vhd
-analyze TbAxi4_AxiIfOptionsMasterResponder.vhd
+analyze TbAxi4_AxSizeMasterMemory.vhd
 
 
 # simulate TbAxi4_BasicReadWrite
@@ -120,5 +122,7 @@ analyze TbAxi4_AxiIfOptionsMasterResponder.vhd
 # simulate TbAxi4_TransactionApiMaster
 
 # simulate TbAxi4_AxiIfOptionsMasterMemory
-simulate TbAxi4_AxiIfOptionsMasterResponder
+# simulate TbAxi4_AxiIfOptionsMasterResponder
+
+simulate TbAxi4_AxSizeMasterMemory
 

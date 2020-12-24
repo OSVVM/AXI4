@@ -69,12 +69,16 @@ generic (
 
   tpd_Clk_BValid  : time   := 2 ns ;
   tpd_Clk_BResp   : time   := 2 ns ;
+  tpd_Clk_BID     : time   := 2 ns ;
+  tpd_Clk_BUser   : time   := 2 ns ;
 
   tpd_Clk_ARReady : time   := 2 ns ;
 
   tpd_Clk_RValid  : time   := 2 ns ;
   tpd_Clk_RData   : time   := 2 ns ;
-  tpd_Clk_RResp   : time   := 2 ns
+  tpd_Clk_RResp   : time   := 2 ns ;
+  tpd_Clk_RID     : time   := 2 ns ;
+  tpd_Clk_RUser   : time   := 2 ns 
 ) ;
 port (
   -- Globals
@@ -127,13 +131,21 @@ architecture TransactorResponder of Axi4Responder is
   signal ReadDataRequestCount        : integer := 0 ;
   signal ReadDataDoneCount           : integer := 0 ;
 
-  signal ModelWProt  : Axi4ProtType := (others => '0') ;
-  signal ModelRProt  : Axi4ProtType := (others => '0') ;
-
-  signal ModelWResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
-  signal ModelRResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
-
   shared variable Params : ModelParametersPType ;
+  
+  -- A hack of a way to set the parameters for now.
+  signal ModelBResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
+  signal ModelRResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
+  
+  alias  AxiBUser is AxiBus.WriteResponse.User ;
+  alias  AxiBID   is AxiBus.WriteResponse.ID ;
+  signal ModelBUSER  : std_logic_vector(AxiBUser'length - 1 downto 0) := (others => '0') ;
+  signal ModelBID    : std_logic_vector(AxiBID'length - 1 downto 0) := (others => '0') ;
+
+  alias  AxiRUser is AxiBus.WriteResponse.User ;
+  alias  AxiRID   is AxiBus.WriteResponse.ID ;
+  signal ModelRUSER  : std_logic_vector(AxiRUser'length - 1 downto 0) := (others => '0') ;
+  signal ModelRID    : std_logic_vector(AxiRID'length - 1 downto 0) := (others => '0') ;
 
 begin
 
@@ -254,12 +266,15 @@ begin
     
     variable FilterUndrivenWriteData       : boolean := TRUE ;
     variable UndrivenWriteDataValue        : std_logic := '0' ;
+
+    variable TransactionCount : integer := 0 ; 
   begin
     WaitForTransaction(
        Clk      => Clk,
        Rdy      => TransRec.Rdy,
        Ack      => TransRec.Ack
     ) ;
+    TransactionCount := TransactionCount + 1 ; 
 
     case TransRec.Operation is
       when WAIT_FOR_TRANSACTION =>
@@ -300,8 +315,10 @@ begin
 --
       when WAIT_FOR_CLOCK =>
         WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
-        wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
-        wait until Clk = '1' ;
+--!!          This is probably faster in execution, but requires an accurate tperiod_Clk
+--!!          wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
+--!!          wait until Clk = '1' ;
+          WaitForClock(Clk, WaitClockCycles) ;
 
       when GET_ALERTLOG_ID =>
         TransRec.IntFromModel <= integer(ModelID) ;
@@ -368,7 +385,7 @@ begin
           TransRec.DataFromModel  <= ToTransaction(WriteData) ;
           if WriteLast = '1' then
             FoundLastWriteData := TRUE ;
-            WriteResponseFifo.push(ModelWResp) ;
+            WriteResponseFifo.push(ModelBResp) ;
           end if ;
 
 -- Works for SlaveGetWriteData - but only if access is correct sized, but not SlaveGetWrite
@@ -476,7 +493,7 @@ begin
 --!!          when AWPROT =>                              ModelWProt <= to_slv(TransRec.IntToModel, ModelWProt'length) ;
 --!!          when ARPROT =>                              ModelRProt  <= to_slv(TransRec.IntToModel, ModelRProt'length) ;
 --!!          -- Slave RESP Settings
---!!          when BRESP =>                               ModelWResp <= to_slv(TransRec.IntToModel, ModelWResp'length) ;
+--!!          when BRESP =>                               ModelBResp <= to_slv(TransRec.IntToModel, ModelBResp'length) ;
 --!!          when RRESP =>                               ModelRResp  <= to_slv(TransRec.IntToModel, ModelRResp'length) ;
 --!!          --
 --!!          -- The End -- Done
@@ -492,12 +509,15 @@ begin
           SetAxi4Parameter(Params, Axi4Option, TransRec.IntToModel) ;
         else
           case Axi4Option is
-            -- Slave PROT Settings
-            when AWPROT =>               ModelWProt <= to_slv(TransRec.IntToModel, ModelWProt'length) ;
-            when ARPROT =>               ModelRProt <= to_slv(TransRec.IntToModel, ModelRProt'length) ;
-            -- Slave RESP Settings
-            when BRESP =>                ModelWResp <= to_slv(TransRec.IntToModel, ModelWResp'length) ;
+            -- RESP Settings
+            when BRESP =>                ModelBResp <= to_slv(TransRec.IntToModel, ModelBResp'length) ;
             when RRESP =>                ModelRResp <= to_slv(TransRec.IntToModel, ModelRResp'length) ;
+            -- ID Settings
+            when BID =>                  ModelBID <= to_slv(TransRec.IntToModel, ModelBID'length) ;
+            when RID =>                  ModelRID <= to_slv(TransRec.IntToModel, ModelRID'length) ;
+            -- User Settings
+            when BUSER =>                ModelBUser <= to_slv(TransRec.IntToModel, ModelBUser'length) ;
+            when RUSER =>                ModelRUser <= to_slv(TransRec.IntToModel, ModelRUser'length) ;
             --
             -- The End -- Done
             when others =>               Alert(ModelID, "Unimplemented Option", FAILURE) ;
@@ -511,14 +531,16 @@ begin
           GetAxi4Parameter(Params, Axi4Option, Axi4OptionVal) ;
           TransRec.IntFromModel <= Axi4OptionVal ;
         else
---          TransRec.IntFromModel <= GetAxi4InterfaceDefault(AxiDefaults, Axi4Option) ;
           case Axi4Option is
-            -- Slave PROT Settings
-            when AWPROT =>               TransRec.IntFromModel <= to_integer(ModelWProt) ;
-            when ARPROT =>               TransRec.IntFromModel <= to_integer(ModelRProt ) ;
-            -- Slave RESP Settings
-            when BRESP =>                TransRec.IntFromModel <= to_integer(ModelWResp) ;
+            -- RESP Settings
+            when BRESP =>                TransRec.IntFromModel <= to_integer(ModelBResp) ;
             when RRESP =>                TransRec.IntFromModel <= to_integer(ModelRResp) ;
+            -- ID Settings
+            when BID =>                  TransRec.IntFromModel <= to_integer(ModelBID) ;
+            when RID =>                  TransRec.IntFromModel <= to_integer(ModelRID) ;
+            -- User Settings
+            when BUSER =>                TransRec.IntFromModel <= to_integer(ModelBUser) ;
+            when RUSER =>                TransRec.IntFromModel <= to_integer(ModelRUser) ;
             --
             -- The End -- Done
             when others =>               Alert(ModelID, "Unimplemented Option", FAILURE) ;
@@ -544,7 +566,7 @@ begin
 --!!          when AWPROT =>                              TransRec.IntFromModel <= to_integer(ModelWProt) ;
 --!!          when ARPROT =>                              TransRec.IntFromModel <= to_integer(ModelRProt ) ;
 --!!          -- Slave RESP Settings
---!!          when BRESP =>                               TransRec.IntFromModel <= to_integer(ModelWResp) ;
+--!!          when BRESP =>                               TransRec.IntFromModel <= to_integer(ModelBResp) ;
 --!!          when RRESP =>                               TransRec.IntFromModel <= to_integer(ModelRResp) ;
 --!!          --
 --!!          -- The End -- Done
@@ -552,6 +574,11 @@ begin
 --!!            Alert(ModelID, "Unimplemented Option", FAILURE) ;
 --!!        end case ;
 --!!        wait for 0 ns ;
+
+      when MULTIPLE_DRIVER_DETECT =>
+        Alert(ModelID, "Axi4Responder: Multiple Drivers on Transaction Record." & 
+                       "  Transaction # " & to_string(TransactionCount), FAILURE) ;
+        wait for 0 ns ;  
 
       when others =>
         Alert(ModelID, "Unimplemented Transaction", FAILURE) ;
@@ -588,8 +615,8 @@ begin
         Ready                   => AW.Ready,
         ReadyBeforeValid        => WriteAddressReadyBeforeValid,
         ReadyDelayCycles        => WriteAddressReadyDelayCycles * tperiod_Clk,
-        tpd_Clk_Ready           => tpd_Clk_AWReady  --,
---        AlertLogID              => BusFailedID,
+        tpd_Clk_Ready           => tpd_Clk_AWReady,
+        AlertLogID              => BusFailedID -- ,
 --        TimeOutMessage          => "Write Address # " & to_string(WriteAddressReceiveCount + 1)
       ) ;
 
@@ -635,8 +662,8 @@ begin
         Ready                   => WD.Ready,
         ReadyBeforeValid        => WriteDataReadyBeforeValid,
         ReadyDelayCycles        => WriteDataReadyDelayCycles * tperiod_Clk,
-        tpd_Clk_Ready           => tpd_Clk_WReady  -- ,
---        AlertLogID              => BusFailedID,
+        tpd_Clk_Ready           => tpd_Clk_WReady,  
+        AlertLogID              => BusFailedID  -- ,
 --        TimeOutMessage          => "Write Data # " & to_string(WriteDataReceiveCount + 1)
       ) ;
 
@@ -681,6 +708,8 @@ begin
     -- initialize
     WR.Valid <= '0' ;
     WR.Resp  <= (WR.Resp'range => '0') ;
+    WR.ID    <= (WR.ID'range => '0') ;
+    WR.User  <= (WR.User'range => '0') ;
 
     WriteResponseLoop : loop
       -- Find Transaction
@@ -699,6 +728,8 @@ begin
 
       -- Do Transaction
       WR.Resp  <= Local.Resp  after tpd_Clk_BResp ;
+      WR.ID    <= ModelBID    after tpd_Clk_BID ; 
+      WR.User  <= ModelBUser  after tpd_Clk_BUser ; 
 
       Log(ModelID,
         "Write Response." &
@@ -723,6 +754,8 @@ begin
 
       -- State after operation
       WR.Resp  <= not Local.Resp after tpd_Clk_BResp ;
+      WR.ID    <= not ModelBID    after tpd_Clk_BID ; 
+      WR.User  <= not ModelBUser  after tpd_Clk_BUser ; 
 
       -- Signal completion
       Increment(WriteResponseDoneCount) ;
@@ -794,6 +827,8 @@ begin
     RD.Valid <= '0' ;
     RD.Data  <= (RD.Data'range => '0') ;
     RD.Resp  <= (RD.Resp'range => '0') ;
+    RD.ID    <= (RD.ID'range => '0') ;
+    RD.User  <= (RD.User'range => '0') ; 
 
     ReadDataLoop : loop
       -- Start a Read Data Response Transaction after receiving a read address
@@ -820,6 +855,8 @@ begin
       -- Transaction Values
       RD.Data  <= Local.Data  after tpd_Clk_RDATA ;
       RD.Resp  <= Local.Resp  after tpd_Clk_RResp ;
+      RD.ID    <= ModelRID    after tpd_Clk_RID ; 
+      RD.User  <= ModelRUser  after tpd_Clk_RUser ; 
 
       Log(ModelID,
         "Read Data." &
@@ -847,6 +884,8 @@ begin
       RD.Valid <= '0' after tpd_Clk_RValid ;
       RD.Data  <= not Local.Data after tpd_clk_RData ;
       RD.Resp  <= not Local.Resp after tpd_Clk_RResp ;
+      RD.ID    <= not ModelRID    after tpd_Clk_RID ; 
+      RD.User  <= not ModelRUser  after tpd_Clk_RUser ; 
 
       -- Signal completion
       Increment(ReadDataDoneCount) ;

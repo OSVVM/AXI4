@@ -284,6 +284,10 @@ begin
     variable ExpectedData    : std_logic_vector(LRD.Data'range) ;
 
     variable Operation       : AddressBusOperationType ;
+    variable TransactionCount : integer := 0 ; 
+    variable WriteAddressTransactionCount : integer := 0 ; 
+    variable WriteDataTransactionCount     : integer := 0 ; 
+    variable WriteResponseTransactionCount : integer := 0 ; 
   begin
     AxiDefaults := InitAxi4Rec(AxiDefaults, '0') ;
     AxiDefaults.WriteAddress.Size  := to_slv(AXI_BYTE_ADDR_WIDTH, LAW.Size'length) ;
@@ -299,7 +303,7 @@ begin
          Rdy      => TransRec.Rdy,
          Ack      => TransRec.Ack
       ) ;
-
+      TransactionCount := increment(TransactionCount) ; 
       Operation := TransRec.Operation ;
 
       case Operation is
@@ -356,8 +360,10 @@ begin
 
         when WAIT_FOR_CLOCK =>
           WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
-          wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
-          wait until Clk = '1' ;
+--!!          This is probably faster in execution, but requires an accurate tperiod_Clk
+--!!          wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
+--!!          wait until Clk = '1' ;
+          WaitForClock(Clk, WaitClockCycles) ;
 
         when GET_ALERTLOG_ID =>
           TransRec.IntFromModel <= integer(ModelID) ;
@@ -374,7 +380,7 @@ begin
           TransRec.IntFromModel <= BurstFifoMode ;
 
         when GET_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= WriteAddressDoneCount + ReadAddressDoneCount ;
+          TransRec.IntFromModel <= TransactionCount ; --  WriteAddressDoneCount + ReadAddressDoneCount ;
           wait for 0 ns ; 
 
         when GET_WRITE_TRANSACTION_COUNT =>
@@ -399,10 +405,8 @@ begin
             -- Initiate Write Address
             WriteAddressFifo.Push(WriteAddress  & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
             Increment(WriteAddressRequestCount) ;
-
-            -- Queue Write Response
-            WriteResponseScoreboard.Push(LWR.Resp) ;
-            Increment(WriteResponseExpectCount) ;
+            
+            WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
           end if ;
 
           if IsWriteData(Operation) then
@@ -414,8 +418,18 @@ begin
             WriteDataFifo.Push('0' & '1' & WriteData & WriteStrb & LWD.User & LWD.ID) ;
 
             Increment(WriteDataRequestCount) ;
+            WriteDataTransactionCount    := Increment(WriteDataTransactionCount) ; 
           end if ;
-
+          
+--!! will need to be a while loop if more than one transaction can be dispatched at a time.
+--!! only happens if bursts are emulated - ie translated from a burst cycle to a multiple individual cycles
+          if WriteAddressTransactionCount /= WriteResponseTransactionCount and WriteDataTransactionCount /= WriteResponseTransactionCount then
+            -- Queue Expected Write Response
+            WriteResponseScoreboard.Push(LWR.Resp) ;
+            Increment(WriteResponseExpectCount) ;
+            WriteResponseTransactionCount := Increment(WriteResponseTransactionCount) ; 
+          end if ;
+          
           -- Transaction wait time and allow RequestCounts a delta cycle to update
           wait for 0 ns ;  wait for 0 ns ;
 
@@ -457,10 +471,7 @@ begin
             WriteAddressFifo.Push(WriteAddress  & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
 
             Increment(WriteAddressRequestCount) ;
-
-            -- Queue Write Response
-            WriteResponseScoreboard.Push(LWR.Resp) ;
-            Increment(WriteResponseExpectCount) ;
+            WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
           end if ;
 
           if IsWriteData(Operation) then
@@ -482,7 +493,17 @@ begin
             WriteDataFifo.Push('1' & '1' & WriteData & WriteStrb & LWD.User & LWD.ID) ;
 
             -- Increment(WriteDataRequestCount) ;
-            WriteDataRequestCount <= WriteDataRequestCount + TransfersInBurst ;
+            WriteDataRequestCount        <= Increment(WriteDataRequestCount, TransfersInBurst) ;
+            WriteDataTransactionCount    := Increment(WriteDataTransactionCount) ; 
+          end if ;
+
+--!! will need to be a while loop if more than one transaction can be dispatched at a time.
+--!! only happens if bursts are emulated - ie translated from a burst cycle to a multiple individual cycles
+          if WriteAddressTransactionCount /= WriteResponseTransactionCount and WriteDataTransactionCount /= WriteResponseTransactionCount then
+            -- Queue Expected Write Response
+            WriteResponseScoreboard.Push(LWR.Resp) ;
+            Increment(WriteResponseExpectCount) ;
+            WriteResponseTransactionCount := Increment(WriteResponseTransactionCount) ; 
           end if ;
 
           -- Transaction wait time and allow RequestCounts a delta cycle to update
@@ -588,7 +609,7 @@ begin
               ReadResponseScoreboard.Push(LRD.Resp) ;
             end loop ;
   -- Should this be + TransfersInBurst ; ???
-            ReadDataExpectCount <= ReadDataExpectCount + TransfersInBurst ;
+            ReadDataExpectCount <= Increment(ReadDataExpectCount, TransfersInBurst) ;
           end if ;
 
   --!!3 Implies that any separate ReadDataBurst or TryReadDataBurst
@@ -652,6 +673,11 @@ begin
             GetAxi4Parameter(Params, Axi4Option, Axi4OptionVal) ;
             TransRec.IntFromModel <= Axi4OptionVal ;
           end if ;
+          wait for 0 ns ;  wait for 0 ns ;
+
+        when MULTIPLE_DRIVER_DETECT =>
+          Alert(ModelID, "Axi4Master: Multiple Drivers on Transaction Record." & 
+                         "  Transaction # " & to_string(TransactionCount), FAILURE) ;
           wait for 0 ns ;  wait for 0 ns ;
 
         when others =>
@@ -795,7 +821,7 @@ begin
       if NewTransfer then
         WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_DATA_VALID_DELAY_CYCLES)))) ; 
       elsif Burst then 
-        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_DATA_VALID_DELAY_BURST_CYCLES)))) ; 
+        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_DATA_VALID_BURST_DELAY_CYCLES)))) ; 
       end if ; 
       
       NewTransfer := Local.Last ; -- Last is '1' for burst end and single word transfers

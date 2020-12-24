@@ -67,6 +67,15 @@ analyze ./TestCases/TbAxi4_ValidTimingResponder.vhd
 analyze ./TestCases/TbAxi4_ValidTimingBurstMaster.vhd
 analyze ./TestCases/TbAxi4_ValidTimingBurstMemory.vhd
 
+analyze ./TestCases/TbAxi4_MultipleDriversMaster.vhd
+analyze ./TestCases/TbAxi4_MultipleDriversResponder.vhd
+analyze ./TestCases/TbAxi4_MultipleDriversMemory.vhd
+
+analyze ./TestCases/TbAxi4_TransactionApiMaster.vhd
+
+analyze ./TestCases/TbAxi4_AxiIfOptionsMasterMemory.vhd
+analyze ./TestCases/TbAxi4_AxiIfOptionsMasterResponder.vhd
+
 
 simulate TbAxi4_BasicReadWrite
 simulate TbAxi4_RandomReadWrite    
@@ -95,4 +104,14 @@ simulate TbAxi4_ValidTimingMaster
 simulate TbAxi4_ValidTimingMemory
 simulate TbAxi4_ValidTimingResponder
 simulate TbAxi4_ValidTimingBurstMaster    
-simulate TbAxi4_ValidTimingBurstMemory    
+simulate TbAxi4_ValidTimingBurstMemory  
+
+simulate TbAxi4_MultipleDriversMaster
+simulate TbAxi4_MultipleDriversResponder
+simulate TbAxi4_MultipleDriversMemory
+  
+simulate TbAxi4_TransactionApiMaster
+
+simulate TbAxi4_AxiIfOptionsMasterMemory
+simulate TbAxi4_AxiIfOptionsMasterResponder
+

@@ -22,9 +22,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2018   2018       Initial revision
---    01/2020   2020.01    Updated license notice
---    12/2020   2020.12    Updated signal and port names
+--    12/2020   2020.12    Initial revision
 --
 --
 --  This file is part of OSVVM.
@@ -118,8 +116,8 @@ begin
     GetAxi4Options(MasterRec, WRITE_DATA_VALID_DELAY_CYCLES, IntOption) ;
     AffirmIfEqual(TbMasterID, IntOption, 0, "WRITE_DATA_VALID_DELAY_CYCLES") ;
 
-    GetAxi4Options(MasterRec, WRITE_DATA_VALID_DELAY_BURST_CYCLES, IntOption) ;
-    AffirmIfEqual(TbMasterID, IntOption, 0, "WRITE_DATA_VALID_DELAY_BURST_CYCLES") ;
+    GetAxi4Options(MasterRec, WRITE_DATA_VALID_BURST_DELAY_CYCLES, IntOption) ;
+    AffirmIfEqual(TbMasterID, IntOption, 0, "WRITE_DATA_VALID_BURST_DELAY_CYCLES") ;
 
     GetAxi4Options(MasterRec, READ_ADDRESS_VALID_DELAY_CYCLES, IntOption) ;
     AffirmIfEqual(TbMasterID, IntOption, 0, "READ_ADDRESS_VALID_DELAY_CYCLES") ;
@@ -147,20 +145,20 @@ begin
             log(TbMasterID, "Valid Delay Cycles 2") ;
             SetAxi4Options(MasterRec, ValidDelayCycleOption, 2) ;
             if k = 1 then  
-              SetAxi4Options(MasterRec, WRITE_DATA_VALID_DELAY_BURST_CYCLES, 2) ;
+              SetAxi4Options(MasterRec, WRITE_DATA_VALID_BURST_DELAY_CYCLES, 2) ;
             end if ; 
           when 2 => 
             log(TbMasterID, "Valid Delay Cycles 4") ;
             SetAxi4Options(MasterRec, ValidDelayCycleOption, 4) ;
             if k = 1 then  
               log(TbMasterID, "Valid Delay Burst Cycles 1") ;
-              SetAxi4Options(MasterRec, WRITE_DATA_VALID_DELAY_BURST_CYCLES, 1) ;
+              SetAxi4Options(MasterRec, WRITE_DATA_VALID_BURST_DELAY_CYCLES, 1) ;
             end if ; 
           when 3 => 
             log(TbMasterID, "Valid Delay Cycles 0") ;
             SetAxi4Options(MasterRec, ValidDelayCycleOption, 0) ;
             if k = 1 then  
-              SetAxi4Options(MasterRec, WRITE_DATA_VALID_DELAY_BURST_CYCLES, 0) ;
+              SetAxi4Options(MasterRec, WRITE_DATA_VALID_BURST_DELAY_CYCLES, 0) ;
             end if ; 
           when others => 
             Alert(TbMasterID, "Unimplemented test case", FAILURE)  ; 

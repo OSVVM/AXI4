@@ -9,10 +9,9 @@
 --
 --
 --  Description:
---    WRITE_RESPONSE & READ_DATA
+--    WRITE_ADDRESS, WRITE_DATA, READ_ADDRESS
 --        Verify Initial values
---        READY_BEFORE_VALID  F/T/T w/ WFC(C,6)
---        READY_DELAY_CYCLES 0,2,4 
+--        VALID_DELAY_CYCLES D, 2, 4, 6, 0 
 --
 --
 --  Developed by:
@@ -22,9 +21,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2018   2018       Initial revision
---    01/2020   2020.01    Updated license notice
---    12/2020   2020.12    Updated signal and port names
+--    12/2020   2020.12    Initial revision
 --
 --
 --  This file is part of OSVVM.
@@ -208,7 +205,7 @@ Configuration TbAxi4_ValidTimingMaster of TbAxi4 is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(ValidTimingMaster) ; 
     end for ; 
-  for Responder_1 : Axi4Responder 
+    for Responder_1 : Axi4Responder 
       use entity OSVVM_AXI4.Axi4Memory ; 
     end for ; 
   end for ; 

@@ -171,8 +171,8 @@ begin
     GetAxi4Options(ResponderRec, READ_DATA_VALID_DELAY_CYCLES, IntOption) ;
     AffirmIfEqual(TbResponderID, IntOption, 0, "READ_DATA_VALID_DELAY_CYCLES") ;
 
-    GetAxi4Options(ResponderRec, READ_DATA_VALID_DELAY_BURST_CYCLES, IntOption) ;
-    AffirmIfEqual(TbResponderID, IntOption, 0, "READ_DATA_VALID_DELAY_BURST_CYCLES") ;
+    GetAxi4Options(ResponderRec, READ_DATA_VALID_BURST_DELAY_CYCLES, IntOption) ;
+    AffirmIfEqual(TbResponderID, IntOption, 0, "READ_DATA_VALID_BURST_DELAY_CYCLES") ;
 
     for k in 0 to 1 loop 
       case k is 
@@ -193,19 +193,19 @@ begin
             log(TbResponderID, "Valid Delay Cycles 2") ;
             SetAxi4Options(ResponderRec, ValidDelayCycleOption, 2) ;
             if k = 1 then  
-              SetAxi4Options(ResponderRec, READ_DATA_VALID_DELAY_BURST_CYCLES, 2) ;
+              SetAxi4Options(ResponderRec, READ_DATA_VALID_BURST_DELAY_CYCLES, 2) ;
             end if ; 
           when 2 => 
             log(TbResponderID, "Valid Delay Cycles 4") ;
             SetAxi4Options(ResponderRec, ValidDelayCycleOption, 4) ;
             if k = 1 then  
-              SetAxi4Options(ResponderRec, READ_DATA_VALID_DELAY_BURST_CYCLES, 1) ;
+              SetAxi4Options(ResponderRec, READ_DATA_VALID_BURST_DELAY_CYCLES, 1) ;
             end if ; 
           when 3 => 
             log(TbResponderID, "Valid Delay Cycles 0") ;
             SetAxi4Options(ResponderRec, ValidDelayCycleOption, 0) ;
             if k = 1 then  
-              SetAxi4Options(ResponderRec, READ_DATA_VALID_DELAY_BURST_CYCLES, 0) ;
+              SetAxi4Options(ResponderRec, READ_DATA_VALID_BURST_DELAY_CYCLES, 0) ;
             end if ; 
           when others => 
             Alert(TbResponderID, "Unimplemented test case", FAILURE)  ; 

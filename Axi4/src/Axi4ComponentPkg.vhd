@@ -125,12 +125,16 @@ package Axi4ComponentPkg is
 
       tpd_Clk_BValid  : time   := 2 ns ;
       tpd_Clk_BResp   : time   := 2 ns ;
+      tpd_Clk_BID     : time   := 2 ns ;
+      tpd_Clk_BUser   : time   := 2 ns ;
 
       tpd_Clk_ARReady : time   := 2 ns ;
 
       tpd_Clk_RValid  : time   := 2 ns ;
       tpd_Clk_RData   : time   := 2 ns ;
-      tpd_Clk_RResp   : time   := 2 ns
+      tpd_Clk_RResp   : time   := 2 ns ;
+      tpd_Clk_RID     : time   := 2 ns ;
+      tpd_Clk_RUser   : time   := 2 ns 
     ) ;
     port (
       -- Globals

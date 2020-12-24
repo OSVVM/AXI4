@@ -86,11 +86,11 @@ package Axi4OptionsTypePkg is
     -- Valid Delays
     WRITE_ADDRESS_VALID_DELAY_CYCLES,
     WRITE_DATA_VALID_DELAY_CYCLES,      
-    WRITE_DATA_VALID_DELAY_BURST_CYCLES,      
+    WRITE_DATA_VALID_BURST_DELAY_CYCLES,      
     WRITE_RESPONSE_VALID_DELAY_CYCLES,  -- S
     READ_ADDRESS_VALID_DELAY_CYCLES,    
     READ_DATA_VALID_DELAY_CYCLES,       -- S
-    READ_DATA_VALID_DELAY_BURST_CYCLES, -- S      
+    READ_DATA_VALID_BURST_DELAY_CYCLES, -- S      
 
     -- Write Data Filtering 
     WRITE_DATA_FILTER_UNDRIVEN, 
@@ -630,11 +630,11 @@ package body Axi4OptionsTypePkg is
     -- Valid Delays
     SetAxi4Parameter(Params, WRITE_ADDRESS_VALID_DELAY_CYCLES,     0) ;  
     SetAxi4Parameter(Params, WRITE_DATA_VALID_DELAY_CYCLES,        0) ;  
-    SetAxi4Parameter(Params, WRITE_DATA_VALID_DELAY_BURST_CYCLES,  0) ;        
+    SetAxi4Parameter(Params, WRITE_DATA_VALID_BURST_DELAY_CYCLES,  0) ;        
     SetAxi4Parameter(Params, WRITE_RESPONSE_VALID_DELAY_CYCLES,    0) ;  -- S
     SetAxi4Parameter(Params, READ_ADDRESS_VALID_DELAY_CYCLES,      0) ;  
     SetAxi4Parameter(Params, READ_DATA_VALID_DELAY_CYCLES,         0) ;  -- S
-    SetAxi4Parameter(Params, READ_DATA_VALID_DELAY_BURST_CYCLES,   0) ;  -- S      
+    SetAxi4Parameter(Params, READ_DATA_VALID_BURST_DELAY_CYCLES,   0) ;  -- S      
 
     -- Write Data Filtering 
     SetAxi4Parameter(Params, WRITE_DATA_FILTER_UNDRIVEN,            TRUE) ; 

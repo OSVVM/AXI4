@@ -136,6 +136,22 @@ architecture MemoryResponder of Axi4Memory is
   signal ReadDataDoneCount           : integer := 0 ;
 
   shared variable Params : ModelParametersPType ;
+  
+
+  -- A hack of a way to set the parameters for now.
+  signal ModelBResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
+  signal ModelRResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
+  
+  alias  AxiBUser is AxiBus.WriteResponse.User ;
+  alias  AxiBID   is AxiBus.WriteResponse.ID ;
+  signal ModelBUSER  : std_logic_vector(AxiBUser'length - 1 downto 0) := (others => '0') ;
+  signal ModelBID    : std_logic_vector(AxiBID'length - 1 downto 0) := (others => '0') ;
+
+  alias  AxiRUser is AxiBus.WriteResponse.User ;
+  alias  AxiRID   is AxiBus.WriteResponse.ID ;
+  signal ModelRUSER  : std_logic_vector(AxiRUser'length - 1 downto 0) := (others => '0') ;
+  signal ModelRID    : std_logic_vector(AxiRID'length - 1 downto 0) := (others => '0') ;
+
 
 begin
 
@@ -212,12 +228,16 @@ begin
     variable DataWidth        : integer ;
     variable NumBytes         : integer ;
     variable Count            : integer ;
+    variable TransactionCount : integer := 0 ; 
+    variable Axi4Option       : Axi4OptionsType ;
+    variable Axi4OptionVal    : integer ; 
   begin
     WaitForTransaction(
        Clk      => Clk,
        Rdy      => TransRec.Rdy,
        Ack      => TransRec.Ack
     ) ;
+    TransactionCount := TransactionCount + 1 ; 
 
     case TransRec.Operation is
       when WAIT_FOR_TRANSACTION =>
@@ -237,8 +257,10 @@ begin
 
       when WAIT_FOR_CLOCK =>
         WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
-        wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
-        wait until Clk = '1' ;
+--!!          This is probably faster in execution, but requires an accurate tperiod_Clk
+--!!          wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
+--!!          wait until Clk = '1' ;
+          WaitForClock(Clk, WaitClockCycles) ;
 
       when GET_ALERTLOG_ID =>
         TransRec.IntFromModel <= integer(ModelID) ;
@@ -309,10 +331,54 @@ begin
         end if ;
 
       when SET_MODEL_OPTIONS =>
-        Params.Set(TransRec.Options, TransRec.IntToModel) ;
+--!!        Params.Set(TransRec.Options, TransRec.IntToModel) ;
+        Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
+        if IsAxiParameter(Axi4Option) then
+          SetAxi4Parameter(Params, Axi4Option, TransRec.IntToModel) ;
+        else
+          case Axi4Option is
+            -- RESP Settings
+            when BRESP =>                ModelBResp <= to_slv(TransRec.IntToModel, ModelBResp'length) ;
+            when RRESP =>                ModelRResp <= to_slv(TransRec.IntToModel, ModelRResp'length) ;
+            -- ID Settings
+            when BID =>                  ModelBID <= to_slv(TransRec.IntToModel, ModelBID'length) ;
+            when RID =>                  ModelRID <= to_slv(TransRec.IntToModel, ModelRID'length) ;
+            -- User Settings
+            when BUSER =>                ModelBUser <= to_slv(TransRec.IntToModel, ModelBUser'length) ;
+            when RUSER =>                ModelRUser <= to_slv(TransRec.IntToModel, ModelRUser'length) ;
+            --
+            -- The End -- Done
+            when others =>               Alert(ModelID, "Unimplemented Option", FAILURE) ;
+          end case ;
+        end if ;
 
       when GET_MODEL_OPTIONS =>
-        TransRec.IntFromModel <= Params.Get(TransRec.Options) ;
+--!!        TransRec.IntFromModel <= Params.Get(TransRec.Options) ;
+        Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
+        if IsAxiParameter(Axi4Option) then
+          GetAxi4Parameter(Params, Axi4Option, Axi4OptionVal) ;
+          TransRec.IntFromModel <= Axi4OptionVal ;
+        else
+          case Axi4Option is
+            -- RESP Settings
+            when BRESP =>                TransRec.IntFromModel <= to_integer(ModelBResp) ;
+            when RRESP =>                TransRec.IntFromModel <= to_integer(ModelRResp) ;
+            -- ID Settings
+            when BID =>                  TransRec.IntFromModel <= to_integer(ModelBID) ;
+            when RID =>                  TransRec.IntFromModel <= to_integer(ModelRID) ;
+            -- User Settings
+            when BUSER =>                TransRec.IntFromModel <= to_integer(ModelBUser) ;
+            when RUSER =>                TransRec.IntFromModel <= to_integer(ModelRUser) ;
+            --
+            -- The End -- Done
+            when others =>               Alert(ModelID, "Unimplemented Option", FAILURE) ;
+          end case ;
+        end if ;
+
+      when MULTIPLE_DRIVER_DETECT =>
+        Alert(ModelID, "Axi4Memory: Multiple Drivers on Transaction Record." & 
+                       "  Transaction # " & to_string(TransactionCount), FAILURE) ;
+        wait for 0 ns ;  
 
       when others =>
         Alert(ModelID, "Unimplemented Transaction", FAILURE) ;
@@ -513,7 +579,7 @@ begin
 
 --!5        GetNextBurstAddress(Address, BurstType) ;  -- to support Wrap addressing
       TransferAddress := TransferAddress + BytesPerTransfer ;
-      MemoryAddress    := TransferAddress(LAW.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
+      MemoryAddress   := TransferAddress(LAW.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
       -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
 
       --!3 Delay between burst words - burst vs. single word
@@ -525,7 +591,7 @@ begin
 --!9 Get response from Params
 --!9 Does response vary with Address?
 --!! Only one response per burst cycle.  Last cycle of a burst only
-    WriteResponseFifo.push(AXI4_RESP_OKAY & LAW.ID & LAW.User) ;
+    WriteResponseFifo.push(ModelBResp & LAW.ID & LAW.User) ;
     increment(WriteReceiveCount) ;
     wait for 0 ns ;
   end process WriteHandler ;
@@ -740,7 +806,7 @@ begin
       if i = BurstLen then
         LRD.Last := '1' ;
       end if ;
-      ReadDataFifo.push(LRD.Data & LRD.Last & AXI4_RESP_OKAY & LAR.ID & LAR.User) ;
+      ReadDataFifo.push(LRD.Data & LRD.Last & ModelRResp & LAR.ID & LAR.User) ;
       increment(ReadDataRequestCount) ;
       wait for 0 ns ;
 
@@ -783,7 +849,7 @@ begin
         WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_DELAY_CYCLES)))) ; 
 --      elsif Burst then 
       else 
-        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_DELAY_BURST_CYCLES)))) ; 
+        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_BURST_DELAY_CYCLES)))) ; 
       end if ; 
       
       NewTransfer := Local.Last ; -- Last is '1' for burst end and single word transfers

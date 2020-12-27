@@ -22,9 +22,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2018   2018       Initial revision
---    01/2020   2020.01    Updated license notice
---    12/2020   2020.12    Updated signal and port names
+--    12/2020   2020.12    Initial revision
 --
 --
 --  This file is part of OSVVM.

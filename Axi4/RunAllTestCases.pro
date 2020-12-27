@@ -17,7 +17,8 @@
 #
 #  Revision History:
 #    Date      Version    Description
-#     1/2019   2019.01    Compile Script for OSVVM
+#     1/2019   2019.01    Compile Script for AXI4
+#     1/2020   2020.01    Updated Licenses to Apache
 #     1/2020   2020.01    Updated Licenses to Apache
 #
 #
@@ -72,12 +73,21 @@ analyze ./TestCases/TbAxi4_MultipleDriversResponder.vhd
 analyze ./TestCases/TbAxi4_MultipleDriversMemory.vhd
 
 analyze ./TestCases/TbAxi4_TransactionApiMaster.vhd
+analyze ./TestCases/TbAxi4_TransactionApiMasterBurst.vhd
+analyze ./TestCases/TbAxi4_TransactionApiMemory.vhd
+analyze ./TestCases/TbAxi4_TransactionApiMemoryBurst.vhd
+analyze ./TestCases/TbAxi4_TransactionApiResponder.vhd
+
 
 analyze ./TestCases/TbAxi4_AxiIfOptionsMasterMemory.vhd
 analyze ./TestCases/TbAxi4_AxiIfOptionsMasterResponder.vhd
 
-analyze ./TestCases/TbAxi4_AxSizeMasterMemory.vhd
+analyze ./TestCases/TbAxi4_AxSizeMasterMemory1.vhd
+analyze ./TestCases/TbAxi4_AxSizeMasterMemory2.vhd
 
+analyze ./TestCases/TbAxi4_AlertLogIDMaster.vhd
+analyze ./TestCases/TbAxi4_AlertLogIDResponder.vhd
+analyze ./TestCases/TbAxi4_AlertLogIDMemory.vhd
 
 simulate TbAxi4_BasicReadWrite
 simulate TbAxi4_RandomReadWrite    
@@ -113,9 +123,17 @@ simulate TbAxi4_MultipleDriversResponder
 simulate TbAxi4_MultipleDriversMemory
   
 simulate TbAxi4_TransactionApiMaster
+simulate TbAxi4_TransactionApiMasterBurst
+simulate TbAxi4_TransactionApiMemory
+simulate TbAxi4_TransactionApiMemoryBurst
+simulate TbAxi4_TransactionApiResponder
 
 simulate TbAxi4_AxiIfOptionsMasterMemory
 simulate TbAxi4_AxiIfOptionsMasterResponder
 
-simulate TbAxi4_AxSizeMasterMemory
+simulate TbAxi4_AxSizeMasterMemory1
+simulate TbAxi4_AxSizeMasterMemory2
 
+simulate TbAxi4_AlertLogIDMaster
+simulate TbAxi4_AlertLogIDResponder
+simulate TbAxi4_AlertLogIDMemory

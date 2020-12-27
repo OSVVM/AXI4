@@ -41,7 +41,7 @@
 
 architecture TransactionApiMemory of TestCtrl is
 
-  signal TestDone, MemorySync : integer_barrier := 1 ;
+  signal TestDone, Sync, RunTest : integer_barrier := 1 ;
   signal TbMasterID : AlertLogIDType ; 
   signal TbResponderID  : AlertLogIDType ; 
   signal WaitForTransactionCount : integer := 0 ; 
@@ -94,149 +94,65 @@ begin
   MasterProc : process
     variable Addr, ExpAddr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data, ExpData : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;  
-    variable Count : integer ; 
-    variable WFTStartTime : time ; 
-    variable Available : boolean ; 
   begin
     wait until nReset = '1' ;  
     -- Must set Master options before start otherwise, ready will be active on first cycle.
     wait for 0 ns ; 
-    -- Verify Initial values of Transaction Counts
-    GetTransactionCount(MasterRec, Count) ;  -- Expect 1
-    AffirmIfEqual(TbMasterID, Count, 1, "GetTransactionCount") ;
-    GetWriteTransactionCount(MasterRec, Count) ; -- Expect 0
-    AffirmIfEqual(TbMasterID, Count, 0, "GetTransactionWriteCount") ;
-    GetReadTransactionCount(MasterRec, Count) ; -- Expect 0
-    AffirmIfEqual(TbMasterID, Count, 0, "GetTransactionReadCount") ;
-    
+
+-------------------------------------------------- Test 1:  Write & Responder WFT
+    WaitForBarrier(Sync) ;
     WaitForClock(MasterRec, 4) ; 
     
     -- Write Tests
     Addr := X"0000_0000" ; 
     Data := X"0000_0000" ; 
-    log(TbMasterID, "WriteAsync, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
-    WriteAsync(MasterRec, Addr,    Data) ;
-    WriteAsync(MasterRec, Addr+4,  Data+1) ;
-    WaitForTransaction(MasterRec) ;
-    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetTransactionCount(MasterRec, Count) ;  -- Expect 8
-    AffirmIfEqual(TbMasterID, Count, 8, "GetTransactionCount") ;
-    GetWriteTransactionCount(MasterRec, Count) ; -- Expect 2
-    AffirmIfEqual(TbMasterID, Count, 2, "GetTransactionWriteCount") ;
+    log(TbMasterID, "Read, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
+    Write(MasterRec, Addr,    Data) ;
+    WaitForBarrier(Sync) ;
+    WaitForClock(MasterRec, 4) ; 
+    Write(MasterRec, Addr+4,  Data+1) ;
     
-    WaitForClock(MasterRec, 4) ;
+-------------------------------------------------- Test 2:  Write & Responder WFWT
+    WaitForBarrier(Sync) ;
+    WaitForClock(MasterRec, 4) ; 
     
-    WriteAsync(MasterRec, Addr+8,  Data+2) ;
-    WriteAsync(MasterRec, Addr+12, Data+3) ;
-    WaitForWriteTransaction(MasterRec) ;
-    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetTransactionCount(MasterRec, Count) ;  -- Expect 14
-    AffirmIfEqual(TbMasterID, Count, 14, "GetTransactionCount") ;
-    GetWriteTransactionCount(MasterRec, Count) ; -- Expect 4
-    AffirmIfEqual(TbMasterID, Count, 4, "GetTransactionWriteCount") ;
+    -- Write Tests
+    Addr := Addr + 128 ; 
+    Data := Data + 128 ; 
+    log(TbMasterID, "Read, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
+    Write(MasterRec, Addr,    Data) ;
+    WaitForBarrier(Sync) ;
+    WaitForClock(MasterRec, 4) ; 
+    Write(MasterRec, Addr+4,  Data+1) ;
     
-    WaitForClock(MasterRec, 4) ;
+-------------------------------------------------- Test 3:  Read & Responder WFT
+    WaitForBarrier(Sync) ;
+    WaitForClock(MasterRec, 4) ; 
     
-    Addr := X"0000_0000" + 16 ; 
-    Data := X"0000_0000" + 4 ; 
-    log(TbMasterID, "WriteAddressAsync, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
-    WriteAddressAsync(MasterRec, Addr) ;
-    WriteAddressAsync(MasterRec, Addr+4) ;
-    WaitForTransaction(MasterRec) ;
-    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetWriteTransactionCount(MasterRec, Count) ; -- Expect 6
-    AffirmIfEqual(TbMasterID, Count, 6, "GetTransactionWriteCount") ;
-    
-    WaitForClock(MasterRec, 4) ;
-    
-    log(TbMasterID, "WriteDataAsync, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
-    WriteDataAsync(MasterRec, Addr,    Data) ;
-    WriteDataAsync(MasterRec, Addr+4,  Data+1) ;
-    WaitForTransaction(MasterRec) ;
-    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetWriteTransactionCount(MasterRec, Count) ; -- Expect 6 
-    AffirmIfEqual(TbMasterID, Count, 6, "GetTransactionWriteCount") ;
-
-    WaitForClock(MasterRec, 4) ;
-    
-    WriteAddressAsync(MasterRec, Addr+8) ;
-    WriteAddressAsync(MasterRec, Addr+12) ;
-    WaitForWriteTransaction(MasterRec) ;
-    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetWriteTransactionCount(MasterRec, Count) ; -- Expect 8
-    AffirmIfEqual(TbMasterID, Count, 8, "GetTransactionWriteCount") ;
-    
-    WaitForClock(MasterRec, 4) ;
-
-    WriteDataAsync(MasterRec, Addr+8,   Data+2) ;
-    WriteDataAsync(MasterRec, Addr+12,  Data+3) ;
-    WaitForWriteTransaction(MasterRec) ;
-    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetWriteTransactionCount(MasterRec, Count) ; -- Expect 8 
-    AffirmIfEqual(TbMasterID, Count, 8, "GetTransactionWriteCount") ;
-
-    WaitForClock(MasterRec, 4) ;
-
-    GetReadTransactionCount(MasterRec, Count) ; -- Expect 0
-    AffirmIfEqual(TbMasterID, Count, 0, "GetTransactionReadCount") ;
-    
-    -- Read Tests
+    -- Write Tests
     Addr := X"0000_0000" ; 
     Data := X"0000_0000" ; 
-
-    log(TbMasterID, "ReadAddressAsync, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
-    ReadAddressAsync(MasterRec, Addr) ;
-    ReadAddressAsync(MasterRec, Addr+4) ;
-    WaitForTransaction(MasterRec) ;
-    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetReadTransactionCount(MasterRec, Count) ; -- Expect 2
-    AffirmIfEqual(TbMasterID, Count, 2, "GetTransactionReadCount") ;   
-    GetWriteTransactionCount(MasterRec, Count) ; -- Expect 8 
-    AffirmIfEqual(TbMasterID, Count, 8, "GetTransactionWriteCount") ;
+    log(TbMasterID, "Read, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
+    ReadCheck(MasterRec, Addr,    Data) ;
+    WaitForBarrier(Sync) ;
+    WaitForClock(MasterRec, 4) ; 
+    ReadCheck(MasterRec, Addr+4,  Data+1) ;
     
-    WaitForClock(MasterRec, 4) ;
+-------------------------------------------------- Test 4:  Read & Responder WFWT
+    WaitForBarrier(Sync) ;
+    WaitForClock(MasterRec, 4) ; 
     
-    log(TbMasterID, "TryReadCheckData, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
-    TryReadCheckData(MasterRec, Data  , Available) ;
-    AffirmIfEqual(TbMasterID, Available, TRUE, "TryReadCheckData Available: ") ;
-    TryReadCheckData(MasterRec, Data+1, Available) ;
-    AffirmIfEqual(TbMasterID, Available, TRUE, "TryReadCheckData Available: ") ;
-    WFTStartTime := now ; 
-    WaitForTransaction(MasterRec) ;
-    AffirmIfEqual(TbMasterID, WFTStartTime, now, "WaitForTransaction after TryReadCheckData takes 0 time") ;
-    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetReadTransactionCount(MasterRec, Count) ; -- Expect 2
-    AffirmIfEqual(TbMasterID, Count, 2, "GetTransactionReadCount") ;   
+    -- Write Tests
+    Addr := Addr + 128 ; 
+    Data := Data + 128 ; 
+    log(TbMasterID, "Read, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
+    ReadCheck(MasterRec, Addr,    Data) ;
+    WaitForBarrier(Sync) ;
+    WaitForClock(MasterRec, 4) ; 
+    ReadCheck(MasterRec, Addr+4,  Data+1) ;
 
-    WaitForClock(MasterRec, 4) ;
-    
-    ReadAddressAsync(MasterRec, Addr+8) ;
-    ReadAddressAsync(MasterRec, Addr+12) ;
-    WaitForReadTransaction(MasterRec) ;
-    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetReadTransactionCount(MasterRec, Count) ; -- Expect 4
-    AffirmIfEqual(TbMasterID, Count, 4, "GetTransactionReadCount") ;   
-    
-    WaitForClock(MasterRec, 4) ;
-    
-    TryReadCheckData(MasterRec, Data+2, Available) ;
-    AffirmIfEqual(TbMasterID, Available, TRUE, "TryReadCheckData Available: ") ;
-    TryReadCheckData(MasterRec, Data+3, Available) ;
-    AffirmIfEqual(TbMasterID, Available, TRUE, "TryReadCheckData Available: ") ;
-    WFTStartTime := now ; 
-    WaitForReadTransaction(MasterRec) ;
-    AffirmIfEqual(TbMasterID, WFTStartTime, now, "WaitForTransaction after TryReadCheckData takes 0 time") ;
-    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetReadTransactionCount(MasterRec, Count) ; -- Expect 4
-    AffirmIfEqual(TbMasterID, Count, 4, "GetTransactionReadCount") ;   
 
-    WaitForClock(MasterRec, 4) ;
-
-    GetReadTransactionCount(MasterRec, Count) ; -- Expect 4
-    AffirmIfEqual(TbMasterID, Count, 4, "GetTransactionReadCount") ;   
-    GetWriteTransactionCount(MasterRec, Count) ; -- Expect 8 
-    AffirmIfEqual(TbMasterID, Count, 8, "GetTransactionWriteCount") ;
-
+-------------------------------------------------- End of Test
 
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(MasterRec, 2) ;
@@ -252,11 +168,151 @@ begin
   ResponderProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
-    variable IntOption  : integer ; 
-    variable ValidDelayCycleOption : Axi4OptionsType ; 
+    variable Count        : integer ; 
+    variable WFTStartTime : time ; 
   begin
-  
+    wait until nReset = '1' ;  
+    wait for 0 ns ; 
+    -- Verify Initial values of Transaction Counts
+    GetTransactionCount(ResponderRec, Count) ;  -- Expect 0
+    AffirmIfEqual(TbResponderID, Count, 0, "GetTransactionCount") ;
+    GetWriteTransactionCount(ResponderRec, Count) ; -- Expect 0
+    AffirmIfEqual(TbResponderID, Count, 0, "GetTransactionWriteCount") ;
+    GetReadTransactionCount(ResponderRec, Count) ; -- Expect 0
+    AffirmIfEqual(TbResponderID, Count, 0, "GetTransactionReadCount") ;
+    
+    WaitForClock(ResponderRec, 4) ; 
+    
+-------------------------------------------------- Test 1:  Write & Responder WFT
+    -- Check #1 validate WFT before transaction received
+    WaitForBarrier(Sync) ;
+    WFTStartTime := now ; 
+    WaitForTransaction(ResponderRec) ;
+    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
+    -- Check that time passed in WFT
+    AffirmIf(TbResponderID, now > WFTStartTime, 
+      "WaitForTransaction before StartTime: " & to_string(WFTStartTime)) ;
+    -- Check Transaction Counts
+    GetTransactionCount(ResponderRec, Count) ;  -- Expect 1
+    AffirmIfEqual(TbResponderID, Count, 1, "GetTransactionCount") ;
+    GetWriteTransactionCount(ResponderRec, Count) ; -- Expect 1
+    AffirmIfEqual(TbResponderID, Count, 1, "GetTransactionWriteCount") ;
+    
+    -- Check #2 validate WFT before transaction received
+    WaitForBarrier(Sync) ;
+--!!    WaitForClock(ResponderRec, 4) ;
+    WFTStartTime := now ; 
+    WaitForTransaction(ResponderRec) ;
+    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
+    -- Check that time passed in WFT
+    AffirmIf(TbResponderID, now > WFTStartTime, 
+      "WaitForTransaction before StartTime: " & to_string(WFTStartTime)) ;
+    -- Check Transaction Counts
+    GetTransactionCount(ResponderRec, Count) ;  -- Expect 2
+    AffirmIfEqual(TbResponderID, Count, 2, "GetTransactionCount") ;
+    GetWriteTransactionCount(ResponderRec, Count) ; -- Expect 2
+    AffirmIfEqual(TbResponderID, Count, 2, "GetTransactionWriteCount") ;
 
+
+-------------------------------------------------- Test 2:  Write & Responder WFWT
+    -- Check #1 validate WFT before transaction received
+    WaitForBarrier(Sync) ;
+    WFTStartTime := now ; 
+    WaitForWriteTransaction(ResponderRec) ;
+    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
+    -- Check that time passed in WFWT
+    AffirmIf(TbResponderID, now > WFTStartTime, 
+      "WaitForTransaction before StartTime: " & to_string(WFTStartTime)) ;
+    -- Check Transaction Counts
+    GetTransactionCount(ResponderRec, Count) ;  -- Expect 3
+    AffirmIfEqual(TbResponderID, Count, 3, "GetTransactionCount") ;
+    GetWriteTransactionCount(ResponderRec, Count) ; -- Expect 3
+    AffirmIfEqual(TbResponderID, Count, 3, "GetTransactionWriteCount") ;
+    
+    -- Check #2 validate WFT after transaction received
+    WaitForBarrier(Sync) ;
+--!!    WaitForClock(ResponderRec, 4) ;
+    WFTStartTime := now ; 
+    WaitForWriteTransaction(ResponderRec) ;
+    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
+    -- Check that time passed in WFWT
+    AffirmIf(TbResponderID, now > WFTStartTime, 
+      "WaitForTransaction before StartTime: " & to_string(WFTStartTime)) ;
+    -- Check Transaction Counts
+    GetTransactionCount(ResponderRec, Count) ;  -- Expect 4
+    AffirmIfEqual(TbResponderID, Count, 4, "GetTransactionCount") ;
+    GetWriteTransactionCount(ResponderRec, Count) ; -- Expect 4
+    AffirmIfEqual(TbResponderID, Count, 4, "GetTransactionWriteCount") ;
+
+-------------------------------------------------- Test 3:  Read & Responder WFT
+    -- Check #1 validate WFT before transaction received
+    WaitForBarrier(Sync) ;
+    WFTStartTime := now ; 
+    WaitForTransaction(ResponderRec) ;
+    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
+    -- Check that time passed in WFT
+    AffirmIf(TbResponderID, now > WFTStartTime, 
+      "WaitForTransaction before StartTime: " & to_string(WFTStartTime)) ;
+    -- Check Transaction Counts
+    GetTransactionCount(ResponderRec, Count) ;  -- Expect 5
+    AffirmIfEqual(TbResponderID, Count, 5, "GetTransactionCount") ;
+    GetReadTransactionCount(ResponderRec, Count) ; -- Expect 1
+    AffirmIfEqual(TbResponderID, Count, 1, "GetReadTransactionCount") ;
+    
+    -- Check #2 validate WFT after transaction received
+    WaitForBarrier(Sync) ;
+--!!    WaitForClock(ResponderRec, 4) ;
+    WFTStartTime := now ; 
+    WaitForTransaction(ResponderRec) ;
+    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
+    -- Check that time passed in WFT
+    AffirmIf(TbResponderID, now > WFTStartTime, 
+      "WaitForTransaction before StartTime: " & to_string(WFTStartTime)) ;
+    -- Check Transaction Counts
+    GetTransactionCount(ResponderRec, Count) ;  -- Expect 6
+    AffirmIfEqual(TbResponderID, Count, 6, "GetTransactionCount") ;
+    GetReadTransactionCount(ResponderRec, Count) ; -- Expect 2
+    AffirmIfEqual(TbResponderID, Count, 2, "GetReadTransactionCount") ;
+
+
+-------------------------------------------------- Test 4:  Read & Responder WFWT
+    -- Check #1 validate WFT before transaction received
+    WaitForBarrier(Sync) ;
+    WFTStartTime := now ; 
+    WaitForReadTransaction(ResponderRec) ;
+    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
+    -- Check that time passed in WFRT
+    AffirmIf(TbResponderID, now > WFTStartTime, 
+      "WaitForTransaction before StartTime: " & to_string(WFTStartTime)) ;
+    -- Check Transaction Counts
+    GetTransactionCount(ResponderRec, Count) ;  -- Expect 7
+    AffirmIfEqual(TbResponderID, Count, 7, "GetTransactionCount") ;
+    GetReadTransactionCount(ResponderRec, Count) ; -- Expect 3
+    AffirmIfEqual(TbResponderID, Count, 3, "GetReadTransactionCount") ;
+    
+    -- Check #2 validate WFT after transaction received
+    WaitForBarrier(Sync) ;
+--!!    WaitForClock(ResponderRec, 4) ;
+    WFTStartTime := now ; 
+    WaitForReadTransaction(ResponderRec) ;
+    WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
+    -- Check that time passed in WFRT
+    AffirmIf(TbResponderID, now > WFTStartTime, 
+      "WaitForTransaction before StartTime: " & to_string(WFTStartTime)) ;
+    -- Check Transaction Counts
+    GetTransactionCount(ResponderRec, Count) ;  -- Expect 8
+    AffirmIfEqual(TbResponderID, Count, 8, "GetTransactionCount") ;
+    GetReadTransactionCount(ResponderRec, Count) ; -- Expect 4
+    AffirmIfEqual(TbResponderID, Count, 4, "GetReadTransactionCount") ;
+
+-------------------------------------------------- End of Test
+    GetWriteTransactionCount(ResponderRec, Count) ; -- Expect 4
+    AffirmIfEqual(TbResponderID, Count, 4, "GetTransactionWriteCount") ;
+    GetReadTransactionCount(ResponderRec, Count) ; -- Expect 4
+    AffirmIfEqual(TbResponderID, Count, 4, "GetReadTransactionCount") ;
+
+
+    WaitForClock(ResponderRec, 4) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process ResponderProc ;

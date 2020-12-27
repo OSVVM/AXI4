@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_AxSizeMasterMemory.vhd
+--  File Name:         TbAxi4_AxSizeMasterMemory1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -11,6 +11,7 @@
 --  Description:
 --    For Master and Memory: 
 --        AWSIZE, ARSIZE
+--        Addresses are on word boundaries
 --
 --
 --  Developed by:
@@ -40,7 +41,7 @@
 --  limitations under the License.
 --  
 
-architecture AxSizeMasterMemory of TestCtrl is
+architecture AxSizeMasterMemory1 of TestCtrl is
 
   signal TestDone, SetParams, RunTest, Sync : integer_barrier := 1 ;
 
@@ -60,7 +61,7 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_AxSizeMasterMemory") ;
+    SetAlertLogName("TbAxi4_AxSizeMasterMemory1") ;
     TbMasterID <= GetAlertLogID("TB Master Proc") ;
     TbResponderID <= GetAlertLogID("TB Responder Proc") ;
     SetLogEnable(PASSED, TRUE) ;  -- Enable PASSED logs
@@ -68,7 +69,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_AxSizeMasterMemory.txt") ;
+    TranscriptOpen("./results/TbAxi4_AxSizeMasterMemory1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -84,7 +85,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_AxSizeMasterMemory.txt", "../sim_shared/validated_results/TbAxi4_AxSizeMasterMemory.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_AxSizeMasterMemory1.txt", "../sim_shared/validated_results/TbAxi4_AxSizeMasterMemory1.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 
@@ -111,37 +112,6 @@ begin
     log(TbMasterID, "Checking IF Parameters for Write Address") ;
     GetAxi4Options(MasterRec, AWSIZE,   IntOption) ;      -- 3 bits 2**N bytes
     AffirmIfEqual(TbMasterID, IntOption,  2, "AWSIZE") ; 
-    GetAxi4Options(MasterRec, AWBURST,  IntOption) ;      -- 2 bits (fixed, incr, wrap, none)
-    AffirmIfEqual(TbMasterID, IntOption,  1, "AWBURST") ;   -- INCR
-    GetAxi4Options(MasterRec, AWLOCK,   IntOption) ;      -- std_logic
-    AffirmIfEqual(TbMasterID, IntOption,  0, "AWLOCK") ;
-    --------
-    GetAxi4Options(MasterRec, AWPROT,   IntOption) ;      -- 3 bits
-    AffirmIfEqual(TbMasterID, IntOption,   0, "AWPROT") ;
-    GetAxi4Options(MasterRec, AWID,     IntOption) ;      -- config:  8 bits
-    AffirmIfEqual(TbMasterID, IntOption,     0, "AWID") ;  
-    GetAxi4Options(MasterRec, AWCACHE,  IntOption) ;      -- 4 bits
-    AffirmIfEqual(TbMasterID, IntOption,  0, "AWCACHE") ;
-    GetAxi4Options(MasterRec, AWQOS,    IntOption) ;      -- 4 bits
-    AffirmIfEqual(TbMasterID, IntOption,    0, "AWQOS") ;
-    GetAxi4Options(MasterRec, AWREGION, IntOption) ;      -- 4 bits
-    AffirmIfEqual(TbMasterID, IntOption, 0, "AWREGION") ;
-    GetAxi4Options(MasterRec, AWUSER,   IntOption) ;      -- config: 8 bits
-    AffirmIfEqual(TbMasterID, IntOption,   0, "AWUSER") ;  
-
-    log(TbMasterID, "Checking IF Parameters for Write Data") ;
-    GetAxi4Options(MasterRec, WID,      IntOption) ;      -- config:  8 bits
-    AffirmIfEqual(TbMasterID, IntOption,      0, "WID") ;  
-    GetAxi4Options(MasterRec, WUSER,    IntOption) ;      -- config: 8 bits
-    AffirmIfEqual(TbMasterID, IntOption,    0, "WUSER") ;  
-
-    log(TbMasterID, "Checking IF Parameters for Master Write Response") ;
-    GetAxi4Options(MasterRec, BRESP,    IntOption) ;      -- config:  2 bits
-    AffirmIfEqual(TbMasterID, IntOption,    0, "BRESP") ;     -- (OK, EXOK, SLVERR, DECERR)
-    GetAxi4Options(MasterRec, BID,      IntOption) ;      -- config:  8 bits
-    AffirmIfEqual(TbMasterID, IntOption,      0, "BID") ;  
-    GetAxi4Options(MasterRec, BUSER,    IntOption) ;      -- config: 8 bits
-    AffirmIfEqual(TbMasterID, IntOption,    0, "BUSER") ;  
 
 
     WaitForClock(MasterRec, 4) ; 
@@ -417,15 +387,15 @@ begin
     wait ;
   end process ResponderProc ;
 
-end AxSizeMasterMemory ;
+end AxSizeMasterMemory1 ;
 
-Configuration TbAxi4_AxSizeMasterMemory of TbAxi4 is
+Configuration TbAxi4_AxSizeMasterMemory1 of TbAxi4 is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(AxSizeMasterMemory) ; 
+      use entity work.TestCtrl(AxSizeMasterMemory1) ; 
     end for ; 
     for Responder_1 : Axi4Responder 
       use entity OSVVM_AXI4.Axi4Memory ; 
     end for ; 
   end for ; 
-end TbAxi4_AxSizeMasterMemory ; 
+end TbAxi4_AxSizeMasterMemory1 ; 

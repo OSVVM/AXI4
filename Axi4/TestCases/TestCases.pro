@@ -51,6 +51,7 @@
 ##  analyze TbAxi4_MemoryReadWrite1.vhd
 ##  analyze TbAxi4_MemoryReadWrite2.vhd
 ##  analyze TbAxi4_MemoryBurst1.vhd
+##  analyze TbAxi4_MemoryBurstAsync1.vhd
 ##  analyze TbAxi4_MemoryBurstByte1.vhd
 ##  
 ##  analyze TbAxi4_ReadWriteAsync1.vhd
@@ -60,9 +61,9 @@
 ##  
 ##  analyze TbAxi4_MemoryAsync.vhd
 ##  
-##  analyze TbAxi4_TimeOutMaster.vhd
-##  analyze TbAxi4_TimeOutResponder.vhd
-##  analyze TbAxi4_TimeOutMemory.vhd
+analyze TbAxi4_TimeOutMaster.vhd
+analyze TbAxi4_TimeOutResponder.vhd
+analyze TbAxi4_TimeOutMemory.vhd
 ##  
 ##  analyze TbAxi4_ReadyTimingMaster.vhd
 ##  analyze TbAxi4_ReadyTimingResponder.vhd
@@ -90,10 +91,17 @@
 ##  
 ##  analyze TbAxi4_AxSizeMasterMemory1.vhd
 ##  analyze TbAxi4_AxSizeMasterMemory2.vhd
+##  
+##  analyze TbAxi4_AlertLogIDMaster.vhd
+##  analyze TbAxi4_AlertLogIDResponder.vhd
+##  analyze TbAxi4_AlertLogIDMemory.vhd
 
-analyze TbAxi4_AlertLogIDMaster.vhd
-analyze TbAxi4_AlertLogIDResponder.vhd
-analyze TbAxi4_AlertLogIDMemory.vhd
+analyze TbAxi4_ResponderReadWrite1.vhd
+analyze TbAxi4_ResponderReadWrite2.vhd
+analyze TbAxi4_ResponderReadWrite3.vhd
+
+analyze TbAxi4_ResponderReadWriteAsync1.vhd
+analyze TbAxi4_ResponderReadWriteAsync2.vhd
 
 
 # simulate TbAxi4_BasicReadWrite
@@ -102,6 +110,7 @@ analyze TbAxi4_AlertLogIDMemory.vhd
 # simulate TbAxi4_MemoryReadWrite1
 # simulate TbAxi4_MemoryReadWrite2
 # simulate TbAxi4_MemoryBurst1
+# simulate TbAxi4_MemoryBurstAsync1
 # simulate TbAxi4_MemoryBurstByte1
 
 # simulate TbAxi4_ReadWriteAsync1    
@@ -143,5 +152,11 @@ analyze TbAxi4_AlertLogIDMemory.vhd
 
 # simulate TbAxi4_AlertLogIDMaster
 # simulate TbAxi4_AlertLogIDResponder
-simulate TbAxi4_AlertLogIDMemory
+# simulate TbAxi4_AlertLogIDMemory
+
+# simulate TbAxi4_ResponderReadWrite1
+# simulate TbAxi4_ResponderReadWrite2
+# simulate TbAxi4_ResponderReadWrite3
+# simulate TbAxi4_ResponderReadWriteAsync1
+simulate TbAxi4_ResponderReadWriteAsync2
 

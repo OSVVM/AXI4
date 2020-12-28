@@ -20,7 +20,8 @@
 --  Revision History:
 --    Date      Version    Description
 --    09/2017   2020.04    Initial revision
---    12/2020   2020.12    Updated signal and port names
+--    12/2020   2020.12    This test is a beta start at bursting
+--                         see MemoryBurst1 for testing.
 --
 --
 --  This file is part of OSVVM.

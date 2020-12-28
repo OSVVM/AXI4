@@ -293,7 +293,7 @@ begin
 
           (WriteData, WriteStrb) := WriteDataFifo.pop ;
           if FilterUndrivenWriteData then
-            FilterUndrivenAxiData(WriteData, WriteStrb, UndrivenWriteDataValue) ;
+            FilterUndrivenData(WriteData, WriteStrb, UndrivenWriteDataValue) ;
           end if ; 
 
 --!! Move this to a procedure and normalize IO
@@ -311,7 +311,7 @@ begin
 --          -- Check WStrb
 --          ByteCount := TransRec.DataWidth / 8 ;
 --          WriteByteAddress := TransRec.AddrWidth mod AXI_BYTE_ADDR_WIDTH ;
---          ExpectedWStrb := CalculateAxiWriteStrobe(WriteByteAddress, ByteCount, AXI_DATA_BYTE_WIDTH) ;
+--          ExpectedWStrb := CalculateWriteStrobe(WriteByteAddress, ByteCount, AXI_DATA_BYTE_WIDTH) ;
 --          AlertIfNotEqual(ModelID, WriteStrb, ExpectedWStrb, "SlaveGetWrite, WStrb", ERROR) ;
 
           -- Check Data Size

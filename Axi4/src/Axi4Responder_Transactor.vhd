@@ -116,6 +116,7 @@ architecture TransactorResponder of Axi4Responder is
   shared variable WriteResponseFifo    : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
 
   shared variable ReadAddressFifo      : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+  shared variable ReadAddressTransactionFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
   shared variable ReadDataFifo         : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
 
   -- Setup so that if no configuration is done, accept transactions
@@ -183,7 +184,9 @@ begin
     WriteResponseFifo.SetName(    MODEL_INSTANCE_NAME & ": WriteResponseFifo");
 
     ReadAddressFifo.SetAlertLogID(ID);
-    ReadAddressFifo.SetName(      MODEL_INSTANCE_NAME & ": ReadAddressFifo");
+    ReadAddressFifo.SetName(      MODEL_INSTANCE_NAME & ": ReadAddressTransactionFifo");
+    ReadAddressTransactionFifo.SetAlertLogID(ID);
+    ReadAddressTransactionFifo.SetName(      MODEL_INSTANCE_NAME & ": ReadAddressTransactionFifo");
     ReadDataFifo.SetAlertLogID(ID);
     ReadDataFifo.SetName(         MODEL_INSTANCE_NAME & ": ReadDataFifo");
     wait ;
@@ -240,7 +243,6 @@ begin
     alias WriteAddr           is LAW.Addr ;
     alias WriteProt           is LAW.Prot ;
 
-    variable FoundWriteAddress   : boolean := FALSE ;
     variable WriteAvailable      : boolean := FALSE ;
 
     alias WriteData           is LWD.Data ;
@@ -249,15 +251,15 @@ begin
     alias WriteUser           is LWD.User ;
     alias WriteID             is LWD.ID ;
 --    alias ExpectedWStrb       is LWD.Strb ;
-    variable WriteByteCount      : integer ;
-    variable WriteByteAddress    : integer ;
-    variable FoundLastWriteData  : boolean := FALSE ;
+    variable WriteByteCount : integer ;
+    variable WriteByteAddr  : integer ;
 
 --    alias WriteResp           is LWR.Resp ;
 
-    alias ReadAddr            is LAR.Addr ;
+    alias ReadAddress            is LAR.Addr ;
     alias ReadProt            is LAR.Prot ;
-    variable ReadAvailable       : boolean := FALSE ;
+    variable ReadByteAddr  : integer ;
+    variable ReadAvailable : boolean := FALSE ;
 
     alias ReadData            is LRD.Data ;
 --    alias ReadResp            is LRD.Resp ;
@@ -268,7 +270,10 @@ begin
     variable FilterUndrivenWriteData       : boolean := TRUE ;
     variable UndrivenWriteDataValue        : std_logic := '0' ;
 
-    variable TransactionCount : integer := 0 ; 
+    variable TransactionCount              : integer := 0 ; 
+    variable WriteAddressTransactionCount  : integer := 0 ; 
+    variable WriteDataTransactionCount     : integer := 0 ; 
+    variable WriteResponseTransactionCount : integer := 0 ; 
   begin
     WaitForTransaction(
        Clk      => Clk,
@@ -316,10 +321,7 @@ begin
 --
       when WAIT_FOR_CLOCK =>
         WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
---!!          This is probably faster in execution, but requires an accurate tperiod_Clk
---!!          wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
---!!          wait until Clk = '1' ;
-          WaitForClock(Clk, WaitClockCycles) ;
+        WaitForClock(Clk, WaitClockCycles) ;
 
       when GET_ALERTLOG_ID =>
         TransRec.IntFromModel <= integer(ModelID) ;
@@ -356,11 +358,12 @@ begin
 
           (WriteAddr, WriteProt) := WriteAddressFifo.pop ;
           TransRec.Address       <= ToTransaction(WriteAddr) ;
-          FoundWriteAddress := TRUE ;
+          WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
 
-          AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "SlaveGetWrite, Address length does not match", FAILURE) ;
---  Need checking of WriteProt to account for timeout - perhaps return "----" on timeout
---          -- Check WProt
+--!! Address checks intentionally removed - only want an error if the value changes.  
+--          AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "SlaveGetWrite, Address length does not match", FAILURE) ;
+--!! Add checking for AWProt?
+--     Suppress signaling of error during timeout?  return "----" on timeout
 --          AlertIfNotEqual(ModelID, WriteProt, ModelWProt, "SlaveGetWrite, WProt", ERROR) ;
         end if ;
 
@@ -370,48 +373,48 @@ begin
             WaitForToggle(WriteDataReceiveCount) ;
           end if ;
 
+          if IsWriteAddress(TransRec.Operation) then
+            WriteByteAddr := to_integer(WriteAddr) mod AXI_DATA_BYTE_WIDTH ;
+          else 
+            -- Cannot save WriteAddr from above since Data may arrive before Addr
+            -- Could hold the Data until Addr is available.
+            WriteByteAddr := TransRec.AddrWidth mod AXI_DATA_BYTE_WIDTH ;
+          end if ; 
+          
           (WriteData, WriteStrb, WriteLast, WriteUser, WriteID) := WriteDataFifo.pop ;
           GetAxi4Parameter(Params, WRITE_DATA_FILTER_UNDRIVEN, FilterUndrivenWriteData) ;
           GetAxi4Parameter(Params, WRITE_DATA_UNDRIVEN_VALUE,  UndrivenWriteDataValue) ;
           if FilterUndrivenWriteData then
-            FilterUndrivenAxiData(WriteData, WriteStrb, UndrivenWriteDataValue) ;
+            FilterUndrivenData(WriteData, WriteStrb, UndrivenWriteDataValue) ;
           end if ;
 
---!! Move this to a procedure and normalize IO
---!! Adjust handling for Byte Location?
---          if TransRec.DataWidth < AXI_DATA_WIDTH then
---            WriteData := WriteData srl ByteAddr * 8 ;
---          end if ;
-
+          
+          WriteData := AlignDataBusToBytes(WriteData, TransRec.DataWidth, WriteByteAddr) ;
           TransRec.DataFromModel  <= ToTransaction(WriteData) ;
+          
           if WriteLast = '1' then
-            FoundLastWriteData := TRUE ;
-            WriteResponseFifo.push(ModelBResp) ;
+            WriteDataTransactionCount := Increment(WriteDataTransactionCount) ; 
           end if ;
 
+
+          -- Check Data Size
+          CheckDataIsBytes(ModelID, TransRec.DataWidth, "GetWrite", WriteDataTransactionCount) ;
+          CheckDataWidth(ModelID, TransRec.DataWidth, WriteByteAddr, AXI_DATA_WIDTH, "GetWrite", WriteDataTransactionCount) ; 
+
+--!! ??? Add Checking for WSTRB?
 -- Works for SlaveGetWriteData - but only if access is correct sized, but not SlaveGetWrite
 --          -- Check WStrb
 --          ByteCount := TransRec.DataWidth / 8 ;
---          WriteByteAddress := TransRec.AddrWidth mod AXI_BYTE_ADDR_WIDTH ;
---          ExpectedWStrb := CalculateAxiWriteStrobe(WriteByteAddress, ByteCount, AXI_DATA_BYTE_WIDTH) ;
+--          ExpectedWStrb := CalculateWriteStrobe(WriteByteAddr, ByteCount, AXI_DATA_BYTE_WIDTH) ;
 --          AlertIfNotEqual(ModelID, WriteStrb, ExpectedWStrb, "SlaveGetWrite, WStrb", ERROR) ;
 
-          -- Check Data Size
-          AlertIf(ModelID, TransRec.DataWidth > AXI_DATA_WIDTH, "SlaveGetWrite, Expected Data length to large", FAILURE) ;
-          AlertIf(ModelID, TransRec.DataWidth mod 8 /= 0,
-            "SlaveGetWrite, Expected Data not on a byte boundary." &
-            "DataWidth: " & to_string(TransRec.DataWidth),
-            FAILURE) ;
         end if ;
 
--- Update s.t. only sent when WLast = '1'
-        -- Appropriate when
-        if FoundWriteAddress and FoundLastWriteData then
+        if WriteAddressTransactionCount /= WriteResponseTransactionCount and 
+              WriteDataTransactionCount /= WriteResponseTransactionCount then
+          WriteResponseFifo.push(ModelBResp) ;
           increment(WriteReceiveCount) ;
---          FoundWriteAddress  := TRUE ;
---          FoundLastWriteData := TRUE ;
-          FoundWriteAddress  := FALSE ;
-          FoundLastWriteData := FALSE ;
+          WriteResponseTransactionCount := Increment(WriteResponseTransactionCount) ; 
         end if ;
 
 --    -- Log this operation
@@ -443,66 +446,32 @@ begin
           if ReadAddressFifo.empty then
             WaitForToggle(ReadAddressReceiveCount) ;
           end if ;
-          (ReadAddr, ReadProt)    := ReadAddressFifo.pop ;
-          TransRec.Address        <= ToTransaction(ReadAddr) ;
-          AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Slave Read, Address length does not match", FAILURE) ;
-  --!TODO Add Check here for actual PROT vs expected (ModelRProt)
-  --        TransRec.Prot           <= to_integer(ReadProt) ;
+          (ReadAddress, ReadProt)  := ReadAddressFifo.pop ;
+          TransRec.Address         <= ToTransaction(ReadAddress) ;
+--         AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Slave Read, Address length does not match", FAILURE) ;
+--!TODO Add Check here for actual PROT vs expected (ModelRProt)
+--        TransRec.Prot           <= to_integer(ReadProt) ;
         end if ;
 
         if ReadAvailable and IsReadData(TransRec.Operation) then
-
-          -- Push Read Data Response Values
-          -- Get Read Data Response Values
-          ReadData := FromTransaction(TransRec.DataToModel) ;
-          ReadDataFifo.push(ReadData & ModelRResp) ;
+          ReadAddress := ReadAddressTransactionFifo.Pop ;
+          ReadByteAddr  :=  CalculateByteAddress(ReadAddress, AXI_BYTE_ADDR_WIDTH);
 
           -- Data Sizing Checks
-          AlertIf(ModelID, TransRec.DataWidth > AXI_DATA_WIDTH, "Slave Read, Data length to large", FAILURE) ;
-          AlertIf(ModelID, TransRec.DataWidth mod 8 /= 0, "Slave Read, Data not on a byte boundary", FAILURE) ;
-  --!TODO replace with data width checking here
-  --        variable ByteCount : integer ;
-  --        ByteCount := TransRec.DataWidth / 8 ;
-  --        Check ReadStrb and Byte Count to make sure they correlate
+          CheckDataIsBytes(ModelID, TransRec.DataWidth, "Read Data", ReadDataRequestCount) ;
+          CheckDataWidth  (ModelID, TransRec.DataWidth, ReadByteAddr, AXI_DATA_WIDTH, "Read Data", ReadDataRequestCount) ; 
+ 
+          -- Get Read Data Response Values
+          ReadData  := AlignBytesToDataBus(FromTransaction(TransRec.DataToModel), TransRec.DataWidth, ReadByteAddr) ;
+          ReadDataFifo.push(ReadData & ModelRResp) ;
           Increment(ReadDataRequestCount) ;
 
-          -- Currently all ReadData Operations are Async
-          -- Add blocking until completion here
+-- Currently all ReadData Operations are Async
+-- Add blocking until completion here
         end if ;
 
         wait for 0 ns ;
-
---!!
---!! Update in a similar fashion to Axi4Master InterfaceDefault / Parameter handling
---!!
---!!      when SET_MODEL_OPTIONS =>
---!!        -- Set Model Options
---!!        
---!!        case Axi4OptionsType'val(TransRec.Options) is
---!!          -- Slave Ready TimeOut Checks
---!!          when WRITE_RESPONSE_READY_TIME_OUT =>       WriteResponseReadyTimeOut     <= TransRec.IntToModel ;
---!!          when READ_DATA_READY_TIME_OUT =>            ReadDataReadyTimeOut          <= TransRec.IntToModel ;
---!!          -- Slave Ready Before Valid
---!!          when WRITE_ADDRESS_READY_BEFORE_VALID =>    WriteAddressReadyBeforeValid  <= (TransRec.IntToModel = 1) ;
---!!          when WRITE_DATA_READY_BEFORE_VALID =>       WriteDataReadyBeforeValid     <= (TransRec.IntToModel = 1) ;
---!!          when READ_ADDRESS_READY_BEFORE_VALID =>     ReadAddressReadyBeforeValid   <= (TransRec.IntToModel = 1) ;
---!!          -- Slave Ready Delay Cycles
---!!          when WRITE_ADDRESS_READY_DELAY_CYCLES =>    WriteAddressReadyDelayCycles  <= TransRec.IntToModel ;
---!!          when WRITE_DATA_READY_DELAY_CYCLES =>       WriteDataReadyDelayCycles     <= TransRec.IntToModel ;
---!!          when READ_ADDRESS_READY_DELAY_CYCLES =>     ReadAddressReadyDelayCycles   <= TransRec.IntToModel ;
---!!          -- Slave PROT Settings
---!!          when AWPROT =>                              ModelWProt <= to_slv(TransRec.IntToModel, ModelWProt'length) ;
---!!          when ARPROT =>                              ModelRProt  <= to_slv(TransRec.IntToModel, ModelRProt'length) ;
---!!          -- Slave RESP Settings
---!!          when BRESP =>                               ModelBResp <= to_slv(TransRec.IntToModel, ModelBResp'length) ;
---!!          when RRESP =>                               ModelRResp  <= to_slv(TransRec.IntToModel, ModelRResp'length) ;
---!!          --
---!!          -- The End -- Done
---!!          when others =>
---!!            Alert(ModelID, "Unimplemented Option", FAILURE) ;
---!!        end case ;
---!!        wait for 0 ns ;
-        
+       
       when SET_MODEL_OPTIONS =>
         -- Set Model Options
         Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
@@ -548,33 +517,6 @@ begin
           end case ;
         end if ;
         wait for 0 ns ; 
-
---!!      when GET_MODEL_OPTIONS =>
---!!        -- Set Model Options
---!!        case Axi4OptionsType'val(TransRec.Options) is
---!!          -- Slave Ready TimeOut Checks
---!!          when WRITE_RESPONSE_READY_TIME_OUT =>       TransRec.IntFromModel  <= WriteResponseReadyTimeOut ;
---!!          when READ_DATA_READY_TIME_OUT =>            TransRec.IntFromModel  <= ReadDataReadyTimeOut ;
---!!          -- Slave Ready Before Valid
---!!          when WRITE_ADDRESS_READY_BEFORE_VALID =>    TransRec.IntFromModel <= 1 when WriteAddressReadyBeforeValid else 0 ;
---!!          when WRITE_DATA_READY_BEFORE_VALID =>       TransRec.IntFromModel <= 1 when WriteDataReadyBeforeValid    else 0 ;
---!!          when READ_ADDRESS_READY_BEFORE_VALID =>     TransRec.IntFromModel <= 1 when ReadAddressReadyBeforeValid  else 0 ;
---!!          -- Slave Ready Delay Cycles
---!!          when WRITE_ADDRESS_READY_DELAY_CYCLES =>    TransRec.IntFromModel  <= WriteAddressReadyDelayCycles ;
---!!          when WRITE_DATA_READY_DELAY_CYCLES =>       TransRec.IntFromModel  <= WriteDataReadyDelayCycles    ;
---!!          when READ_ADDRESS_READY_DELAY_CYCLES =>     TransRec.IntFromModel  <= ReadAddressReadyDelayCycles  ;
---!!          -- Slave PROT Settings
---!!          when AWPROT =>                              TransRec.IntFromModel <= to_integer(ModelWProt) ;
---!!          when ARPROT =>                              TransRec.IntFromModel <= to_integer(ModelRProt ) ;
---!!          -- Slave RESP Settings
---!!          when BRESP =>                               TransRec.IntFromModel <= to_integer(ModelBResp) ;
---!!          when RRESP =>                               TransRec.IntFromModel <= to_integer(ModelRResp) ;
---!!          --
---!!          -- The End -- Done
---!!          when others =>
---!!            Alert(ModelID, "Unimplemented Option", FAILURE) ;
---!!        end case ;
---!!        wait for 0 ns ;
 
       when MULTIPLE_DRIVER_DETECT =>
         Alert(ModelID, "Axi4Responder: Multiple Drivers on Transaction Record." & 
@@ -796,6 +738,7 @@ begin
 
       -- capture address, prot
       ReadAddressFifo.push(AR.Addr & AR.Prot) ;
+      ReadAddressTransactionFifo.Push(AR.Addr) ;
       increment(ReadAddressReceiveCount) ;
       wait for 0 ns ;
 

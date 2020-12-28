@@ -257,10 +257,7 @@ begin
 
       when WAIT_FOR_CLOCK =>
         WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
---!!          This is probably faster in execution, but requires an accurate tperiod_Clk
---!!          wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
---!!          wait until Clk = '1' ;
-          WaitForClock(Clk, WaitClockCycles) ;
+        WaitForClock(Clk, WaitClockCycles) ;
 
       when GET_ALERTLOG_ID =>
         TransRec.IntFromModel <= integer(ModelID) ;
@@ -297,7 +294,7 @@ begin
       when READ_OP | READ_CHECK =>
         -- Back door Read access to memory.  Completes without time passing.
         Address    := FromTransaction(TransRec.Address) ;
---        ByteAddr   := CalculateAxiByteAddress(Address, AXI_BYTE_ADDR_WIDTH);
+--        ByteAddr   := CalculateByteAddress(Address, AXI_BYTE_ADDR_WIDTH);
         Data       := (others => '0') ;
         DataWidth  := TransRec.DataWidth ;
         NumBytes   := DataWidth / 8 ;

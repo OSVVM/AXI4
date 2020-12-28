@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_RandomReadWriteByte.vhd
+--  File Name:         TbAxi4_RandomReadWriteByte1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -41,7 +41,7 @@
 --  limitations under the License.
 --  
 
-architecture RandomReadWriteByte of TestCtrl is
+architecture RandomReadWriteByte1 of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
   constant AXI_DATA_BYTES : integer := AXI_DATA_WIDTH / 8 ; 
@@ -66,13 +66,13 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_RandomReadWriteByte") ;
+    SetAlertLogName("TbAxi4_RandomReadWriteByte1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_RandomReadWriteByte.txt") ;
+    TranscriptOpen("./results/TbAxi4_RandomReadWriteByte1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -87,7 +87,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_RandomReadWriteByte.txt", "../sim_shared/validated_results/TbAxi4_RandomReadWriteByte.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_RandomReadWriteByte1.txt", "../sim_shared/validated_results/TbAxi4_RandomReadWriteByte1.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 
@@ -254,12 +254,12 @@ begin
   end process ResponderProc ;
 
 
-end RandomReadWriteByte ;
+end RandomReadWriteByte1 ;
 
-Configuration TbAxi4_RandomReadWriteByte of TbAxi4 is
+Configuration TbAxi4_RandomReadWriteByte1 of TbAxi4 is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(RandomReadWriteByte) ; 
+      use entity work.TestCtrl(RandomReadWriteByte1) ; 
     end for ; 
   end for ; 
-end TbAxi4_RandomReadWriteByte ; 
+end TbAxi4_RandomReadWriteByte1 ; 

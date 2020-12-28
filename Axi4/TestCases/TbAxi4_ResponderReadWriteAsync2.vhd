@@ -215,7 +215,7 @@ begin
     end loop ; 
     AffirmIf(Count > 0, "Count " & to_string(Count)) ;
     AffirmIfEqual(Addr, X"1111_1110", "Responder Read Addr: ") ;
-    AsyncSendReadData(ResponderRec, X"2222_2222") ; 
+    SendReadDataAsync(ResponderRec, X"2222_2222") ; 
 
     
     -- Write and Read with 1 Byte, and ByteAddr = 0, 1, 2, 3
@@ -290,7 +290,7 @@ begin
     end loop ; 
     AffirmIf(Count > 0, "Count " & to_string(Count)) ;
     AffirmIfEqual(Addr, X"1111_1110", "Responder Read Addr: ") ;
-    AsyncSendReadData(ResponderRec, X"AA") ; 
+    SendReadDataAsync(ResponderRec, X"AA") ; 
 
     WaitForBarrier(Sync) ;
     Count := 0 ; 
@@ -302,7 +302,7 @@ begin
     end loop ; 
     AffirmIf(Count > 0, "Count " & to_string(Count)) ;
     AffirmIfEqual(Addr, X"1111_1111", "Responder Read Addr: ") ;
-    AsyncSendReadData(ResponderRec, X"BB") ; 
+    SendReadDataAsync(ResponderRec, X"BB") ; 
 
     WaitForBarrier(Sync) ;
     Count := 0 ; 
@@ -314,7 +314,7 @@ begin
     end loop ; 
     AffirmIf(Count > 0, "Count " & to_string(Count)) ;
     AffirmIfEqual(Addr, X"1111_1112", "Responder Read Addr: ") ;
-    AsyncSendReadData(ResponderRec, X"CC") ; 
+    SendReadDataAsync(ResponderRec, X"CC") ; 
 
     WaitForBarrier(Sync) ;
     Count := 0 ; 
@@ -326,7 +326,7 @@ begin
     end loop ; 
     AffirmIf(Count > 0, "Count " & to_string(Count)) ;
     AffirmIfEqual(Addr, X"1111_1113", "Responder Read Addr: ") ;
-    AsyncSendReadData(ResponderRec, X"DD") ; 
+    SendReadDataAsync(ResponderRec, X"DD") ; 
 
 
 
@@ -387,7 +387,7 @@ begin
     end loop ; 
     AffirmIf(Count > 0, "Count " & to_string(Count)) ;
     AffirmIfEqual(Addr, X"1111_1110", "Responder Read Addr: ") ;
-    AsyncSendReadData(ResponderRec, X"BBAA") ; 
+    SendReadDataAsync(ResponderRec, X"BBAA") ; 
 
     WaitForBarrier(Sync) ;
     Count := 0 ; 
@@ -399,7 +399,7 @@ begin
     end loop ; 
     AffirmIf(Count > 0, "Count " & to_string(Count)) ;
     AffirmIfEqual(Addr, X"1111_1111", "Responder Read Addr: ") ;
-    AsyncSendReadData(ResponderRec, X"CCBB") ; 
+    SendReadDataAsync(ResponderRec, X"CCBB") ; 
 
     WaitForBarrier(Sync) ;
     Count := 0 ; 
@@ -411,7 +411,7 @@ begin
     end loop ; 
     AffirmIf(Count > 0, "Count " & to_string(Count)) ;
     AffirmIfEqual(Addr, X"1111_1112", "Responder Read Addr: ") ;
-    AsyncSendReadData(ResponderRec, X"DDCC") ; 
+    SendReadDataAsync(ResponderRec, X"DDCC") ; 
 
 
     -- Write and Read with 3 Bytes and ByteAddr = 0. 1
@@ -456,7 +456,7 @@ begin
     end loop ; 
     AffirmIf(Count > 0, "Count " & to_string(Count)) ;
     AffirmIfEqual(Addr, X"1111_1110", "Responder Read Addr: ") ;
-    AsyncSendReadData(ResponderRec, X"CCBBAA") ; 
+    SendReadDataAsync(ResponderRec, X"CCBBAA") ; 
 
     WaitForBarrier(Sync) ;
     Count := 0 ; 
@@ -468,7 +468,7 @@ begin
     end loop ; 
     AffirmIf(Count > 0, "Count " & to_string(Count)) ;
     AffirmIfEqual(Addr, X"1111_1111", "Responder Read Addr: ") ;
-    AsyncSendReadData(ResponderRec, X"DDCCBB") ; 
+    SendReadDataAsync(ResponderRec, X"DDCCBB") ; 
 
 
     -- Wait for outputs to propagate and signal TestDone

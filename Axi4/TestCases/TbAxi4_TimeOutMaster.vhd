@@ -196,7 +196,7 @@ log(TbMasterID, "Read Address Ready TimeOut test.  Trigger Ready TimeOut twice."
     
     SetAxi4Options(MasterRec, READ_ADDRESS_READY_TIME_OUT, 5) ;
     Read(MasterRec, X"BAD0_0010",  ReadData) ;  -- Read Address Fail
-    AffirmIfEqual(TbMasterID, ReadData, X"BAD0_0010", "AXI Master Read Data: ") ;
+    AffirmIfEqual(TbMasterID, ReadData, X"BAD0_00--", "AXI Master Read Data: ") ;
     WaitForClock(MasterRec, 10) ; 
     print("") ;  print("") ;  
     
@@ -208,7 +208,7 @@ log(TbMasterID, "Read Address Ready TimeOut test.  Trigger Ready TimeOut twice."
     
     SetAxi4Options(MasterRec, READ_ADDRESS_READY_TIME_OUT, 5) ;
     Read(MasterRec, X"BAD0_0020",  ReadData) ;  -- Read Address Fail
-    AffirmIfEqual(TbMasterID, ReadData, X"BAD0_0020", "AXI Master Read Data: ") ;
+    AffirmIfEqual(TbMasterID, ReadData, X"BAD0_00--", "AXI Master Read Data: ") ;
     WaitForClock(MasterRec, 10) ; 
     print("") ;  print("") ;  
     
@@ -274,7 +274,7 @@ WaitForBarrier(TestPhaseStart) ;
 
     GetWrite(ResponderRec, Addr, Data) ;  -- Fail
     AffirmIfEqual(TbResponderID, Addr, X"BAD0_0011", "Responder Write Addr: ") ;
-    AffirmIfEqual(TbResponderID, Data, X"BAD0_0010", "Responder Write Data: ") ;
+    AffirmIfEqual(TbResponderID, Data, X"BAD0_00--", "Responder Write Data: ") ;
     
     GetWrite(ResponderRec, Addr, Data) ; -- Pass
     AffirmIfEqual(TbResponderID, Addr, X"0002_0020", "Responder Write Addr: ") ;
@@ -282,7 +282,7 @@ WaitForBarrier(TestPhaseStart) ;
     
     GetWrite(ResponderRec, Addr, Data) ;  -- Fail
     AffirmIfEqual(TbResponderID, Addr, X"BAD0_0021", "Responder Write Addr: ") ;
-    AffirmIfEqual(TbResponderID, Data, X"BAD0_0020", "Responder Write Data: ") ;
+    AffirmIfEqual(TbResponderID, Data, X"BAD0_00--", "Responder Write Data: ") ;
     
     -- Warning:  it takes one operation before these take impact
     SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 0) ;

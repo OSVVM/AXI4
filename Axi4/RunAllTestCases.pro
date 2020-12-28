@@ -41,37 +41,34 @@
 
 analyze ./TestCases/TbAxi4_BasicReadWrite.vhd
 analyze ./TestCases/TbAxi4_RandomReadWrite.vhd
-analyze ./TestCases/TbAxi4_RandomReadWriteByte.vhd
+analyze ./TestCases/TbAxi4_RandomReadWriteByte1.vhd
+
 analyze ./TestCases/TbAxi4_MemoryReadWrite1.vhd
 analyze ./TestCases/TbAxi4_MemoryReadWrite2.vhd
 analyze ./TestCases/TbAxi4_MemoryBurst1.vhd
 analyze ./TestCases/TbAxi4_MemoryBurstAsync1.vhd
 analyze ./TestCases/TbAxi4_MemoryBurstByte1.vhd
+analyze ./TestCases/TbAxi4_MemoryBurstSparse1.vhd
+
+analyze ./TestCases/TbAxi4_MultipleDriversMaster.vhd
+analyze ./TestCases/TbAxi4_MultipleDriversResponder.vhd
+analyze ./TestCases/TbAxi4_MultipleDriversMemory.vhd
+
+analyze ./TestCases/TbAxi4_AlertLogIDMaster.vhd
+analyze ./TestCases/TbAxi4_AlertLogIDResponder.vhd
+analyze ./TestCases/TbAxi4_AlertLogIDMemory.vhd
 
 analyze ./TestCases/TbAxi4_ReadWriteAsync1.vhd
 analyze ./TestCases/TbAxi4_ReadWriteAsync2.vhd
 analyze ./TestCases/TbAxi4_ReadWriteAsync3.vhd
 analyze ./TestCases/TbAxi4_ReadWriteAsync4.vhd
 
-analyze ./TestCases/TbAxi4_MemoryAsync.vhd
+analyze ./TestCases/TbAxi4_ResponderReadWrite1.vhd
+analyze ./TestCases/TbAxi4_ResponderReadWrite2.vhd
+analyze ./TestCases/TbAxi4_ResponderReadWrite3.vhd
 
-analyze ./TestCases/TbAxi4_TimeOutMaster.vhd
-analyze ./TestCases/TbAxi4_TimeOutResponder.vhd
-analyze ./TestCases/TbAxi4_TimeOutMemory.vhd
-
-analyze ./TestCases/TbAxi4_ReadyTimingMaster.vhd
-analyze ./TestCases/TbAxi4_ReadyTimingResponder.vhd
-analyze ./TestCases/TbAxi4_ReadyTimingMemory.vhd
-
-analyze ./TestCases/TbAxi4_ValidTimingMaster.vhd
-analyze ./TestCases/TbAxi4_ValidTimingMemory.vhd
-analyze ./TestCases/TbAxi4_ValidTimingResponder.vhd
-analyze ./TestCases/TbAxi4_ValidTimingBurstMaster.vhd
-analyze ./TestCases/TbAxi4_ValidTimingBurstMemory.vhd
-
-analyze ./TestCases/TbAxi4_MultipleDriversMaster.vhd
-analyze ./TestCases/TbAxi4_MultipleDriversResponder.vhd
-analyze ./TestCases/TbAxi4_MultipleDriversMemory.vhd
+analyze ./TestCases/TbAxi4_ResponderReadWriteAsync1.vhd
+analyze ./TestCases/TbAxi4_ResponderReadWriteAsync2.vhd
 
 analyze ./TestCases/TbAxi4_TransactionApiMaster.vhd
 analyze ./TestCases/TbAxi4_TransactionApiMasterBurst.vhd
@@ -79,6 +76,15 @@ analyze ./TestCases/TbAxi4_TransactionApiMemory.vhd
 analyze ./TestCases/TbAxi4_TransactionApiMemoryBurst.vhd
 analyze ./TestCases/TbAxi4_TransactionApiResponder.vhd
 
+analyze ./TestCases/TbAxi4_ValidTimingMaster.vhd
+analyze ./TestCases/TbAxi4_ValidTimingMemory.vhd
+analyze ./TestCases/TbAxi4_ValidTimingResponder.vhd
+analyze ./TestCases/TbAxi4_ValidTimingBurstMaster.vhd
+analyze ./TestCases/TbAxi4_ValidTimingBurstMemory.vhd
+
+analyze ./TestCases/TbAxi4_ReadyTimingMaster.vhd
+analyze ./TestCases/TbAxi4_ReadyTimingResponder.vhd
+analyze ./TestCases/TbAxi4_ReadyTimingMemory.vhd
 
 analyze ./TestCases/TbAxi4_AxiIfOptionsMasterMemory.vhd
 analyze ./TestCases/TbAxi4_AxiIfOptionsMasterResponder.vhd
@@ -86,49 +92,59 @@ analyze ./TestCases/TbAxi4_AxiIfOptionsMasterResponder.vhd
 analyze ./TestCases/TbAxi4_AxSizeMasterMemory1.vhd
 analyze ./TestCases/TbAxi4_AxSizeMasterMemory2.vhd
 
-analyze ./TestCases/TbAxi4_AlertLogIDMaster.vhd
-analyze ./TestCases/TbAxi4_AlertLogIDResponder.vhd
-analyze ./TestCases/TbAxi4_AlertLogIDMemory.vhd
+analyze ./TestCases/TbAxi4_TimeOutMaster.vhd
+analyze ./TestCases/TbAxi4_TimeOutResponder.vhd
+analyze ./TestCases/TbAxi4_TimeOutMemory.vhd
+
+analyze ./TestCases/TbAxi4_MemoryAsync.vhd
+
 
 simulate TbAxi4_BasicReadWrite
-simulate TbAxi4_RandomReadWrite    
-simulate TbAxi4_RandomReadWriteByte    
+simulate TbAxi4_RandomReadWrite
+simulate TbAxi4_RandomReadWriteByte1
+
 simulate TbAxi4_MemoryReadWrite1
 simulate TbAxi4_MemoryReadWrite2
 simulate TbAxi4_MemoryBurst1
 simulate TbAxi4_MemoryBurstAsync1
 simulate TbAxi4_MemoryBurstByte1
-
-simulate TbAxi4_ReadWriteAsync1    
-simulate TbAxi4_ReadWriteAsync2    
-simulate TbAxi4_ReadWriteAsync3  
-simulate TbAxi4_ReadWriteAsync4  
-
-simulate TbAxi4_MemoryAsync
-
-simulate TbAxi4_TimeOutMaster    
-simulate TbAxi4_TimeOutResponder    
-simulate TbAxi4_TimeOutMemory    
-
-simulate TbAxi4_ReadyTimingMaster
-simulate TbAxi4_ReadyTimingResponder
-simulate TbAxi4_ReadyTimingMemory
-
-simulate TbAxi4_ValidTimingMaster
-simulate TbAxi4_ValidTimingMemory
-simulate TbAxi4_ValidTimingResponder
-simulate TbAxi4_ValidTimingBurstMaster    
-simulate TbAxi4_ValidTimingBurstMemory  
+simulate TbAxi4_MemoryBurstSparse1
 
 simulate TbAxi4_MultipleDriversMaster
 simulate TbAxi4_MultipleDriversResponder
 simulate TbAxi4_MultipleDriversMemory
-  
+
+simulate TbAxi4_AlertLogIDMaster
+simulate TbAxi4_AlertLogIDResponder
+simulate TbAxi4_AlertLogIDMemory
+
+simulate TbAxi4_ReadWriteAsync1
+simulate TbAxi4_ReadWriteAsync2
+simulate TbAxi4_ReadWriteAsync3
+simulate TbAxi4_ReadWriteAsync4
+
+simulate TbAxi4_ResponderReadWrite1
+simulate TbAxi4_ResponderReadWrite2
+simulate TbAxi4_ResponderReadWrite3
+
+simulate TbAxi4_ResponderReadWriteAsync1
+simulate TbAxi4_ResponderReadWriteAsync2
+
 simulate TbAxi4_TransactionApiMaster
 simulate TbAxi4_TransactionApiMasterBurst
 simulate TbAxi4_TransactionApiMemory
 simulate TbAxi4_TransactionApiMemoryBurst
 simulate TbAxi4_TransactionApiResponder
+
+simulate TbAxi4_ValidTimingMaster
+simulate TbAxi4_ValidTimingMemory
+simulate TbAxi4_ValidTimingResponder
+simulate TbAxi4_ValidTimingBurstMaster
+simulate TbAxi4_ValidTimingBurstMemory
+
+simulate TbAxi4_ReadyTimingMaster
+simulate TbAxi4_ReadyTimingResponder
+simulate TbAxi4_ReadyTimingMemory
 
 simulate TbAxi4_AxiIfOptionsMasterMemory
 simulate TbAxi4_AxiIfOptionsMasterResponder
@@ -136,6 +152,8 @@ simulate TbAxi4_AxiIfOptionsMasterResponder
 simulate TbAxi4_AxSizeMasterMemory1
 simulate TbAxi4_AxSizeMasterMemory2
 
-simulate TbAxi4_AlertLogIDMaster
-simulate TbAxi4_AlertLogIDResponder
-simulate TbAxi4_AlertLogIDMemory
+simulate TbAxi4_TimeOutMaster
+simulate TbAxi4_TimeOutResponder
+simulate TbAxi4_TimeOutMemory
+
+simulate TbAxi4_MemoryAsync

@@ -58,13 +58,12 @@ entity TestCtrl is
   port (
     -- Global Signal Interface
     Clk            : In    std_logic ;
-    nReset         : In    std_logic ;
-
-    -- Transaction Interfaces
-    MasterRec      : inout AddressBusRecType ;
-    ResponderRec   : inout AddressBusRecType 
-
+    nReset         : In    std_logic
   ) ;
+  
+  alias MasterRec    is <<signal ^.Master_1.TransRec : AddressBusRecType>> ;
+  alias ResponderRec is <<signal ^.Responder_1.TransRec : AddressBusRecType>> ;
+  
   constant AXI_ADDR_WIDTH : integer := MasterRec.Address'length ; 
   constant AXI_DATA_WIDTH : integer := MasterRec.DataToModel'length ;  
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;

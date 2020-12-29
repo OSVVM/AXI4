@@ -1,4 +1,4 @@
-#  File Name:         Axi4.pro
+#  File Name:         RunAllTestsVti.pro
 #  Revision:          STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to compile the Axi4 models  
+#        Script to run all Axi4 tests  
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -36,15 +36,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-#
-library osvvm_axi4
-analyze ./src/Axi4ComponentPkg.vhd
-analyze ./src/Axi4ComponentVtiPkg.vhd
-analyze ./src/Axi4Context.vhd
-analyze ./src/Axi4Master.vhd
-analyze ./src/Axi4MasterVti.vhd
-analyze ./src/Axi4Monitor_dummy.vhd
-analyze ./src/Axi4Responder_Transactor.vhd
-analyze ./src/Axi4ResponderVti_Transactor.vhd
-analyze ./src/Axi4Memory.vhd
-analyze ./src/Axi4MemoryVti.vhd
+#  
+library osvvm_TbAxi4Vti
+analyze ./testbenchVti/TestCtrl_e.vhd
+analyze ./testbenchVti/TbAxi4.vhd
+analyze ./testbenchVti/TbAxi4Memory.vhd
+
+include RunAllTestCases.pro

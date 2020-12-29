@@ -40,5 +40,6 @@
 library osvvm_TbAxi4
 analyze ./testbench/TestCtrl_e.vhd
 analyze ./testbench/TbAxi4.vhd
+analyze ./testbench/TbAxi4Memory.vhd
 
 include RunAllTestCases.pro

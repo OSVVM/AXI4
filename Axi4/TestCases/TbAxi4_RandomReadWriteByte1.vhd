@@ -184,8 +184,8 @@ begin
     
     TestActive <= FALSE ; 
     -- Allow Responder to catch up before signaling OperationCount (needed when WRITE_OP is last)
-    -- wait for 0 ns ;  -- this is enough
-    WaitForClock(MasterRec, 2) ;
+    -- Wait must be enough to allow initial WaitForClock in Responder to expire
+    WaitForClock(MasterRec, 10) ;
     Increment(OperationCount) ;
     
     -- Wait for outputs to propagate and signal TestDone

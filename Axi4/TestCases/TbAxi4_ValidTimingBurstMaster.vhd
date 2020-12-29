@@ -211,13 +211,13 @@ begin
 
 end ValidTimingBurstMaster ;
 
-Configuration TbAxi4_ValidTimingBurstMaster of TbAxi4 is
+Configuration TbAxi4_ValidTimingBurstMaster of TbAxi4Memory is
   for TestHarness
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(ValidTimingBurstMaster) ; 
     end for ; 
-    for Responder_1 : Axi4Responder 
-      use entity OSVVM_AXI4.Axi4Memory ; 
-    end for ; 
+--!!    for Responder_1 : Axi4Responder 
+--!!      use entity OSVVM_AXI4.Axi4Memory ; 
+--!!    end for ; 
   end for ; 
 end TbAxi4_ValidTimingBurstMaster ; 

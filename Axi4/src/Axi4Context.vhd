@@ -18,6 +18,7 @@
 --    Date      Version    Description
 --    03/2019   2019.03    Initial Revision
 --    01/2020   2020.01    Updated license notice
+--    12/2020   2020.12    Restructured Component Packages
 --
 --
 --  This file is part of OSVVM.
@@ -40,7 +41,7 @@
 context Axi4Context is
     library osvvm_common ;  
     context osvvm_common.OsvvmCommonContext ;
-      
+
     library osvvm_axi4 ;
 
     use osvvm_axi4.Axi4CommonPkg.all ;
@@ -48,9 +49,9 @@ context Axi4Context is
 
     use osvvm_axi4.Axi4OptionsTypePkg.all ; 
     use osvvm_axi4.Axi4ModelPkg.all ;
-    
-    
+
     use osvvm_axi4.Axi4ComponentPkg.all ;
+    use osvvm_axi4.Axi4ComponentVtiPkg.all ;
 --    use osvvm_axi4.Axi4MasterComponentPkg.all ;
 --    use osvvm_axi4.Axi4ResponderComponentPkg.all ;
 --    use osvvm_axi4.Axi4MemoryComponentPkg.all ;

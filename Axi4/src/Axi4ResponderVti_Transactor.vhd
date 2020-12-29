@@ -1,6 +1,6 @@
 --
---  File Name:         Axi4Responder_Transactor.vhd
---  Design Unit Name:  Axi4Responder
+--  File Name:         Axi4ResponderVti_Transactor.vhd
+--  Design Unit Name:  Axi4ResponderVti
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -59,7 +59,7 @@ library OSVVM_Common ;
   use work.Axi4ModelPkg.all ;
   use work.Axi4CommonPkg.all ;
 
-entity Axi4Responder is
+entity Axi4ResponderVti is
 generic (
   MODEL_ID_NAME   : string := "" ;
   tperiod_Clk     : time   := 10 ns ;
@@ -88,29 +88,34 @@ port (
 
 
   -- AXI Master Functional Interface
-  AxiBus      : inout Axi4RecType ;
-
-  -- Testbench Transaction Interface
-  TransRec    : inout AddressBusRecType
+  AxiBus      : inout Axi4RecType 
 ) ;
 
   -- Model Configuration
   shared variable Params : ModelParametersPType ;
   
-end entity Axi4Responder ;
-
-architecture TransactorResponder of Axi4Responder is
-
   alias    AxiAddr is AxiBus.WriteAddress.Addr ;
   alias    AxiData is AxiBus.WriteData.Data ;
   constant AXI_ADDR_WIDTH : integer := AxiAddr'length ;
   constant AXI_DATA_WIDTH : integer := AxiData'length ;
+
+  -- Testbench Transaction Interface
+  signal TransRec : AddressBusRecType (
+          Address      (AXI_ADDR_WIDTH-1 downto 0),
+          DataToModel  (AXI_DATA_WIDTH-1 downto 0),
+          DataFromModel(AXI_DATA_WIDTH-1 downto 0)
+        ) ;
+        
+end entity Axi4ResponderVti ;
+
+architecture TransactorResponder of Axi4ResponderVti is
+
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 
   -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
-    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Responder'PATH_NAME))) ;
+    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4ResponderVti'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
 
@@ -521,7 +526,7 @@ begin
         wait for 0 ns ; 
 
       when MULTIPLE_DRIVER_DETECT =>
-        Alert(ModelID, "Axi4Responder: Multiple Drivers on Transaction Record." & 
+        Alert(ModelID, "Axi4ResponderVti: Multiple Drivers on Transaction Record." & 
                        "  Transaction # " & to_string(TransactionCount), FAILURE) ;
         wait for 0 ns ;  
 

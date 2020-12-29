@@ -1,6 +1,6 @@
 --
---  File Name:         Axi4Memory.vhd
---  Design Unit Name:  Axi4Memory
+--  File Name:         Axi4MemoryVti.vhd
+--  Design Unit Name:  Axi4MemoryVti
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -57,7 +57,7 @@ library osvvm_common ;
   use work.Axi4CommonPkg.all ;
   use work.Axi4ModelPkg.all ;
 
-entity Axi4Memory is
+entity Axi4MemoryVti is
 generic (
   MODEL_ID_NAME   : string := "" ;
   tperiod_Clk     : time   := 10 ns ;
@@ -86,10 +86,7 @@ port (
   nReset      : in   std_logic ;
 
   -- AXI Responder Interface
-  AxiBus      : inout Axi4RecType ;
-
-  -- Testbench Transaction Interface
-  TransRec    : inout AddressBusRecType
+  AxiBus      : inout Axi4RecType 
 ) ;
 
   -- Memory Model
@@ -98,14 +95,22 @@ port (
   -- Model Configuration
   shared variable Params : ModelParametersPType ;
   
-end entity Axi4Memory ;
-
-architecture MemoryResponder of Axi4Memory is
-
   alias    AxiAddr is AxiBus.WriteAddress.Addr ;
   alias    AxiData is AxiBus.WriteData.Data ;
   constant AXI_ADDR_WIDTH : integer := AxiAddr'length ;
   constant AXI_DATA_WIDTH : integer := AxiData'length ;
+
+  -- Testbench Transaction Interface
+  signal TransRec : AddressBusRecType (
+          Address      (AXI_ADDR_WIDTH-1 downto 0),
+          DataToModel  (AXI_DATA_WIDTH-1 downto 0),
+          DataFromModel(AXI_DATA_WIDTH-1 downto 0)
+        ) ;
+        
+end entity Axi4MemoryVti ;
+
+architecture MemoryResponder of Axi4MemoryVti is
+
   constant AXI_DATA_BYTE_WIDTH  : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH  : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 
@@ -113,7 +118,7 @@ architecture MemoryResponder of Axi4Memory is
 --!! Move IfElse to ConditionalPkg in OSVVM library
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
-    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Memory'PATH_NAME))) ;
+    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4MemoryVti'PATH_NAME))) ;
 
   signal ModelID, BusFailedID, DataCheckID : AlertLogIDType ;
 
@@ -375,7 +380,7 @@ begin
         end if ;
 
       when MULTIPLE_DRIVER_DETECT =>
-        Alert(ModelID, "Axi4Memory: Multiple Drivers on Transaction Record." & 
+        Alert(ModelID, "Axi4MemoryVti: Multiple Drivers on Transaction Record." & 
                        "  Transaction # " & to_string(TransactionCount), FAILURE) ;
         wait for 0 ns ;  
 

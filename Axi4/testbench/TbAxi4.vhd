@@ -74,7 +74,7 @@ architecture TestHarness of TbAxi4 is
 --  ) ;
 --  signal MasterRec   : LocalTransactionRecType ;
 --  signal ResponderRec  : LocalTransactionRecType ;
-  signal MasterRec, ResponderRec  : AddressBusRecType(
+  signal MasterRec, ResponderRec  : AddressBusRecType (
           Address(AXI_ADDR_WIDTH-1 downto 0),
           DataToModel(AXI_DATA_WIDTH-1 downto 0),
           DataFromModel(AXI_DATA_WIDTH-1 downto 0)

@@ -97,7 +97,7 @@ begin
     tpd         => tpd
   ) ;
   
-  AxiStreamTransmitter_1 : AxiStreamTransmitter_VTI 
+  AxiStreamTransmitter_1 : AxiStreamTransmitterVti 
     generic map (
       INIT_ID        => INIT_ID  , 
       INIT_DEST      => INIT_DEST, 
@@ -132,7 +132,7 @@ begin
       TLast     => TLast 
     ) ;
   
-  AxiStreamReceiver_1 : AxiStreamReceiver_VTI
+  AxiStreamReceiver_1 : AxiStreamReceiverVti
     generic map (
       tperiod_Clk    => tperiod_Clk,
       INIT_ID        => INIT_ID  , 

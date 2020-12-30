@@ -215,7 +215,9 @@ begin
       when GET | TRY_GET | CHECK | TRY_CHECK =>
         if ReceiveFifo.empty and  IsTry(Operation) then
           -- Return if no data
-          TransRec.BoolFromModel <= FALSE ; 
+          TransRec.BoolFromModel  <= FALSE ; 
+          TransRec.DataFromModel  <= (others => '0') ; 
+          TransRec.ParamFromModel <= (others => '0') ;  
           wait for 0 ns ; 
         else 
           -- Get data
@@ -243,9 +245,9 @@ begin
           end if ; 
           
           if IsCheck(Operation) then 
-            ExpectedData  := std_logic_vector(TransRec.DataToModel) ;
+            ExpectedData  := FromTransaction(TransRec.DataToModel, ExpectedData'length) ;
             ExpectedParam  := UpdateOptions(
-                        Param      => std_logic_vector(TransRec.ParamToModel),
+                        Param      => FromTransaction(TransRec.ParamToModel, ExpectedParam'length),
                         ParamID    => ParamID, 
                         ParamDest  => ParamDest,
                         ParamUser  => ParamUser,
@@ -273,7 +275,9 @@ begin
       when GET_BURST | TRY_GET_BURST =>
         if (BurstReceiveCount - BurstTransferCount) = 0 and IsTry(Operation) then
           -- Return if no data
-          TransRec.BoolFromModel <= FALSE ; 
+          TransRec.BoolFromModel  <= FALSE ; 
+          TransRec.DataFromModel  <= (others => '0') ; 
+          TransRec.ParamFromModel <= (others => '0') ;  
           wait for 0 ns ; 
         else
           -- Get data
@@ -328,7 +332,9 @@ begin
       when CHECK_BURST | TRY_CHECK_BURST =>
         if (BurstReceiveCount - BurstTransferCount) = 0 and IsTry(Operation) then
           -- Return if no data
-          TransRec.BoolFromModel <= FALSE ; 
+          TransRec.BoolFromModel  <= FALSE ; 
+          TransRec.DataFromModel  <= (others => '0') ; 
+          TransRec.ParamFromModel <= (others => '0') ;  
           wait for 0 ns ; 
         else
           -- Get data
@@ -384,7 +390,7 @@ begin
             ) ;
           end if ; 
           ExpectedParam  := UpdateOptions(
-                      Param      => std_logic_vector(TransRec.ParamToModel),
+                      Param      => FromTransaction(TransRec.ParamToModel, ExpectedParam'length),
                       ParamID    => ParamID, 
                       ParamDest  => ParamDest,
                       ParamUser  => ParamUser,

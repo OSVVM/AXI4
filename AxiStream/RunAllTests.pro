@@ -44,11 +44,3 @@ analyze ./Testbench/TestCtrl_e.vhd
 analyze ./Testbench/TbStream.vhd
 
 include RunAllTestCases.pro
-
-
-# Run same AxiStream Tests on VTI models
-library osvvm_TbAxiStream_VTI
-analyze ./TestbenchVTI/TestCtrl_e.vhd
-analyze ./TestbenchVTI/TbStream.vhd
-
-include RunAllTestCases.pro

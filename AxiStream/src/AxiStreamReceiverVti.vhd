@@ -1,6 +1,6 @@
 --
---  File Name:         AxiStreamReceiver_VTI.vhd
---  Design Unit Name:  AxiStreamReceiver_VTI
+--  File Name:         AxiStreamReceiverVti.vhd
+--  Design Unit Name:  AxiStreamReceiverVti
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -60,7 +60,7 @@ library osvvm_common ;
   use work.Axi4CommonPkg.all ; 
   use work.AxiStreamTbPkg.all ;
 
-entity AxiStreamReceiver_VTI is
+entity AxiStreamReceiverVti is
   generic (
     MODEL_ID_NAME  : string :="" ;
     INIT_ID        : std_logic_vector := "" ; 
@@ -100,8 +100,8 @@ entity AxiStreamReceiver_VTI is
 
   shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
 
-end entity AxiStreamReceiver_VTI ;
-architecture behavioral of AxiStreamReceiver_VTI is
+end entity AxiStreamReceiverVti ;
+architecture behavioral of AxiStreamReceiverVti is
 
   constant AXI_STREAM_DATA_BYTE_WIDTH : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
   constant ID_LEN       : integer := TID'length ;
@@ -114,7 +114,7 @@ architecture behavioral of AxiStreamReceiver_VTI is
 
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
-    IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamReceiver_VTI'PATH_NAME))) ;
+    IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamReceiverVti'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID, BurstFifoID : AlertLogIDType ; 
   
@@ -225,7 +225,9 @@ begin
       when GET | TRY_GET | CHECK | TRY_CHECK =>
         if ReceiveFifo.empty and  IsTry(Operation) then
           -- Return if no data
-          TransRec.BoolFromModel <= FALSE ; 
+          TransRec.BoolFromModel  <= FALSE ; 
+          TransRec.DataFromModel  <= (others => '0') ; 
+          TransRec.ParamFromModel <= (others => '0') ;  
           wait for 0 ns ; 
         else 
           -- Get data
@@ -253,9 +255,9 @@ begin
           end if ; 
           
           if IsCheck(Operation) then 
-            ExpectedData  := std_logic_vector(TransRec.DataToModel) ;
+            ExpectedData  := FromTransaction(TransRec.DataToModel, ExpectedData'length) ;
             ExpectedParam  := UpdateOptions(
-                        Param      => std_logic_vector(TransRec.ParamToModel),
+                        Param      => FromTransaction(TransRec.ParamToModel, ExpectedParam'length),
                         ParamID    => ParamID, 
                         ParamDest  => ParamDest,
                         ParamUser  => ParamUser,
@@ -283,7 +285,9 @@ begin
       when GET_BURST | TRY_GET_BURST =>
         if (BurstReceiveCount - BurstTransferCount) = 0 and IsTry(Operation) then
           -- Return if no data
-          TransRec.BoolFromModel <= FALSE ; 
+          TransRec.BoolFromModel  <= FALSE ; 
+          TransRec.DataFromModel  <= (others => '0') ; 
+          TransRec.ParamFromModel <= (others => '0') ;  
           wait for 0 ns ; 
         else
           -- Get data
@@ -339,6 +343,8 @@ begin
         if (BurstReceiveCount - BurstTransferCount) = 0 and IsTry(Operation) then
           -- Return if no data
           TransRec.BoolFromModel <= FALSE ; 
+          TransRec.DataFromModel  <= (others => '0') ; 
+          TransRec.ParamFromModel <= (others => '0') ;  
           wait for 0 ns ; 
         else
           -- Get data
@@ -394,7 +400,7 @@ begin
             ) ;
           end if ; 
           ExpectedParam  := UpdateOptions(
-                      Param      => std_logic_vector(TransRec.ParamToModel),
+                      Param      => FromTransaction(TransRec.ParamToModel, ExpectedParam'length),
                       ParamID    => ParamID, 
                       ParamDest  => ParamDest,
                       ParamUser  => ParamUser,

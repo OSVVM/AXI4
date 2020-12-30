@@ -1,6 +1,6 @@
 --
---  File Name:         AxiStreamTransmitter_VTI.vhd
---  Design Unit Name:  AxiStreamTransmitter_VTI
+--  File Name:         AxiStreamTransmitterVti.vhd
+--  Design Unit Name:  AxiStreamTransmitterVti
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -59,7 +59,7 @@ library osvvm_common ;
   use work.Axi4CommonPkg.all ; 
   use work.AxiStreamTbPkg.all ;
 
-entity AxiStreamTransmitter_VTI is
+entity AxiStreamTransmitterVti is
   generic (
     MODEL_ID_NAME  : string := "" ;
     INIT_ID        : std_logic_vector := "" ; 
@@ -107,15 +107,15 @@ entity AxiStreamTransmitter_VTI is
   
   shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
 
-end entity AxiStreamTransmitter_VTI ;
-architecture SimpleTransmitter of AxiStreamTransmitter_VTI is
+end entity AxiStreamTransmitterVti ;
+architecture SimpleTransmitter of AxiStreamTransmitterVti is
 
 
   constant AXI_STREAM_DATA_BYTE_WIDTH  : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
 
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
-    IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamTransmitter_VTI'PATH_NAME))) ;
+    IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamTransmitterVti'PATH_NAME))) ;
 
   signal ModelID, BusFailedID : AlertLogIDType ; 
 --  signal ProtocolID, DataCheckID : AlertLogIDType ; 

@@ -205,7 +205,6 @@ begin
     alias    LAR is AxiLocal.ReadAddress ;
     alias    LRD is AxiLocal.ReadData ;
 
-    variable WaitClockCycles     : integer ;
     alias WriteAddr           is LAW.Addr ;
     alias WriteProt           is LAW.Prot ;
 
@@ -237,9 +236,7 @@ begin
 
     case TransRec.Operation is
       when WAIT_FOR_CLOCK =>
-        WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
-        wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
-        wait until Clk = '1' ;
+        WaitForClock(Clk, TransRec.IntToModel) ;
 
       when GET_ALERTLOG_ID =>
         TransRec.IntFromModel <= integer(ModelID) ;
@@ -263,11 +260,11 @@ begin
         if (IsTryWriteAddress(TransRec.Operation) and WriteAddressFifo.empty) or
            (IsTryWriteData(TransRec.Operation)    and WriteDataFifo.empty) then
           WriteAvailable         := FALSE ;
-          TransRec.BoolFromModel <= FALSE ;
+          TransRec.DataFromModel <= (others => '0') ; 
         else
           WriteAvailable         := TRUE ;
-          TransRec.BoolFromModel <= TRUE ;
         end if ;
+        TransRec.BoolFromModel <= WriteAvailable ;
 
         if WriteAvailable and IsWriteAddress(TransRec.Operation) then
           -- Find Write Address transaction
@@ -276,7 +273,7 @@ begin
           end if ;
 
           (WriteAddr, WriteProt) := WriteAddressFifo.pop ;
-          TransRec.Address        <= ToTransaction(WriteAddr) ;
+          TransRec.Address        <= ToTransaction(WriteAddr, TransRec.Address'length) ;
           FoundWriteAddress := TRUE ;
 
           AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "SlaveGetWrite, Address length does not match", FAILURE) ;
@@ -301,7 +298,7 @@ begin
 --          if TransRec.DataWidth < AXI_DATA_WIDTH then 
 --            WriteData := WriteData srl ByteAddr * 8 ; 
 --          end if ; 
-          TransRec.DataFromModel  <= ToTransaction(WriteData) ;
+          TransRec.DataFromModel  <= ToTransaction(WriteData, TransRec.DataFromModel'length) ;
 --          if WriteLast = '1' then
             FoundLastWriteData := TRUE ;
             WriteResponseFifo.push(ModelWResp) ;
@@ -363,7 +360,7 @@ begin
             WaitForToggle(ReadAddressReceiveCount) ;
           end if ;
           (ReadAddr, ReadProt) := ReadAddressFifo.pop ;
-          TransRec.Address        <= ToTransaction(ReadAddr) ;
+          TransRec.Address        <= ToTransaction(ReadAddr, TransRec.Address'length) ;
           AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Slave Read, Address length does not match", FAILURE) ;
   --!TODO Add Check here for actual PROT vs expected (ModelRProt)
   --        TransRec.Prot           <= to_integer(ReadProt) ;
@@ -373,7 +370,7 @@ begin
 
           -- Push Read Data Response Values
           -- Get Read Data Response Values
-          ReadData := FromTransaction(TransRec.DataToModel) ;
+          ReadData := FromTransaction(TransRec.DataToModel, ReadData'length) ;
           ReadDataFifo.push(ReadData & ModelRResp) ;
 
           -- Data Sizing Checks

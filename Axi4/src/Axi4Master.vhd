@@ -214,7 +214,6 @@ begin
   --    Dispatches transactions to
   ------------------------------------------------------------
   TransactionDispatcher : process
-    variable WaitClockCycles    : integer ;
     variable ReadDataTransactionCount : integer := 1 ;
     variable ByteCount          : integer ;
     variable TransfersInBurst   : integer ;
@@ -359,8 +358,7 @@ begin
           wait for 0 ns ; 
 
         when WAIT_FOR_CLOCK =>
-          WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
-          WaitForClock(Clk, WaitClockCycles) ;
+          WaitForClock(Clk, TransRec.IntToModel) ;
 
         when GET_ALERTLOG_ID =>
           TransRec.IntFromModel <= integer(ModelID) ;
@@ -410,7 +408,7 @@ begin
             -- Single Transfer Write Data Handling
             CheckDataIsBytes(ModelID, TransRec.DataWidth, "Master Write: ", WriteDataRequestCount+1) ;
             CheckDataWidth  (ModelID, TransRec.DataWidth, WriteByteAddr, AXI_DATA_WIDTH, "Master Write: ", WriteDataRequestCount+1) ;
-            WriteData  := AlignBytesToDataBus(FromTransaction(TransRec.DataToModel), TransRec.DataWidth, WriteByteAddr) ;
+            WriteData  := AlignBytesToDataBus(FromTransaction(TransRec.DataToModel, WriteData'length), TransRec.DataWidth, WriteByteAddr) ;
             WriteStrb  := CalculateWriteStrobe(WriteData) ;
             WriteDataFifo.Push('0' & '1' & WriteData & WriteStrb & LWD.User & LWD.ID) ;
 
@@ -445,7 +443,7 @@ begin
 
         -- Model Transaction Dispatch
         when WRITE_BURST | ASYNC_WRITE_BURST =>
-          WriteAddress  := FromTransaction(TransRec.Address) ;
+          WriteAddress  := FromTransaction(TransRec.Address, WriteAddress'length) ;
           WriteByteAddr := CalculateByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH);
           BytesPerTransfer := AXI_DATA_BYTE_WIDTH ;
 --!!          BytesPerTransfer := 2**to_integer(LAW.Size);
@@ -521,7 +519,7 @@ begin
         when READ_OP | READ_CHECK | READ_ADDRESS | READ_DATA | READ_DATA_CHECK | ASYNC_READ_ADDRESS | ASYNC_READ_DATA | ASYNC_READ_DATA_CHECK =>
           if IsReadAddress(Operation) then
             -- Send Read Address to Read Address Handler and Read Data Handler
-            ReadAddress   :=  FromTransaction(TransRec.Address) ;
+            ReadAddress   :=  FromTransaction(TransRec.Address, ReadAddress'length) ;
             ReadByteAddr  :=  CalculateByteAddress(ReadAddress, AXI_BYTE_ADDR_WIDTH);
             AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Read Address length does not match", FAILURE) ;
             BytesPerTransfer := 2**to_integer(LAR.Size);
@@ -542,6 +540,7 @@ begin
             -- Data not available
             -- ReadDataReceiveCount < ReadDataTransactionCount then
             TransRec.BoolFromModel <= FALSE ;
+            TransRec.DataFromModel <= (others => '0') ; 
           elsif IsReadData(Operation) then
             (ReadAddress, ReadProt) := ReadAddressTransactionFifo.Pop ;
             ReadByteAddr  :=  CalculateByteAddress(ReadAddress, AXI_BYTE_ADDR_WIDTH);
@@ -558,11 +557,11 @@ begin
             CheckDataWidth  (ModelID, TransRec.DataWidth, ReadByteAddr, AXI_DATA_WIDTH, "Master Read: ", ReadDataExpectCount) ;
             ReadData := AlignDataBusToBytes(ReadData, TransRec.DataWidth, ReadByteAddr) ;
 --            AxiReadDataAlignCheck (ModelID, ReadData, TransRec.DataWidth, ReadAddress, AXI_DATA_BYTE_WIDTH, AXI_BYTE_ADDR_WIDTH) ;
-            TransRec.DataFromModel <= ToTransaction(ReadData) ;
+            TransRec.DataFromModel <= ToTransaction(ReadData, TransRec.DataFromModel'length) ;
 
             -- Check or Log Read Data
             if IsReadCheck(TransRec.Operation) then
-              ExpectedData := FromTransaction(TransRec.DataToModel) ;
+              ExpectedData := FromTransaction(TransRec.DataToModel, ExpectedData'length) ;
   --!!9 TODO:  Change format to Transaction #, Address, Prot, Read Data
   --!! Run regressions before changing
               AffirmIf( DataCheckID, ReadData = ExpectedData,
@@ -590,7 +589,7 @@ begin
         when READ_BURST =>
           if IsReadAddress(Operation) then
             -- Send Read Address to Read Address Handler and Read Data Handler
-            ReadAddress   :=  FromTransaction(TransRec.Address) ;
+            ReadAddress   :=  FromTransaction(TransRec.Address, ReadAddress'length) ;
             ReadByteAddr  :=  CalculateByteAddress(ReadAddress, AXI_BYTE_ADDR_WIDTH);
 --            AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Read Address length does not match", FAILURE) ;
             BytesPerTransfer := 2**to_integer(LAR.Size);

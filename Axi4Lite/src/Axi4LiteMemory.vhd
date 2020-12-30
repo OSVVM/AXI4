@@ -217,7 +217,6 @@ begin
   --    Handles transactions between TestCtrl and Model
   ------------------------------------------------------------
   TransactionDispatcher : process
-    variable WaitClockCycles  : integer ;
 --!GHDL    variable Address          : AxiAddr'subtype ;
 --!GHDL    variable Data             : AxiData'subtype ;
 --!GHDL    variable ExpectedData     : AxiData'subtype ;
@@ -236,9 +235,7 @@ begin
 
     case TransRec.Operation is
       when WAIT_FOR_CLOCK =>
-        WaitClockCycles := FromTransaction(TransRec.DataToModel) ;
-        wait for (WaitClockCycles * tperiod_Clk) - 1 ns ;
-        wait until Clk = '1' ;
+        WaitForClock(Clk, TransRec.IntToModel) ;
 
       when GET_ALERTLOG_ID =>
         TransRec.IntFromModel <= integer(ModelID) ;
@@ -258,8 +255,8 @@ begin
 
       when WRITE_OP =>
         -- Back door Write access to memory.  Completes without time passing.
-        Address    := FromTransaction(TransRec.Address) ;
-        Data       := FromTransaction(TransRec.DataToModel) ;
+        Address    := FromTransaction(TransRec.Address, Address'length) ;
+        Data       := FromTransaction(TransRec.DataToModel, Data'length) ;
         DataWidth  := TransRec.DataWidth ;
         NumBytes   := DataWidth / 8 ;
 
@@ -274,7 +271,7 @@ begin
 
       when READ_OP | READ_CHECK =>
         -- Back door Read access to memory.  Completes without time passing.
-        Address    := FromTransaction(TransRec.Address) ;
+        Address    := FromTransaction(TransRec.Address, Address'length) ;
 --        ByteAddr   := CalculateAxiByteAddress(Address, AXI_BYTE_ADDR_WIDTH);
         Data       := (others => '0') ;
         DataWidth  := TransRec.DataWidth ;
@@ -290,10 +287,10 @@ begin
           Data((8*i + 7)  downto 8*i) := ByteData ;
         end loop ;
 
-        TransRec.DataFromModel <= ToTransaction(Data) ;
+        TransRec.DataFromModel <= ToTransaction(Data, TransRec.DataFromModel'length) ;
 
         if IsReadCheck(TransRec.Operation) then
-          ExpectedData := FromTransaction(TransRec.DataToModel) ;
+          ExpectedData := FromTransaction(TransRec.DataToModel, ExpectedData'length) ;
           AffirmIf( DataCheckID, Data = ExpectedData,
             "Read Address: " & to_hstring(Address) &
             "  Data: " & to_hstring(Data) &

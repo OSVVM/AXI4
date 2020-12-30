@@ -95,7 +95,7 @@ package AxiStreamComponentPkg is
     ) ;
   end component AxiStreamTransmitter ;
   
-  component AxiStreamTransmitter_VTI is
+  component AxiStreamTransmitterVti is
     generic (
       MODEL_ID_NAME  : string :="" ;
       INIT_ID        : std_logic_vector := "" ; 
@@ -130,7 +130,7 @@ package AxiStreamComponentPkg is
       TKeep     : out std_logic_vector ; 
       TLast     : out std_logic 
     ) ;
-  end component AxiStreamTransmitter_VTI ;
+  end component AxiStreamTransmitterVti ;
 
   component AxiStreamReceiver is
     generic (
@@ -164,7 +164,7 @@ package AxiStreamComponentPkg is
     ) ;
   end component AxiStreamReceiver ;
   
-  component AxiStreamReceiver_VTI is
+  component AxiStreamReceiverVti is
     generic (
       MODEL_ID_NAME  : string :="" ;
       INIT_ID        : std_logic_vector := "" ; 
@@ -191,7 +191,7 @@ package AxiStreamComponentPkg is
       TKeep     : in  std_logic_vector ; 
       TLast     : in  std_logic  
     ) ;
-  end component AxiStreamReceiver_VTI ;
+  end component AxiStreamReceiverVti ;
 
 
 end package AxiStreamComponentPkg ;

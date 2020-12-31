@@ -1,6 +1,6 @@
 --
---  File Name:         Axi4OptionsTypePkg.vhd
---  Design Unit Name:  Axi4OptionsTypePkg
+--  File Name:         Axi4OptionsPkg.vhd
+--  Design Unit Name:  Axi4OptionsPkg
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -54,7 +54,7 @@ library OSVVM_Common ;
 use work.Axi4InterfacePkg.all ; 
 
 
-package Axi4OptionsTypePkg is
+package Axi4OptionsPkg is
 
   type Axi4UnresolvedOptionsType is (
     -- AXI4 Model Options
@@ -370,12 +370,12 @@ package Axi4OptionsTypePkg is
   alias GetAxiParameter is GetAxi4InterfaceDefault[Axi4BaseRecType, Axi4OptionsType return integer] ;
 
 
-end package Axi4OptionsTypePkg ;
+end package Axi4OptionsPkg ;
 
 -- /////////////////////////////////////////////////////////////////////////////////////////
 -- /////////////////////////////////////////////////////////////////////////////////////////
 
-package body Axi4OptionsTypePkg is
+package body Axi4OptionsPkg is
 
   function resolved_max(A : Axi4UnresolvedOptionsVectorType) return Axi4UnresolvedOptionsType is
   begin
@@ -811,4 +811,4 @@ package body Axi4OptionsTypePkg is
   end function GetAxi4InterfaceDefault ;
   
  
-end package body Axi4OptionsTypePkg ;
+end package body Axi4OptionsPkg ;

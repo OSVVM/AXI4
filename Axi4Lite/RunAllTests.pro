@@ -37,7 +37,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
-library osvvm_TbAxi4
+library osvvm_TbAxi4Lite
 analyze ./testbench/TestCtrl_e.vhd
 analyze ./testbench/TbAxi4.vhd
 analyze ./testbench/TbAxi4_BasicReadWrite.vhd

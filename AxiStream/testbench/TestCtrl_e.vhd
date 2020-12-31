@@ -47,9 +47,6 @@ library ieee ;
 library OSVVM ; 
   context OSVVM.OsvvmContext ; 
 
-library osvvm_common ;
-  context osvvm_common.OsvvmCommonContext ;
-
 library osvvm_AXI4 ;
     context osvvm_AXI4.AxiStreamContext ;
 
@@ -61,7 +58,6 @@ entity TestCtrl is
   ) ;
   port (
       -- Global Signal Interface
-      Clk                : In    std_logic ;
       nReset             : In    std_logic ;
 
       -- Transaction Interfaces
@@ -69,9 +65,13 @@ entity TestCtrl is
       StreamRxRec        : InOut StreamRecType 
 
   ) ;
+
+  -- Derive AXI interface properties from the StreamTxRec
   constant DATA_WIDTH : integer := StreamTxRec.DataToModel'length ; 
   constant DATA_BYTES : integer := DATA_WIDTH/8 ; 
   
-  alias TxBurstFifo is <<variable .TbStream.AxiStreamTransmitter_1.BurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
-  alias RxBurstFifo is <<variable .TbStream.AxiStreamReceiver_1.BurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+  -- Access Burst FIFOs in Axi4Master using external names
+  alias TxBurstFifo is <<variable ^.Transmitter_1.BurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+  alias RxBurstFifo is <<variable ^.Receiver_1.BurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+
 end entity TestCtrl ;

@@ -48,9 +48,6 @@ library ieee ;
 library osvvm ;
     context osvvm.OsvvmContext ;
     
-library osvvm_common ;
-  context osvvm_common.OsvvmCommonContext ;
-
 library osvvm_AXI4 ;
     context osvvm_AXI4.AxiStreamContext ;
     use     osvvm_AXI4.AxiStreamSignalsPkg_32.all ;
@@ -74,7 +71,6 @@ architecture TestHarness of TbStream is
     ) ;
     port (
       -- Global Signal Interface
-      Clk             : In    std_logic ;
       nReset          : In    std_logic ;
 
       -- Transaction Interfaces
@@ -101,7 +97,7 @@ begin
     tpd         => tpd
   ) ;
   
-  AxiStreamTransmitter_1 : AxiStreamTransmitterVti 
+  Transmitter_1 : AxiStreamTransmitterVti 
     generic map (
       INIT_ID        => INIT_ID  , 
       INIT_DEST      => INIT_DEST, 
@@ -136,7 +132,7 @@ begin
       TLast     => TLast 
     ) ;
   
-  AxiStreamReceiver_1 : AxiStreamReceiverVti
+  Receiver_1 : AxiStreamReceiverVti
     generic map (
       tperiod_Clk    => tperiod_Clk,
       INIT_ID        => INIT_ID  , 
@@ -172,12 +168,11 @@ begin
   ) 
   port map ( 
     -- Globals
-    Clk          => Clk,
     nReset       => nReset,
     
     -- Testbench Transaction Interfaces
-    StreamTxRec  => <<signal .TbStream.AxiStreamTransmitter_1.TransRec : StreamRecType>>, 
-    StreamRxRec  => <<signal .TbStream.AxiStreamReceiver_1.TransRec : StreamRecType>>  
+    StreamTxRec  => <<signal .TbStream.Transmitter_1.TransRec : StreamRecType>>, 
+    StreamRxRec  => <<signal .TbStream.Receiver_1.TransRec : StreamRecType>>  
   ) ; 
 
 end architecture TestHarness ;

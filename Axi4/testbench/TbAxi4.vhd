@@ -192,7 +192,6 @@ architecture TestHarness of TbAxi4 is
   component TestCtrl is
     port (
       -- Global Signal Interface
-      Clk            : In    std_logic ;
       nReset         : In    std_logic ;
 
       -- Transaction Interfaces
@@ -288,11 +287,10 @@ begin
 
   TestCtrl_1 : TestCtrl
   port map (
-    -- Globals
-    Clk           => Clk,
+    -- Global Signal Interface
     nReset        => nReset,
 
-    -- Testbench Transaction Interfaces
+    -- Transaction Interfaces
     MasterRec     => MasterRec,
     ResponderRec  => ResponderRec
   ) ;

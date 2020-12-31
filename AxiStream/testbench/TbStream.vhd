@@ -48,12 +48,8 @@ library ieee ;
 library osvvm ;
     context osvvm.OsvvmContext ;
     
-library osvvm_common ;
-  context osvvm_common.OsvvmCommonContext ;
-
 library osvvm_AXI4 ;
     context osvvm_AXI4.AxiStreamContext ;
---    use     osvvm_AXI4.AxiStreamSignalsPkg_32.all ;
     
 entity TbStream is
 end entity TbStream ; 
@@ -65,54 +61,6 @@ architecture TestHarness of TbStream is
   signal Clk       : std_logic ;
   signal nReset    : std_logic ;
   
-  
---!! Broken in Modelsim AE 2020.2
-  -- Create signals and transaction interface for AxiStream TX model
---  package AxiStreamPkg is new osvvm_axi4.AxiStreamGenericSignalsPkg
---    generic map (
---      AXI_DATA_WIDTH   => 32, 
---      AXI_BYTE_WIDTH   => 4, 
---      TID_MAX_WIDTH    => 8,
---      TDEST_MAX_WIDTH  => 4,
---      TUSER_MAX_WIDTH  => 4
---    ) ;  
---
---  use AxiStreamPkg.all ;
-  
---  constant AXI_DATA_WIDTH   : integer := 32 ; 
---  constant AXI_BYTE_WIDTH   : integer := AXI_DATA_WIDTH/8 ; 
---  constant TID_MAX_WIDTH    : integer := 8 ;
---  constant TDEST_MAX_WIDTH  : integer := 4 ;
---  constant TUSER_MAX_WIDTH  : integer := 1 * AXI_BYTE_WIDTH ;
---  
---  constant DEFAULT_ID     : std_logic_vector(TID_MAX_WIDTH-1 downto 0) := B"0000_0000" ; 
---  constant DEFAULT_DEST   : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) := "0000" ; 
---  constant DEFAULT_USER   : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) := "0000" ; 
-  
---    signal TValid    : std_logic ;
---    signal TReady    : std_logic ; 
---    signal TID       : std_logic_vector(TID_MAX_WIDTH-1 downto 0) ; 
---    signal TDest     : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) ; 
---    signal TUser     : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) ; 
---    signal TData     : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ; 
---    signal TStrb     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
---    signal TKeep     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
---    signal TLast     : std_logic ; 
---   
---    -- Testbench Transaction Interface
---    subtype TransactionRecType is AxiStreamTransactionRecType(
---      DataToModel(AXI_DATA_WIDTH-1 downto 0),
---      DataFromModel(XI_DATA_WIDTH-1 downto 0)
---    ) ;  
---    signal StreamTxRec : TransactionRecType ;
---    signal StreamRxRec : TransactionRecType ;
-  
-  -- MTI fails with the following ...
-  -- alias StreamTxRec : TransactionRecType is TransRec ; 
-  -- however it is ok with:
---  signal StreamTxRec : TransactionRecType ;
---  signal StreamRxRec : TransactionRecType ;
-
   constant AXI_DATA_WIDTH   : integer := 32 ;
   constant AXI_BYTE_WIDTH   : integer := AXI_DATA_WIDTH/8 ; 
   constant TID_MAX_WIDTH    : integer := 8 ;
@@ -151,7 +99,6 @@ architecture TestHarness of TbStream is
     ) ;
     port (
       -- Global Signal Interface
-      Clk             : In    std_logic ;
       nReset          : In    std_logic ;
 
       -- Transaction Interfaces
@@ -178,7 +125,7 @@ begin
     tpd         => tpd
   ) ;
   
-  AxiStreamTransmitter_1 : AxiStreamTransmitter 
+  Transmitter_1 : AxiStreamTransmitter 
     generic map (
       INIT_ID        => INIT_ID  , 
       INIT_DEST      => INIT_DEST, 
@@ -216,7 +163,7 @@ begin
       TransRec  => StreamTxRec
     ) ;
   
-  AxiStreamReceiver_1 : AxiStreamReceiver
+  Receiver_1 : AxiStreamReceiver
     generic map (
       tperiod_Clk    => tperiod_Clk,
       INIT_ID        => INIT_ID  , 
@@ -255,7 +202,6 @@ begin
   ) 
   port map ( 
     -- Globals
-    Clk          => Clk,
     nReset       => nReset,
     
     -- Testbench Transaction Interfaces

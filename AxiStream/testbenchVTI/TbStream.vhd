@@ -48,9 +48,6 @@ library ieee ;
 library osvvm ;
     context osvvm.OsvvmContext ;
     
-library osvvm_common ;
-  context osvvm_common.OsvvmCommonContext ;
-
 library osvvm_AXI4 ;
     context osvvm_AXI4.AxiStreamContext ;
     use     osvvm_AXI4.AxiStreamSignalsPkg_32.all ;
@@ -74,7 +71,6 @@ architecture TestHarness of TbStream is
     ) ;
     port (
       -- Global Signal Interface
-      Clk             : In    std_logic ;
       nReset          : In    std_logic 
     ) ;
   end component TestCtrl ;
@@ -97,7 +93,7 @@ begin
     tpd         => tpd
   ) ;
   
-  AxiStreamTransmitter_1 : AxiStreamTransmitterVti 
+  Transmitter_1 : AxiStreamTransmitterVti 
     generic map (
       INIT_ID        => INIT_ID  , 
       INIT_DEST      => INIT_DEST, 
@@ -132,7 +128,7 @@ begin
       TLast     => TLast 
     ) ;
   
-  AxiStreamReceiver_1 : AxiStreamReceiverVti
+  Receiver_1 : AxiStreamReceiverVti
     generic map (
       tperiod_Clk    => tperiod_Clk,
       INIT_ID        => INIT_ID  , 
@@ -168,7 +164,6 @@ begin
   ) 
   port map ( 
     -- Globals
-    Clk          => Clk,
     nReset       => nReset
   ) ; 
 

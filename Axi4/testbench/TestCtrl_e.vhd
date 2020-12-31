@@ -57,19 +57,20 @@ library OSVVM_AXI4 ;
 entity TestCtrl is
   port (
     -- Global Signal Interface
-    Clk            : In    std_logic ;
     nReset         : In    std_logic ;
 
     -- Transaction Interfaces
     MasterRec      : inout AddressBusRecType ;
     ResponderRec   : inout AddressBusRecType 
-
   ) ;
+  
+  -- Derive AXI interface properties from the MasterRec
   constant AXI_ADDR_WIDTH : integer := MasterRec.Address'length ; 
   constant AXI_DATA_WIDTH : integer := MasterRec.DataToModel'length ;  
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
     
+  -- Access Burst FIFOs in Axi4Master using external names
   alias WriteBurstFifo is <<variable ^.Master_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
   alias ReadBurstFifo  is <<variable ^.Master_1.ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
 end entity TestCtrl ;

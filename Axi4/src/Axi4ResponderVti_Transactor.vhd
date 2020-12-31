@@ -249,7 +249,7 @@ begin
     alias    LAR is AxiLocal.ReadAddress ;
     alias    LRD is AxiLocal.ReadData ;
 
-    alias WriteAddr           is LAW.Addr ;
+    alias WriteAddress           is LAW.Addr ;
     alias WriteProt           is LAW.Prot ;
 
     variable WriteAvailable      : boolean := FALSE ;
@@ -353,7 +353,7 @@ begin
         if (IsTryWriteAddress(TransRec.Operation) and WriteAddressFifo.empty) or
            (IsTryWriteData(TransRec.Operation)    and WriteDataFifo.empty) then
           WriteAvailable         := FALSE ;
-          TransRec.DataFromModel <= (others => '0') ; 
+          TransRec.DataFromModel <= (TransRec.DataFromModel'range => '0') ; 
         else
           WriteAvailable         := TRUE ;
         end if ;
@@ -365,8 +365,8 @@ begin
             WaitForToggle(WriteAddressReceiveCount) ;
           end if ;
 
-          (WriteAddr, WriteProt) := WriteAddressFifo.pop ;
-          TransRec.Address       <= ToTransaction(WriteAddr, TransRec.Address'length) ;
+          (WriteAddress, WriteProt) := WriteAddressFifo.pop ;
+          TransRec.Address       <= ToTransaction(WriteAddress, TransRec.Address'length) ;
           WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
 
 --!! Address checks intentionally removed - only want an error if the value changes.  
@@ -383,9 +383,9 @@ begin
           end if ;
 
           if IsWriteAddress(TransRec.Operation) then
-            WriteByteAddr := to_integer(WriteAddr) mod AXI_DATA_BYTE_WIDTH ;
+            WriteByteAddr := CalculateByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH) ;
           else 
-            -- Cannot save WriteAddr from above since Data may arrive before Addr
+            -- Cannot save WriteAddress from above since Data may arrive before Addr
             -- Could hold the Data until Addr is available.
             WriteByteAddr := TransRec.AddrWidth mod AXI_DATA_BYTE_WIDTH ;
           end if ; 
@@ -429,7 +429,7 @@ begin
 --    -- Log this operation
 --    Log(ModelID,
 --      "Write Operation." &
---      "  AWAddr: "    & to_hstring(WriteAddr) &
+--      "  AWAddr: "    & to_hstring(WriteAddress) &
 --      "  AWProt: "    & to_string(WriteProt) &
 --      "  WData: "     & to_hstring(WriteData) &
 --      "  WStrb: "     & to_string(WriteStrb) &

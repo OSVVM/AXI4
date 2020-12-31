@@ -355,9 +355,9 @@ package Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure SetAxi4InterfaceDefault (
   -----------------------------------------------------------
-    variable AxiBus        : out Axi4BaseRecType ;
-    constant Operation     : in  Axi4OptionsType ;
-    constant OptVal        : in  integer  
+    variable AxiBus        : InOut Axi4BaseRecType ;
+    constant Operation     : In    Axi4OptionsType ;
+    constant OptVal        : In    integer  
   ) ;
   alias SetAxiParameter is SetAxi4InterfaceDefault[Axi4BaseRecType, Axi4OptionsType, integer];
 
@@ -681,9 +681,9 @@ package body Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure SetAxi4InterfaceDefault (
   -----------------------------------------------------------
-    variable AxiBus        : out Axi4BaseRecType ;
-    constant Operation     : in  Axi4OptionsType ;
-    constant OptVal        : in  integer  
+    variable AxiBus        : InOut Axi4BaseRecType ;
+    constant Operation     : In    Axi4OptionsType ;
+    constant OptVal        : In    integer  
   ) is
   begin
     case Operation is

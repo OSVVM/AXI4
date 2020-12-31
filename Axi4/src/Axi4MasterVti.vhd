@@ -168,9 +168,9 @@ architecture AxiFull of Axi4MasterVti is
 
   signal WriteResponseActive, ReadDataActive : boolean ;
 
-  signal BurstFifoMode     : integer := ADDRESS_BUS_BURST_WORD_MODE ;
---  signal BurstFifoMode     : integer := ADDRESS_BUS_BURST_BYTE_MODE ;
-  signal BurstFifoByteMode : boolean := (BurstFifoMode = ADDRESS_BUS_BURST_BYTE_MODE) ; 
+  constant DEFAULT_BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;
+  signal   BurstFifoMode      : AddressBusFifoBurstModeType := DEFAULT_BURST_MODE ;
+  signal   BurstFifoByteMode  : boolean := (DEFAULT_BURST_MODE = ADDRESS_BUS_BURST_BYTE_MODE) ; 
 begin
 
   ------------------------------------------------------------
@@ -548,7 +548,7 @@ begin
             -- Data not available
             -- ReadDataReceiveCount < ReadDataTransactionCount then
             TransRec.BoolFromModel <= FALSE ;
-            TransRec.DataFromModel <= (others => '0') ; 
+            TransRec.DataFromModel <= (TransRec.DataFromModel'range => '0') ; 
           elsif IsReadData(Operation) then
             (ReadAddress, ReadProt) := ReadAddressTransactionFifo.Pop ;
             ReadByteAddr  :=  CalculateByteAddress(ReadAddress, AXI_BYTE_ADDR_WIDTH);

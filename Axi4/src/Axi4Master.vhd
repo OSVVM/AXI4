@@ -161,10 +161,10 @@ architecture AxiFull of Axi4Master is
   signal ReadDataExpectCount,      ReadDataReceiveCount       : integer := 0 ;
 
   signal WriteResponseActive, ReadDataActive : boolean ;
-
-  signal BurstFifoMode     : integer := ADDRESS_BUS_BURST_WORD_MODE ;
---  signal BurstFifoMode     : integer := ADDRESS_BUS_BURST_BYTE_MODE ;
-  signal BurstFifoByteMode : boolean := (BurstFifoMode = ADDRESS_BUS_BURST_BYTE_MODE) ; 
+  
+  constant DEFAULT_BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;
+  signal   BurstFifoMode      : AddressBusFifoBurstModeType := DEFAULT_BURST_MODE ;
+  signal   BurstFifoByteMode  : boolean := (DEFAULT_BURST_MODE = ADDRESS_BUS_BURST_BYTE_MODE) ; 
 begin
 
   ------------------------------------------------------------
@@ -392,7 +392,7 @@ begin
         when WRITE_OP | WRITE_ADDRESS | WRITE_DATA | ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
           -- For All Write Operations - Write Address and Write Data
           WriteAddress  := FromTransaction(TransRec.Address, WriteAddress'length) ;
-          WriteByteAddr := CalculateByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH);
+          WriteByteAddr := CalculateByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH) ;
 
           if IsWriteAddress(Operation) then
             -- AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Write Address length does not match", FAILURE) ;
@@ -542,7 +542,7 @@ begin
             -- Data not available
             -- ReadDataReceiveCount < ReadDataTransactionCount then
             TransRec.BoolFromModel <= FALSE ;
-            TransRec.DataFromModel <= (others => '0') ; 
+            TransRec.DataFromModel <= (TransRec.DataFromModel'range => '0') ; 
           elsif IsReadData(Operation) then
             (ReadAddress, ReadProt) := ReadAddressTransactionFifo.Pop ;
             ReadByteAddr  :=  CalculateByteAddress(ReadAddress, AXI_BYTE_ADDR_WIDTH);

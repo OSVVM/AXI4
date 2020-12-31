@@ -131,8 +131,9 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
   signal ParamUser         : std_logic_vector(TUser'range) := IfElse(INIT_USER'length > 0, INIT_USER, (TUser'range => '0')) ;
   signal ParamLast         : natural := INIT_LAST ;
   signal LastOffsetCount   : integer := 0 ; 
-  signal BurstFifoMode     : integer := STREAM_BURST_WORD_MODE;
-  signal BurstFifoByteMode : boolean := (BurstFifoMode = STREAM_BURST_BYTE_MODE) ; 
+  constant DEFAULT_BURST_MODE : StreamFifoBurstModeType := STREAM_BURST_WORD_MODE ;
+  signal   BurstFifoMode      : StreamFifoBurstModeType := DEFAULT_BURST_MODE ;
+  signal   BurstFifoByteMode  : boolean := (DEFAULT_BURST_MODE = STREAM_BURST_BYTE_MODE) ; 
 
 begin
 

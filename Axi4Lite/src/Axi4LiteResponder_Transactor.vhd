@@ -260,7 +260,7 @@ begin
         if (IsTryWriteAddress(TransRec.Operation) and WriteAddressFifo.empty) or
            (IsTryWriteData(TransRec.Operation)    and WriteDataFifo.empty) then
           WriteAvailable         := FALSE ;
-          TransRec.DataFromModel <= (others => '0') ; 
+          TransRec.DataFromModel <= (TransRec.DataFromModel'range => '0') ; 
         else
           WriteAvailable         := TRUE ;
         end if ;

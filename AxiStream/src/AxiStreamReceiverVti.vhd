@@ -67,8 +67,8 @@ entity AxiStreamReceiverVti is
     INIT_DEST      : std_logic_vector := "" ; 
     INIT_USER      : std_logic_vector := "" ; 
     INIT_LAST      : natural := 0 ; 
-    tperiod_Clk    : time := 10 ns ;
     
+    tperiod_Clk    : time := 10 ns ;
     tpd_Clk_TReady : time := 2 ns  
   ) ;
   port (
@@ -87,10 +87,17 @@ entity AxiStreamReceiverVti is
     TKeep     : in  std_logic_vector ; 
     TLast     : in  std_logic
   ) ;
+  
+  -- Burst Interface
+  -- Access via external names
+  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
+
+  -- Derive AXI interface properties from interface signals
   constant AXI_STREAM_DATA_WIDTH   : integer := TData'length ;
   constant AXI_STREAM_PARAM_WIDTH  : integer := TID'length + TDest'length + TUser'length + 1 ;
 
-  -- Testbench Virtual Transaction Interface
+  -- Testbench Transaction Interface
+  -- Access via external names
   signal TransRec  : StreamRecType (
     DataToModel   (AXI_STREAM_DATA_WIDTH-1  downto 0),
     DataFromModel (AXI_STREAM_DATA_WIDTH-1  downto 0),
@@ -98,12 +105,8 @@ entity AxiStreamReceiverVti is
     ParamFromModel(AXI_STREAM_PARAM_WIDTH-1 downto 0)
   ) ;  
 
-  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
-
 end entity AxiStreamReceiverVti ;
 architecture behavioral of AxiStreamReceiverVti is
-
-  constant AXI_STREAM_DATA_BYTE_WIDTH : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
   constant ID_LEN       : integer := TID'length ;
   constant DEST_LEN     : integer := TDest'length ;
   constant USER_LEN     : integer := TUser'length ;

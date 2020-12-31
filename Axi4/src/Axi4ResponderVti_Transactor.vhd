@@ -54,7 +54,7 @@ library osvvm ;
 library OSVVM_Common ;
   context OSVVM_Common.OsvvmCommonContext ;
 
-  use work.Axi4OptionsTypePkg.all ;
+  use work.Axi4OptionsPkg.all ;
   use work.Axi4InterfacePkg.all ;
   use work.Axi4ModelPkg.all ;
   use work.Axi4CommonPkg.all ;
@@ -91,15 +91,18 @@ port (
   AxiBus      : inout Axi4RecType 
 ) ;
 
-  -- Model Configuration
+  -- Model Configuration 
+  -- Access via transactions or external name
   shared variable Params : ModelParametersPType ;
   
+  -- Derive AXI interface properties from the AxiBus
   alias    AxiAddr is AxiBus.WriteAddress.Addr ;
   alias    AxiData is AxiBus.WriteData.Data ;
   constant AXI_ADDR_WIDTH : integer := AxiAddr'length ;
   constant AXI_DATA_WIDTH : integer := AxiData'length ;
 
   -- Testbench Transaction Interface
+  -- Access via external names
   signal TransRec : AddressBusRecType (
           Address      (AXI_ADDR_WIDTH-1 downto 0),
           DataToModel  (AXI_DATA_WIDTH-1 downto 0),

@@ -94,10 +94,17 @@ entity AxiStreamTransmitterVti is
     TKeep     : out std_logic_vector ; 
     TLast     : out std_logic 
   ) ;
+
+  -- Burst Interface
+  -- Access via external names
+  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
+
+  -- Derive AXI interface properties from interface signals
   constant AXI_STREAM_DATA_WIDTH   : integer := TData'length ;
   constant AXI_STREAM_PARAM_WIDTH  : integer := TID'length + TDest'length + TUser'length + 1 ;
 
-  -- Testbench Virtual Transaction Interface
+  -- Testbench Transaction Interface
+  -- Access via external names
   signal TransRec  : StreamRecType (
     DataToModel   (AXI_STREAM_DATA_WIDTH-1  downto 0),
     DataFromModel (AXI_STREAM_DATA_WIDTH-1  downto 0),
@@ -105,12 +112,8 @@ entity AxiStreamTransmitterVti is
     ParamFromModel(AXI_STREAM_PARAM_WIDTH-1 downto 0)
   ) ;  
   
-  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
-
 end entity AxiStreamTransmitterVti ;
 architecture SimpleTransmitter of AxiStreamTransmitterVti is
-
-
   constant AXI_STREAM_DATA_BYTE_WIDTH  : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
 
   constant MODEL_INSTANCE_NAME : string :=
@@ -123,7 +126,6 @@ architecture SimpleTransmitter of AxiStreamTransmitterVti is
   shared variable TransmitFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
 
   signal TransmitRequestCount, TransmitDoneCount      : integer := 0 ;   
-
 
   -- Verification Component Configuration
   signal TransmitReadyTimeOut : integer := integer'right ; 

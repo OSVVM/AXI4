@@ -55,7 +55,7 @@ library osvvm ;
 library osvvm_common ;
   context osvvm_common.OsvvmCommonContext ;
 
-  use work.Axi4OptionsTypePkg.all ;
+  use work.Axi4OptionsPkg.all ;
   use work.Axi4ModelPkg.all ;
   use work.Axi4InterfacePkg.all ;
   use work.Axi4CommonPkg.all ;
@@ -118,9 +118,14 @@ port (
   TransRec    : inout AddressBusRecType 
 ) ;
 
-  -- External Burst Interface
-  shared variable WriteBurstFifo              : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable ReadBurstFifo               : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+  -- Burst Interface
+  -- Access via external names
+  shared variable WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+  shared variable ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+
+  -- Model Configuration 
+  -- Access via transactions or external name
+  shared variable params : ModelParametersPType ;
 
 end entity Axi4Master ;
 architecture AxiFull of Axi4Master is
@@ -156,9 +161,6 @@ architecture AxiFull of Axi4Master is
   signal ReadDataExpectCount,      ReadDataReceiveCount       : integer := 0 ;
 
   signal WriteResponseActive, ReadDataActive : boolean ;
-
-  -- Model Configuration
-  shared variable params : ModelParametersPType ;
 
   signal BurstFifoMode     : integer := ADDRESS_BUS_BURST_WORD_MODE ;
 --  signal BurstFifoMode     : integer := ADDRESS_BUS_BURST_BYTE_MODE ;

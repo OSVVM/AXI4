@@ -46,7 +46,7 @@ context Axi4LiteContext is
     use osvvm_Axi4.Axi4CommonPkg.all ;
     use osvvm_Axi4.Axi4LiteInterfacePkg.all ;
 
-    use osvvm_Axi4.Axi4OptionsTypePkg.all ; 
+    use osvvm_Axi4.Axi4OptionsPkg.all ; 
     use osvvm_Axi4.Axi4ModelPkg.all ;
     
     

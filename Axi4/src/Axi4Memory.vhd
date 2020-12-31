@@ -52,7 +52,7 @@ library osvvm ;
 library osvvm_common ;
   context osvvm_common.OsvvmCommonContext ;
 
-  use work.Axi4OptionsTypePkg.all ;
+  use work.Axi4OptionsPkg.all ;
   use work.Axi4InterfacePkg.all ;
   use work.Axi4CommonPkg.all ;
   use work.Axi4ModelPkg.all ;
@@ -92,10 +92,12 @@ port (
   TransRec    : inout AddressBusRecType
 ) ;
 
-  -- Memory Model
+  -- Memory Data Structure
+  -- Access via transactions or external name
   shared variable Memory : MemoryPType ;
 
   -- Model Configuration
+  -- Access via transactions or external name
   shared variable Params : ModelParametersPType ;
   
 end entity Axi4Memory ;

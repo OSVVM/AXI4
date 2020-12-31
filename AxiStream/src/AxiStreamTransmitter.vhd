@@ -97,10 +97,16 @@ entity AxiStreamTransmitter is
     -- Testbench Transaction Interface
     TransRec  : inout StreamRecType 
   ) ;
+
+  -- Burst Interface
+  -- Access via external names
+  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
+
+  -- Derive AXI interface properties from interface signals
+  constant AXI_STREAM_DATA_WIDTH   : integer := TData'length ;
+
 end entity AxiStreamTransmitter ;
 architecture SimpleTransmitter of AxiStreamTransmitter is
-
-  constant AXI_STREAM_DATA_WIDTH       : integer := TData'length ;
   constant AXI_STREAM_DATA_BYTE_WIDTH  : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
   constant AXI_ID_WIDTH   : integer    := TID'length ;
   constant AXI_DEST_WIDTH : integer    := TDest'length ;
@@ -112,7 +118,6 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
   signal ModelID, BusFailedID : AlertLogIDType ; 
 --  signal ProtocolID, DataCheckID : AlertLogIDType ; 
   
-  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
   shared variable TransmitFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
 
   signal TransmitRequestCount, TransmitDoneCount      : integer := 0 ;   

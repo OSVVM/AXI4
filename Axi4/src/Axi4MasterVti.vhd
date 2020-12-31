@@ -55,7 +55,7 @@ library osvvm ;
 library osvvm_common ;
   context osvvm_common.OsvvmCommonContext ;
 
-  use work.Axi4OptionsTypePkg.all ;
+  use work.Axi4OptionsPkg.all ;
   use work.Axi4ModelPkg.all ;
   use work.Axi4InterfacePkg.all ;
   use work.Axi4CommonPkg.all ;
@@ -115,16 +115,23 @@ port (
   AxiBus      : inout Axi4RecType 
 ) ;
 
-  -- External Burst Interface
+  -- Burst Interface
+  -- Access via external names
   shared variable WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
   shared variable ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
 
+  -- Model Configuration 
+  -- Access via transactions or external name
+  shared variable params : ModelParametersPType ;
+
+  -- Derive AXI interface properties from the AxiBus
   alias AxiAddr is AxiBus.WriteAddress.Addr ;
   alias AxiData is AxiBus.WriteData.Data ;
   constant AXI_ADDR_WIDTH      : integer := AxiAddr'length ;
   constant AXI_DATA_WIDTH      : integer := AxiData'length ;
   
   -- Testbench Transaction Interface
+  -- Access via external names
   signal TransRec : AddressBusRecType (
           Address      (AXI_ADDR_WIDTH-1 downto 0),
           DataToModel  (AXI_DATA_WIDTH-1 downto 0),
@@ -160,9 +167,6 @@ architecture AxiFull of Axi4MasterVti is
   signal ReadDataExpectCount,      ReadDataReceiveCount       : integer := 0 ;
 
   signal WriteResponseActive, ReadDataActive : boolean ;
-
-  -- Model Configuration
-  shared variable params : ModelParametersPType ;
 
   signal BurstFifoMode     : integer := ADDRESS_BUS_BURST_WORD_MODE ;
 --  signal BurstFifoMode     : integer := ADDRESS_BUS_BURST_BYTE_MODE ;

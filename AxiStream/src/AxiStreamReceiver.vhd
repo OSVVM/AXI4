@@ -89,10 +89,16 @@ entity AxiStreamReceiver is
     -- Testbench Transaction Interface
     TransRec  : inout StreamRecType 
   ) ;
+  
+  -- Burst Interface
+  -- Access via external names
+  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
+
+  -- Derive AXI interface properties from interface signals
+  constant AXI_STREAM_DATA_WIDTH   : integer := TData'length ;
+
 end entity AxiStreamReceiver ;
 architecture behavioral of AxiStreamReceiver is
-  constant AXI_STREAM_DATA_WIDTH : integer := TData'length ;
-  constant AXI_STREAM_DATA_BYTE_WIDTH : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
   constant ID_LEN       : integer := TID'length ;
   constant DEST_LEN     : integer := TDest'length ;
   constant USER_LEN     : integer := TUser'length ;
@@ -107,7 +113,6 @@ architecture behavioral of AxiStreamReceiver is
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID, BurstFifoID : AlertLogIDType ; 
   
-  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
   shared variable ReceiveFifo   : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
 
   signal ReceiveCount : integer := 0 ;   

@@ -54,7 +54,7 @@ library osvvm ;
 library OSVVM_Common ;
   context OSVVM_Common.OsvvmCommonContext ;
 
-  use work.Axi4OptionsTypePkg.all ;
+  use work.Axi4OptionsPkg.all ;
   use work.Axi4InterfacePkg.all ;
   use work.Axi4ModelPkg.all ;
   use work.Axi4CommonPkg.all ;
@@ -95,8 +95,9 @@ port (
 ) ;
 
   -- Model Configuration
+  -- Access via transactions or external name
   shared variable Params : ModelParametersPType ;
-  
+
 end entity Axi4Responder ;
 
 architecture TransactorResponder of Axi4Responder is

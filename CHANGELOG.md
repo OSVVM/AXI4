@@ -1,21 +1,30 @@
 # AXI4 Verification Component Change Log
 
-Revision      Date             Comments
-**2020.10**   October 2020     Added Bursting to AxiStream
-**2020.07**   July 2020        Major release for Axi4Lite.  First release of Axi4 (full)
-                               All verification components now use AddressBusTransactionpkg in OSVVM-Common
-                               Name Responder replaced Slave
-                               Details below
-**2020.02**   February 2020    Refactored master transaction package s.t. 
-                               it now uses common package from osvvm_common    
-**2018.04**   April 2018       Initial public release    
+| Revision  | Revision Date |  Release Summary | 
+------------|---------------|----------- 
+| 2020.12   | December 2020 |  More Bursting and Virtual Transaction Interfaces.
+| 2020.10   | October 2020  |  Added Bursting to AxiStream. 
+| 2020.07   | July 2020     |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
+| 2020.02   | February 2020 |  Initial version of AddressBusTransactionPkg.
+| 2018.04   | April 2018    |  Initial public release
 
+
+## 2020.12 December 2020
+- Added Word Based Bursting to Axi4Master. 
+- Added Virtual Transaction Interfaces (VTI) to Axi4 (full) verification components.
+- Added VTI to AxiStream verification components.
+- Not Done:  Axi4Lite and UART VTI and Bursting.
+
+## 2020.10 October 2020
+### AxiStream
+Added Byte and Word based bursting to AxiStream.
+Supports bursting User field with Data.
 
 ## 2020.07 July 2020
 
 ### AXI4 Common
 Updated to support OSVVM Model Independent Transactions for AddressBusses.
-See OSVVM-Common repository, file Common/src/AddressBusTransactionpkg.vhd
+See OSVVM-Common repository, file Common/src/AddressBusTransactionPkg.vhd
 
 ### AXI4
 First public release.

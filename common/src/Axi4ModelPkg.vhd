@@ -200,8 +200,8 @@ package Axi4ModelPkg is
   ------------------------------------------------------------
     variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
     constant BurstFifoMode   : In    AddressBusFifoBurstModeType ;
-    variable WriteData       : Out   std_logic_vector ;
-    variable WriteStrb       : Out   std_logic_vector ;
+    variable WriteData       : InOut std_logic_vector ;
+    variable WriteStrb       : InOut std_logic_vector ;
     variable BytesToSend     : InOut integer ; 
     constant ByteAddress     : In    integer := 0 
   ) ;
@@ -580,8 +580,8 @@ package body Axi4ModelPkg is
   procedure PopWriteBurstByteData (
   ------------------------------------------------------------
     variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-    variable WriteData       : Out   std_logic_vector ;
-    variable WriteStrb       : Out   std_logic_vector ;
+    variable WriteData       : InOut std_logic_vector ;
+    variable WriteStrb       : InOut std_logic_vector ;
     variable BytesToSend     : InOut integer ; 
     constant ByteAddress     : In    integer := 0 
   ) is
@@ -611,8 +611,8 @@ package body Axi4ModelPkg is
   procedure PopWriteBurstWordData (
   ------------------------------------------------------------
     variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-    variable WriteData       : Out   std_logic_vector ;
-    variable WriteStrb       : Out   std_logic_vector ;
+    variable WriteData       : InOut std_logic_vector ;
+    variable WriteStrb       : InOut std_logic_vector ;
     constant ByteAddress     : In    integer := 0 
   ) is
     alias aWriteData : std_logic_vector(WriteData'length-1 downto 0) is WriteData ; 
@@ -640,8 +640,8 @@ package body Axi4ModelPkg is
   ------------------------------------------------------------
     variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
     constant BurstFifoMode   : In    AddressBusFifoBurstModeType ;
-    variable WriteData       : Out   std_logic_vector ;
-    variable WriteStrb       : Out   std_logic_vector ;
+    variable WriteData       : InOut std_logic_vector ;
+    variable WriteStrb       : InOut std_logic_vector ;
     variable BytesToSend     : InOut integer ; 
     constant ByteAddress     : In    integer := 0 
   ) is

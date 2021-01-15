@@ -73,19 +73,17 @@ Common/src/AddressBusTransactionpkg.vhd and
 Common/src/AddressBusResponderTransactionPkg.vhd
 
    * Packages with component declarations for verification components
-      * Axi4MasterComponentPkg.vhd
-      * Axi4ResponderComponentPkg.vhd
-      * Axi4MemoryComponentPkg.vhd
-      * Axi4MonitorComponentPkg.vhd
+      * Axi4ComponentPkg.vhd - All AXI4 CTI Components
+      * Axi4ComponentVtiPkg.vhd - All AXI4 VTI Components
    * Axi4Context.vhd
       * References all packages required to use the AXI4 verification components
-   * Axi4Master.vhd
+   * Axi4Master.vhd and Axi4MasterVti.vhd
       * AXI4 Master verification component with bursting
    * Axi4Monitor_dummy.vhd
-   * Axi4Responder_Transactor.vhd
+   * Axi4Responder_Transactor.vhd and Axi4ResponderVti_Transactor.vhd
       * AXI4 Responder verification component
-     * Currently does not support bursting
-   * Axi4Memory.vhd
+      * Currently does not support bursting
+   * Axi4Memory.vhd and Axi4MemoryVti.vhd
       * AXI4 Memory verification component with bursting
 
 For current compile order see AXI4/Axi4/Axi4.pro.
@@ -123,9 +121,9 @@ See OSVVM-Common repository, file Common/src/StreamTransactionPkg.vhd
    * AxiStreamOptionsTypePkg.vhd
       * Transaction extensions for AxiStream interface
       * Used in conjunction with StreamTransactionpkg 
-   * AxiStreamTransmitter.vhd
+   * AxiStreamTransmitter.vhd and AxiStreamTransmitterVti.vhd
       * AXI4 Transmitter verification component
-   * AxiStreamReceiver.vhd
+   * AxiStreamReceiver.vhd and AxiStreamReceiverVti.vhd
       * AXI4 Receiver verification component
    * AxiStreamComponentPkg.vhd
       * Packages with component declarations for verification components

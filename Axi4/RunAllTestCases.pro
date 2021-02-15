@@ -54,6 +54,10 @@ analyze ./TestCases/TbAxi4_MultipleDriversMaster.vhd
 analyze ./TestCases/TbAxi4_MultipleDriversResponder.vhd
 analyze ./TestCases/TbAxi4_MultipleDriversMemory.vhd
 
+analyze ./TestCases/TbAxi4_ReleaseAcquireMaster1.vhd
+analyze ./TestCases/TbAxi4_ReleaseAcquireMemory1.vhd
+analyze ./TestCases/TbAxi4_ReleaseAcquireResponder1.vhd
+
 analyze ./TestCases/TbAxi4_AlertLogIDMaster.vhd
 analyze ./TestCases/TbAxi4_AlertLogIDResponder.vhd
 analyze ./TestCases/TbAxi4_AlertLogIDMemory.vhd
@@ -113,6 +117,10 @@ simulate TbAxi4_MemoryBurstSparse1
 simulate TbAxi4_MultipleDriversMaster
 simulate TbAxi4_MultipleDriversResponder
 simulate TbAxi4_MultipleDriversMemory
+
+simulate TbAxi4_ReleaseAcquireMaster1
+simulate TbAxi4_ReleaseAcquireMemory1
+simulate TbAxi4_ReleaseAcquireResponder1
 
 simulate TbAxi4_AlertLogIDMaster
 simulate TbAxi4_AlertLogIDResponder

@@ -19,11 +19,11 @@
 --
 --  Revision History:
 --    Date       Version    Description
---    05/2018    2018.05    First Release
---    05/2019    2019.05    Removed generics for DEFAULT_ID, DEFAULT_DEST, DEFAULT_USER
---    01/2020    2020.01    Updated license notice
---    07/2020    2020.07    Updated for Streaming Model Independent Transactions
 --    10/2020    2020.10    Added Bursting per updates to Model Independent Transactions
+--    07/2020    2020.07    Updated for Streaming Model Independent Transactions
+--    01/2020    2020.01    Updated license notice
+--    05/2019    2019.05    Removed generics for DEFAULT_ID, DEFAULT_DEST, DEFAULT_USER
+--    05/2018    2018.05    First Release
 --
 --
 --  This file is part of OSVVM.

@@ -109,8 +109,8 @@ begin
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
   begin
     wait until nReset = '1' ;  
-    WaitForClock(ResponderRec, 2) ; 
-    WaitForClock(ResponderRec, 3) ; 
+    WaitForClock(ResponderRec, 1) ; 
+    WaitForClock(ResponderRec, 1) ; 
     
     WaitForBarrier(TestDone) ;
     wait ;

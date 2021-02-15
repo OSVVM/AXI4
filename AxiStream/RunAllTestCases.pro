@@ -51,6 +51,9 @@ analyze ./TestCases/TbStream_SendCheckBurstAsync1.vhd
 analyze ./TestCases/TbStream_SendCheckBurstByte1.vhd
 analyze ./TestCases/TbStream_SendCheckBurstByteAsync1.vhd
 
+analyze ./TestCases/TbStream_MultipleDriversTransmitter1.vhd
+analyze ./TestCases/TbStream_MultipleDriversReceiver1.vhd
+
 analyze ./TestCases/TbStream_ByteHandling1.vhd
 analyze ./TestCases/TbStream_ByteHandlingAsync1.vhd
 analyze ./TestCases/TbStream_ByteHandlingBurst1.vhd
@@ -75,6 +78,9 @@ analyze ./TestCases/TbStream_AxiSetOptions1.vhd
 analyze ./TestCases/TbStream_AxiSetOptionsAsync1.vhd
 analyze ./TestCases/TbStream_AxiSetOptionsBurst1.vhd
 analyze ./TestCases/TbStream_AxiSetOptionsBurstAsync1.vhd
+
+analyze ./TestCases/TbStream_AxiTxValidDelay1.vhd
+analyze ./TestCases/TbStream_AxiTxValidDelayBurst1.vhd
 
 analyze ./TestCases/TbStream_AxiTiming1.vhd
 analyze ./TestCases/TbStream_AxiTiming2.vhd
@@ -110,6 +116,9 @@ simulate TbStream_SendCheckBurstAsync1
 simulate TbStream_SendCheckBurstByte1
 simulate TbStream_SendCheckBurstByteAsync1
 
+simulate TbStream_MultipleDriversTransmitter1
+simulate TbStream_MultipleDriversReceiver1
+
 simulate TbStream_ByteHandling1
 simulate TbStream_ByteHandlingAsync1
 simulate TbStream_ByteHandlingBurst1
@@ -132,6 +141,9 @@ simulate TbStream_AxiSetOptions1
 simulate TbStream_AxiSetOptionsAsync1
 simulate TbStream_AxiSetOptionsBurst1
 simulate TbStream_AxiSetOptionsBurstAsync1
+
+simulate TbStream_AxiTxValidDelay1
+simulate TbStream_AxiTxValidDelayBurst1
 
 simulate TbStream_AxiTiming1
 simulate TbStream_AxiTiming2

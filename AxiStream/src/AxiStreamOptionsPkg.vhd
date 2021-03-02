@@ -121,6 +121,14 @@ package AxiStreamOptionsPkg is
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
+    variable OptVal      : Out   boolean
+  ) ;
+
+  ------------------------------------------------------------
+  procedure GetAxiStreamOptions (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut StreamRecType ;
+    constant Option      : In    AxiStreamOptionsType ;
     variable OptVal      : Out   std_logic_vector
   ) ;
 
@@ -154,11 +162,10 @@ package body AxiStreamOptionsPkg is
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
-    constant OptVal      : In    std_logic_vector
+    constant OptVal      : In    boolean
   ) is
   begin
-    TransRec.ParamToModel <= ToTransaction(OptVal, TransRec.ParamToModel'length) ;
-    SetModelOptions(TransRec, AxiStreamOptionsType'POS(Option)) ;
+    SetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), OptVal) ;
   end procedure SetAxiStreamOptions ;
 
   ------------------------------------------------------------
@@ -166,10 +173,10 @@ package body AxiStreamOptionsPkg is
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
-    constant OptVal      : In    boolean
+    constant OptVal      : In    std_logic_vector
   ) is
   begin
-    TransRec.BoolToModel <= OptVal ;
+    TransRec.ParamToModel <= ToTransaction(OptVal, TransRec.ParamToModel'length) ;
     SetModelOptions(TransRec, AxiStreamOptionsType'POS(Option)) ;
   end procedure SetAxiStreamOptions ;
 
@@ -189,11 +196,10 @@ package body AxiStreamOptionsPkg is
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
-    variable OptVal      : Out   std_logic_vector
+    variable OptVal      : Out   boolean
   ) is
   begin
-    GetModelOptions(TransRec, AxiStreamOptionsType'POS(Option)) ;
-    OptVal := FromTransaction(TransRec.ParamFromModel, OptVal'length) ;
+    GetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), OptVal) ;
   end procedure GetAxiStreamOptions ;
 
   ------------------------------------------------------------
@@ -201,11 +207,11 @@ package body AxiStreamOptionsPkg is
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
-    variable OptVal      : Out   boolean
+    variable OptVal      : Out   std_logic_vector
   ) is
   begin
     GetModelOptions(TransRec, AxiStreamOptionsType'POS(Option)) ;
-    OptVal := TransRec.BoolFromModel ;
+    OptVal := FromTransaction(TransRec.ParamFromModel, OptVal'length) ;
   end procedure GetAxiStreamOptions ;
 
 end package body AxiStreamOptionsPkg ;

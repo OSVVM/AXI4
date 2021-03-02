@@ -123,6 +123,12 @@ port (
   shared variable WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
   shared variable ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
 
+  -- Derive AXI interface properties from the AxiBus
+  alias AxiAddr is AxiBus.WriteAddress.Addr ;
+  alias AxiData is AxiBus.WriteData.Data ;
+  constant AXI_ADDR_WIDTH      : integer := AxiAddr'length ;
+  constant AXI_DATA_WIDTH      : integer := AxiData'length ;
+
   -- Model Configuration 
   -- Access via transactions or external name
   shared variable params : ModelParametersPType ;
@@ -130,10 +136,6 @@ port (
 end entity Axi4Master ;
 architecture AxiFull of Axi4Master is
 
-  alias AxiAddr is AxiBus.WriteAddress.Addr ;
-  alias AxiData is AxiBus.WriteData.Data ;
-  constant AXI_ADDR_WIDTH      : integer := AxiAddr'length ;
-  constant AXI_DATA_WIDTH      : integer := AxiData'length ;
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
   constant AXI_STRB_WIDTH      : integer := AXI_DATA_WIDTH/8 ;
@@ -767,7 +769,7 @@ begin
       ) ;
 
       -- State after operation
-      AW.Addr   <= Local.Addr   + 1  after tpd_Clk_AWAddr   ;
+      AW.Addr   <= Local.Addr   + 4  after tpd_Clk_AWAddr   ;
       AW.Prot   <= Local.Prot   + 1  after tpd_clk_AWProt   ;
       -- AXI4 Full
       AW.Len    <= Local.Len    + 1  after tpd_clk_AWLen    ;
@@ -1022,7 +1024,7 @@ begin
       ) ;
 
       -- State after operation
-      AR.Addr   <= Local.Addr   + 1  after tpd_Clk_ARAddr   ;
+      AR.Addr   <= Local.Addr   + 4  after tpd_Clk_ARAddr   ;
       AR.Prot   <= Local.Prot   + 1  after tpd_clk_ARProt   ;
       -- AXI4 Full
       AR.Len    <= Local.Len    + 1  after tpd_clk_ARLen    ;

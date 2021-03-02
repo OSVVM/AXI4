@@ -773,7 +773,7 @@ begin
       ) ;
 
       -- State after operation
-      AW.Addr   <= Local.Addr   + 1  after tpd_Clk_AWAddr   ;
+      AW.Addr   <= Local.Addr   + 4  after tpd_Clk_AWAddr   ;
       AW.Prot   <= Local.Prot   + 1  after tpd_clk_AWProt   ;
       -- AXI4 Full
       AW.Len    <= Local.Len    + 1  after tpd_clk_AWLen    ;
@@ -1028,7 +1028,7 @@ begin
       ) ;
 
       -- State after operation
-      AR.Addr   <= Local.Addr   + 1  after tpd_Clk_ARAddr   ;
+      AR.Addr   <= Local.Addr   + 4  after tpd_Clk_ARAddr   ;
       AR.Prot   <= Local.Prot   + 1  after tpd_clk_ARProt   ;
       -- AXI4 Full
       AR.Len    <= Local.Len    + 1  after tpd_clk_ARLen    ;

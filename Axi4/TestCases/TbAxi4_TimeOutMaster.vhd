@@ -273,7 +273,7 @@ WaitForBarrier(TestPhaseStart) ;
     AffirmIfEqual(TbResponderID, Data, X"0001_0010", "Responder Write Data: ") ;
 
     GetWrite(ResponderRec, Addr, Data) ;  -- Fail
-    AffirmIfEqual(TbResponderID, Addr, X"BAD0_0011", "Responder Write Addr: ") ;
+    AffirmIfEqual(TbResponderID, Addr, X"BAD0_001-", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, X"BAD0_00--", "Responder Write Data: ") ;
     
     GetWrite(ResponderRec, Addr, Data) ; -- Pass
@@ -281,7 +281,7 @@ WaitForBarrier(TestPhaseStart) ;
     AffirmIfEqual(TbResponderID, Data, X"0002_0020", "Responder Write Data: ") ;
     
     GetWrite(ResponderRec, Addr, Data) ;  -- Fail
-    AffirmIfEqual(TbResponderID, Addr, X"BAD0_0021", "Responder Write Addr: ") ;
+    AffirmIfEqual(TbResponderID, Addr, X"BAD0_002-", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, X"BAD0_00--", "Responder Write Data: ") ;
     
     -- Warning:  it takes one operation before these take impact
@@ -335,13 +335,13 @@ WaitForBarrier(TestPhaseStart) ;
     AffirmIfEqual(TbResponderID, Addr, X"0001_0010", "Responder Read Addr: ") ;
 
     SendRead(ResponderRec, Addr, X"BAD0_0010") ; -- Fail
-    AffirmIfEqual(TbResponderID, Addr, X"BAD0_0011", "Responder Read Addr: ") ;
+    AffirmIfEqual(TbResponderID, Addr, X"BAD0_001-", "Responder Read Addr: ") ;
     
     SendRead(ResponderRec, Addr, X"0002_0020") ; -- Pass
     AffirmIfEqual(TbResponderID, Addr, X"0002_0020", "Responder Read Addr: ") ;
 
     SendRead(ResponderRec, Addr, X"BAD0_0020") ; -- Fail
-    AffirmIfEqual(TbResponderID, Addr, X"BAD0_0021", "Responder Read Addr: ") ;
+    AffirmIfEqual(TbResponderID, Addr, X"BAD0_002-", "Responder Read Addr: ") ;
     
     -- Warning:  it takes one operation before these take impact
     SetAxi4Options(ResponderRec, READ_ADDRESS_READY_DELAY_CYCLES, 0) ;

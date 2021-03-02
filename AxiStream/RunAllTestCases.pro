@@ -54,6 +54,9 @@ analyze ./TestCases/TbStream_SendCheckBurstByteAsync1.vhd
 analyze ./TestCases/TbStream_MultipleDriversTransmitter1.vhd
 analyze ./TestCases/TbStream_MultipleDriversReceiver1.vhd
 
+simulate ./TestCases/TbStream_ReleaseAcquireTransmitter1.vhd
+simulate ./TestCases/TbStream_ReleaseAcquireReceiver1.vhd
+
 analyze ./TestCases/TbStream_ByteHandling1.vhd
 analyze ./TestCases/TbStream_ByteHandlingAsync1.vhd
 analyze ./TestCases/TbStream_ByteHandlingBurst1.vhd
@@ -118,6 +121,9 @@ simulate TbStream_SendCheckBurstByteAsync1
 
 simulate TbStream_MultipleDriversTransmitter1
 simulate TbStream_MultipleDriversReceiver1
+
+simulate TbStream_ReleaseAcquireTransmitter1
+simulate TbStream_ReleaseAcquireReceiver1
 
 simulate TbStream_ByteHandling1
 simulate TbStream_ByteHandlingAsync1

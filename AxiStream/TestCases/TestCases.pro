@@ -46,70 +46,71 @@
 
 ##  # Tests for any Stream MIT
 analyze TbStream_SendGet1.vhd
-# analyze TbStream_SendGetAsync1.vhd
-# analyze TbStream_SendGetBurst1.vhd
-# analyze TbStream_SendGetBurstAsync1.vhd
-# 
-# analyze TbStream_SendCheckBurst1.vhd
-# analyze TbStream_SendCheckBurstAsync1.vhd
-# 
-# analyze TbStream_SendGetBurstByte1.vhd
-# analyze TbStream_SendGetBurstByteAsync1.vhd
-# 
-# analyze TbStream_SendCheckBurstByte1.vhd
-# analyze TbStream_SendCheckBurstByteAsync1.vhd
-# 
-# analyze TbStream_MultipleDriversTransmitter1.vhd
-# analyze TbStream_MultipleDriversReceiver1.vhd
+analyze TbStream_SendGetAsync1.vhd
+analyze TbStream_SendGetBurst1.vhd
+analyze TbStream_SendGetBurstAsync1.vhd
+
+analyze TbStream_SendCheckBurst1.vhd
+analyze TbStream_SendCheckBurstAsync1.vhd
+
+analyze TbStream_SendGetBurstByte1.vhd
+analyze TbStream_SendGetBurstByteAsync1.vhd
+
+analyze TbStream_SendCheckBurstByte1.vhd
+analyze TbStream_SendCheckBurstByteAsync1.vhd
+
+analyze TbStream_MultipleDriversTransmitter1.vhd
+analyze TbStream_MultipleDriversReceiver1.vhd
 
 analyze TbStream_ReleaseAcquireTransmitter1.vhd
+analyze TbStream_ReleaseAcquireReceiver1.vhd
 
-# 
-# analyze TbStream_ByteHandling1.vhd
-# analyze TbStream_ByteHandlingAsync1.vhd
-# analyze TbStream_ByteHandlingBurst1.vhd
-# analyze TbStream_ByteHandlingBurstAsync1.vhd
-# 
-# analyze TbStream_ByteHandlingBurstByte1.vhd
-# analyze TbStream_ByteHandlingBurstByteAsync1.vhd
-# 
+
+analyze TbStream_ByteHandling1.vhd
+analyze TbStream_ByteHandlingAsync1.vhd
+analyze TbStream_ByteHandlingBurst1.vhd
+analyze TbStream_ByteHandlingBurstAsync1.vhd
+
+analyze TbStream_ByteHandlingBurstByte1.vhd
+analyze TbStream_ByteHandlingBurstByteAsync1.vhd
+
 # # Tests for AXI Stream
-# analyze TbStream_AxiSendGet2.vhd
-# analyze TbStream_AxiSendGetAsync2.vhd
-# analyze TbStream_AxiSendGetBurst2.vhd
-# analyze TbStream_AxiSendGetBurstAsync2.vhd
-# 
-# analyze TbStream_AxiLastParam1.vhd
-# analyze TbStream_AxiLastParamAsync1.vhd
-# analyze TbStream_AxiLastOption1.vhd
-# analyze TbStream_AxiLastOptionAsync1.vhd
-# 
-# analyze TbStream_AxiSetOptions1.vhd
-# analyze TbStream_AxiSetOptionsAsync1.vhd
-# analyze TbStream_AxiSetOptionsBurst1.vhd
-# analyze TbStream_AxiSetOptionsBurstAsync1.vhd
-# 
-# analyze TbStream_AxiTxValidDelay1.vhd
-# analyze TbStream_AxiTxValidDelayBurst1.vhd
-#
-# analyze TbStream_AxiTiming1.vhd
-# analyze TbStream_AxiTiming2.vhd
-# analyze TbStream_AxiTimingBurst2.vhd
-# 
-# analyze TbStream_AxiSetOptions2.vhd
-# analyze TbStream_AxiSetOptionsAsync2.vhd
-# analyze TbStream_AxiSetOptionsBurst2.vhd
-# analyze TbStream_AxiSetOptionsBurstAsync2.vhd
-# analyze TbStream_AxiSetOptionsBurstByte2.vhd
-# analyze TbStream_AxiSetOptionsBurstByteAsync2.vhd
-# 
-# analyze TbStream_AxiSetOptionsBurst3.vhd
-# analyze TbStream_AxiSetOptionsBurstAsync3.vhd
-# analyze TbStream_AxiSetOptionsBurstCheck3.vhd
-# analyze TbStream_AxiSetOptionsBurstCheckAsync3.vhd
-# 
-# analyze TbStream_AxiBurstNoLast1.vhd
-# analyze TbStream_AxiBurstAsyncNoLast1.vhd
+analyze TbStream_AxiSendGet2.vhd
+analyze TbStream_AxiSendGetAsync2.vhd
+analyze TbStream_AxiSendGetBurst2.vhd
+analyze TbStream_AxiSendGetBurstAsync2.vhd
+
+analyze TbStream_AxiLastParam1.vhd
+analyze TbStream_AxiLastParamAsync1.vhd
+analyze TbStream_AxiLastOption1.vhd
+analyze TbStream_AxiLastOptionAsync1.vhd
+
+analyze TbStream_AxiSetOptions1.vhd
+analyze TbStream_AxiSetOptionsAsync1.vhd
+analyze TbStream_AxiSetOptionsBurst1.vhd
+analyze TbStream_AxiSetOptionsBurstAsync1.vhd
+
+analyze TbStream_AxiTxValidDelay1.vhd
+analyze TbStream_AxiTxValidDelayBurst1.vhd
+
+analyze TbStream_AxiTiming1.vhd
+analyze TbStream_AxiTiming2.vhd
+analyze TbStream_AxiTimingBurst2.vhd
+
+analyze TbStream_AxiSetOptions2.vhd
+analyze TbStream_AxiSetOptionsAsync2.vhd
+analyze TbStream_AxiSetOptionsBurst2.vhd
+analyze TbStream_AxiSetOptionsBurstAsync2.vhd
+analyze TbStream_AxiSetOptionsBurstByte2.vhd
+analyze TbStream_AxiSetOptionsBurstByteAsync2.vhd
+
+analyze TbStream_AxiSetOptionsBurst3.vhd
+analyze TbStream_AxiSetOptionsBurstAsync3.vhd
+analyze TbStream_AxiSetOptionsBurstCheck3.vhd
+analyze TbStream_AxiSetOptionsBurstCheckAsync3.vhd
+
+analyze TbStream_AxiBurstNoLast1.vhd
+analyze TbStream_AxiBurstAsyncNoLast1.vhd
 
 
 simulate TbStream_SendGet1
@@ -129,7 +130,8 @@ simulate TbStream_SendGet1
 # simulate TbStream_MultipleDriversTransmitter1
 # simulate TbStream_MultipleDriversReceiver1
 
-simulate TbStream_ReleaseAcquireTransmitter1
+# simulate TbStream_ReleaseAcquireTransmitter1
+# simulate TbStream_ReleaseAcquireReceiver1
 
 # simulate TbStream_ByteHandling1
 # simulate TbStream_ByteHandlingAsync1

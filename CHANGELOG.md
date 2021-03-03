@@ -2,6 +2,7 @@
 
 | Revision  | Revision Date |  Release Summary | 
 ------------|---------------|----------- 
+| 2021.02   | February 2021 |  Added TRANSMIT_VALID_DELAY_CYCLES to AxiStreamTransmitter
 | 2020.12   | December 2020 |  More Bursting and Virtual Transaction Interfaces.
 | 2020.10   | October 2020  |  Added Bursting to AxiStream. 
 | 2020.07   | July 2020     |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder

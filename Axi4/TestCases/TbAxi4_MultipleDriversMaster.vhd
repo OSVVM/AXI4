@@ -55,7 +55,7 @@ begin
     SetAlertLogName("TbAxi4_MultipleDriversMaster") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
-    SetAlertStopCount(FAILURE, 2) ;    -- Enable INFO logs
+    SetAlertStopCount(FAILURE, 2) ;    -- Allow 2 FAILURE Alerts
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
@@ -88,7 +88,6 @@ begin
   --   Generate transactions for AxiMaster
   ------------------------------------------------------------
   MasterProc : process
-    variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
   begin
     wait until nReset = '1' ;  
     WaitForClock(MasterRec, 2) ; 
@@ -104,8 +103,6 @@ begin
   --   Generate transactions for AxiResponder
   ------------------------------------------------------------
   ResponderProc : process
-    variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
-    variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
   begin
     wait until nReset = '1' ;  
     WaitForClock(ResponderRec, 2) ; 

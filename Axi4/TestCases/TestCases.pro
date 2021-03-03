@@ -60,6 +60,10 @@ analyze TbAxi4_MultipleDriversMaster.vhd
 analyze TbAxi4_MultipleDriversResponder.vhd
 analyze TbAxi4_MultipleDriversMemory.vhd
 
+analyze TbAxi4_ReleaseAcquireMaster1.vhd
+analyze TbAxi4_ReleaseAcquireMemory1.vhd
+analyze TbAxi4_ReleaseAcquireResponder1.vhd
+
 analyze TbAxi4_AlertLogIDMaster.vhd
 analyze TbAxi4_AlertLogIDResponder.vhd
 analyze TbAxi4_AlertLogIDMemory.vhd
@@ -119,6 +123,10 @@ analyze TbAxi4_MemoryAsync.vhd
 # simulate TbAxi4_MultipleDriversMaster
 # simulate TbAxi4_MultipleDriversResponder
 # simulate TbAxi4_MultipleDriversMemory
+
+# simulate TbAxi4_ReleaseAcquireMaster1
+# simulate TbAxi4_ReleaseAcquireMemory1
+# simulate TbAxi4_ReleaseAcquireResponder1
 
 # simulate TbAxi4_AlertLogIDMaster
 # simulate TbAxi4_AlertLogIDResponder

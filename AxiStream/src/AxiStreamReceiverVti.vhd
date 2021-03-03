@@ -19,12 +19,8 @@
 --
 --  Revision History:
 --    Date       Version    Description
---    05/2018    2018.05    First Release
---    05/2019    2019.05    Removed generics for DEFAULT_ID, DEFAULT_DEST, DEFAULT_USER
---    01/2020    2020.01    Updated license notice
---    07/2020    2020.07    Updated for Streaming Model Independent Transactions
---    10/2020    2020.10    Added Bursting per updates to Model Independent Transactions
---    12/2020    2020.12    Added Virtual Transaction Interface
+--    02/2021    2021.02    Added MultiDriver Detect.  Updated Generics.   
+--    12/2020    2020.12    Created Virtual Transaction Interface from AxiStreamReceiver.vhd
 --
 --
 --  This file is part of OSVVM.
@@ -69,7 +65,7 @@ entity AxiStreamReceiverVti is
     INIT_LAST      : natural := 0 ; 
     
     tperiod_Clk    : time := 10 ns ;
-    tpd_Clk_TReady : time := 2 ns  
+    tpd_Clk_TReady : time := 1 ns  
   ) ;
   port (
     -- Globals

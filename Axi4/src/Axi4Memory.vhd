@@ -19,7 +19,8 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    01/2020   2020.06    Derived from Axi4Responder.vhd
+--    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.   
+--    06/2020   2020.06    Derived from Axi4Responder.vhd
 --
 --
 --  This file is part of OSVVM.
@@ -62,23 +63,25 @@ generic (
   MODEL_ID_NAME   : string := "" ;
   tperiod_Clk     : time   := 10 ns ;
 
-  tpd_Clk_AWReady : time   := 2 ns ;
+  DEFAULT_DELAY   : time   := 1 ns ; 
 
-  tpd_Clk_WReady  : time   := 2 ns ;
+  tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
 
-  tpd_Clk_BValid  : time   := 2 ns ;
-  tpd_Clk_BResp   : time   := 2 ns ;
-  tpd_Clk_BID     : time   := 2 ns ;
-  tpd_Clk_BUser   : time   := 2 ns ;
+  tpd_Clk_WReady  : time   := DEFAULT_DELAY ;
 
-  tpd_Clk_ARReady : time   := 2 ns ;
+  tpd_Clk_BValid  : time   := DEFAULT_DELAY ;
+  tpd_Clk_BResp   : time   := DEFAULT_DELAY ;
+  tpd_Clk_BID     : time   := DEFAULT_DELAY ;
+  tpd_Clk_BUser   : time   := DEFAULT_DELAY ;
 
-  tpd_Clk_RValid  : time   := 2 ns ;
-  tpd_Clk_RData   : time   := 2 ns ;
-  tpd_Clk_RResp   : time   := 2 ns ;
-  tpd_Clk_RID     : time   := 2 ns ;
-  tpd_Clk_RUser   : time   := 2 ns ;
-  tpd_Clk_RLast   : time   := 2 ns
+  tpd_Clk_ARReady : time   := DEFAULT_DELAY ;
+
+  tpd_Clk_RValid  : time   := DEFAULT_DELAY ;
+  tpd_Clk_RData   : time   := DEFAULT_DELAY ;
+  tpd_Clk_RResp   : time   := DEFAULT_DELAY ;
+  tpd_Clk_RID     : time   := DEFAULT_DELAY ;
+  tpd_Clk_RUser   : time   := DEFAULT_DELAY ;
+  tpd_Clk_RLast   : time   := DEFAULT_DELAY
 ) ;
 port (
   -- Globals

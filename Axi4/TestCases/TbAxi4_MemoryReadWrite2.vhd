@@ -125,7 +125,7 @@ begin
     WaitForBarrier(MasterSync1) ;
     WaitForBarrier(MemorySync1) ;
 
-    log("In Master, Check What Master Wrote") ;
+    log("In Master, Check What Memory Wrote") ;
     log("Read with ByteAddr = 0, 4 Bytes") ;
     ReadCheck(MasterRec,  X"A000_1000", X"2222_2222") ;
 

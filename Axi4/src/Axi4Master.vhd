@@ -19,11 +19,12 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    09/2017   2017       Initial revision
---    04/2018   2018.04    First Release
---    01/2020   2020.01    Updated license notice
+--    02/2021   2021.02    Added MultiDriver Detect.  Added Valid Delays.  Updated Generics.   
+--    12/2020   2020.12    Added Burst Word Mode.  Refactored code.  
 --    07/2020   2020.07    Created Axi4 FULL from Axi4Lite
---    12/2020   2020.12    Added Burst Word Mode.  Refactored code.
+--    01/2020   2020.01    Updated license notice
+--    04/2018   2018.04    First Release
+--    09/2017   2017       Initial revision
 --
 --
 --  This file is part of OSVVM.
@@ -64,47 +65,49 @@ entity Axi4Master is
 generic (
   MODEL_ID_NAME    : string := "" ;
   tperiod_Clk      : time   := 10 ns ;
+  
+  DEFAULT_DELAY    : time   := 1 ns ; 
 
-  tpd_Clk_AWAddr   : time   := 2 ns ;
-  tpd_Clk_AWProt   : time   := 2 ns ;
-  tpd_Clk_AWValid  : time   := 2 ns ;
+  tpd_Clk_AWAddr   : time   := DEFAULT_DELAY ;
+  tpd_Clk_AWProt   : time   := DEFAULT_DELAY ;
+  tpd_Clk_AWValid  : time   := DEFAULT_DELAY ;
   -- AXI4 Full
-  tpd_clk_AWLen    : time   := 2 ns ;
-  tpd_clk_AWID     : time   := 2 ns ;
-  tpd_clk_AWSize   : time   := 2 ns ;
-  tpd_clk_AWBurst  : time   := 2 ns ;
-  tpd_clk_AWLock   : time   := 2 ns ;
-  tpd_clk_AWCache  : time   := 2 ns ;
-  tpd_clk_AWQOS    : time   := 2 ns ;
-  tpd_clk_AWRegion : time   := 2 ns ;
-  tpd_clk_AWUser   : time   := 2 ns ;
+  tpd_clk_AWLen    : time   := DEFAULT_DELAY ;
+  tpd_clk_AWID     : time   := DEFAULT_DELAY ;
+  tpd_clk_AWSize   : time   := DEFAULT_DELAY ;
+  tpd_clk_AWBurst  : time   := DEFAULT_DELAY ;
+  tpd_clk_AWLock   : time   := DEFAULT_DELAY ;
+  tpd_clk_AWCache  : time   := DEFAULT_DELAY ;
+  tpd_clk_AWQOS    : time   := DEFAULT_DELAY ;
+  tpd_clk_AWRegion : time   := DEFAULT_DELAY ;
+  tpd_clk_AWUser   : time   := DEFAULT_DELAY ;
 
-  tpd_Clk_WValid   : time   := 2 ns ;
-  tpd_Clk_WData    : time   := 2 ns ;
-  tpd_Clk_WStrb    : time   := 2 ns ;
+  tpd_Clk_WValid   : time   := DEFAULT_DELAY ;
+  tpd_Clk_WData    : time   := DEFAULT_DELAY ;
+  tpd_Clk_WStrb    : time   := DEFAULT_DELAY ;
   -- AXI4 Full
-  tpd_Clk_WLast    : time   := 2 ns ;
-  tpd_Clk_WUser    : time   := 2 ns ;
+  tpd_Clk_WLast    : time   := DEFAULT_DELAY ;
+  tpd_Clk_WUser    : time   := DEFAULT_DELAY ;
   -- AXI3
-  tpd_Clk_WID      : time   := 2 ns ;
+  tpd_Clk_WID      : time   := DEFAULT_DELAY ;
 
-  tpd_Clk_BReady   : time   := 2 ns ;
+  tpd_Clk_BReady   : time   := DEFAULT_DELAY ;
 
-  tpd_Clk_ARValid  : time   := 2 ns ;
-  tpd_Clk_ARProt   : time   := 2 ns ;
-  tpd_Clk_ARAddr   : time   := 2 ns ;
+  tpd_Clk_ARValid  : time   := DEFAULT_DELAY ;
+  tpd_Clk_ARProt   : time   := DEFAULT_DELAY ;
+  tpd_Clk_ARAddr   : time   := DEFAULT_DELAY ;
   -- AXI4 Full
-  tpd_clk_ARLen    : time   := 2 ns ;
-  tpd_clk_ARID     : time   := 2 ns ;
-  tpd_clk_ARSize   : time   := 2 ns ;
-  tpd_clk_ARBurst  : time   := 2 ns ;
-  tpd_clk_ARLock   : time   := 2 ns ;
-  tpd_clk_ARCache  : time   := 2 ns ;
-  tpd_clk_ARQOS    : time   := 2 ns ;
-  tpd_clk_ARRegion : time   := 2 ns ;
-  tpd_clk_ARUser   : time   := 2 ns ;
+  tpd_clk_ARLen    : time   := DEFAULT_DELAY ;
+  tpd_clk_ARID     : time   := DEFAULT_DELAY ;
+  tpd_clk_ARSize   : time   := DEFAULT_DELAY ;
+  tpd_clk_ARBurst  : time   := DEFAULT_DELAY ;
+  tpd_clk_ARLock   : time   := DEFAULT_DELAY ;
+  tpd_clk_ARCache  : time   := DEFAULT_DELAY ;
+  tpd_clk_ARQOS    : time   := DEFAULT_DELAY ;
+  tpd_clk_ARRegion : time   := DEFAULT_DELAY ;
+  tpd_clk_ARUser   : time   := DEFAULT_DELAY ;
 
-  tpd_Clk_RReady   : time   := 2 ns
+  tpd_Clk_RReady   : time   := DEFAULT_DELAY
 ) ;
 port (
   -- Globals
@@ -123,6 +126,12 @@ port (
   shared variable WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
   shared variable ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
 
+  -- Derive AXI interface properties from the AxiBus
+  alias AxiAddr is AxiBus.WriteAddress.Addr ;
+  alias AxiData is AxiBus.WriteData.Data ;
+  constant AXI_ADDR_WIDTH      : integer := AxiAddr'length ;
+  constant AXI_DATA_WIDTH      : integer := AxiData'length ;
+
   -- Model Configuration 
   -- Access via transactions or external name
   shared variable params : ModelParametersPType ;
@@ -130,10 +139,6 @@ port (
 end entity Axi4Master ;
 architecture AxiFull of Axi4Master is
 
-  alias AxiAddr is AxiBus.WriteAddress.Addr ;
-  alias AxiData is AxiBus.WriteData.Data ;
-  constant AXI_ADDR_WIDTH      : integer := AxiAddr'length ;
-  constant AXI_DATA_WIDTH      : integer := AxiData'length ;
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
   constant AXI_STRB_WIDTH      : integer := AXI_DATA_WIDTH/8 ;
@@ -767,7 +772,7 @@ begin
       ) ;
 
       -- State after operation
-      AW.Addr   <= Local.Addr   + 1  after tpd_Clk_AWAddr   ;
+      AW.Addr   <= Local.Addr   + 4  after tpd_Clk_AWAddr   ;
       AW.Prot   <= Local.Prot   + 1  after tpd_clk_AWProt   ;
       -- AXI4 Full
       AW.Len    <= Local.Len    + 1  after tpd_clk_AWLen    ;
@@ -1022,7 +1027,7 @@ begin
       ) ;
 
       -- State after operation
-      AR.Addr   <= Local.Addr   + 1  after tpd_Clk_ARAddr   ;
+      AR.Addr   <= Local.Addr   + 4  after tpd_Clk_ARAddr   ;
       AR.Prot   <= Local.Prot   + 1  after tpd_clk_ARProt   ;
       -- AXI4 Full
       AR.Len    <= Local.Len    + 1  after tpd_clk_ARLen    ;

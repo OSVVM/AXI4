@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_MultipleDriversResponder.vhd
+--  File Name:         TbStream_MultipleDriversReceiver1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Test transaction source
+--      Validates Multiple Driver detection works
 --
 --
 --  Developed by:
@@ -19,12 +19,12 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    12/2020   2020.12    Initial revision
+--    02/2021   2021.02    Initial revision
 --
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2017 - 2020 by SynthWorks Design Inc.  
+--  Copyright (c) 2021 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -38,11 +38,10 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --  
+architecture MultipleDriversReceiver1 of TestCtrl is
 
-architecture MultipleDriversResponder of TestCtrl is
-
-  signal TestDone, Sync : integer_barrier := 1 ;
- 
+  signal   TestDone : integer_barrier := 1 ;
+   
 begin
 
   ------------------------------------------------------------
@@ -52,14 +51,14 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_MultipleDriversResponder") ;
+    SetAlertLogName("TbStream_MultipleDriversReceiver1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
-    SetAlertStopCount(FAILURE, 2) ;    -- Enable INFO logs
+    SetAlertStopCount(FAILURE, 2) ;    -- Allow 2 FAILURE Alerts
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_MultipleDriversResponder.txt") ;
+    TranscriptOpen("./results/TbStream_MultipleDriversReceiver1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -71,58 +70,54 @@ begin
     AlertIf(now >= 35 ms, "Test finished due to timeout") ;
 --    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
-    
     TranscriptClose ; 
-    -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_MultipleDriversResponder.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MultipleDriversResponder.txt", "") ; 
+--    AlertIfDiff("./results/TbStream_MultipleDriversReceiver1.txt", "../sim_shared/validated_results/TbStream_MultipleDriversReceiver1.txt", "") ; 
     
     print("") ;
+    -- Expecting five check errors 
     ReportAlerts(ExternalErrors => (FAILURE => -1, ERROR => 0, WARNING => 0)) ; 
     print("") ;
     std.env.stop ; 
     wait ; 
   end process ControlProc ; 
 
+  
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- TransmitterProc
+  --   Generate transactions for Transmitter
   ------------------------------------------------------------
-  MasterProc : process
-    variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
+  TransmitterProc : process
   begin
     wait until nReset = '1' ;  
-    WaitForClock(MasterRec, 2) ; 
-    WaitForClock(MasterRec, 2) ; 
-    WaitForClock(ResponderRec, 2) ;
+    WaitForClock(StreamTxRec, 2) ; 
+    WaitForClock(StreamTxRec, 2) ; 
+    WaitForClock(StreamRxRec, 2) ; 
 
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process TransmitterProc ;
 
 
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- ReceiverProc
+  --   Generate transactions for Receiver
   ------------------------------------------------------------
-  ResponderProc : process
-    variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
-    variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
+  ReceiverProc : process
   begin
     wait until nReset = '1' ;  
-    WaitForClock(ResponderRec, 1) ; 
-    WaitForClock(ResponderRec, 1) ; 
+    WaitForClock(StreamRxRec, 2) ; 
+    WaitForClock(StreamRxRec, 3) ; 
     
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process ReceiverProc ;
 
+end MultipleDriversReceiver1 ;
 
-end MultipleDriversResponder ;
-
-Configuration TbAxi4_MultipleDriversResponder of TbAxi4 is
+Configuration TbStream_MultipleDriversReceiver1 of TbStream is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(MultipleDriversResponder) ; 
+      use entity work.TestCtrl(MultipleDriversReceiver1) ; 
     end for ; 
   end for ; 
-end TbAxi4_MultipleDriversResponder ; 
+end TbStream_MultipleDriversReceiver1 ; 

@@ -19,7 +19,7 @@
 --
 --  Revision History:
 --    Date       Version    Description
---    02/2021    2021.02    Added Valid Delays
+--    02/2021    2021.02    Added Valid Delays.  Added MultiDriver Detect.  Updated Generics.   
 --    12/2020    2020.12    Created Virtual Transaction Interface from AxiStreamTransmitter.vhd
 --
 --  This file is part of OSVVM.
@@ -66,14 +66,16 @@ entity AxiStreamTransmitterVti is
 
     tperiod_Clk    : time := 10 ns ;
     
-    tpd_Clk_TValid : time := 2 ns ; 
-    tpd_Clk_TID    : time := 2 ns ; 
-    tpd_Clk_TDest  : time := 2 ns ; 
-    tpd_Clk_TUser  : time := 2 ns ; 
-    tpd_Clk_TData  : time := 2 ns ; 
-    tpd_Clk_TStrb  : time := 2 ns ; 
-    tpd_Clk_TKeep  : time := 2 ns ; 
-    tpd_Clk_TLast  : time := 2 ns 
+    DEFAULT_DELAY  : time := 1 ns ; 
+
+    tpd_Clk_TValid : time := DEFAULT_DELAY ; 
+    tpd_Clk_TID    : time := DEFAULT_DELAY ; 
+    tpd_Clk_TDest  : time := DEFAULT_DELAY ; 
+    tpd_Clk_TUser  : time := DEFAULT_DELAY ; 
+    tpd_Clk_TData  : time := DEFAULT_DELAY ; 
+    tpd_Clk_TStrb  : time := DEFAULT_DELAY ; 
+    tpd_Clk_TKeep  : time := DEFAULT_DELAY ; 
+    tpd_Clk_TLast  : time := DEFAULT_DELAY 
   ) ;
   port (
     -- Globals

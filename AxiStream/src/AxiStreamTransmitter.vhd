@@ -19,7 +19,7 @@
 --
 --  Revision History:
 --    Date       Version    Description
---    02/2021    2021.02    Added Valid Delays.  Added MultiDriver Detect.  Updated Generics.   
+--    02/2021    2021.02    Added Valid Delays.  Added MultiDriver Detect.  Updated Generics.
 --    10/2020    2020.10    Added Bursting per updates to Model Independent Transactions
 --    07/2020    2020.07    Updated for Streaming Model Independent Transactions
 --    01/2020    2020.01    Updated license notice
@@ -70,7 +70,7 @@ entity AxiStreamTransmitter is
 
     tperiod_Clk    : time := 10 ns ;
 
-    DEFAULT_DELAY  : time := 1 ns ; 
+    DEFAULT_DELAY  : time := 1 ns ;
 
     tpd_Clk_TValid : time := DEFAULT_DELAY ;
     tpd_Clk_TID    : time := DEFAULT_DELAY ;
@@ -142,7 +142,6 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
   signal   BurstFifoByteMode  : boolean := (DEFAULT_BURST_MODE = STREAM_BURST_BYTE_MODE) ;
 
 begin
-
 
   ------------------------------------------------------------
   --  Initialize alerts
@@ -442,6 +441,5 @@ begin
       wait for 0 ns ;
     end loop TransmitLoop ;
   end process TransmitHandler ;
-
 
 end architecture SimpleTransmitter ;

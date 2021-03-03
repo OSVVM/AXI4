@@ -19,19 +19,19 @@
 --
 --  Revision History:
 --    Date       Version    Description
---    02/2021    2021.02    Added Valid Delays.  Added MultiDriver Detect.  Updated Generics.   
+--    02/2021    2021.02    Added Valid Delays.  Added MultiDriver Detect.  Updated Generics.
 --    12/2020    2020.12    Created Virtual Transaction Interface from AxiStreamTransmitter.vhd
 --
 --  This file is part of OSVVM.
---  
---  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.  
---  
+--
+--  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.
+--
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
 --  You may obtain a copy of the License at
---  
+--
 --      https://www.apache.org/licenses/LICENSE-2.0
---  
+--
 --  Unless required by applicable law or agreed to in writing, software
 --  distributed under the License is distributed on an "AS IS" BASIS,
 --  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -44,59 +44,59 @@ library ieee ;
   use ieee.numeric_std.all ;
   use ieee.numeric_std_unsigned.all ;
   use ieee.math_real.all ;
-  
+
 library osvvm ;
   context osvvm.OsvvmContext ;
   use osvvm.ScoreboardPkg_slv.all ;
-  
+
 library osvvm_common ;
   context osvvm_common.OsvvmCommonContext ;
 
-  use work.AxiStreamOptionsPkg.all ; 
-  use work.Axi4CommonPkg.all ; 
+  use work.AxiStreamOptionsPkg.all ;
+  use work.Axi4CommonPkg.all ;
   use work.AxiStreamTbPkg.all ;
 
 entity AxiStreamTransmitterVti is
   generic (
     MODEL_ID_NAME  : string := "" ;
-    INIT_ID        : std_logic_vector := "" ; 
-    INIT_DEST      : std_logic_vector := "" ; 
-    INIT_USER      : std_logic_vector := "" ; 
-    INIT_LAST      : natural := 0 ; 
+    INIT_ID        : std_logic_vector := "" ;
+    INIT_DEST      : std_logic_vector := "" ;
+    INIT_USER      : std_logic_vector := "" ;
+    INIT_LAST      : natural := 0 ;
 
     tperiod_Clk    : time := 10 ns ;
-    
-    DEFAULT_DELAY  : time := 1 ns ; 
 
-    tpd_Clk_TValid : time := DEFAULT_DELAY ; 
-    tpd_Clk_TID    : time := DEFAULT_DELAY ; 
-    tpd_Clk_TDest  : time := DEFAULT_DELAY ; 
-    tpd_Clk_TUser  : time := DEFAULT_DELAY ; 
-    tpd_Clk_TData  : time := DEFAULT_DELAY ; 
-    tpd_Clk_TStrb  : time := DEFAULT_DELAY ; 
-    tpd_Clk_TKeep  : time := DEFAULT_DELAY ; 
-    tpd_Clk_TLast  : time := DEFAULT_DELAY 
+    DEFAULT_DELAY  : time := 1 ns ;
+
+    tpd_Clk_TValid : time := DEFAULT_DELAY ;
+    tpd_Clk_TID    : time := DEFAULT_DELAY ;
+    tpd_Clk_TDest  : time := DEFAULT_DELAY ;
+    tpd_Clk_TUser  : time := DEFAULT_DELAY ;
+    tpd_Clk_TData  : time := DEFAULT_DELAY ;
+    tpd_Clk_TStrb  : time := DEFAULT_DELAY ;
+    tpd_Clk_TKeep  : time := DEFAULT_DELAY ;
+    tpd_Clk_TLast  : time := DEFAULT_DELAY
   ) ;
   port (
     -- Globals
     Clk       : in  std_logic ;
     nReset    : in  std_logic ;
-    
+
     -- AXI Transmitter Functional Interface
     TValid    : out std_logic ;
-    TReady    : in  std_logic ; 
-    TID       : out std_logic_vector ; 
-    TDest     : out std_logic_vector ; 
-    TUser     : out std_logic_vector ; 
-    TData     : out std_logic_vector ; 
-    TStrb     : out std_logic_vector ; 
-    TKeep     : out std_logic_vector ; 
-    TLast     : out std_logic 
+    TReady    : in  std_logic ;
+    TID       : out std_logic_vector ;
+    TDest     : out std_logic_vector ;
+    TUser     : out std_logic_vector ;
+    TData     : out std_logic_vector ;
+    TStrb     : out std_logic_vector ;
+    TKeep     : out std_logic_vector ;
+    TLast     : out std_logic
   ) ;
 
   -- Burst Interface
   -- Access via external names
-  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
+  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
 
   -- Derive AXI interface properties from interface signals
   constant AXI_STREAM_DATA_WIDTH   : integer := TData'length ;
@@ -109,8 +109,8 @@ entity AxiStreamTransmitterVti is
     DataFromModel (AXI_STREAM_DATA_WIDTH-1  downto 0),
     ParamToModel  (AXI_STREAM_PARAM_WIDTH-1 downto 0),
     ParamFromModel(AXI_STREAM_PARAM_WIDTH-1 downto 0)
-  ) ;  
-  
+  ) ;
+
 end entity AxiStreamTransmitterVti ;
 architecture SimpleTransmitter of AxiStreamTransmitterVti is
   constant AXI_STREAM_DATA_BYTE_WIDTH  : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
@@ -138,13 +138,13 @@ architecture SimpleTransmitter of AxiStreamTransmitterVti is
   signal ParamLast         : natural := INIT_LAST ;
   signal LastOffsetCount   : integer := 0 ;
   signal ValidDelayCycles  : integer := 0 ;
+  signal ValidBurstDelayCycles  : integer := 0 ;
 
   constant DEFAULT_BURST_MODE : StreamFifoBurstModeType := STREAM_BURST_WORD_MODE ;
   signal   BurstFifoMode      : StreamFifoBurstModeType := DEFAULT_BURST_MODE ;
   signal   BurstFifoByteMode  : boolean := (DEFAULT_BURST_MODE = STREAM_BURST_BYTE_MODE) ;
 
 begin
-
 
   ------------------------------------------------------------
   --  Initialize alerts
@@ -214,7 +214,7 @@ begin
                     ParamLast  => ParamLast,
                     Count      => ((TransmitRequestCount+1) - LastOffsetCount)
                   ) ;
-        TransmitFifo.Push(Data & Param) ;
+        TransmitFifo.Push('0' & Data & Param) ;
         Increment(TransmitRequestCount) ;
         wait for 0 ns ;
         if IsBlocking(TransRec.Operation) then
@@ -260,7 +260,7 @@ begin
           end case ;
 --          Param(0) := '1' when i = 0 else Last ;  -- TLast
           Param(0) := '1' when i = 0 else '0' ;  -- TLast
-          TransmitFifo.Push(Data & Param) ;
+          TransmitFifo.Push('1' & Data & Param) ;
         end loop ;
 
         wait for 0 ns ;
@@ -272,6 +272,9 @@ begin
         case AxiStreamOptionsType'val(TransRec.Options) is
           when TRANSMIT_VALID_DELAY_CYCLES =>
             ValidDelayCycles <= TransRec.IntToModel ;
+
+          when TRANSMIT_VALID_BURST_DELAY_CYCLES =>
+            ValidBurstDelayCycles <= TransRec.IntToModel ;
 
           when TRANSMIT_READY_TIME_OUT =>
             TransmitReadyTimeOut      <= TransRec.IntToModel ;
@@ -298,6 +301,9 @@ begin
         case AxiStreamOptionsType'val(TransRec.Options) is
           when TRANSMIT_VALID_DELAY_CYCLES =>
             TransRec.IntFromModel   <= ValidDelayCycles ;
+
+          when TRANSMIT_VALID_BURST_DELAY_CYCLES =>
+            TransRec.IntFromModel   <= ValidBurstDelayCycles ;
 
           when TRANSMIT_READY_TIME_OUT =>
             TransRec.IntFromModel   <=  TransmitReadyTimeOut ;
@@ -342,6 +348,8 @@ begin
     variable Strb  : std_logic_vector(TStrb'length-1 downto 0) ;
     variable Keep  : std_logic_vector(TKeep'length-1 downto 0) ;
     variable Last  : std_logic ;
+    variable NewTransfer : std_logic := '1' ;
+    variable Burst : std_logic ;
   begin
     -- Initialize
     TValid  <= '0' ;
@@ -359,10 +367,15 @@ begin
          WaitForToggle(TransmitRequestCount) ;
       end if ;
 
-      WaitForClock(Clk, ValidDelayCycles) ;
-
       -- Get Transaction
-      (Data, ID, Dest, User, Last) := TransmitFifo.Pop ;
+      (Burst, Data, ID, Dest, User, Last) := TransmitFifo.Pop ;
+
+      if NewTransfer or not Burst then
+        WaitForClock(Clk, ValidDelayCycles) ;
+      else
+        WaitForClock(Clk, ValidBurstDelayCycles) ;
+      end if ;
+      NewTransfer := Last or not Burst ;
 
       -- Calculate Strb. 1 when data else 0
       -- If Strb is unused it may be null range
@@ -431,6 +444,5 @@ begin
       wait for 0 ns ;
     end loop TransmitLoop ;
   end process TransmitHandler ;
-
 
 end architecture SimpleTransmitter ;

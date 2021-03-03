@@ -19,13 +19,14 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    03/2019   2019       Initial revision
+--    02/2021   2021.02    Merged separate component packages into 1
 --    01/2020   2020.01    Updated license notice
+--    03/2019   2019       Initial revision
 --
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2019 - 2020 by SynthWorks Design Inc.
+--  Copyright (c) 2019 - 2021 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -57,46 +58,48 @@ package Axi4ComponentPkg is
       MODEL_ID_NAME    : string := "" ;
       tperiod_Clk      : time   := 10 ns ;
 
-      tpd_Clk_AWAddr   : time   := 2 ns ;
-      tpd_Clk_AWProt   : time   := 2 ns ;
-      tpd_Clk_AWValid  : time   := 2 ns ;
-      -- AXI4 Full
-      tpd_clk_AWLen    : time   := 2 ns ;
-      tpd_clk_AWID     : time   := 2 ns ;
-      tpd_clk_AWSize   : time   := 2 ns ;
-      tpd_clk_AWBurst  : time   := 2 ns ;
-      tpd_clk_AWLock   : time   := 2 ns ;
-      tpd_clk_AWCache  : time   := 2 ns ;
-      tpd_clk_AWQOS    : time   := 2 ns ;
-      tpd_clk_AWRegion : time   := 2 ns ;
-      tpd_clk_AWUser   : time   := 2 ns ;
+      DEFAULT_DELAY    : time   := 1 ns ; 
 
-      tpd_Clk_WValid   : time   := 2 ns ;
-      tpd_Clk_WData    : time   := 2 ns ;
-      tpd_Clk_WStrb    : time   := 2 ns ;
+      tpd_Clk_AWAddr   : time   := DEFAULT_DELAY ;
+      tpd_Clk_AWProt   : time   := DEFAULT_DELAY ;
+      tpd_Clk_AWValid  : time   := DEFAULT_DELAY ;
       -- AXI4 Full
-      tpd_Clk_WLast    : time   := 2 ns ;
-      tpd_Clk_WUser    : time   := 2 ns ;
+      tpd_clk_AWLen    : time   := DEFAULT_DELAY ;
+      tpd_clk_AWID     : time   := DEFAULT_DELAY ;
+      tpd_clk_AWSize   : time   := DEFAULT_DELAY ;
+      tpd_clk_AWBurst  : time   := DEFAULT_DELAY ;
+      tpd_clk_AWLock   : time   := DEFAULT_DELAY ;
+      tpd_clk_AWCache  : time   := DEFAULT_DELAY ;
+      tpd_clk_AWQOS    : time   := DEFAULT_DELAY ;
+      tpd_clk_AWRegion : time   := DEFAULT_DELAY ;
+      tpd_clk_AWUser   : time   := DEFAULT_DELAY ;
+
+      tpd_Clk_WValid   : time   := DEFAULT_DELAY ;
+      tpd_Clk_WData    : time   := DEFAULT_DELAY ;
+      tpd_Clk_WStrb    : time   := DEFAULT_DELAY ;
+      -- AXI4 Full
+      tpd_Clk_WLast    : time   := DEFAULT_DELAY ;
+      tpd_Clk_WUser    : time   := DEFAULT_DELAY ;
       -- AXI3
-      tpd_Clk_WID      : time   := 2 ns ;
+      tpd_Clk_WID      : time   := DEFAULT_DELAY ;
 
-      tpd_Clk_BReady   : time   := 2 ns ;
+      tpd_Clk_BReady   : time   := DEFAULT_DELAY ;
 
-      tpd_Clk_ARValid  : time   := 2 ns ;
-      tpd_Clk_ARProt   : time   := 2 ns ;
-      tpd_Clk_ARAddr   : time   := 2 ns ;
+      tpd_Clk_ARValid  : time   := DEFAULT_DELAY ;
+      tpd_Clk_ARProt   : time   := DEFAULT_DELAY ;
+      tpd_Clk_ARAddr   : time   := DEFAULT_DELAY ;
       -- AXI4 Full
-      tpd_clk_ARLen    : time   := 2 ns ;
-      tpd_clk_ARID     : time   := 2 ns ;
-      tpd_clk_ARSize   : time   := 2 ns ;
-      tpd_clk_ARBurst  : time   := 2 ns ;
-      tpd_clk_ARLock   : time   := 2 ns ;
-      tpd_clk_ARCache  : time   := 2 ns ;
-      tpd_clk_ARQOS    : time   := 2 ns ;
-      tpd_clk_ARRegion : time   := 2 ns ;
-      tpd_clk_ARUser   : time   := 2 ns ;
+      tpd_clk_ARLen    : time   := DEFAULT_DELAY ;
+      tpd_clk_ARID     : time   := DEFAULT_DELAY ;
+      tpd_clk_ARSize   : time   := DEFAULT_DELAY ;
+      tpd_clk_ARBurst  : time   := DEFAULT_DELAY ;
+      tpd_clk_ARLock   : time   := DEFAULT_DELAY ;
+      tpd_clk_ARCache  : time   := DEFAULT_DELAY ;
+      tpd_clk_ARQOS    : time   := DEFAULT_DELAY ;
+      tpd_clk_ARRegion : time   := DEFAULT_DELAY ;
+      tpd_clk_ARUser   : time   := DEFAULT_DELAY ;
 
-      tpd_Clk_RReady   : time   := 2 ns
+      tpd_Clk_RReady   : time   := DEFAULT_DELAY
     ) ;
     port (
       -- Globals
@@ -119,22 +122,24 @@ package Axi4ComponentPkg is
       MODEL_ID_NAME   : string := "" ;
       tperiod_Clk     : time   := 10 ns ;
 
-      tpd_Clk_AWReady : time   := 2 ns ;
+      DEFAULT_DELAY    : time   := 1 ns ; 
 
-      tpd_Clk_WReady  : time   := 2 ns ;
+      tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
 
-      tpd_Clk_BValid  : time   := 2 ns ;
-      tpd_Clk_BResp   : time   := 2 ns ;
-      tpd_Clk_BID     : time   := 2 ns ;
-      tpd_Clk_BUser   : time   := 2 ns ;
+      tpd_Clk_WReady  : time   := DEFAULT_DELAY ;
 
-      tpd_Clk_ARReady : time   := 2 ns ;
+      tpd_Clk_BValid  : time   := DEFAULT_DELAY ;
+      tpd_Clk_BResp   : time   := DEFAULT_DELAY ;
+      tpd_Clk_BID     : time   := DEFAULT_DELAY ;
+      tpd_Clk_BUser   : time   := DEFAULT_DELAY ;
 
-      tpd_Clk_RValid  : time   := 2 ns ;
-      tpd_Clk_RData   : time   := 2 ns ;
-      tpd_Clk_RResp   : time   := 2 ns ;
-      tpd_Clk_RID     : time   := 2 ns ;
-      tpd_Clk_RUser   : time   := 2 ns 
+      tpd_Clk_ARReady : time   := DEFAULT_DELAY ;
+
+      tpd_Clk_RValid  : time   := DEFAULT_DELAY ;
+      tpd_Clk_RData   : time   := DEFAULT_DELAY ;
+      tpd_Clk_RResp   : time   := DEFAULT_DELAY ;
+      tpd_Clk_RID     : time   := DEFAULT_DELAY ;
+      tpd_Clk_RUser   : time   := DEFAULT_DELAY 
     ) ;
     port (
       -- Globals
@@ -156,24 +161,26 @@ package Axi4ComponentPkg is
     generic (
       MODEL_ID_NAME   : string := "" ;
       tperiod_Clk     : time   := 10 ns ;
+      
+      DEFAULT_DELAY    : time   := 1 ns ; 
 
-      tpd_Clk_AWReady : time   := 2 ns ;
+      tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
 
-      tpd_Clk_WReady  : time   := 2 ns ;
+      tpd_Clk_WReady  : time   := DEFAULT_DELAY ;
 
-      tpd_Clk_BValid  : time   := 2 ns ;
-      tpd_Clk_BResp   : time   := 2 ns ;
-      tpd_Clk_BID     : time   := 2 ns ;
-      tpd_Clk_BUser   : time   := 2 ns ;
+      tpd_Clk_BValid  : time   := DEFAULT_DELAY ;
+      tpd_Clk_BResp   : time   := DEFAULT_DELAY ;
+      tpd_Clk_BID     : time   := DEFAULT_DELAY ;
+      tpd_Clk_BUser   : time   := DEFAULT_DELAY ;
 
-      tpd_Clk_ARReady : time   := 2 ns ;
+      tpd_Clk_ARReady : time   := DEFAULT_DELAY ;
 
-      tpd_Clk_RValid  : time   := 2 ns ;
-      tpd_Clk_RData   : time   := 2 ns ;
-      tpd_Clk_RResp   : time   := 2 ns ;
-      tpd_Clk_RID     : time   := 2 ns ;
-      tpd_Clk_RUser   : time   := 2 ns ;
-      tpd_Clk_RLast   : time   := 2 ns
+      tpd_Clk_RValid  : time   := DEFAULT_DELAY ;
+      tpd_Clk_RData   : time   := DEFAULT_DELAY ;
+      tpd_Clk_RResp   : time   := DEFAULT_DELAY ;
+      tpd_Clk_RID     : time   := DEFAULT_DELAY ;
+      tpd_Clk_RUser   : time   := DEFAULT_DELAY ;
+      tpd_Clk_RLast   : time   := DEFAULT_DELAY
     ) ;
     port (
       -- Globals

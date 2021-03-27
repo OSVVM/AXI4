@@ -711,7 +711,7 @@ begin
     
     variable WriteAddressReadyTimeOut : integer ;
   begin
-    -- AXI4 LIte Signaling
+    -- AXI4 Lite Signaling
     AW.Valid  <= '0' ;
     AW.Addr   <= (Local.Addr'range   => '0') ;
     AW.Prot   <= (Local.Prot'range   => '0') ;

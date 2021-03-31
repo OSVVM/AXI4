@@ -2,6 +2,7 @@
 
 | Revision  | Revision Date |  Release Summary | 
 ------------|---------------|----------- 
+| 2021.03   | March 2021    |  Minor updates to scripts for case sensitivity on Linux
 | 2021.02   | February 2021 |  Added TRANSMIT_VALID_DELAY_CYCLES to AxiStreamTransmitter
 | 2020.12   | December 2020 |  More Bursting and Virtual Transaction Interfaces.
 | 2020.10   | October 2020  |  Added Bursting to AxiStream. 

@@ -40,7 +40,7 @@
 
 # Run same AxiStream Tests on VTI models
 library osvvm_TbAxiStreamVti
-analyze ./TestbenchVti/TestCtrl_e.vhd
-analyze ./TestbenchVti/TbStream.vhd
+analyze ./testbenchVti/TestCtrl_e.vhd
+analyze ./testbenchVti/TbStream.vhd
 
 include RunAllTestCases.pro

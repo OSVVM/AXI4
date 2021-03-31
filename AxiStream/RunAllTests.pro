@@ -40,7 +40,7 @@
 
 # Run AxiStream Tests
 library osvvm_TbAxiStream
-analyze ./Testbench/TestCtrl_e.vhd
-analyze ./Testbench/TbStream.vhd
+analyze ./testbench/TestCtrl_e.vhd
+analyze ./testbench/TbStream.vhd
 
 include RunAllTestCases.pro

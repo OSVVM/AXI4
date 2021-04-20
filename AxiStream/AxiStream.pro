@@ -39,6 +39,7 @@
 #
 library osvvm_axi4
 analyze ./src/AxiStreamOptionsPkg.vhd
+analyze ./src/AxiStreamInterfacePkg.vhd
 analyze ./src/AxiStreamTbPkg.vhd
 analyze ./src/AxiStreamTransmitter.vhd
 analyze ./src/AxiStreamTransmitterVti.vhd

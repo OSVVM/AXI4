@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date       Version    Description
+--    04/2021    2021.04    VHDL-2019 Interfaces
 --    02/2021    2021.02    Added MultiDriver Detect.  Updated Generics.   
 --    10/2020    2020.10    Added Bursting per updates to Model Independent Transactions
 --    07/2020    2020.07    Updated for Streaming Model Independent Transactions
@@ -29,7 +30,7 @@
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.  
+--  Copyright (c) 2018 - 2021 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -59,6 +60,7 @@ library osvvm_common ;
   use work.AxiStreamOptionsPkg.all ; 
   use work.Axi4CommonPkg.all ; 
   use work.AxiStreamTbPkg.all ;
+  use work.AxiStreamInterfacePkg.all ; 
 
 entity AxiStreamReceiver is
   generic (
@@ -76,20 +78,22 @@ entity AxiStreamReceiver is
     Clk       : in  std_logic ;
     nReset    : in  std_logic ;
     
-    -- AXI Master Functional Interface
-    TValid    : in  std_logic ;
-    TReady    : out std_logic ; 
-    TID       : in  std_logic_vector ; 
-    TDest     : in  std_logic_vector ; 
-    TUser     : in  std_logic_vector ; 
-    TData     : in  std_logic_vector ; 
-    TStrb     : in  std_logic_vector ; 
-    TKeep     : in  std_logic_vector ; 
-    TLast     : in  std_logic ; 
+    -- AXI Stream Interface
+    AxiStream : view AxiStreamRxView of AxiStreamRecType ; 
 
     -- Testbench Transaction Interface
     TransRec  : inout StreamRecType 
   ) ;
+  
+  alias TValid : std_logic        is AxiStream.TValid ;
+  alias TReady : std_logic        is AxiStream.TReady ;
+  alias TID    : std_logic_vector is AxiStream.TID    ;
+  alias TDest  : std_logic_vector is AxiStream.TDest  ;
+  alias TUser  : std_logic_vector is AxiStream.TUser  ;
+  alias TData  : std_logic_vector is AxiStream.TData  ;
+  alias TStrb  : std_logic_vector is AxiStream.TStrb  ;
+  alias TKeep  : std_logic_vector is AxiStream.TKeep  ;
+  alias TLast  : std_logic        is AxiStream.TLast  ;
   
   -- Burst Interface
   -- Access via external names

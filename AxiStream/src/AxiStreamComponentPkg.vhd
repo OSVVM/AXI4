@@ -18,14 +18,15 @@
 --        http://www.SynthWorks.com
 --
 --  Revision History:
---    Date      Version    Description
---    05/2018   2018.05    Initial revision
---    01/2020   2020.01    Updated license notice
+--    Date       Version    Description
+--    04/2021    2021.04    VHDL-2019 Interfaces
+--    01/2020    2020.01    Updated license notice
+--    05/2018    2018.05    Initial revision
 --
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.  
+--  Copyright (c) 2018 - 2021 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -52,6 +53,7 @@ library osvvm_common ;
 
   use work.AxiStreamOptionsPkg.all ; 
   use work.Axi4CommonPkg.all ; 
+  use work.AxiStreamInterfacePkg.all ; 
     
 package AxiStreamComponentPkg is
 
@@ -77,23 +79,15 @@ package AxiStreamComponentPkg is
       tpd_Clk_TLast  : time := DEFAULT_DELAY 
     ) ;
     port (
-      -- Globals
-      Clk       : in  std_logic ;
-      nReset    : in  std_logic ;
-      
-      -- AXI Transmitter Functional Interface
-      TValid    : out std_logic ;
-      TReady    : in  std_logic ; 
-      TID       : out std_logic_vector ; 
-      TDest     : out std_logic_vector ; 
-      TUser     : out std_logic_vector ; 
-      TData     : out std_logic_vector ; 
-      TStrb     : out std_logic_vector ; 
-      TKeep     : out std_logic_vector ; 
-      TLast     : out std_logic ; 
+    -- Globals
+    Clk       : in  std_logic ;
+    nReset    : in  std_logic ;
+    
+    -- AXI Stream Interface
+    AxiStream : view AxiStreamTxView of AxiStreamRecType ;
 
-      -- Testbench Transaction Interface
-      TransRec  : inout StreamRecType 
+    -- Testbench Transaction Interface
+    TransRec  : inout StreamRecType 
     ) ;
   end component AxiStreamTransmitter ;
   
@@ -119,20 +113,12 @@ package AxiStreamComponentPkg is
       tpd_Clk_TLast  : time := DEFAULT_DELAY 
     ) ;
     port (
-      -- Globals
-      Clk       : in  std_logic ;
-      nReset    : in  std_logic ;
-      
-      -- AXI Transmitter Functional Interface
-      TValid    : out std_logic ;
-      TReady    : in  std_logic ; 
-      TID       : out std_logic_vector ; 
-      TDest     : out std_logic_vector ; 
-      TUser     : out std_logic_vector ; 
-      TData     : out std_logic_vector ; 
-      TStrb     : out std_logic_vector ; 
-      TKeep     : out std_logic_vector ; 
-      TLast     : out std_logic 
+    -- Globals
+    Clk       : in  std_logic ;
+    nReset    : in  std_logic ;
+
+    -- AXI Stream Interface
+    AxiStream : view AxiStreamTxView
     ) ;
   end component AxiStreamTransmitterVti ;
 
@@ -148,23 +134,15 @@ package AxiStreamComponentPkg is
       tpd_Clk_TReady : time := 1 ns  
     ) ;
     port (
-      -- Globals
-      Clk       : in  std_logic ;
-      nReset    : in  std_logic ;
-      
-      -- AXI Transmitter Functional Interface
-      TValid    : in  std_logic ;
-      TReady    : out std_logic ; 
-      TID       : in  std_logic_vector ; 
-      TDest     : in  std_logic_vector ; 
-      TUser     : in  std_logic_vector ; 
-      TData     : in  std_logic_vector ; 
-      TStrb     : in  std_logic_vector ; 
-      TKeep     : in  std_logic_vector ; 
-      TLast     : in  std_logic ; 
+    -- Globals
+    Clk       : in  std_logic ;
+    nReset    : in  std_logic ;
+    
+    -- AXI Stream Interface
+    AxiStream : view AxiStreamRxView of AxiStreamRecType ; 
 
-      -- Testbench Transaction Interface
-      TransRec  : inout StreamRecType 
+    -- Testbench Transaction Interface
+    TransRec  : inout StreamRecType 
     ) ;
   end component AxiStreamReceiver ;
   
@@ -180,20 +158,12 @@ package AxiStreamComponentPkg is
       tpd_Clk_TReady : time := 1 ns  
     ) ;
     port (
-      -- Globals
-      Clk       : in  std_logic ;
-      nReset    : in  std_logic ;
-      
-      -- AXI Transmitter Functional Interface
-      TValid    : in  std_logic ;
-      TReady    : out std_logic ; 
-      TID       : in  std_logic_vector ; 
-      TDest     : in  std_logic_vector ; 
-      TUser     : in  std_logic_vector ; 
-      TData     : in  std_logic_vector ; 
-      TStrb     : in  std_logic_vector ; 
-      TKeep     : in  std_logic_vector ; 
-      TLast     : in  std_logic  
+    -- Globals
+    Clk       : in  std_logic ;
+    nReset    : in  std_logic ;
+    
+    -- AXI Stream Interface
+    AxiStream : view AxiStreamRxView
     ) ;
   end component AxiStreamReceiverVti ;
 

@@ -19,14 +19,15 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2018   2018.05    Initial revision
---    01/2020   2020.01    Updated license notice
+--    04/2021   2021.04    VHDL-2019 Interfaces
 --    10/2020   2020.10    Updated name to be TbStream.vhd in conjunction with Model Indepenedent Transactions
+--    01/2020   2020.01    Updated license notice
+--    05/2018   2018.05    Initial revision
 --
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.  
+--  Copyright (c) 2018 - 2021 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -71,15 +72,23 @@ architecture TestHarness of TbStream is
   constant INIT_DEST   : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) := (others => '0') ; 
   constant INIT_USER   : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) := (others => '0') ; 
   
-  signal TValid    : std_logic ;
-  signal TReady    : std_logic ; 
-  signal TID       : std_logic_vector(TID_MAX_WIDTH-1 downto 0) ; 
-  signal TDest     : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) ; 
-  signal TUser     : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) ; 
-  signal TData     : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ; 
-  signal TStrb     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
-  signal TKeep     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
-  signal TLast     : std_logic ; 
+  signal AxiStream : AxiStreamRecType (
+                        TID  (TID_MAX_WIDTH-1   downto 0), 
+                        TDest(TDEST_MAX_WIDTH-1 downto 0), 
+                        TUser(TUSER_MAX_WIDTH-1 downto 0), 
+                        TData(AXI_DATA_WIDTH-1  downto 0), 
+                        TStrb(AXI_BYTE_WIDTH-1  downto 0), 
+                        TKeep(AXI_BYTE_WIDTH-1  downto 0) 
+                      ) ;
+--   signal TValid    : std_logic ;
+--   signal TReady    : std_logic ; 
+--   signal TID       : std_logic_vector(TID_MAX_WIDTH-1 downto 0) ; 
+--   signal TDest     : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) ; 
+--   signal TUser     : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) ; 
+--   signal TData     : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ; 
+--   signal TStrb     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
+--   signal TKeep     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
+--   signal TLast     : std_logic ; 
   
   constant AXI_PARAM_WIDTH : integer := TID_MAX_WIDTH + TDEST_MAX_WIDTH + TUSER_MAX_WIDTH + 1 ;
 
@@ -149,15 +158,7 @@ begin
       nReset    => nReset,
       
       -- AXI Stream Interface
-      TValid    => TValid,
-      TReady    => TReady,
-      TID       => TID   ,
-      TDest     => TDest ,
-      TUser     => TUser ,
-      TData     => TData ,
-      TStrb     => TStrb ,
-      TKeep     => TKeep ,
-      TLast     => TLast ,
+      AxiStream    => AxiStream,
 
       -- Testbench Transaction Interface
       TransRec  => StreamTxRec
@@ -179,15 +180,7 @@ begin
       nReset    => nReset,
       
       -- AXI Stream Interface
-      TValid    => TValid,
-      TReady    => TReady,
-      TID       => TID   ,
-      TDest     => TDest ,
-      TUser     => TUser ,
-      TData     => TData ,
-      TStrb     => TStrb ,
-      TKeep     => TKeep ,
-      TLast     => TLast ,
+      AxiStream    => AxiStream,
 
       -- Testbench Transaction Interface
       TransRec  => StreamRxRec
@@ -196,9 +189,9 @@ begin
   
   TestCtrl_1 : TestCtrl
   generic map ( 
-    ID_LEN       => TID'length,
-    DEST_LEN     => TDest'length,
-    USER_LEN     => TUser'length
+    ID_LEN       => TID_MAX_WIDTH,
+    DEST_LEN     => TDEST_MAX_WIDTH,
+    USER_LEN     => TUSER_MAX_WIDTH
   ) 
   port map ( 
     -- Globals

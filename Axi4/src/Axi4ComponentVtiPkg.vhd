@@ -106,8 +106,8 @@ package Axi4ComponentVtiPkg is
       Clk         : in   std_logic ;
       nReset      : in   std_logic ;
 
-      -- AXI Master Functional Interface
-      AxiBus  : inout Axi4RecType
+      -- AXI Master Interface
+      AxiBus      : view Axi4MasterView of Axi4BaseRecType
     ) ;
   end component Axi4MasterVti ;
 
@@ -143,8 +143,8 @@ package Axi4ComponentVtiPkg is
       Clk         : in   std_logic ;
       nReset      : in   std_logic ;
 
-      -- AXI Master Functional Interface
-      AxiBus      : inout Axi4RecType
+      -- AXI Responder Interface
+      AxiBus      : view Axi4ResponderView of Axi4BaseRecType
     ) ;
   end component Axi4ResponderVti ;
 
@@ -181,8 +181,8 @@ package Axi4ComponentVtiPkg is
       Clk         : in   std_logic ;
       nReset      : in   std_logic ;
 
-      -- AXI Slave Interface
-      AxiBus      : inout Axi4RecType
+      -- AXI Responder Interface
+      AxiBus      : view Axi4ResponderView of Axi4BaseRecType
     ) ;
   end component Axi4MemoryVti ;
 

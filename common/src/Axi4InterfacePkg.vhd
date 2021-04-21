@@ -21,13 +21,14 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    09/2017   2017       Initial revision
+--    04/2021   2021.04    VHDL-2019 Update
 --    01/2020   2020.01    Updated license notice
+--    09/2017   2017       Initial revision
 --
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2017 - 2020 by SynthWorks Design Inc.  
+--  Copyright (c) 2017 - 2021 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -94,10 +95,30 @@ package Axi4InterfacePkg is
     InitVal       : std_logic := 'Z'
   ) return Axi4WriteAddressRecType ;
     
---
---!TODO Add VHDL-2018 mode declarations here
--- Comment out for now, also include `ifdef for language revision
---
+  view Axi4WriteAddressMasterView of Axi4WriteAddressRecType is
+    Addr      : out ; 
+    Prot      : out ;
+    Valid     : out ; 
+    Ready     : in ; 
+    -- AXI4 Full
+    -- User Config - AXI recommended 3:0 for master, 7:0 at slave
+    ID        : out ; 
+    -- BurstLength = AxLen+1.  AXI4: 7:0,  AXI3: 3:0
+    Len       : out ; 
+    -- #Bytes in transfer = 2**AxSize
+    Size      : out ; 
+    -- AxBurst Binary Encoded (Fixed, Incr, Wrap, NotDefined)
+    Burst     : out ; 
+    Lock      : out ;
+    -- AxCache One-hot (Write-Allocate, Read-Allocate, Modifiable, Bufferable)
+    Cache     : out ;
+    QOS       : out ; 
+    Region    : out ; 
+    User      : out ; 
+  end view Axi4WriteAddressMasterView ;
+
+  alias Axi4WriteAddressResponderView is Axi4WriteAddressMasterView'converse ;
+
   
   -- AXI Write Data Channel
   type Axi4WriteDataRecType is record
@@ -118,9 +139,22 @@ package Axi4InterfacePkg is
     InitVal   : std_logic := 'Z'
   ) return Axi4WriteDataRecType ;
 
--- Add VHDL-2018 modes here
+  view Axi4WriteDataMasterView of Axi4WriteDataRecType is
+    -- AXI4 Lite
+    Data       : out ;  
+    Strb       : out ;  
+    Valid      : out ; 
+    Ready      : in ; 
+    -- AXI 4 Full 
+    Last       : out ; 
+    User       : out ; 
+    -- AXI3
+    ID         : out ; 
+  end view Axi4WriteDataMasterView ;
 
-  
+  alias Axi4WriteDataResponderView is Axi4WriteDataMasterView'converse ;
+
+
   -- AXI Write Response Channel
   type Axi4WriteResponseRecType is record
     -- AXI4 Lite
@@ -137,7 +171,17 @@ package Axi4InterfacePkg is
     InitVal   : std_logic := 'Z'
   ) return Axi4WriteResponseRecType ;
   
--- Add VHDL-2018 modes here
+  view Axi4WriteResponseMasterView of Axi4WriteResponseRecType is
+    -- AXI4 Lite
+    Valid      : in ;
+    Ready      : out ;
+    Resp       : in ;
+    -- AXI 4 Fulli
+    ID         : in ;
+    User       : in ;
+  end view Axi4WriteResponseMasterView ;
+
+  alias Axi4WriteResponseResponderView is Axi4WriteResponseMasterView'converse ;
 
   
   -- AXI Read Address Channel
@@ -169,7 +213,30 @@ package Axi4InterfacePkg is
     InitVal   : std_logic := 'Z'
   ) return Axi4ReadAddressRecType ;
 
--- Add VHDL-2018 modes here
+  view Axi4ReadAddressMasterView of Axi4ReadAddressRecType is
+    -- AXI4 Lite
+    Addr      : out ;
+    Prot      : out ;
+    Valid     : out ;
+    Ready     : in ;
+    -- AXI 4 Full
+    -- User Config - AXI recommended 3:0 for master, 7:0 at slave
+    ID        : out ; 
+    -- BurstLength = AxLen+1.  AXI4: 7:0,  AXI3: 3:0
+    Len       : out ; 
+    -- #Bytes in transfer = 2**AxSize
+    Size      : out ; 
+    -- AxBurst Binary Encoded (Fixed, Incr, Wrap, NotDefined)
+    Burst     : out ;  
+    Lock      : out ; 
+    -- AxCache One-hot (Write-Allocate, Read-Allocate, Modifiable, Bufferable)
+    Cache     : out ;
+    QOS       : out ;
+    Region    : out ;
+    User      : out ;
+  end view Axi4ReadAddressMasterView ;
+  
+  alias Axi4ReadAddressResponderView is Axi4ReadAddressMasterView'converse ;
 
   -- AXI Read Data Channel
   type Axi4ReadDataRecType is record
@@ -188,9 +255,21 @@ package Axi4InterfacePkg is
     ReadData : Axi4ReadDataRecType ;
     InitVal   : std_logic := 'Z'
   ) return Axi4ReadDataRecType ;
-
   
--- Add VHDL-2018 modes here
+  view Axi4ReadDataMasterView of Axi4ReadDataRecType is
+    -- AXI4 Lite
+    Data       : in ; 
+    Resp       : in ; 
+    Valid      : in ; 
+    Ready      : out ; 
+    -- AXI 4 Full
+    Last       : in ;
+    User       : in ;
+    ID         : in ;
+  end view Axi4ReadDataMasterView ;
+
+  alias Axi4ReadDataResponderView is Axi4ReadDataMasterView'converse ;
+
   
   type Axi4BaseRecType is record
     WriteAddress   : Axi4WriteAddressRecType ; 
@@ -199,6 +278,17 @@ package Axi4InterfacePkg is
     ReadAddress    : Axi4ReadAddressRecType ; 
     ReadData       : Axi4ReadDataRecType ; 
   end record Axi4BaseRecType ; 
+  
+  view Axi4MasterView of Axi4BaseRecType is
+    WriteAddress   : view Axi4WriteAddressMasterView ; 
+    WriteData      : view Axi4WriteDataMasterView ; 
+    WriteResponse  : view Axi4WriteResponseMasterView ; 
+    ReadAddress    : view Axi4ReadAddressMasterView ; 
+    ReadData       : view Axi4ReadDataMasterView ; 
+  end view Axi4MasterView ;
+
+  alias Axi4ResponderView is Axi4MasterView'converse ;
+  
   
   -- Axi4RecType with sized elements
   -- Get From Above

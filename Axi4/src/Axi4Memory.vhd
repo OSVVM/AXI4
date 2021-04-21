@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Simple AXI Lite Responder Tansactor Model
+--      AXI Memory Model
 --
 --
 --  Developed by:
@@ -19,13 +19,14 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    04/2021   2021.04    VHDL-2019 Interfaces
 --    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.   
 --    06/2020   2020.06    Derived from Axi4Responder.vhd
 --
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2017 - 2020 by SynthWorks Design Inc.
+--  Copyright (c) 2020 - 2021 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -89,7 +90,7 @@ port (
   nReset      : in   std_logic ;
 
   -- AXI Responder Interface
-  AxiBus      : inout Axi4RecType ;
+  AxiBus      : view Axi4ResponderView of Axi4BaseRecType ;
 
   -- Testbench Transaction Interface
   TransRec    : inout AddressBusRecType
@@ -165,7 +166,7 @@ begin
   ------------------------------------------------------------
   -- Turn off drivers not being driven by this model
   ------------------------------------------------------------
-  InitAxi4Rec (AxiBusRec => AxiBus ) ;
+--  InitAxi4Rec (AxiBusRec => AxiBus ) ;
 
 
   ------------------------------------------------------------

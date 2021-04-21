@@ -106,8 +106,8 @@ package Axi4ComponentPkg is
       Clk         : in   std_logic ;
       nReset      : in   std_logic ;
 
-      -- AXI Master Functional Interface
-      AxiBus      : inout Axi4RecType ;
+      -- AXI Master Interface
+      AxiBus      : view Axi4MasterView of Axi4BaseRecType ;
 
       -- Testbench Transaction Interface
       TransRec    : inout AddressBusRecType 
@@ -146,8 +146,8 @@ package Axi4ComponentPkg is
       Clk         : in   std_logic ;
       nReset      : in   std_logic ;
 
-      -- AXI Master Functional Interface
-      AxiBus      : inout Axi4RecType ;
+      -- AXI Responder Interface
+      AxiBus      : view Axi4ResponderView of Axi4BaseRecType ;
 
       -- Testbench Transaction Interface
       TransRec    : inout AddressBusRecType
@@ -188,7 +188,7 @@ package Axi4ComponentPkg is
       nReset      : in   std_logic ;
 
       -- AXI Responder Interface
-      AxiBus      : inout Axi4RecType ;
+      AxiBus      : view Axi4ResponderView of Axi4BaseRecType ;
 
       -- Testbench Transaction Interface
       TransRec    : inout AddressBusRecType

@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    04/2021   2021.04    VHDL-2019 Interfaces
 --    02/2021   2021.02    Added MultiDriver Detect.  Added Valid Delays.  Updated Generics.   
 --    12/2020   2020.12    Added Burst Word Mode.  Refactored code.  Added VTI
 --    07/2020   2020.07    Created Axi4 FULL from Axi4Lite
@@ -29,7 +30,7 @@
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2017 - 2020 by SynthWorks Design Inc.
+--  Copyright (c) 2017 - 2021 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -114,8 +115,8 @@ port (
   Clk         : in   std_logic ;
   nReset      : in   std_logic ;
 
-  -- AXI Master Functional Interface
-  AxiBus      : inout Axi4RecType 
+  -- AXI Master Interface
+  AxiBus      : view Axi4MasterView of Axi4BaseRecType
 ) ;
 
   -- Burst Interface
@@ -173,13 +174,16 @@ architecture AxiFull of Axi4MasterVti is
 
   constant DEFAULT_BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;
   signal   BurstFifoMode      : AddressBusFifoBurstModeType := DEFAULT_BURST_MODE ;
-  signal   BurstFifoByteMode  : boolean := (DEFAULT_BURST_MODE = ADDRESS_BUS_BURST_BYTE_MODE) ; 
+  signal   BurstFifoByteMode  : boolean := (DEFAULT_BURST_MODE = ADDRESS_BUS_BURST_BYTE_MODE) ;
+  
+  -- Crutch for DoAxiReadyHandshake since signal parameters of mode out cannot be read.
+  signal LocalWriteResponseReady, LocalReadDataReady : std_logic ; 
 begin
 
   ------------------------------------------------------------
   -- Turn off drivers not being driven by this model
   ------------------------------------------------------------
-  InitAxi4Rec (AxiBusRec => AxiBus) ;
+--  InitAxi4Rec (AxiBusRec => AxiBus) ;
 
 
   ------------------------------------------------------------
@@ -918,7 +922,7 @@ begin
       ---------------------
         Clk                     => Clk,
         Valid                   => AxiBus.WriteResponse.Valid,
-        Ready                   => AxiBus.WriteResponse.Ready,
+        Ready                   => LocalWriteResponseReady,
         ReadyBeforeValid        => WriteResponseReadyBeforeValid,
         ReadyDelayCycles        => WriteResponseReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_BReady,
@@ -936,6 +940,7 @@ begin
     end loop WriteResponseOperation ;
   end process WriteResponseHandler ;
 
+  AxiBus.WriteResponse.Ready <= LocalWriteResponseReady ; 
 
   ------------------------------------------------------------
   --  WriteResponseProtocolChecker
@@ -1080,7 +1085,7 @@ begin
       ---------------------
         Clk                     => Clk,
         Valid                   => AxiBus.ReadData.Valid,
-        Ready                   => AxiBus.ReadData.Ready,
+        Ready                   => LocalReadDataReady, 
         ReadyBeforeValid        => ReadDataReadyBeforeValid,
         ReadyDelayCycles        => ReadDataReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_RReady,
@@ -1097,6 +1102,8 @@ begin
       wait for 0 ns ; -- Allow ReadDataReceiveCount to update
     end loop ReadDataOperation ;
   end process ReadDataHandler ;
+
+  AxiBus.ReadData.Ready <= LocalReadDataReady ; 
 
   ------------------------------------------------------------
   --  ReadDataProtocolChecker

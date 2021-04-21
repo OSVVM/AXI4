@@ -19,14 +19,15 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2018   2018.05    Initial revision
---    01/2020   2020.01    Updated license notice
+--    04/2021   2021.04    VHDL-2019 Interfaces
 --    10/2020   2020.10    Updated name to be TbStream.vhd in conjunction with Model Indepenedent Transactions
+--    01/2020   2020.01    Updated license notice
+--    05/2018   2018.05    Initial revision
 --
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.  
+--  Copyright (c) 2018 - 2021 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -50,7 +51,6 @@ library osvvm ;
     
 library osvvm_AXI4 ;
     context osvvm_AXI4.AxiStreamContext ;
-    use     osvvm_AXI4.AxiStreamSignalsPkg_32.all ;
     
 entity TbStream is
 end entity TbStream ; 
@@ -62,6 +62,24 @@ architecture TestHarness of TbStream is
   signal Clk       : std_logic ;
   signal nReset    : std_logic ;
   
+  constant AXI_DATA_WIDTH   : integer := 32 ;
+  constant AXI_BYTE_WIDTH   : integer := AXI_DATA_WIDTH/8 ; 
+  constant TID_MAX_WIDTH    : integer := 8 ;
+  constant TDEST_MAX_WIDTH  : integer := 4 ;
+  constant TUSER_MAX_WIDTH  : integer := 4 ;
+
+  constant INIT_ID     : std_logic_vector(TID_MAX_WIDTH-1 downto 0)   := (others => '0') ; 
+  constant INIT_DEST   : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) := (others => '0') ; 
+  constant INIT_USER   : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) := (others => '0') ; 
+  
+  signal AxiStream : AxiStreamRecType (
+            TID  (TID_MAX_WIDTH-1   downto 0), 
+            TDest(TDEST_MAX_WIDTH-1 downto 0), 
+            TUser(TUSER_MAX_WIDTH-1 downto 0), 
+            TData(AXI_DATA_WIDTH-1  downto 0), 
+            TStrb(AXI_BYTE_WIDTH-1  downto 0), 
+            TKeep(AXI_BYTE_WIDTH-1  downto 0) 
+          ) ;
   
   component TestCtrl is
     generic ( 
@@ -117,15 +135,7 @@ begin
       nReset    => nReset,
       
       -- AXI Stream Interface
-      TValid    => TValid,
-      TReady    => TReady,
-      TID       => TID   ,
-      TDest     => TDest ,
-      TUser     => TUser ,
-      TData     => TData ,
-      TStrb     => TStrb ,
-      TKeep     => TKeep ,
-      TLast     => TLast 
+      AxiStream    => AxiStream
     ) ;
   
   Receiver_1 : AxiStreamReceiverVti
@@ -144,23 +154,15 @@ begin
       nReset    => nReset,
       
       -- AXI Stream Interface
-      TValid    => TValid,
-      TReady    => TReady,
-      TID       => TID   ,
-      TDest     => TDest ,
-      TUser     => TUser ,
-      TData     => TData ,
-      TStrb     => TStrb ,
-      TKeep     => TKeep ,
-      TLast     => TLast 
+      AxiStream    => AxiStream
     ) ;
   
   
   TestCtrl_1 : TestCtrl
   generic map ( 
-    ID_LEN       => TID'length,
-    DEST_LEN     => TDest'length,
-    USER_LEN     => TUser'length
+    ID_LEN       => TID_MAX_WIDTH,
+    DEST_LEN     => TDEST_MAX_WIDTH,
+    USER_LEN     => TUSER_MAX_WIDTH
   ) 
   port map ( 
     -- Globals

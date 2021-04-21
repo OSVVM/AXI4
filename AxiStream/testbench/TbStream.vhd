@@ -80,15 +80,6 @@ architecture TestHarness of TbStream is
                         TStrb(AXI_BYTE_WIDTH-1  downto 0), 
                         TKeep(AXI_BYTE_WIDTH-1  downto 0) 
                       ) ;
---   signal TValid    : std_logic ;
---   signal TReady    : std_logic ; 
---   signal TID       : std_logic_vector(TID_MAX_WIDTH-1 downto 0) ; 
---   signal TDest     : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) ; 
---   signal TUser     : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) ; 
---   signal TData     : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ; 
---   signal TStrb     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
---   signal TKeep     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
---   signal TLast     : std_logic ; 
   
   constant AXI_PARAM_WIDTH : integer := TID_MAX_WIDTH + TDEST_MAX_WIDTH + TUSER_MAX_WIDTH + 1 ;
 

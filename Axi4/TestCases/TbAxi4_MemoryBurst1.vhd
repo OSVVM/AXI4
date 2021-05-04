@@ -222,8 +222,5 @@ Configuration TbAxi4_MemoryBurst1 of TbAxi4Memory is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(MemoryBurst1) ; 
     end for ; 
---!!    for Responder_1 : Axi4Responder 
---!!      use entity OSVVM_AXI4.Axi4Memory ; 
---!!    end for ; 
   end for ; 
 end TbAxi4_MemoryBurst1 ; 

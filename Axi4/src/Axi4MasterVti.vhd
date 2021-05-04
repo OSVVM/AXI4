@@ -900,7 +900,7 @@ begin
     variable WriteResponseTimeOut : boolean ; 
   begin
     -- initialize
-    AxiBus.WriteResponse.Ready <= '0' ;
+    LocalWriteResponseReady <= '0' ;
 
     WriteResponseOperation : loop
       -- Find Expected Transaction
@@ -1065,7 +1065,7 @@ begin
     variable ReadDataReadyDelayCycles : integer ;
     variable ReadDataValidTimeOut     : integer ;
   begin
-    AxiBus.ReadData.Ready <= '0' ;
+    LocalReadDataReady <= '0' ;
     WaitForClock(Clk, 2) ;  -- Initialize
 
     ReadDataOperation : loop

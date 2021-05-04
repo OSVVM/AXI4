@@ -44,6 +44,9 @@
 library ieee ;
   use ieee.std_logic_1164.all ;
 
+library osvvm ;
+  context osvvm.OsvvmContext ;
+
 library osvvm_common ;
   context osvvm_common.OsvvmCommonContext ;
 
@@ -194,7 +197,49 @@ package Axi4ComponentPkg is
       TransRec    : inout AddressBusRecType
     ) ;
   end component Axi4Memory ;
+  
+  ------------------------------------------------------------
+  component Axi4MemoryExternal is
+  ------------------------------------------------------------
+  generic (
+    MODEL_ID_NAME   : string := "" ;
+    tperiod_Clk     : time   := 10 ns ;
 
+    DEFAULT_DELAY   : time   := 1 ns ; 
+
+    tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
+
+    tpd_Clk_WReady  : time   := DEFAULT_DELAY ;
+
+    tpd_Clk_BValid  : time   := DEFAULT_DELAY ;
+    tpd_Clk_BResp   : time   := DEFAULT_DELAY ;
+    tpd_Clk_BID     : time   := DEFAULT_DELAY ;
+    tpd_Clk_BUser   : time   := DEFAULT_DELAY ;
+
+    tpd_Clk_ARReady : time   := DEFAULT_DELAY ;
+
+    tpd_Clk_RValid  : time   := DEFAULT_DELAY ;
+    tpd_Clk_RData   : time   := DEFAULT_DELAY ;
+    tpd_Clk_RResp   : time   := DEFAULT_DELAY ;
+    tpd_Clk_RID     : time   := DEFAULT_DELAY ;
+    tpd_Clk_RUser   : time   := DEFAULT_DELAY ;
+    tpd_Clk_RLast   : time   := DEFAULT_DELAY
+  ) ;
+  port (
+    -- Globals
+    Clk             : in   std_logic ;
+    nReset          : in   std_logic ;
+    
+    -- Memory Interface
+    variable Memory : inout MemoryPType ;
+
+    -- AXI Responder Interface
+    AxiBus          : view Axi4ResponderView of Axi4BaseRecType ;
+
+    -- Testbench Transaction Interface
+    TransRec        : inout AddressBusRecType
+  ) ;
+  end component Axi4MemoryExternal ;
 
   ------------------------------------------------------------
   component Axi4Monitor is
@@ -208,6 +253,8 @@ package Axi4ComponentPkg is
       AxiBus      : in    Axi4RecType
     ) ;
   end component Axi4Monitor ;
+  
+  
 
 end package Axi4ComponentPkg ;
 

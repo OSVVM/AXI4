@@ -48,3 +48,6 @@ analyze ./src/Axi4Responder_Transactor.vhd
 analyze ./src/Axi4ResponderVti_Transactor.vhd
 analyze ./src/Axi4Memory.vhd
 analyze ./src/Axi4MemoryVti.vhd
+
+analyze ./src/Axi4MemoryExternal.vhd
+analyze ./src/Axi4MemorySharedVti.vhd

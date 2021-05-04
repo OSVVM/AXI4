@@ -187,5 +187,45 @@ package Axi4ComponentVtiPkg is
   end component Axi4MemoryVti ;
 
 
+  ------------------------------------------------------------
+  component Axi4MemorySharedVti is
+  ------------------------------------------------------------
+    generic (
+      MODEL_ID_NAME   : string := "" ;
+      tperiod_Clk     : time   := 10 ns ;
+
+      DEFAULT_DELAY   : time   := 1 ns ; 
+
+      tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
+
+      tpd_Clk_WReady  : time   := DEFAULT_DELAY ;
+
+      tpd_Clk_BValid  : time   := DEFAULT_DELAY ;
+      tpd_Clk_BResp   : time   := DEFAULT_DELAY ;
+      tpd_Clk_BID     : time   := DEFAULT_DELAY ;
+      tpd_Clk_BUser   : time   := DEFAULT_DELAY ;
+
+      tpd_Clk_ARReady : time   := DEFAULT_DELAY ;
+
+      tpd_Clk_RValid  : time   := DEFAULT_DELAY ;
+      tpd_Clk_RData   : time   := DEFAULT_DELAY ;
+      tpd_Clk_RResp   : time   := DEFAULT_DELAY ;
+      tpd_Clk_RID     : time   := DEFAULT_DELAY ;
+      tpd_Clk_RUser   : time   := DEFAULT_DELAY ;
+      tpd_Clk_RLast   : time   := DEFAULT_DELAY
+    ) ;
+    port (
+      -- Globals
+      Clk         : in   std_logic ;
+      nReset      : in   std_logic ;
+      
+      -- AXI Responder Interface
+      AxiBus1      : view Axi4ResponderView of Axi4BaseRecType ;
+      AxiBus2      : view Axi4ResponderView of Axi4BaseRecType ;
+      AxiBus3      : view Axi4ResponderView of Axi4BaseRecType ;
+      AxiBus4      : view Axi4ResponderView of Axi4BaseRecType 
+    ) ;
+  end component Axi4MemorySharedVti ;
+
 end package Axi4ComponentVtiPkg ;
 

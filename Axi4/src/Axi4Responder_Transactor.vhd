@@ -203,70 +203,35 @@ begin
   --    Handles transactions between TestCtrl and Model
   ------------------------------------------------------------
   TransactionDispatcher : process
---!!GHDL Added to support AxiLocal declaration
-	  alias    AW is AxiBus.WriteAddress ;
-	  alias    WD is AxiBus.WriteData ;
-	  alias    WR is AxiBus.WriteResponse ;
-	  alias    AR is AxiBus.ReadAddress ;
-	  alias    RD is AxiBus.ReadData ;
 
---!!GHDL    variable AxiLocal    : AxiBus'subtype ;
-    variable AxiLocal : Axi4RecType(
-      WriteAddress(
-        Addr(AW.Addr'range),
-        ID(AW.ID'range),
-        User(AW.User'range)
-      ),
-      WriteData   (
-        Data(WD.Data'range),
-        Strb(WD.Strb'range),
-        User(WD.User'range),
-        ID(WD.ID'range)
-      ),
-      WriteResponse(
-        ID(WR.ID'range),
-        User(WR.User'range)
-      ),
-      ReadAddress (
-        Addr(AR.Addr'range),
-        ID(AR.ID'range),
-        User(AR.User'range)
-      ),
-      ReadData    (
-        Data(RD.Data'range),
-        ID(RD.ID'range),
-        User(RD.User'range)
-      )
-    ) ;
-    alias    LAW is AxiLocal.WriteAddress ;
-    alias    LWD is AxiLocal.WriteData ;
-    alias    LWR is AxiLocal.WriteResponse ;
-    alias    LAR is AxiLocal.ReadAddress ;
-    alias    LRD is AxiLocal.ReadData ;
+    variable LAW : AxiBus.WriteAddress'subtype ;
+    variable LWD : AxiBus.WriteData'subtype ;
+    variable LWR : AxiBus.WriteResponse'subtype ;
+    variable LAR : AxiBus.ReadAddress'subtype ;
+    variable LRD : AxiBus.ReadData'subtype ;
 
-    alias WriteAddress        is LAW.Addr ;
-    alias WriteProt           is LAW.Prot ;
+    alias WriteAddress : LAW.Addr'subtype is LAW.Addr ;
+    alias WriteProt    : LAW.Prot'subtype is LAW.Prot ;
 
     variable WriteAvailable      : boolean := FALSE ;
 
-    alias WriteData           is LWD.Data ;
-    alias WriteStrb           is LWD.Strb ;
-    alias WriteLast           is LWD.Last ;
-    alias WriteUser           is LWD.User ;
-    alias WriteID             is LWD.ID ;
---    alias ExpectedWStrb       is LWD.Strb ;
+    alias WriteData    : LWD.Data'subtype is LWD.Data ;
+    alias WriteStrb    : LWD.Strb'subtype is LWD.Strb ;
+    alias WriteLast    : LWD.Last'subtype is LWD.Last ;
+    alias WriteUser    : LWD.User'subtype is LWD.User ;
+    alias WriteID      : LWD.ID'subtype   is LWD.ID ;
+
     variable WriteByteCount : integer ;
     variable WriteByteAddr  : integer ;
 
 --    alias WriteResp           is LWR.Resp ;
 
-    alias ReadAddress            is LAR.Addr ;
-    alias ReadProt            is LAR.Prot ;
+    alias ReadAddress  : LAR.Addr'subtype is LAR.Addr ;
+    alias ReadProt     : LAR.Prot'subtype is LAR.Prot ;
     variable ReadByteAddr  : integer ;
     variable ReadAvailable : boolean := FALSE ;
 
-    alias ReadData            is LRD.Data ;
---    alias ReadResp            is LRD.Resp ;
+    alias ReadData     : LRD.Data'subtype is LRD.Data ;
 
     variable Axi4Option    : Axi4OptionsType ; 
     variable Axi4OptionVal : integer ; 
@@ -537,13 +502,12 @@ begin
 
   end process TransactionDispatcher ;
 
-
   ------------------------------------------------------------
   --  WriteAddressHandler
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   WriteAddressHandler : process
-    alias    AW is AxiBus.WriteAddress ;
+    alias    AW : AxiBus.WriteAddress'subtype is AxiBus.WriteAddress ;
     variable WriteAddressReadyBeforeValid  : boolean := TRUE ;
     variable WriteAddressReadyDelayCycles  : integer := 0 ;
   begin
@@ -558,8 +522,8 @@ begin
       DoAxiReadyHandshake (
       ---------------------
         Clk                     => Clk,
-        Valid                   => AW.Valid,
-        Ready                   => AW.Ready,
+        Valid                   => AxiBus.WriteAddress.Valid,
+        Ready                   => AxiBus.WriteAddress.Ready,
         ReadyBeforeValid        => WriteAddressReadyBeforeValid,
         ReadyDelayCycles        => WriteAddressReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_AWReady,
@@ -591,7 +555,7 @@ begin
   --    Execute Write Data Transactions
   ------------------------------------------------------------
   WriteDataHandler : process
-    alias    WD is AxiBus.WriteData ;
+    alias    WD : AxiBus.WriteData'subtype is AxiBus.WriteData ;
     variable WriteDataReadyBeforeValid     : boolean := TRUE ;
     variable WriteDataReadyDelayCycles     : integer := 0 ;
   begin
@@ -605,8 +569,8 @@ begin
       DoAxiReadyHandshake(
       ---------------------
         Clk                     => Clk,
-        Valid                   => WD.Valid,
-        Ready                   => WD.Ready,
+        Valid                   => AxiBus.WriteData.Valid,
+        Ready                   => AxiBus.WriteData.Ready,
         ReadyBeforeValid        => WriteDataReadyBeforeValid,
         ReadyDelayCycles        => WriteDataReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_WReady,  
@@ -643,14 +607,9 @@ begin
   --   Receive and Check Write Responses
   ------------------------------------------------------------
   WriteResponseHandler : process
-    alias    WR is AxiBus.WriteResponse ;
---!!GHDL    variable Local : AxiBus.WriteResponse'subtype ;
-    variable Local : Axi4WriteResponseRecType (
-                          ID(WR.ID'range),
-                          User(WR.User'range)
-                        ) ;
+    alias    WR : AxiBus.WriteResponse'subtype is AxiBus.WriteResponse ;
+    variable Local : AxiBus.WriteResponse'subtype ;
     variable WriteResponseReadyTimeOut: integer := 25 ;
-    
   begin
     -- initialize
     WR.Valid <= '0' ;
@@ -691,8 +650,8 @@ begin
       DoAxiValidHandshake (
       ---------------------
         Clk            =>  Clk,
-        Valid          =>  WR.Valid,
-        Ready          =>  WR.Ready,
+        Valid          =>  AxiBus.WriteResponse.Valid,
+        Ready          =>  AxiBus.WriteResponse.Ready,
         tpd_Clk_Valid  =>  tpd_Clk_BValid,
         AlertLogID     =>  BusFailedID,
         TimeOutMessage =>  "Write Response # " & to_string(WriteResponseDoneCount + 1),
@@ -710,13 +669,12 @@ begin
     end loop WriteResponseLoop ;
   end process WriteResponseHandler ;
 
-
   ------------------------------------------------------------
   --  ReadAddressHandler
   --    Execute Read Address Transactions
   ------------------------------------------------------------
   ReadAddressHandler : process
-    alias    AR is AxiBus.ReadAddress ;
+    alias    AR : AxiBus.ReadAddress'subtype is AxiBus.ReadAddress ;
     variable ReadAddressReadyBeforeValid   : boolean := TRUE ;
     variable ReadAddressReadyDelayCycles   : integer := 0 ;
   begin
@@ -731,8 +689,8 @@ begin
       DoAxiReadyHandshake (
       ---------------------
         Clk                     => Clk,
-        Valid                   => AR.Valid,
-        Ready                   => AR.Ready,
+        Valid                   => AxiBus.ReadAddress.Valid,
+        Ready                   => AxiBus.ReadAddress.Ready,
         ReadyBeforeValid        => ReadAddressReadyBeforeValid,
         ReadyDelayCycles        => ReadAddressReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_ARReady,
@@ -756,19 +714,13 @@ begin
     end loop ReadAddressOperation ;
   end process ReadAddressHandler ;
 
-
   ------------------------------------------------------------
   --  ReadDataHandler
   --    Receive Read Data Transactions
   ------------------------------------------------------------
   ReadDataHandler : process
-    alias    RD is AxiBus.ReadData ;
---!!GHDL    variable Local : AxiBus.ReadData'subtype ;
-    variable Local : Axi4ReadDataRecType (
-                      Data(RD.Data'range),
-                      User(RD.User'range),
-                      ID(RD.ID'range)
-                    );
+    alias    RD : AxiBus.ReadData'subtype is AxiBus.ReadData ;
+    variable Local : AxiBus.ReadData'subtype ;
     variable ReadDataReadyTimeOut: integer := 25 ;
   begin
     -- initialize
@@ -820,8 +772,8 @@ begin
       DoAxiValidHandshake (
       ---------------------
         Clk            =>  Clk,
-        Valid          =>  RD.Valid,
-        Ready          =>  RD.Ready,
+        Valid          =>  AxiBus.ReadData.Valid,
+        Ready          =>  AxiBus.ReadData.Ready,
         tpd_Clk_Valid  =>  tpd_Clk_RValid,
         AlertLogID     =>  BusFailedID,
         TimeOutMessage =>  "Read Data # " & to_string(ReadDataDoneCount + 1),
@@ -840,5 +792,4 @@ begin
       wait for 0 ns ;
     end loop ReadDataLoop ;
   end process ReadDataHandler ;
-
 end architecture TransactorResponder ;

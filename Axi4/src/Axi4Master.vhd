@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    05/2021   2021.05    Working toward GHDL support   
 --    02/2021   2021.02    Added MultiDriver Detect.  Added Valid Delays.  Updated Generics.   
 --    12/2020   2020.12    Added Burst Word Mode.  Refactored code.  
 --    07/2020   2020.07    Created Axi4 FULL from Axi4Lite
@@ -127,10 +128,12 @@ port (
   shared variable ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
 
   -- Derive AXI interface properties from the AxiBus
-  alias AxiAddr is AxiBus.WriteAddress.Addr ;
-  alias AxiData is AxiBus.WriteData.Data ;
-  constant AXI_ADDR_WIDTH      : integer := AxiAddr'length ;
-  constant AXI_DATA_WIDTH      : integer := AxiData'length ;
+--  alias AxiAddr is AxiBus.WriteAddress.Addr ;
+--  alias AxiData is AxiBus.WriteData.Data ;
+--  constant AXI_ADDR_WIDTH      : integer := AxiAddr'length ;
+--  constant AXI_DATA_WIDTH      : integer := AxiData'length ;
+  constant AXI_ADDR_WIDTH      : integer := AxiBus.WriteAddress.Addr'length ;
+  constant AXI_DATA_WIDTH      : integer := AxiBus.WriteData.Data'length ;
 
   -- Model Configuration 
   -- Access via transactions or external name
@@ -235,13 +238,6 @@ begin
     alias    LWR : AxiDefaults.WriteResponse'subtype is AxiDefaults.WriteResponse ;
     alias    LAR : AxiDefaults.ReadAddress'subtype   is AxiDefaults.ReadAddress ;
     alias    LRD : AxiDefaults.ReadData'subtype      is AxiDefaults.ReadData ;
-
-    --alias    WriteAddress  : LAW.Addr'subtype   is LAW.Addr ;
-    --alias    WriteData     : LWD.Data'subtype   is LWD.Data ;
-    -- alias    WriteStrb     : LWD.Strb'subtype   is LWD.Strb ;
-    -- alias    ReadAddress   : LAR.Addr'subtype   is LAR.Addr ;
-    --alias    ReadData      : LRD.Data'subtype   is LRD.Data ;
-    
     
     variable WriteByteAddr   : integer ;
 

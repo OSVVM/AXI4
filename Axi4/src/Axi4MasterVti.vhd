@@ -170,7 +170,7 @@ architecture AxiFull of Axi4MasterVti is
   signal ReadDataExpectCount,      ReadDataReceiveCount       : integer := 0 ;
 
   signal WriteResponseActive, ReadDataActive : boolean ;
-
+  
   constant DEFAULT_BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;
   signal   BurstFifoMode      : AddressBusFifoBurstModeType := DEFAULT_BURST_MODE ;
   signal   BurstFifoByteMode  : boolean := (DEFAULT_BURST_MODE = ADDRESS_BUS_BURST_BYTE_MODE) ; 
@@ -240,6 +240,7 @@ begin
 	  alias    RD is AxiBus.ReadData ;
     
 --!!GHDL    variable AxiDefaults    : AxiBus'subtype ;
+
     variable AxiDefaults : Axi4RecType(
       WriteAddress(
         Addr(AW.Addr'range),
@@ -401,7 +402,7 @@ begin
         when WRITE_OP | WRITE_ADDRESS | WRITE_DATA | ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
           -- For All Write Operations - Write Address and Write Data
           WriteAddress  := FromTransaction(TransRec.Address, WriteAddress'length) ;
-          WriteByteAddr := CalculateByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH);
+          WriteByteAddr := CalculateByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH) ;
 
           if IsWriteAddress(Operation) then
             -- AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Write Address length does not match", FAILURE) ;
@@ -705,17 +706,11 @@ begin
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   WriteAddressHandler : process
-    alias    AW is AxiBus.WriteAddress ;
---!!GHDL    variable Local : AxiBus.WriteAddress'subtype ;
-    variable Local : Axi4WriteAddressRecType (
-                        Addr(AW.Addr'range),
-                        ID(AW.ID'range),
-                        User(AW.User'range)
-                      ) ;
-    
+    alias    AW    : AxiBus.WriteAddress'subtype is AxiBus.WriteAddress ;
+    variable Local : AxiBus.WriteAddress'subtype ;
     variable WriteAddressReadyTimeOut : integer ;
   begin
-    -- AXI4 LIte Signaling
+    -- AXI4 Lite Signaling
     AW.Valid  <= '0' ;
     AW.Addr   <= (Local.Addr'range   => '0') ;
     AW.Prot   <= (Local.Prot'range   => '0') ;
@@ -767,8 +762,8 @@ begin
       DoAxiValidHandshake (
       ---------------------
         Clk            =>  Clk,
-        Valid          =>  AW.Valid,
-        Ready          =>  AW.Ready,
+        Valid          =>  AxiBus.WriteAddress.Valid,  --!GHDL
+        Ready          =>  AxiBus.WriteAddress.Ready,  --!GHDL
         tpd_Clk_Valid  =>  tpd_Clk_AWValid,
         AlertLogID     =>  BusFailedID,
         TimeOutMessage =>  "Write Address # " & to_string(WriteAddressDoneCount + 1),
@@ -788,7 +783,6 @@ begin
       AW.QOS    <= Local.QOS    + 1  after tpd_clk_AWQOS    ;
       AW.Region <= Local.Region + 1  after tpd_clk_AWRegion ;
       AW.User   <= Local.User   + 1  after tpd_clk_AWUser   ;
-
       -- Signal completion
       Increment(WriteAddressDoneCount) ;
       wait for 0 ns ;
@@ -800,15 +794,16 @@ begin
   --    Execute Write Data Transactions
   ------------------------------------------------------------
   WriteDataHandler : process
-    alias    WD is AxiBus.WriteData ;
+    alias    WD : AxiBus.WriteData'subtype is AxiBus.WriteData ;
 
---!!GHDL    variable Local : AxiBus.WriteData'subtype ;
-    variable Local : Axi4WriteDataRecType (
-                      Data(WD.Data'length-1 downto 0),
-                      Strb(WD.Strb'length-1 downto 0),
-                      User(WD.User'range),
-                      ID(WD.ID'range)
-                    );
+    variable Local : AxiBus.WriteData'subtype ;
+    
+--    variable Local : Axi4WriteDataRecType (
+--                      Data(WD.Data'length-1 downto 0),
+--                      Strb(WD.Strb'length-1 downto 0),
+--                      User(WD.User'range),
+--                      ID(WD.ID'range)
+--                    );
 
       variable WriteDataReadyTimeOut : integer ;
       variable Burst    : std_logic ; 
@@ -862,8 +857,8 @@ begin
       DoAxiValidHandshake (
       ---------------------
         Clk            =>  Clk,
-        Valid          =>  WD.Valid,
-        Ready          =>  WD.Ready,
+        Valid          =>  AxiBus.WriteData.Valid,  --!GHDL
+        Ready          =>  AxiBus.WriteData.Ready,  --!GHDL
         tpd_Clk_Valid  =>  tpd_Clk_WValid,
         AlertLogID     =>  BusFailedID,
         TimeOutMessage =>  "Write Data # " & to_string(WriteDataDoneCount + 1),
@@ -958,14 +953,9 @@ begin
   --    Execute Read Address Transactions
   ------------------------------------------------------------
   ReadAddressHandler : process
-    alias    AR is AxiBus.ReadAddress ;
+    alias    AR : AxiBus.ReadAddress'subtype is AxiBus.ReadAddress ;
 
---!!GHDL    variable Local : AxiBus.ReadAddress'subtype ;
-    variable Local : Axi4ReadAddressRecType (
-                          Addr(AR.Addr'range),
-                          ID(AR.ID'range),
-                          User(AR.User'range)
-                        ) ;
+    variable Local : AxiBus.ReadAddress'subtype ;
 
     variable ReadAddressReadyTimeOut : integer ;
   begin
@@ -1022,8 +1012,8 @@ begin
       DoAxiValidHandshake (
       ---------------------
         Clk            =>  Clk,
-        Valid          =>  AR.Valid,
-        Ready          =>  AR.Ready,
+        Valid          =>  AxiBus.ReadAddress.Valid,
+        Ready          =>  AxiBus.ReadAddress.Ready,
         tpd_Clk_Valid  =>  tpd_Clk_ARValid,
         AlertLogID     =>  BusFailedID,
         TimeOutMessage =>  "Read Address # " & to_string(ReadAddressDoneCount + 1),
@@ -1114,5 +1104,4 @@ begin
       FAILURE
     ) ;
   end process ReadDataProtocolChecker ;
-
 end architecture AxiFull ;

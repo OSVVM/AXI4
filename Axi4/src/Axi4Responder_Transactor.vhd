@@ -204,34 +204,20 @@ begin
   ------------------------------------------------------------
   TransactionDispatcher : process
 
-    variable LAW : AxiBus.WriteAddress'subtype ;
-    variable LWD : AxiBus.WriteData'subtype ;
-    variable LWR : AxiBus.WriteResponse'subtype ;
-    variable LAR : AxiBus.ReadAddress'subtype ;
-    variable LRD : AxiBus.ReadData'subtype ;
-
-    alias WriteAddress : LAW.Addr'subtype is LAW.Addr ;
-    alias WriteProt    : LAW.Prot'subtype is LAW.Prot ;
+    -- Formulate local copies of values for AXI Interface
+    variable LocalAW : AxiBus.WriteAddress'subtype ;
+    variable LocalWD : AxiBus.WriteData'subtype ;
+--    variable LocalWR : AxiBus.WriteResponse'subtype ;
+    variable LocalAR : AxiBus.ReadAddress'subtype ;
+    variable LocalRD : AxiBus.ReadData'subtype ;
 
     variable WriteAvailable      : boolean := FALSE ;
-
-    alias WriteData    : LWD.Data'subtype is LWD.Data ;
-    alias WriteStrb    : LWD.Strb'subtype is LWD.Strb ;
-    alias WriteLast    : LWD.Last'subtype is LWD.Last ;
-    alias WriteUser    : LWD.User'subtype is LWD.User ;
-    alias WriteID      : LWD.ID'subtype   is LWD.ID ;
 
     variable WriteByteCount : integer ;
     variable WriteByteAddr  : integer ;
 
---    alias WriteResp           is LWR.Resp ;
-
-    alias ReadAddress  : LAR.Addr'subtype is LAR.Addr ;
-    alias ReadProt     : LAR.Prot'subtype is LAR.Prot ;
     variable ReadByteAddr  : integer ;
     variable ReadAvailable : boolean := FALSE ;
-
-    alias ReadData     : LRD.Data'subtype is LRD.Data ;
 
     variable Axi4Option    : Axi4OptionsType ; 
     variable Axi4OptionVal : integer ; 
@@ -325,15 +311,15 @@ begin
             WaitForToggle(WriteAddressReceiveCount) ;
           end if ;
 
-          (WriteAddress, WriteProt) := WriteAddressFifo.pop ;
-          TransRec.Address       <= ToTransaction(WriteAddress, TransRec.Address'length) ;
+          (LocalAW.Addr, LocalAW.Prot) := WriteAddressFifo.pop ;
+          TransRec.Address       <= ToTransaction(LocalAW.Addr, TransRec.Address'length) ;
           WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
 
 --!! Address checks intentionally removed - only want an error if the value changes.  
 --          AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "SlaveGetWrite, Address length does not match", FAILURE) ;
 --!! Add checking for AWProt?
 --     Suppress signaling of error during timeout?  return "----" on timeout
---          AlertIfNotEqual(ModelID, WriteProt, ModelWProt, "SlaveGetWrite, WProt", ERROR) ;
+--          AlertIfNotEqual(ModelID, LocalAW.Prot, ModelWProt, "SlaveGetWrite, WProt", ERROR) ;
         end if ;
 
         if WriteAvailable and IsWriteData(TransRec.Operation) then
@@ -343,25 +329,25 @@ begin
           end if ;
 
           if IsWriteAddress(TransRec.Operation) then
-            WriteByteAddr := CalculateByteAddress(WriteAddress, AXI_BYTE_ADDR_WIDTH) ;
+            WriteByteAddr := CalculateByteAddress(LocalAW.Addr, AXI_BYTE_ADDR_WIDTH) ;
           else 
-            -- Cannot save WriteAddress from above since Data may arrive before Addr
+            -- Cannot save LocalAW.Addr from above since Data may arrive before Addr
             -- Could hold the Data until Addr is available.
             WriteByteAddr := TransRec.AddrWidth mod AXI_DATA_BYTE_WIDTH ;
           end if ; 
           
-          (WriteData, WriteStrb, WriteLast, WriteUser, WriteID) := WriteDataFifo.pop ;
+          (LocalWD.Data, LocalWD.Strb, LocalWD.Last, LocalWD.User, LocalWD.ID) := WriteDataFifo.pop ;
           GetAxi4Parameter(Params, WRITE_DATA_FILTER_UNDRIVEN, FilterUndrivenWriteData) ;
           GetAxi4Parameter(Params, WRITE_DATA_UNDRIVEN_VALUE,  UndrivenWriteDataValue) ;
           if FilterUndrivenWriteData then
-            FilterUndrivenData(WriteData, WriteStrb, UndrivenWriteDataValue) ;
+            FilterUndrivenData(LocalWD.Data, LocalWD.Strb, UndrivenWriteDataValue) ;
           end if ;
 
           
-          WriteData := AlignDataBusToBytes(WriteData, TransRec.DataWidth, WriteByteAddr) ;
-          TransRec.DataFromModel  <= ToTransaction(WriteData, TransRec.DataFromModel'length) ;
+          LocalWD.Data := AlignDataBusToBytes(LocalWD.Data, TransRec.DataWidth, WriteByteAddr) ;
+          TransRec.DataFromModel  <= ToTransaction(LocalWD.Data, TransRec.DataFromModel'length) ;
           
-          if WriteLast = '1' then
+          if LocalWD.Last = '1' then
             WriteDataTransactionCount := Increment(WriteDataTransactionCount) ; 
           end if ;
 
@@ -375,7 +361,7 @@ begin
 --          -- Check WStrb
 --          ByteCount := TransRec.DataWidth / 8 ;
 --          ExpectedWStrb := CalculateWriteStrobe(WriteByteAddr, ByteCount, AXI_DATA_BYTE_WIDTH) ;
---          AlertIfNotEqual(ModelID, WriteStrb, ExpectedWStrb, "SlaveGetWrite, WStrb", ERROR) ;
+--          AlertIfNotEqual(ModelID, LocalWD.Strb, ExpectedWStrb, "SlaveGetWrite, WStrb", ERROR) ;
 
         end if ;
 
@@ -389,10 +375,10 @@ begin
 --    -- Log this operation
 --    Log(ModelID,
 --      "Write Operation." &
---      "  AWAddr: "    & to_hstring(WriteAddress) &
---      "  AWProt: "    & to_string(WriteProt) &
---      "  WData: "     & to_hstring(WriteData) &
---      "  WStrb: "     & to_string(WriteStrb) &
+--      "  AWAddr: "    & to_hstring(LocalAW.Addr) &
+--      "  AWProt: "    & to_string(LocalAW.Prot) &
+--      "  WData: "     & to_hstring(LocalWD.Data) &
+--      "  WStrb: "     & to_string(LocalWD.Strb) &
 --      "  Operation# " & to_string(WriteReceiveCount),
 --      DEBUG
 --    ) ;
@@ -415,24 +401,24 @@ begin
           if ReadAddressFifo.empty then
             WaitForToggle(ReadAddressReceiveCount) ;
           end if ;
-          (ReadAddress, ReadProt)  := ReadAddressFifo.pop ;
-          TransRec.Address         <= ToTransaction(ReadAddress, TransRec.Address'length) ;
+          (LocalAR.Addr, LocalAR.Prot)  := ReadAddressFifo.pop ;
+          TransRec.Address         <= ToTransaction(LocalAR.Addr, TransRec.Address'length) ;
 --         AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Slave Read, Address length does not match", FAILURE) ;
 --!TODO Add Check here for actual PROT vs expected (ModelRProt)
---        TransRec.Prot           <= to_integer(ReadProt) ;
+--        TransRec.Prot           <= to_integer(LocalAR.Prot) ;
         end if ;
 
         if ReadAvailable and IsReadData(TransRec.Operation) then
-          ReadAddress := ReadAddressTransactionFifo.Pop ;
-          ReadByteAddr  :=  CalculateByteAddress(ReadAddress, AXI_BYTE_ADDR_WIDTH);
+          LocalAR.Addr := ReadAddressTransactionFifo.Pop ;
+          ReadByteAddr  :=  CalculateByteAddress(LocalAR.Addr, AXI_BYTE_ADDR_WIDTH);
 
           -- Data Sizing Checks
           CheckDataIsBytes(ModelID, TransRec.DataWidth, "Read Data", ReadDataRequestCount) ;
           CheckDataWidth  (ModelID, TransRec.DataWidth, ReadByteAddr, AXI_DATA_WIDTH, "Read Data", ReadDataRequestCount) ; 
  
           -- Get Read Data Response Values
-          ReadData  := AlignBytesToDataBus(FromTransaction(TransRec.DataToModel, ReadData'length), TransRec.DataWidth, ReadByteAddr) ;
-          ReadDataFifo.push(ReadData & ModelRResp) ;
+          LocalRD.Data  := AlignBytesToDataBus(FromTransaction(TransRec.DataToModel, LocalRD.Data'length), TransRec.DataWidth, ReadByteAddr) ;
+          ReadDataFifo.push(LocalRD.Data & ModelRResp) ;
           Increment(ReadDataRequestCount) ;
 
 -- Currently all ReadData Operations are Async

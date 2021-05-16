@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Simple AXI Lite Responder Tansactor Model
+--      Simple AXI Full Memory Responder Model
 --
 --
 --  Developed by:
@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    05/2021   2021.05    Working toward GHDL support   
 --    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.   
 --    06/2020   2020.06    Derived from Axi4Responder.vhd
 --
@@ -103,25 +104,22 @@ port (
   -- Access via transactions or external name
   shared variable Params : ModelParametersPType ;
   
+  -- Derive AXI interface properties from the AxiBus
+  constant AXI_ADDR_WIDTH : integer := AxiBus.WriteAddress.Addr'length ;
+  constant AXI_DATA_WIDTH : integer := AxiBus.WriteData.Data'length ;
+  
 end entity Axi4Memory ;
 
 architecture MemoryResponder of Axi4Memory is
 
-  alias    AxiAddr is AxiBus.WriteAddress.Addr ;
-  alias    AxiData is AxiBus.WriteData.Data ;
-  constant AXI_ADDR_WIDTH : integer := AxiAddr'length ;
-  constant AXI_DATA_WIDTH : integer := AxiData'length ;
   constant AXI_DATA_BYTE_WIDTH  : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH  : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 
-
---!! Move IfElse to ConditionalPkg in OSVVM library
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Memory'PATH_NAME))) ;
 
   signal ModelID, BusFailedID, DataCheckID : AlertLogIDType ;
-
 
   shared variable WriteAddressFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
   shared variable WriteDataFifo        : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
@@ -149,15 +147,11 @@ architecture MemoryResponder of Axi4Memory is
   signal ModelBResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
   signal ModelRResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
   
-  alias  AxiBUser is AxiBus.WriteResponse.User ;
-  alias  AxiBID   is AxiBus.WriteResponse.ID ;
-  signal ModelBUSER  : std_logic_vector(AxiBUser'length - 1 downto 0) := (others => '0') ;
-  signal ModelBID    : std_logic_vector(AxiBID'length - 1 downto 0) := (others => '0') ;
+  signal ModelBUSER  : std_logic_vector(AxiBus.WriteResponse.User'length - 1 downto 0) := (others => '0') ;
+  signal ModelBID    : std_logic_vector(AxiBus.WriteResponse.ID'length - 1 downto 0) := (others => '0') ;
 
-  alias  AxiRUser is AxiBus.WriteResponse.User ;
-  alias  AxiRID   is AxiBus.WriteResponse.ID ;
-  signal ModelRUSER  : std_logic_vector(AxiRUser'length - 1 downto 0) := (others => '0') ;
-  signal ModelRID    : std_logic_vector(AxiRID'length - 1 downto 0) := (others => '0') ;
+  signal ModelRUSER  : std_logic_vector(AxiBus.ReadData.User'length - 1 downto 0) := (others => '0') ;
+  signal ModelRID    : std_logic_vector(AxiBus.ReadData.ID'length - 1 downto 0) := (others => '0') ;
 
 
 begin
@@ -227,9 +221,9 @@ begin
   --    Handles transactions between TestCtrl and Model
   ------------------------------------------------------------
   TransactionDispatcher : process
-    variable Address          : std_logic_vector(AxiAddr'range) ;
-    variable Data             : std_logic_vector(AxiData'range) ;
-    variable ExpectedData     : std_logic_vector(AxiData'range) ;
+    variable Address          : std_logic_vector(AxiBus.WriteAddress.Addr'range) ;
+    variable Data             : std_logic_vector(AxiBus.WriteData.Data'range) ;
+    variable ExpectedData     : std_logic_vector(AxiBus.WriteData.Data'range) ;
     variable ByteData         : std_logic_vector(7 downto 0) ;
     variable DataWidth        : integer ;
     variable NumBytes         : integer ;

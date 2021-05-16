@@ -30,7 +30,7 @@
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2017 - 2020 by SynthWorks Design Inc.
+--  Copyright (c) 2017 - 2021 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -127,18 +127,13 @@ port (
   shared variable WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
   shared variable ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
 
-  -- Derive AXI interface properties from the AxiBus
---  alias AxiAddr is AxiBus.WriteAddress.Addr ;
---  alias AxiData is AxiBus.WriteData.Data ;
---  constant AXI_ADDR_WIDTH      : integer := AxiAddr'length ;
---  constant AXI_DATA_WIDTH      : integer := AxiData'length ;
-  constant AXI_ADDR_WIDTH      : integer := AxiBus.WriteAddress.Addr'length ;
-  constant AXI_DATA_WIDTH      : integer := AxiBus.WriteData.Data'length ;
-
   -- Model Configuration 
   -- Access via transactions or external name
   shared variable params : ModelParametersPType ;
 
+  -- Derive AXI interface properties from the AxiBus
+  constant AXI_ADDR_WIDTH      : integer := AxiBus.WriteAddress.Addr'length ;
+  constant AXI_DATA_WIDTH      : integer := AxiBus.WriteData.Data'length ;
 end entity Axi4Master ;
 architecture AxiFull of Axi4Master is
 
@@ -149,6 +144,7 @@ architecture AxiFull of Axi4Master is
   -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Master'PATH_NAME))) ;
+
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
 
   -- Internal Resources

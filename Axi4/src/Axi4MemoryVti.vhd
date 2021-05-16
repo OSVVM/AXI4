@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Simple AXI Lite Responder Tansactor Model
+--      Simple AXI Full Memory Responder Model
 --
 --
 --  Developed by:
@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    05/2021   2021.05    Working toward GHDL support   
 --    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.   
 --    12/2020   2020.12    Added VTI based on Axi4Memory.vhd
 --    01/2020   2020.06    Derived from Axi4Responder.vhd
@@ -26,7 +27,7 @@
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2017 - 2020 by SynthWorks Design Inc.
+--  Copyright (c) 2020 - 2021 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -102,10 +103,8 @@ port (
   shared variable Params : ModelParametersPType ;
   
   -- Derive AXI interface properties from the AxiBus
-  alias    AxiAddr is AxiBus.WriteAddress.Addr ;
-  alias    AxiData is AxiBus.WriteData.Data ;
-  constant AXI_ADDR_WIDTH : integer := AxiAddr'length ;
-  constant AXI_DATA_WIDTH : integer := AxiData'length ;
+  constant AXI_ADDR_WIDTH : integer := AxiBus.WriteAddress.Addr'length ;
+  constant AXI_DATA_WIDTH : integer := AxiBus.WriteData.Data'length ;
 
   -- Testbench Transaction Interface
   -- Access via external names
@@ -122,14 +121,11 @@ architecture MemoryResponder of Axi4MemoryVti is
   constant AXI_DATA_BYTE_WIDTH  : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH  : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 
-
---!! Move IfElse to ConditionalPkg in OSVVM library
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4MemoryVti'PATH_NAME))) ;
 
   signal ModelID, BusFailedID, DataCheckID : AlertLogIDType ;
-
 
   shared variable WriteAddressFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
   shared variable WriteDataFifo        : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
@@ -157,15 +153,11 @@ architecture MemoryResponder of Axi4MemoryVti is
   signal ModelBResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
   signal ModelRResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
   
-  alias  AxiBUser is AxiBus.WriteResponse.User ;
-  alias  AxiBID   is AxiBus.WriteResponse.ID ;
-  signal ModelBUSER  : std_logic_vector(AxiBUser'length - 1 downto 0) := (others => '0') ;
-  signal ModelBID    : std_logic_vector(AxiBID'length - 1 downto 0) := (others => '0') ;
+  signal ModelBUSER  : std_logic_vector(AxiBus.WriteResponse.User'length - 1 downto 0) := (others => '0') ;
+  signal ModelBID    : std_logic_vector(AxiBus.WriteResponse.ID'length - 1 downto 0) := (others => '0') ;
 
-  alias  AxiRUser is AxiBus.WriteResponse.User ;
-  alias  AxiRID   is AxiBus.WriteResponse.ID ;
-  signal ModelRUSER  : std_logic_vector(AxiRUser'length - 1 downto 0) := (others => '0') ;
-  signal ModelRID    : std_logic_vector(AxiRID'length - 1 downto 0) := (others => '0') ;
+  signal ModelRUSER  : std_logic_vector(AxiBus.ReadData.User'length - 1 downto 0) := (others => '0') ;
+  signal ModelRID    : std_logic_vector(AxiBus.ReadData.ID'length - 1 downto 0) := (others => '0') ;
 
 
 begin
@@ -235,9 +227,9 @@ begin
   --    Handles transactions between TestCtrl and Model
   ------------------------------------------------------------
   TransactionDispatcher : process
-    variable Address          : std_logic_vector(AxiAddr'range) ;
-    variable Data             : std_logic_vector(AxiData'range) ;
-    variable ExpectedData     : std_logic_vector(AxiData'range) ;
+    variable Address          : std_logic_vector(AxiBus.WriteAddress.Addr'range) ;
+    variable Data             : std_logic_vector(AxiBus.WriteData.Data'range) ;
+    variable ExpectedData     : std_logic_vector(AxiBus.WriteData.Data'range) ;
     variable ByteData         : std_logic_vector(7 downto 0) ;
     variable DataWidth        : integer ;
     variable NumBytes         : integer ;
@@ -386,7 +378,7 @@ begin
         end if ;
 
       when MULTIPLE_DRIVER_DETECT =>
-        Alert(ModelID, "Axi4MemoryVti: Multiple Drivers on Transaction Record." & 
+        Alert(ModelID, "Axi4Memory: Multiple Drivers on Transaction Record." & 
                        "  Transaction # " & to_string(TransactionCount), FAILURE) ;
         wait for 0 ns ;  
 
@@ -406,7 +398,7 @@ begin
   --    Execute Write Address Transactions
   ------------------------------------------------------------
   WriteAddressHandler : process
-    alias    AW is AxiBus.WriteAddress ;
+    alias    AW : AxiBus.WriteAddress'subtype is AxiBus.WriteAddress ;
     variable WriteAddressReadyBeforeValid  : boolean := TRUE ;
     variable WriteAddressReadyDelayCycles  : integer := 0 ;
   begin
@@ -420,8 +412,8 @@ begin
       DoAxiReadyHandshake (
       ---------------------
         Clk                     => Clk,
-        Valid                   => AW.Valid,
-        Ready                   => AW.Ready,
+        Valid                   => AxiBus.WriteAddress.Valid,
+        Ready                   => AxiBus.WriteAddress.Ready,
         ReadyBeforeValid        => WriteAddressReadyBeforeValid,
         ReadyDelayCycles        => WriteAddressReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_AWReady
@@ -459,7 +451,7 @@ begin
   --    Execute Write Data Transactions
   ------------------------------------------------------------
   WriteDataHandler : process
-    alias    WD is AxiBus.WriteData ;
+    alias    WD : AxiBus.WriteData'subtype is AxiBus.WriteData ;
     variable WriteDataReadyBeforeValid     : boolean := TRUE ;
     variable WriteDataReadyDelayCycles     : integer := 0 ;
   begin
@@ -473,8 +465,8 @@ begin
       DoAxiReadyHandshake(
       ---------------------
         Clk                     => Clk,
-        Valid                   => WD.Valid,
-        Ready                   => WD.Ready,
+        Valid                   => AxiBus.WriteData.Valid,
+        Ready                   => AxiBus.WriteData.Ready,
         ReadyBeforeValid        => WriteDataReadyBeforeValid,
         ReadyDelayCycles        => WriteDataReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_WReady
@@ -509,22 +501,25 @@ begin
   --    Collect Write Address and Data transactions
   ------------------------------------------------------------
   WriteHandler : process
---!!GHDL    variable LAW : AxiBus.WriteAddress'subtype ;
-    alias AW is AxiBus.WriteAddress ;
+    variable LAW : AxiBus.WriteAddress'subtype ;
+    alias AW : AxiBus.WriteAddress'subtype is AxiBus.WriteAddress ;
+/*    
     variable LAW : Axi4WriteAddressRecType (
                           Addr(AW.Addr'range),
                           ID(AW.ID'range),
                           User(AW.User'range)
                         ) ;
---!!GHDL    variable LWD : AxiBus.WriteData'subtype ;
-    alias WD is AxiBus.WriteData ;
+*/                        
+    variable LWD : AxiBus.WriteData'subtype ;
+    alias    WD  : AxiBus.WriteData'subtype is AxiBus.WriteData ;
+ /*   
     variable LWD : Axi4WriteDataRecType (
                       Data(WD.Data'range),
                       Strb(WD.Strb'range),
                       User(WD.User'range),
                       ID(WD.ID'range)
                     ) ;
-
+*/
     variable BurstLen         : integer ;
     variable ByteAddressBits  : integer ;
     variable BytesPerTransfer : integer ;
@@ -612,12 +607,13 @@ begin
   --   Receive and Check Write Responses
   ------------------------------------------------------------
   WriteResponseHandler : process
-    alias    WR is AxiBus.WriteResponse ;
---!!GHDL    variable Local : AxiBus.WriteResponse'subtype ;
-    variable Local : Axi4WriteResponseRecType (
-                          ID(WR.ID'range),
-                          User(WR.User'range)
-                        ) ;
+    alias    WR    : AxiBus.WriteResponse'subtype is AxiBus.WriteResponse ;
+    variable Local : AxiBus.WriteResponse'subtype ;
+    
+    -- variable Local : Axi4WriteResponseRecType (
+                          -- ID(WR.ID'range),
+                          -- User(WR.User'range)
+                        -- ) ;
     variable WriteResponseReadyTimeOut : integer := 25 ;
   begin
     -- initialize
@@ -655,8 +651,8 @@ begin
       DoAxiValidHandshake (
       ---------------------
         Clk            =>  Clk,
-        Valid          =>  WR.Valid,
-        Ready          =>  WR.Ready,
+        Valid          =>  AxiBus.WriteResponse.Valid,
+        Ready          =>  AxiBus.WriteResponse.Ready,
         tpd_Clk_Valid  =>  tpd_Clk_BValid,
         AlertLogID     =>  BusFailedID,
         TimeOutMessage =>  "Write Response # " & to_string(WriteResponseDoneCount + 1),
@@ -684,7 +680,7 @@ begin
   --    Handles addresses as received, adds appropriate interface characterists
   ------------------------------------------------------------
   ReadAddressHandler : process
-    alias    AR is AxiBus.ReadAddress ;
+    alias    AR : AxiBus.ReadAddress'subtype is AxiBus.ReadAddress ;
     variable ReadAddressReadyBeforeValid   : boolean := TRUE ;
     variable ReadAddressReadyDelayCycles   : integer := 0 ;
   begin
@@ -700,8 +696,8 @@ begin
       DoAxiReadyHandshake (
       ---------------------
         Clk                     => Clk,
-        Valid                   => AR.Valid,
-        Ready                   => AR.Ready,
+        Valid                   => AxiBus.ReadAddress.Valid,
+        Ready                   => AxiBus.ReadAddress.Ready,
         ReadyBeforeValid        => ReadAddressReadyBeforeValid,
         ReadyDelayCycles        => ReadAddressReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_ARReady
@@ -741,20 +737,20 @@ begin
   --    Introduces cycle delays due to accessing memory
   ------------------------------------------------------------
   ReadHandler : process
---!!GHDL    variable LAR : AxiBus.ReadAddress'subtype ;
-    alias    AR is AxiBus.ReadAddress ;
-    variable LAR : Axi4ReadAddressRecType (
-                          Addr(AR.Addr'range),
-                          ID(AR.ID'range),
-                          User(AR.User'range)
-                        ) ;
---!!GHDL    variable LRD : AxiBus.ReadData'subtype ;
-    alias    RD is AxiBus.ReadData ;
-    variable LRD : Axi4ReadDataRecType (
-                      Data(RD.Data'range),
-                      User(RD.User'range),
-                      ID(RD.ID'range)
-                    );
+    variable LAR : AxiBus.ReadAddress'subtype ;
+    alias    AR  : AxiBus.ReadAddress'subtype is AxiBus.ReadAddress ;
+    -- variable LAR : Axi4ReadAddressRecType (
+                          -- Addr(AR.Addr'range),
+                          -- ID(AR.ID'range),
+                          -- User(AR.User'range)
+                        -- ) ;
+    variable LRD : AxiBus.ReadData'subtype ;
+    alias    RD  : AxiBus.ReadData'subtype is AxiBus.ReadData ;
+    -- variable LRD : Axi4ReadDataRecType (
+                      -- Data(RD.Data'range),
+                      -- User(RD.User'range),
+                      -- ID(RD.ID'range)
+                    -- );
 
     variable BurstLen         : integer ;
     variable ByteAddressBits  : integer ;
@@ -777,10 +773,10 @@ begin
 
     if LAR.Size'length > 0 then
       ByteAddressBits   := to_integer(LAR.Size) ;
-      BytesPerTransfer    := 2 ** ByteAddressBits ;
+      BytesPerTransfer  := 2 ** ByteAddressBits ;
     else
-      ByteAddressBits := AXI_BYTE_ADDR_WIDTH ;
-      BytesPerTransfer    := AXI_DATA_BYTE_WIDTH ;
+      ByteAddressBits   := AXI_BYTE_ADDR_WIDTH ;
+      BytesPerTransfer  := AXI_DATA_BYTE_WIDTH ;
     end if ;
 
     -- first word in a burst or single word transfer
@@ -831,13 +827,13 @@ begin
   --    All delays at this point are due to AXI Read Data interface operations
   ------------------------------------------------------------
   ReadDataHandler : process
-    alias    RD is AxiBus.ReadData ;
---!!GHDL    variable Local : AxiBus.ReadData'subtype ;
-    variable Local : Axi4ReadDataRecType (
-                      Data(RD.Data'range),
-                      User(RD.User'range),
-                      ID(RD.ID'range)
-                    );
+    alias    RD    : AxiBus.ReadData'subtype is AxiBus.ReadData ;
+    variable Local : AxiBus.ReadData'subtype ;
+    -- variable Local : Axi4ReadDataRecType (
+                      -- Data(RD.Data'range),
+                      -- User(RD.User'range),
+                      -- ID(RD.ID'range)
+                    -- );
     variable ReadDataReadyTimeOut : integer := 25 ;
     variable NewTransfer : std_logic := '1' ; 
   begin
@@ -888,8 +884,8 @@ begin
       DoAxiValidHandshake (
       ---------------------
         Clk            =>  Clk,
-        Valid          =>  RD.Valid,
-        Ready          =>  RD.Ready,
+        Valid          =>  AxiBus.ReadData.Valid,
+        Ready          =>  AxiBus.ReadData.Ready,
         tpd_Clk_Valid  =>  tpd_Clk_RValid,
         AlertLogID     =>  BusFailedID,
         TimeOutMessage =>  "Read Data # " & to_string(ReadDataDoneCount + 1),

@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Simple AXI Lite Slave Transactor Model
+--      Simple AXI Full Responder Transactor Model
 --
 --
 --  Developed by:
@@ -19,14 +19,15 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    05/2021   2021.05    Updates for GHDL.   
 --    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.   
---    12/2020   2020.12    Updated.  Added VTI.
+--    12/2020   2020.12    Updated.  
 --    09/2017   2017       Initial revision
 --
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2017 - 2020 by SynthWorks Design Inc.
+--  Copyright (c) 2017 - 2021 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -100,14 +101,14 @@ port (
   -- Access via transactions or external name
   shared variable Params : ModelParametersPType ;
 
+  -- Derive AXI interface properties from the AxiBus
+  constant AXI_ADDR_WIDTH : integer := AxiBus.WriteAddress.Addr'length ;
+  constant AXI_DATA_WIDTH : integer := AxiBus.WriteData.Data'length ;
+
 end entity Axi4Responder ;
 
 architecture TransactorResponder of Axi4Responder is
 
-  alias    AxiAddr is AxiBus.WriteAddress.Addr ;
-  alias    AxiData is AxiBus.WriteData.Data ;
-  constant AXI_ADDR_WIDTH : integer := AxiAddr'length ;
-  constant AXI_DATA_WIDTH : integer := AxiData'length ;
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 
@@ -144,15 +145,11 @@ architecture TransactorResponder of Axi4Responder is
   signal ModelBResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
   signal ModelRResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
   
-  alias  AxiBUser is AxiBus.WriteResponse.User ;
-  alias  AxiBID   is AxiBus.WriteResponse.ID ;
-  signal ModelBUSER  : std_logic_vector(AxiBUser'length - 1 downto 0) := (others => '0') ;
-  signal ModelBID    : std_logic_vector(AxiBID'length - 1 downto 0) := (others => '0') ;
+  signal ModelBUSER  : std_logic_vector(AxiBus.WriteResponse.User'length - 1 downto 0) := (others => '0') ;
+  signal ModelBID    : std_logic_vector(AxiBus.WriteResponse.ID'length - 1 downto 0) := (others => '0') ;
 
-  alias  AxiRUser is AxiBus.WriteResponse.User ;
-  alias  AxiRID   is AxiBus.WriteResponse.ID ;
-  signal ModelRUSER  : std_logic_vector(AxiRUser'length - 1 downto 0) := (others => '0') ;
-  signal ModelRID    : std_logic_vector(AxiRID'length - 1 downto 0) := (others => '0') ;
+  signal ModelRUSER  : std_logic_vector(AxiBus.ReadData.User'length - 1 downto 0) := (others => '0') ;
+  signal ModelRID    : std_logic_vector(AxiBus.ReadData.ID'length - 1 downto 0) := (others => '0') ;
 
 begin
 
@@ -593,7 +590,7 @@ begin
   --   Receive and Check Write Responses
   ------------------------------------------------------------
   WriteResponseHandler : process
-    alias    WR : AxiBus.WriteResponse'subtype is AxiBus.WriteResponse ;
+    alias    WR    : AxiBus.WriteResponse'subtype is AxiBus.WriteResponse ;
     variable Local : AxiBus.WriteResponse'subtype ;
     variable WriteResponseReadyTimeOut: integer := 25 ;
   begin
@@ -705,7 +702,7 @@ begin
   --    Receive Read Data Transactions
   ------------------------------------------------------------
   ReadDataHandler : process
-    alias    RD : AxiBus.ReadData'subtype is AxiBus.ReadData ;
+    alias    RD    : AxiBus.ReadData'subtype is AxiBus.ReadData ;
     variable Local : AxiBus.ReadData'subtype ;
     variable ReadDataReadyTimeOut: integer := 25 ;
   begin

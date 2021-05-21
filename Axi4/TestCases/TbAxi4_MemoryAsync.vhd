@@ -90,74 +90,74 @@ begin
   ------------------------------------------------------------
   InitiatorProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
-    alias AddrRec is MasterRec ;
+--    alias AddrRec : MasterRec'subtype is MasterRec ;
   begin
     wait until nReset = '1' ;  
-    WaitForClock(AddrRec, 2) ; 
+    WaitForClock(MasterRec, 2) ; 
     log("Write Address and Data sent at same time") ;
     log("Queue 3 Write Transactions for A1/D1, A2/D2, A3/D3") ;
-    WriteAsync       (AddrRec, X"0000_0A10", X"030201D1");  -- Async = Queue
-    WriteAsync       (AddrRec, X"0000_0A20", X"030201D2");
-    WriteAsync       (AddrRec, X"0000_0A30", X"030201D3");
+    WriteAsync       (MasterRec, X"0000_0A10", X"030201D1");  -- Async = Queue
+    WriteAsync       (MasterRec, X"0000_0A20", X"030201D2");
+    WriteAsync       (MasterRec, X"0000_0A30", X"030201D3");
 
     log("Wait Cne Cycle") ;
-    WaitForClock     (AddrRec, 1) ;      -- Stop for 1 Clock
+    WaitForClock     (MasterRec, 1) ;      -- Stop for 1 Clock
 
     log("Queue 3 Read Address Cycles for A1, A2, A3") ;
-    ReadAddressAsync (AddrRec, X"0000_0A10");      -- Queue Reads
-    ReadAddressAsync (AddrRec, X"0000_0A20");
-    ReadAddressAsync (AddrRec, X"0000_0A30");
+    ReadAddressAsync (MasterRec, X"0000_0A10");      -- Queue Reads
+    ReadAddressAsync (MasterRec, X"0000_0A20");
+    ReadAddressAsync (MasterRec, X"0000_0A30");
 
     log("Block and Check D1, D2, D3") ;
-    ReadCheckData    (AddrRec, X"030201D1"); -- Blocking, checks D1
-    ReadCheckData    (AddrRec, X"030201D2"); -- Blocking, checks D2
-    ReadCheckData    (AddrRec, X"030201D3");  -- Blocking, checks D3
+    ReadCheckData    (MasterRec, X"030201D1"); -- Blocking, checks D1
+    ReadCheckData    (MasterRec, X"030201D2"); -- Blocking, checks D2
+    ReadCheckData    (MasterRec, X"030201D3");  -- Blocking, checks D3
     
     log("Write Address sent 1 cycle before Write Data") ;
     log("Queue 3 Write Address Cycles for A5, A6, and A7") ;
-    WriteAddressAsync(AddrRec, X"0000_0A50");  -- Queue Write Address
-    WriteAddressAsync(AddrRec, X"0000_0A60");  -- Queue Write Address
-    WriteAddressAsync(AddrRec, X"0000_0A70");  -- Queue Write Address
+    WriteAddressAsync(MasterRec, X"0000_0A50");  -- Queue Write Address
+    WriteAddressAsync(MasterRec, X"0000_0A60");  -- Queue Write Address
+    WriteAddressAsync(MasterRec, X"0000_0A70");  -- Queue Write Address
 
     log("Wait Cne Cycle") ;
-    WaitForClock     (AddrRec, 1);
+    WaitForClock     (MasterRec, 1);
 
     log("Queue 3 Write Data Cycles for D5, D6, and D7") ;
-    WriteDataAsync   (AddrRec, X"0", X"030201D5"); 
-    WriteDataAsync   (AddrRec, X"0", X"030201D6"); 
-    WriteDataAsync   (AddrRec, X"0", X"030201D7"); 
+    WriteDataAsync   (MasterRec, X"0", X"030201D5"); 
+    WriteDataAsync   (MasterRec, X"0", X"030201D6"); 
+    WriteDataAsync   (MasterRec, X"0", X"030201D7"); 
 
     log("Wait Cne Cycle") ;
-    WaitForClock     (AddrRec, 1);
+    WaitForClock     (MasterRec, 1);
 
     log("Read A5 and Check D5") ;
-    ReadCheck        (AddrRec, X"0000_0A50", X"030201D5"); -- Blocking, read and checks D5
+    ReadCheck        (MasterRec, X"0000_0A50", X"030201D5"); -- Blocking, read and checks D5
 
     log("Queue Read Address a6") ;
-    ReadAddressAsync (AddrRec, X"0000_0A60");       -- Queue Read
+    ReadAddressAsync (MasterRec, X"0000_0A60");       -- Queue Read
 
     log("Wait Cne Cycle") ;
-    WaitForClock     (AddrRec, 1) ;       -- Stops for 1 Clock
+    WaitForClock     (MasterRec, 1) ;       -- Stops for 1 Clock
     
     log("Write Data sent 1 cycle before Write Address") ;
     log("Write Data D8") ;
-    WriteDataAsync   (AddrRec, X"0", X"030201D8"); -- Queue Write Data 
+    WriteDataAsync   (MasterRec, X"0", X"030201D8"); -- Queue Write Data 
 
     log("Block and Check D6") ;
-    ReadCheckData    (AddrRec, X"030201D6");       -- Blocking, checks D6
+    ReadCheckData    (MasterRec, X"030201D6");       -- Blocking, checks D6
     
     log("Queue Write Address") ;
-    WriteAddressAsync(AddrRec, X"0000_0A80");
+    WriteAddressAsync(MasterRec, X"0000_0A80");
     
     log("Block and Check A7/D7") ;
-    ReadCheck (AddrRec, X"0000_0A70", X"030201D7") ; 
+    ReadCheck (MasterRec, X"0000_0A70", X"030201D7") ; 
 
     log("Block and Check A8/D8") ;
-    ReadCheck (AddrRec, X"0000_0A80", X"030201D8") ; 
+    ReadCheck (MasterRec, X"0000_0A80", X"030201D8") ; 
 
     WaitForBarrier(InitiatorDone) ;
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(AddrRec, 2) ;
+    WaitForClock(MasterRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process InitiatorProc ;
@@ -170,23 +170,23 @@ begin
   MemoryTransProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;   
-    alias MemoryTransRec is ResponderRec ;    
+--    alias MemoryTransRec is ResponderRec ;    
   begin
-    WaitForClock(MemoryTransRec, 2) ;
+    WaitForClock(ResponderRec, 2) ;
     
     -- ReadBack after Initiator finishes
     WaitForBarrier(InitiatorDone) ;
-    ReadCheck(MemoryTransRec, X"0000_0A10", X"030201D1" ) ;
-    ReadCheck(MemoryTransRec, X"0000_0A20", X"030201D2" ) ;
-    ReadCheck(MemoryTransRec, X"0000_0A30", X"030201D3" ) ;
+    ReadCheck(ResponderRec, X"0000_0A10", X"030201D1" ) ;
+    ReadCheck(ResponderRec, X"0000_0A20", X"030201D2" ) ;
+    ReadCheck(ResponderRec, X"0000_0A30", X"030201D3" ) ;
     
-    ReadCheck(MemoryTransRec, X"0000_0A50", X"030201D5" ) ;
-    ReadCheck(MemoryTransRec, X"0000_0A60", X"030201D6" ) ;
-    ReadCheck(MemoryTransRec, X"0000_0A70", X"030201D7" ) ;
-    ReadCheck(MemoryTransRec, X"0000_0A80", X"030201D8" ) ;
+    ReadCheck(ResponderRec, X"0000_0A50", X"030201D5" ) ;
+    ReadCheck(ResponderRec, X"0000_0A60", X"030201D6" ) ;
+    ReadCheck(ResponderRec, X"0000_0A70", X"030201D7" ) ;
+    ReadCheck(ResponderRec, X"0000_0A80", X"030201D8" ) ;
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MemoryTransRec, 2) ;
+    WaitForClock(ResponderRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process MemoryTransProc ;

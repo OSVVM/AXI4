@@ -109,49 +109,49 @@ begin
     SetAxiStreamOptions(StreamTxRec, DEFAULT_USER, User + 1) ;
     
     for i in 1 to 32 loop
-      TxBurstFifo.push(Data & TxUser) ;
+      Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
     SendBurst(StreamTxRec, 32) ;
     
     for i in 1 to 32 loop
-      TxBurstFifo.push(Data & TxUser) ;
+      Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
     SendBurst(StreamTxRec, 32, (USER+5) & "0") ;
     
     for i in 1 to 32 loop
-      TxBurstFifo.push(Data & TxUser) ;
+      Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
     SendBurst(StreamTxRec, 32, (Dest+6) & (USER+5) & "0") ;
     
     for i in 1 to 32 loop
-      TxBurstFifo.push(Data & TxUser) ;
+      Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
     SendBurst(StreamTxRec, 32, (ID+7) & (Dest+6) & (USER+5) & "0") ;
     
     for i in 1 to 32 loop
-      TxBurstFifo.push(Data & TxUser) ;
+      Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
     SendBurst(StreamTxRec, 32, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
 
     for i in 1 to 32 loop
-      TxBurstFifo.push(Data & TxUser) ;
+      Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
     SendBurst(StreamTxRec, 32, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
 
     for i in 1 to 32 loop
-      TxBurstFifo.push(Data & TxUser) ;
+      Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
@@ -188,14 +188,14 @@ begin
     SetAxiStreamOptions(StreamRxRec, DEFAULT_USER, User + 1) ;
     
     for i in 1 to 32 loop
-      RxBurstFifo.push(Data & RxUser) ;
+      Push(RxBurstFifo, Data & RxUser) ;
       Data   := Data + 1 ; 
       RxUser := RxUser + 1 ; 
     end loop ; 
     CheckBurst(StreamRxRec, 32, "1") ;
     
     for i in 1 to 32 loop
-      RxBurstFifo.push(Data & RxUser) ;
+      Push(RxBurstFifo, Data & RxUser) ;
       Data   := Data + 1 ; 
       RxUser := RxUser + 1 ; 
     end loop ; 
@@ -203,35 +203,35 @@ begin
     CheckBurst(StreamRxRec, 32, (USER+5) & "1") ;
     
     for i in 1 to 32 loop
-      RxBurstFifo.push(Data & RxUser) ;
+      Push(RxBurstFifo, Data & RxUser) ;
       Data   := Data + 1 ; 
       RxUser := RxUser + 1 ; 
     end loop ; 
     CheckBurst(StreamRxRec, 32, (Dest+6) & (USER+5) & "1") ;
     
     for i in 1 to 32 loop
-      RxBurstFifo.push(Data & RxUser) ;
+      Push(RxBurstFifo, Data & RxUser) ;
       Data   := Data + 1 ; 
       RxUser := RxUser + 1 ; 
     end loop ; 
     CheckBurst(StreamRxRec, 32, (ID+7) & (Dest+6) & (USER+5) & "1") ;
     
     for i in 1 to 32 loop
-      RxBurstFifo.push(Data & RxUser) ;
+      Push(RxBurstFifo, Data & RxUser) ;
       Data   := Data + 1 ; 
       RxUser := RxUser + 1 ; 
     end loop ; 
     CheckBurst(StreamRxRec, 32, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "1") ;
 
     for i in 1 to 32 loop
-      RxBurstFifo.push(Data & RxUser) ;
+      Push(RxBurstFifo, Data & RxUser) ;
       Data   := Data + 1 ; 
       RxUser := RxUser + 1 ; 
     end loop ; 
     CheckBurst(StreamRxRec, 32, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "1") ;
 
     for i in 1 to 32 loop
-      RxBurstFifo.push(Data & RxUser) ;
+      Push(RxBurstFifo, Data & RxUser) ;
       Data   := Data + 1 ; 
       RxUser := RxUser + 1 ; 
     end loop ; 

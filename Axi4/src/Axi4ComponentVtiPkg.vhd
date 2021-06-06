@@ -56,6 +56,7 @@ package Axi4ComponentVtiPkg is
   ------------------------------------------------------------
     generic (
       MODEL_ID_NAME    : string := "" ;
+      MEMORY_NAME      : string := "" ;
       tperiod_Clk      : time   := 10 ns ;
 
       DEFAULT_DELAY    : time   := 1 ns ; 

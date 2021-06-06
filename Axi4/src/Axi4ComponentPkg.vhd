@@ -55,7 +55,8 @@ package Axi4ComponentPkg is
   component Axi4Master is
   ------------------------------------------------------------
     generic (
-      MODEL_ID_NAME    : string := "" ;
+      MODEL_ID_NAME   : string := "" ;
+      MEMORY_NAME     : string := "" ;
       tperiod_Clk      : time   := 10 ns ;
 
       DEFAULT_DELAY    : time   := 1 ns ; 

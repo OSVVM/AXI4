@@ -118,11 +118,11 @@ architecture MemoryResponder of Axi4Memory is
   signal ModelID, BusFailedID, DataCheckID : AlertLogIDType ;
 
   -- Memory Data Structure, Access via MemoryName
-  constant MemoryName : string := 
+  constant LOCAL_MEMORY_NAME : string := 
     IfElse(MEMORY_NAME /= "", MEMORY_NAME, to_lower(Axi4Memory'PATH_NAME) & ":memory") ;
     
   constant MemoryID : MemoryIDType := NewID(
-      Name       => MemoryName, 
+      Name       => LOCAL_MEMORY_NAME, 
       AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
       DataWidth  => 8                -- Memory is byte oriented
     ) ; 

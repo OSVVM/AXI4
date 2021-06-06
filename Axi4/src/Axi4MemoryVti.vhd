@@ -126,7 +126,7 @@ architecture MemoryResponder of Axi4MemoryVti is
 
   -- Memory Data Structure, Access via MemoryName
   constant MemoryName : string := 
-    IfElse(MEMORY_NAME /= "", MEMORY_NAME, to_lower(Axi4Memory'PATH_NAME) & ":memory") ;
+    IfElse(MEMORY_NAME /= "", MEMORY_NAME, to_lower(Axi4MemoryVti'PATH_NAME) & ":memory") ;
     
   constant MemoryID : MemoryIDType := NewID(
       Name       => MemoryName, 

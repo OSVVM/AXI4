@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_MemoryBurstSparse1.vhd
+--  File Name:         TbAxi4_MemoryBurst1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -40,7 +40,7 @@
 --  limitations under the License.
 --  
 
-architecture MemoryBurstSparse1 of TestCtrl is
+architecture MemoryBurst1 of TestCtrl is
 
   signal TestDone, WriteDone : integer_barrier := 1 ;
   constant BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;   
@@ -56,14 +56,14 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_MemoryBurstSparse1") ;
+    SetAlertLogName("TbAxi4_MemoryBurst1") ;
     SetLogEnable(PASSED, TRUE) ;   -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;     -- Enable INFO logs
     SetLogEnable(DEBUG, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_MemoryBurstSparse1.txt") ;
+    TranscriptOpen("./results/TbAxi4_MemoryBurst1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -77,7 +77,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_MemoryBurstSparse1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MemoryBurstSparse1.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_MemoryBurst1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MemoryBurst1.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 
@@ -97,7 +97,39 @@ begin
     wait until nReset = '1' ;  
     WaitForClock(MasterRec, 2) ; 
     
-----------------------------------------  Test 1, Word Aligned
+    GetBurstMode(MasterRec, BurstVal) ;
+    AffirmIf(BurstVal = ADDRESS_BUS_BURST_WORD_MODE, "Default BurstMode is ADDRESS_BUS_BURST_WORD_MODE " & to_string(BurstVal)) ; 
+    SetBurstMode(MasterRec, BURST_MODE) ;
+    GetBurstMode(MasterRec, BurstVal) ;
+    AffirmIfEqual(BurstVal, BURST_MODE, "BurstMode") ; 
+    
+    log("Write with ByteAddr = 8, 12 Bytes -- word aligned") ;
+    PushBurstIncrement(WriteBurstFifo, 3, 12, DATA_WIDTH) ;
+    WriteBurst(MasterRec, X"0000_0008", 12) ;
+
+    ReadBurst (MasterRec, X"0000_0008", 12) ;
+    CheckBurstIncrement(ReadBurstFifo, 3, 12, DATA_WIDTH) ;
+    
+    log("Write with ByteAddr = x1A, 13 Bytes -- unaligned") ;
+    Push(WriteBurstFifo, X"0001_UUUU") ;
+    PushBurst(WriteBurstFifo, (3,5,7,9,11,13,15,17,19,21,23,25), DATA_WIDTH) ;
+    WriteBurst(MasterRec, X"0000_100A", 13) ;
+
+    ReadBurst (MasterRec, X"0000_100A", 13) ;
+    Check(ReadBurstFifo, X"0001_----") ; -- First Byte not aligned
+    CheckBurst(ReadBurstFifo, (3,5,7,9,11,13,15,17,19,21,23,25), DATA_WIDTH) ;
+
+
+    log("Write with ByteAddr = 31, 12 Bytes -- unaligned") ;
+    Push(WriteBurstFifo, X"A015_28UU") ; 
+    PushBurstRandom(WriteBurstFifo, 7, 12, DATA_WIDTH) ;
+/*
+    WriteBurst(MasterRec, X"0000_3001", 13) ;
+
+    ReadBurst (MasterRec, X"0000_3001", 13) ;
+    Check(ReadBurstFifo, X"A015_28--") ; -- First Byte not aligned
+    CheckBurstRandom(ReadBurstFifo, 7, 12, DATA_WIDTH) ;
+
     log("Write with ByteAddr = 8, 12 Bytes -- word aligned") ;
     Push(WriteBurstFifo, X"UUUU_UU01") ;
     Push(WriteBurstFifo, X"UUUU_02UU") ;
@@ -111,10 +143,30 @@ begin
     Push(WriteBurstFifo, X"UU0D_0C0B") ;
     Push(WriteBurstFifo, X"100F_0EUU") ;
     
-    WriteBurst(MasterRec, X"0000_1000", 9) ;
+    WriteBurst(MasterRec, X"0000_5050", 1) ;
+    WriteBurst(MasterRec, X"0000_5051", 1) ;
+    WriteBurst(MasterRec, X"0000_5052", 1) ;
+    WriteBurst(MasterRec, X"0000_5053", 1) ;
+    
+    WriteBurst(MasterRec, X"0000_5060", 1) ;
+    WriteBurst(MasterRec, X"0000_5071", 1) ;
+    WriteBurst(MasterRec, X"0000_5082", 1) ;
+    
+    WriteBurst(MasterRec, X"0000_5090", 1) ;
+    WriteBurst(MasterRec, X"0000_50A1", 1) ;
 
 
-    ReadBurst (MasterRec, X"0000_1000", 9) ;
+    ReadBurst (MasterRec, X"0000_5050", 1) ;
+    ReadBurst (MasterRec, X"0000_5051", 1) ;
+    ReadBurst (MasterRec, X"0000_5052", 1) ;
+    ReadBurst (MasterRec, X"0000_5053", 1) ;
+    
+    ReadBurst (MasterRec, X"0000_5060", 1) ;
+    ReadBurst (MasterRec, X"0000_5071", 1) ;
+    ReadBurst (MasterRec, X"0000_5082", 1) ;
+
+    ReadBurst (MasterRec, X"0000_5090", 1) ;
+    ReadBurst (MasterRec, X"0000_50A1", 1) ;
     
    Check(ReadBurstFifo, X"----_--01") ;
    Check(ReadBurstFifo, X"----_02--") ;
@@ -127,40 +179,7 @@ begin
 
    Check(ReadBurstFifo, X"--0D_0C0B") ;
    Check(ReadBurstFifo, X"100F_0E--") ;
-    
-    
-----------------------------------------  Test 2, Byte Aligned
-    Push(WriteBurstFifo, X"UU02_01UU") ;
-    Push(WriteBurstFifo, X"05UU_0403") ;
-    Push(WriteBurstFifo, X"8877_UU06") ;
-    Push(WriteBurstFifo, X"BBAA_99UU") ;
-    
-    Push(WriteBurstFifo, X"UUUU_DDCC") ;
-    Push(WriteBurstFifo, X"FFUU_UUEE") ;
-    Push(WriteBurstFifo, X"1110_UUUU") ;
-
-    Push(WriteBurstFifo, X"UUUU_UU12") ;
-    Push(WriteBurstFifo, X"UUUU_13UU") ;
-    Push(WriteBurstFifo, X"UU14_UUUU") ;
-    Push(WriteBurstFifo, X"15UU_UUUU") ;
-    
-    WriteBurst(MasterRec, X"0000_2001", 11) ;
-
-    ReadBurst(MasterRec, X"0000_2001", 11) ;
-   Check(ReadBurstFifo, X"--02_01--") ;
-   Check(ReadBurstFifo, X"05--_0403") ;
-   Check(ReadBurstFifo, X"8877_--06") ;
-   Check(ReadBurstFifo, X"BBAA_99--") ;
-
-   Check(ReadBurstFifo, X"----_DDCC") ;
-   Check(ReadBurstFifo, X"FF--_--EE") ;
-   Check(ReadBurstFifo, X"1110_----") ;
-
-   Check(ReadBurstFifo, X"----_--12") ;
-   Check(ReadBurstFifo, X"----_13--") ;
-   Check(ReadBurstFifo, X"--14_----") ;
-   Check(ReadBurstFifo, X"15--_----") ;
-
+*/
 
     WaitForBarrier(WriteDone) ;
     
@@ -180,7 +199,18 @@ begin
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ; 
   begin
     WaitForClock(ResponderRec, 2) ; 
-   
+    
+    
+    WaitForBarrier(WriteDone) ;
+
+    -- Check that write burst was received correctly
+    ReadCheck(ResponderRec, X"0000_0008", X"0000_0003") ;
+    ReadCheck(ResponderRec, X"0000_000C", X"0000_0004") ;
+    ReadCheck(ResponderRec, X"0000_0010", X"0000_0005") ;
+    ReadCheck(ResponderRec, X"0000_0014", X"0000_0006") ;
+    ReadCheck(ResponderRec, X"0000_0018", X"0000_0007") ;
+    ReadCheck(ResponderRec, X"0000_001C", X"0000_0008") ;
+
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(ResponderRec, 2) ;
     WaitForBarrier(TestDone) ;
@@ -188,15 +218,15 @@ begin
   end process MemoryProc ;
 
 
-end MemoryBurstSparse1 ;
+end MemoryBurst1 ;
 
-Configuration TbAxi4_MemoryBurstSparse1 of TbAxi4Memory is
+Configuration TbAxi4_MemoryBurst1 of TbAxi4Memory is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(MemoryBurstSparse1) ; 
+      use entity work.TestCtrl(MemoryBurst1) ; 
     end for ; 
 --!!    for Responder_1 : Axi4Responder 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 
-end TbAxi4_MemoryBurstSparse1 ; 
+end TbAxi4_MemoryBurst1 ; 

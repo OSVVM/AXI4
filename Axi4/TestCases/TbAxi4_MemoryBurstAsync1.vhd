@@ -108,12 +108,12 @@ begin
     WriteBurstAsync(MasterRec, X"0000_0008", 12) ;
 
     log("Write with ByteAddr = x1A, 13 Bytes -- unaligned") ;
-    WriteBurstFifo.Push(X"0001_UUUU") ;
+    Push(WriteBurstFifo, X"0001_UUUU") ;
     PushBurst(WriteBurstFifo, (3,5,7,9,11,13,15,17,19,21,23,25), DATA_WIDTH) ;
     WriteBurstAsync(MasterRec, X"0000_100A", 13) ;
 
     log("Write with ByteAddr = 31, 12 Bytes -- unaligned") ;
-    WriteBurstFifo.Push(X"A015_28UU") ;
+    Push(WriteBurstFifo, X"A015_28UU") ;
     PushBurstRandom(WriteBurstFifo, 7, 12, DATA_WIDTH) ;
     WriteBurstAsync(MasterRec, X"0000_3001", 13) ;
     
@@ -123,25 +123,25 @@ begin
     CheckBurstIncrement(ReadBurstFifo, 3, 12, DATA_WIDTH) ;
     
     ReadBurst (MasterRec, X"0000_100A", 13) ;
-    ReadBurstFifo.Check(X"0001_----") ; -- First Byte not aligned
+   Check(ReadBurstFifo, X"0001_----") ; -- First Byte not aligned
     CheckBurst(ReadBurstFifo, (3,5,7,9,11,13,15,17,19,21,23,25), DATA_WIDTH) ;
 
     ReadBurst (MasterRec, X"0000_3001", 13) ;
-    ReadBurstFifo.Check(X"A015_28--") ; -- First Byte not aligned
+   Check(ReadBurstFifo, X"A015_28--") ; -- First Byte not aligned
     CheckBurstRandom(ReadBurstFifo, 7, 12, DATA_WIDTH) ;
 
     log("Write with ByteAddr = 8, 12 Bytes -- word aligned") ;
-    WriteBurstFIFO.push(X"UUUU_UU01") ;
-    WriteBurstFIFO.push(X"UUUU_02UU") ;
-    WriteBurstFIFO.push(X"UU03_UUUU") ;
-    WriteBurstFIFO.push(X"04UU_UUUU") ;
+    Push(WriteBurstFifo, X"UUUU_UU01") ;
+    Push(WriteBurstFifo, X"UUUU_02UU") ;
+    Push(WriteBurstFifo, X"UU03_UUUU") ;
+    Push(WriteBurstFifo, X"04UU_UUUU") ;
     
-    WriteBurstFIFO.push(X"UUUU_0605") ;
-    WriteBurstFIFO.push(X"UU08_07UU") ;
-    WriteBurstFIFO.push(X"0A09_UUUU") ;
+    Push(WriteBurstFifo, X"UUUU_0605") ;
+    Push(WriteBurstFifo, X"UU08_07UU") ;
+    Push(WriteBurstFifo, X"0A09_UUUU") ;
 
-    WriteBurstFIFO.push(X"UU0D_0C0B") ;
-    WriteBurstFIFO.push(X"100F_0EUU") ;
+    Push(WriteBurstFifo, X"UU0D_0C0B") ;
+    Push(WriteBurstFifo, X"100F_0EUU") ;
     
     WriteBurstAsync(MasterRec, X"0000_5050", 1) ;
     WriteBurstAsync(MasterRec, X"0000_5051", 1) ;
@@ -169,17 +169,17 @@ begin
     ReadBurst (MasterRec, X"0000_5090", 1) ;
     ReadBurst (MasterRec, X"0000_50A1", 1) ;
     
-    ReadBurstFIFO.Check(X"----_--01") ;
-    ReadBurstFIFO.Check(X"----_02--") ;
-    ReadBurstFIFO.Check(X"--03_----") ;
-    ReadBurstFIFO.Check(X"04--_----") ;
+   Check(ReadBurstFifo, X"----_--01") ;
+   Check(ReadBurstFifo, X"----_02--") ;
+   Check(ReadBurstFifo, X"--03_----") ;
+   Check(ReadBurstFifo, X"04--_----") ;
     
-    ReadBurstFIFO.Check(X"----_0605") ;
-    ReadBurstFIFO.Check(X"--08_07--") ;
-    ReadBurstFIFO.Check(X"0A09_----") ;
+   Check(ReadBurstFifo, X"----_0605") ;
+   Check(ReadBurstFifo, X"--08_07--") ;
+   Check(ReadBurstFifo, X"0A09_----") ;
 
-    ReadBurstFIFO.Check(X"--0D_0C0B") ;
-    ReadBurstFIFO.Check(X"100F_0E--") ;
+   Check(ReadBurstFifo, X"--0D_0C0B") ;
+   Check(ReadBurstFifo, X"100F_0E--") ;
 
     WaitForBarrier(WriteDone) ;
     

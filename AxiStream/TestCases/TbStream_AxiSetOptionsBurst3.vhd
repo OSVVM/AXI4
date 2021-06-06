@@ -109,49 +109,49 @@ begin
     SetAxiStreamOptions(StreamTxRec, DEFAULT_USER, User + 1) ;
     
     for i in 1 to 32 loop
-      TxBurstFifo.push(Data & TxUser) ;
+      Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
     SendBurst(StreamTxRec, 32) ;
     
     for i in 1 to 32 loop
-      TxBurstFifo.push(Data & TxUser) ;
+      Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
     SendBurst(StreamTxRec, 32, (USER+5) & "0") ;
     
     for i in 1 to 32 loop
-      TxBurstFifo.push(Data & TxUser) ;
+      Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
     SendBurst(StreamTxRec, 32, (Dest+6) & (USER+5) & "0") ;
     
     for i in 1 to 32 loop
-      TxBurstFifo.push(Data & TxUser) ;
+      Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
     SendBurst(StreamTxRec, 32, (ID+7) & (Dest+6) & (USER+5) & "0") ;
     
     for i in 1 to 32 loop
-      TxBurstFifo.push(Data & TxUser) ;
+      Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
     SendBurst(StreamTxRec, 32, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
 
     for i in 1 to 32 loop
-      TxBurstFifo.push(Data & TxUser) ;
+      Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
     SendBurst(StreamTxRec, 32, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
 
     for i in 1 to 32 loop
-      TxBurstFifo.push(Data & TxUser) ;
+      Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
@@ -194,7 +194,7 @@ begin
     AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
     AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
     for i in 1 to NumBytes loop
-      (RxData, RxUser) := RxBurstFifo.Pop ; 
+      (RxData, RxUser) := Pop(RxBurstFifo) ; 
       AffirmIfEqual(RxData, ExpData, "Data") ;
       AffirmIfEqual(RxUser, ExpUser, "User") ;
       ExpData := ExpData + 1 ; 
@@ -206,7 +206,7 @@ begin
     AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
     AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
     for i in 1 to NumBytes loop
-      (RxData, RxUser) := RxBurstFifo.Pop ; 
+      (RxData, RxUser) := Pop(RxBurstFifo) ; 
       AffirmIfEqual(RxData, ExpData, "Data") ;
       AffirmIfEqual(RxUser, ExpUser, "User") ;
       ExpData := ExpData + 1 ; 
@@ -218,7 +218,7 @@ begin
     AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
     AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
     for i in 1 to NumBytes loop
-      (RxData, RxUser) := RxBurstFifo.Pop ; 
+      (RxData, RxUser) := Pop(RxBurstFifo) ; 
       AffirmIfEqual(RxData, ExpData, "Data") ;
       AffirmIfEqual(RxUser, ExpUser, "User") ;
       ExpData := ExpData + 1 ; 
@@ -230,7 +230,7 @@ begin
     AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
     AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
     for i in 1 to NumBytes loop
-      (RxData, RxUser) := RxBurstFifo.Pop ; 
+      (RxData, RxUser) := Pop(RxBurstFifo) ; 
       AffirmIfEqual(RxData, ExpData, "Data") ;
       AffirmIfEqual(RxUser, ExpUser, "User") ;
       ExpData := ExpData + 1 ; 
@@ -242,7 +242,7 @@ begin
     AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
     AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
     for i in 1 to NumBytes loop
-      (RxData, RxUser) := RxBurstFifo.Pop ; 
+      (RxData, RxUser) := Pop(RxBurstFifo) ; 
       AffirmIfEqual(RxData, ExpData, "Data") ;
       AffirmIfEqual(RxUser, ExpUser, "User") ;
       ExpData := ExpData + 1 ; 
@@ -254,7 +254,7 @@ begin
     AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
     AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
     for i in 1 to NumBytes loop
-      (RxData, RxUser) := RxBurstFifo.Pop ; 
+      (RxData, RxUser) := Pop(RxBurstFifo) ; 
       AffirmIfEqual(RxData, ExpData, "Data") ;
       AffirmIfEqual(RxUser, ExpUser, "User") ;
       ExpData := ExpData + 1 ; 
@@ -266,7 +266,7 @@ begin
     AffirmIfEqual(RxParam, Param,   "Param ID & Dest & User ") ; 
     AffirmIfEqual(NumBytes,  32,    "NumBytes ") ; 
     for i in 1 to NumBytes loop
-      (RxData, RxUser) := RxBurstFifo.Pop ; 
+      (RxData, RxUser) := Pop(RxBurstFifo) ; 
       AffirmIfEqual(RxData, ExpData, "Data") ;
       AffirmIfEqual(RxUser, ExpUser, "User") ;
       ExpData := ExpData + 1 ; 

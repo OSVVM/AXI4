@@ -63,6 +63,7 @@ library osvvm_common ;
 entity Axi4MemoryVti is
 generic (
   MODEL_ID_NAME   : string := "" ;
+  MEMORY_NAME     : string := "" ;
   tperiod_Clk     : time   := 10 ns ;
 
   DEFAULT_DELAY   : time   := 1 ns ; 
@@ -94,10 +95,6 @@ port (
   AxiBus      : inout Axi4RecType 
 ) ;
 
-  -- Memory Data Structure
-  -- Access via transactions or external name
-  shared variable Memory : MemoryPType ;
-
   -- Model Configuration
   -- Access via transactions or external name
   shared variable Params : ModelParametersPType ;
@@ -126,6 +123,16 @@ architecture MemoryResponder of Axi4MemoryVti is
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4MemoryVti'PATH_NAME))) ;
 
   signal ModelID, BusFailedID, DataCheckID : AlertLogIDType ;
+
+  -- Memory Data Structure, Access via MemoryName
+  constant MemoryName : string := 
+    IfElse(MEMORY_NAME /= "", MEMORY_NAME, to_lower(Axi4MemoryVti'PATH_NAME) & ":memory") ;
+    
+  constant MemoryID : MemoryIDType := NewID(
+      Name       => MemoryName, 
+      AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
+      DataWidth  => 8                -- Memory is byte oriented
+    ) ; 
 
   shared variable WriteAddressFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
   shared variable WriteDataFifo        : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
@@ -158,7 +165,6 @@ architecture MemoryResponder of Axi4MemoryVti is
 
   signal ModelRUSER  : std_logic_vector(AxiBus.ReadData.User'length - 1 downto 0) := (others => '0') ;
   signal ModelRID    : std_logic_vector(AxiBus.ReadData.ID'length - 1 downto 0) := (others => '0') ;
-
 
 begin
 
@@ -209,17 +215,17 @@ begin
   end process InitalizeOptions ;
 
 
-  ------------------------------------------------------------
-  --  Initialize Memory
-  ------------------------------------------------------------
-  InitalizeMemory : process
-  begin
-    Memory.MemInit (
-      AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
-      DataWidth  => 8                -- Memory is byte oriented
-    ) ;
-    wait ;
-  end process InitalizeMemory ;
+--  ------------------------------------------------------------
+--  --  Initialize Memory
+--  ------------------------------------------------------------
+--  InitalizeMemory : process
+--  begin
+--    Memory.MemInit (
+--      AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
+--      DataWidth  => 8                -- Memory is byte oriented
+--    ) ;
+--    wait ;
+--  end process InitalizeMemory ;
 
 
   ------------------------------------------------------------
@@ -293,7 +299,7 @@ begin
         -- Memory is byte oriented.  Access as Bytes
         for i in 0 to NumBytes-1 loop
           ByteData := Data((8*i + 7)  downto 8*i) ;
-          Memory.MemWrite(Address + i, ByteData) ;
+          MemWrite(MemoryID, Address + i, ByteData) ;
         end loop ;
 
       when READ_OP | READ_CHECK =>
@@ -310,7 +316,7 @@ begin
 
         -- Memory is byte oriented.  Access as Bytes
         for i in 0 to NumBytes-1 loop
-          Memory.MemRead(Address + i, ByteData) ;
+          MemRead(MemoryID, Address + i, ByteData) ;
           Data((8*i + 7)  downto 8*i) := ByteData ;
         end loop ;
 
@@ -578,7 +584,7 @@ begin
       for j in 0 to AXI_DATA_BYTE_WIDTH-1 loop
         if LWD.Strb(j) = '1' then
           ByteData := LWD.Data((8*j + 7)  downto 8*j) ;
-          Memory.MemWrite(MemoryAddress + j, ByteData) ;
+          MemWrite(MemoryID, MemoryAddress + j, ByteData) ;
         end if ;
       end loop ;
 
@@ -789,7 +795,7 @@ begin
     BurstLoop : for i in 1 to BurstLen loop
       -- Memory is byte oriented.  Access as Bytes
       for i in 0 to AXI_DATA_BYTE_WIDTH-1 loop
-        Memory.MemRead(MemoryAddress + i, ByteData) ;
+        MemRead(MemoryID, MemoryAddress + i, ByteData) ;
         LRD.Data((8*i + 7)  downto 8*i) := ByteData ;
       end loop ;
 

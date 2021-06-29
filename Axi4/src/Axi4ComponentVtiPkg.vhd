@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    06/2021   2021.06    Added new generics to Axi4Memory[Vti].vhd
 --    02/2021   2021.02    Merged separate component packages into 1
 --    01/2020   2020.01    Updated license notice
 --    03/2019   2019       Initial revision

@@ -19,7 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2021   2021.05    Working toward GHDL support   
+--    06/2021   2021.06    GHDL support + new memory data structure  
 --    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.   
 --    06/2020   2020.06    Derived from Axi4Responder.vhd
 --

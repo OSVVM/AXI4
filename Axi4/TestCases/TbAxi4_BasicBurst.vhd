@@ -96,7 +96,7 @@ begin
     WaitForClock(MasterRec, 2) ; 
     log("Write with ByteAddr = 0, 4 Bytes") ;
     for i in 3 to 10 loop
-      WriteBurstFifo.Push(to_slv(i, 8)) ;
+      Push(WriteBurstFifo, to_slv(i, 8)) ;
     end loop ;
     WriteBurst(MasterRec, X"0000_1002", 8) ;
     

@@ -19,7 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2021   2021.05    Working toward GHDL support   
+--    06/2021   2021.06    GHDL support + New Burst FIFOs 
 --    02/2021   2021.02    Added MultiDriver Detect.  Added Valid Delays.  Updated Generics.   
 --    12/2020   2020.12    Added Burst Word Mode.  Refactored code.  
 --    07/2020   2020.07    Created Axi4 FULL from Axi4Lite
@@ -122,10 +122,10 @@ port (
   TransRec    : inout AddressBusRecType 
 ) ;
 
-  -- Burst Interface
-  -- Access via external names
-  shared variable WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+--  -- Burst Interface
+--  -- Access via external names
+--  shared variable WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+--  shared variable ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
 
   -- Model Configuration 
   -- Access via transactions or external name
@@ -192,8 +192,6 @@ begin
     DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
     BusFailedID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
 
-    WriteBurstFifo.SetAlertLogID( MODEL_INSTANCE_NAME & ": Write Burst FIFO", ID) ;
-    ReadBurstFifo.SetAlertLogID( MODEL_INSTANCE_NAME & ": Read Burst FIFO", ID) ;
     WriteResponseScoreboard.SetAlertLogID( MODEL_INSTANCE_NAME & ": WriteResponse Scoreboard", ID);
     ReadResponseScoreboard.SetAlertLogID(  MODEL_INSTANCE_NAME & ": ReadResponse Scoreboard",  ID);
 
@@ -263,6 +261,13 @@ begin
     LAR.Size    := to_slv(AXI_BYTE_ADDR_WIDTH, LAR.Size'length) ;
     LAR.Burst   := "01" ;  -- INCR
     LRD.Resp    := to_Axi4RespType(OKAY) ;
+    
+    wait for 0 ns ; 
+    TransRec.WriteBurstFifo <= NewID(MODEL_INSTANCE_NAME & ": WriteBurstFifo", ModelID) ;
+    TransRec.ReadBurstFifo  <= NewID(MODEL_INSTANCE_NAME & ": ReadBurstFifo",  ModelID) ;
+--    WriteBurstFifo.SetAlertLogID( MODEL_INSTANCE_NAME & ": Write Burst FIFO", ID) ;
+--    ReadBurstFifo.SetAlertLogID( MODEL_INSTANCE_NAME & ": Read Burst FIFO", ID) ;
+    
 --!! AWCache, ARCache Defaults
     loop
       WaitForTransaction(
@@ -446,11 +451,11 @@ begin
               TransfersInBurst := TransRec.DataWidth ;
             end if ; 
             
-            PopWriteBurstData(WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, WriteByteAddr) ;
+            PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, WriteByteAddr) ;
 
             for BurstLoop in TransfersInBurst downto 2 loop    
               WriteDataFifo.Push('1' & '0' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
-              PopWriteBurstData(WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, 0) ;
+              PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, 0) ;
             end loop ; 
             
             -- Special handle last push
@@ -617,7 +622,7 @@ begin
               end if ;
               LRD.Data := ReadDataFifo.Pop ;
               
-              PushReadBurstData(ReadBurstFifo, BurstFifoMode, LRD.Data, BytesToReceive, ReadByteAddr) ;
+              PushReadBurstData(TransRec.ReadBurstFifo, BurstFifoMode, LRD.Data, BytesToReceive, ReadByteAddr) ;
               ReadByteAddr := 0 ;
             end loop ;
           end if ;

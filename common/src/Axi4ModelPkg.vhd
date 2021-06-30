@@ -46,9 +46,9 @@ library ieee ;
   use ieee.math_real.all ;
   
 library osvvm ; 
-    use osvvm.AlertLogPkg.all ; 
-    use osvvm.ResolutionPkg.all ; 
-    
+  context osvvm.OsvvmContext ; 
+  use osvvm.ScoreboardPkg_slv.all ;
+  
 library osvvm_common ; 
   context osvvm_common.OsvvmCommonContext ;
     
@@ -198,7 +198,7 @@ package Axi4ModelPkg is
   ------------------------------------------------------------
   procedure PopWriteBurstData (
   ------------------------------------------------------------
-    variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+    constant WriteBurstFifo  : In    osvvm.ScoreboardPkg_slv.ScoreboardIdType ;
     constant BurstFifoMode   : In    AddressBusFifoBurstModeType ;
     variable WriteData       : InOut std_logic_vector ;
     variable WriteStrb       : InOut std_logic_vector ;
@@ -206,16 +206,29 @@ package Axi4ModelPkg is
     constant ByteAddress     : In    integer := 0 
   ) ;
 
---!! Local Only??
---!!  ------------------------------------------------------------
---!!  procedure PushReadBurstByteData (
---!!  -- Push Burst Data into Byte Burst FIFO.   
---!!  ------------------------------------------------------------
---!!    variable ReadBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
---!!    variable ReadData       : InOut std_logic_vector ;
---!!    variable BytesToReceive : InOut integer ; 
---!!    constant ByteAddress    : In    integer := 0 
---!!  ) ;
+  ------------------------------------------------------------
+  procedure PushReadBurstData (
+  -- Push Burst Data into Byte Burst FIFO.   
+  ------------------------------------------------------------
+    constant ReadBurstFifo  : In    osvvm.ScoreboardPkg_slv.ScoreboardIdType ;
+    constant BurstFifoMode  : In    AddressBusFifoBurstModeType ;
+    variable ReadData       : InOut std_logic_vector ;
+    variable BytesToReceive : InOut integer ; 
+    constant ByteAddress    : In    integer := 0 
+  ) ;
+
+-- ====  Older Version Directed FIFO intereaction
+
+  ------------------------------------------------------------
+  procedure PopWriteBurstData (
+  ------------------------------------------------------------
+    variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+    constant BurstFifoMode   : In    AddressBusFifoBurstModeType ;
+    variable WriteData       : InOut std_logic_vector ;
+    variable WriteStrb       : InOut std_logic_vector ;
+    variable BytesToSend     : InOut integer ; 
+    constant ByteAddress     : In    integer := 0 
+  ) ;
 
   ------------------------------------------------------------
   procedure PushReadBurstData (
@@ -228,6 +241,17 @@ package Axi4ModelPkg is
     constant ByteAddress    : In    integer := 0 
   ) ;
   
+--!! Local Only??
+--!!  ------------------------------------------------------------
+--!!  procedure PushReadBurstByteData (
+--!!  -- Push Burst Data into Byte Burst FIFO.   
+--!!  ------------------------------------------------------------
+--!!    variable ReadBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+--!!    variable ReadData       : InOut std_logic_vector ;
+--!!    variable BytesToReceive : InOut integer ; 
+--!!    constant ByteAddress    : In    integer := 0 
+--!!  ) ;
+
   ------------------------------------------------------------
   function AlignDataBusToBytes (
   -- Shift Data Right and MASK unused bytes. 
@@ -574,6 +598,141 @@ package body Axi4ModelPkg is
 --!!       DataBitOffset := DataBitOffset + 8 ; 
 --!!    end loop ; 
 --!!  end procedure GetWriteBurstData ; 
+
+  ------------------------------------------------------------
+  -- Local
+  procedure PopWriteBurstByteData (
+  ------------------------------------------------------------
+    constant WriteBurstFifo  : In    osvvm.ScoreboardPkg_slv.ScoreboardIdType ;
+    variable WriteData       : InOut std_logic_vector ;
+    variable WriteStrb       : InOut std_logic_vector ;
+    variable BytesToSend     : InOut integer ; 
+    constant ByteAddress     : In    integer := 0 
+  ) is
+    constant DataLeft : integer := WriteData'length-1; 
+    alias aWriteData : std_logic_vector(DataLeft downto 0) is WriteData ; 
+    alias aWriteStrb : std_logic_vector(WriteStrb'length-1 downto 0) is WriteStrb ;
+    variable DataIndex    : integer := ByteAddress * 8 ; 
+    variable StrbIndex    : integer := ByteAddress ; 
+  begin
+    aWriteData := (others => 'U') ;
+    aWriteStrb := (others => '0') ;
+    -- First Byte is put in right side of word
+    PopByte : while DataIndex <= DataLeft loop  
+      aWriteData(DataIndex+7 downto DataIndex) := Pop(WriteBurstFifo) ; 
+      if aWriteData(DataIndex) /= 'U' then 
+        aWriteStrb(StrbIndex) := '1' ; 
+      end if ; 
+      BytesToSend := BytesToSend - 1 ; 
+      exit when BytesToSend = 0 ; 
+      DataIndex := DataIndex + 8 ; 
+      StrbIndex := StrbIndex + 1 ; 
+    end loop PopByte ;
+  end procedure PopWriteBurstByteData ; 
+
+  ------------------------------------------------------------
+  -- Local
+  procedure PopWriteBurstWordData (
+  ------------------------------------------------------------
+    constant WriteBurstFifo  : In    osvvm.ScoreboardPkg_slv.ScoreboardIdType ;
+    variable WriteData       : InOut std_logic_vector ;
+    variable WriteStrb       : InOut std_logic_vector ;
+    constant ByteAddress     : In    integer := 0 
+  ) is
+    alias aWriteData : std_logic_vector(WriteData'length-1 downto 0) is WriteData ; 
+    alias aWriteStrb : std_logic_vector(WriteStrb'length-1 downto 0) is WriteStrb ;
+    variable DataIndex    : integer := 0 ; 
+  begin
+    aWriteData := Pop(WriteBurstFifo) ; 
+    aWriteStrb := (others => '0') ; 
+    
+    for i in 0 to ByteAddress-1 loop 
+      aWriteData(DataIndex + 7 downto DataIndex) := (others => 'U') ; 
+      DataIndex := DataIndex + 8 ; 
+    end loop ; 
+    
+    for i in ByteAddress to WriteStrb'length-1 loop 
+      if aWriteData(DataIndex) /= 'U' then 
+        aWriteStrb(i) := '1' ; 
+      end if ; 
+      DataIndex := DataIndex + 8 ;
+    end loop ;
+  end procedure PopWriteBurstWordData ; 
+  
+  ------------------------------------------------------------
+  procedure PopWriteBurstData (
+  ------------------------------------------------------------
+    constant WriteBurstFifo  : In    osvvm.ScoreboardPkg_slv.ScoreboardIdType ;
+    constant BurstFifoMode   : In    AddressBusFifoBurstModeType ;
+    variable WriteData       : InOut std_logic_vector ;
+    variable WriteStrb       : InOut std_logic_vector ;
+    variable BytesToSend     : InOut integer ; 
+    constant ByteAddress     : In    integer := 0 
+  ) is
+  begin
+    case BurstFifoMode is
+      when ADDRESS_BUS_BURST_BYTE_MODE => 
+        PopWriteBurstByteData(WriteBurstFifo, WriteData, WriteStrb, BytesToSend, ByteAddress) ;
+        
+      when ADDRESS_BUS_BURST_WORD_MODE => 
+        PopWriteBurstWordData(WriteBurstFifo, WriteData, WriteStrb, ByteAddress) ;
+
+      when others => 
+        -- Already checked, this should never happen
+        Alert("PopWriteBurstData: BurstFifoMode Invalid Mode: " & to_string(BurstFifoMode), FAILURE) ;
+        
+    end case ; 
+  end procedure PopWriteBurstData ; 
+
+  ------------------------------------------------------------
+  procedure PushReadBurstByteData (
+  -- Push Burst Data into Byte Burst FIFO.   
+  ------------------------------------------------------------
+    constant ReadBurstFifo  : In    osvvm.ScoreboardPkg_slv.ScoreboardIdType ;
+    variable ReadData       : InOut std_logic_vector ;
+    variable BytesToReceive : InOut integer ; 
+    constant ByteAddress    : In    integer := 0 
+  ) is
+    constant DataLeft : integer := ReadData'length-1; 
+    alias aReadData : std_logic_vector(DataLeft downto 0) is ReadData ; 
+    variable DataIndex    : integer := ByteAddress * 8 ; 
+    variable StrbIndex    : integer := ByteAddress ; 
+  begin
+    -- First Byte is put in right side of word
+    PushByte : while DataIndex <= DataLeft loop  
+      Push(ReadBurstFifo, aReadData(DataIndex+7 downto DataIndex)) ;
+      BytesToReceive := BytesToReceive - 1 ; 
+      exit when BytesToReceive = 0 ; 
+      DataIndex := DataIndex + 8 ; 
+    end loop PushByte ;
+  end procedure PushReadBurstByteData ; 
+
+  ------------------------------------------------------------
+  procedure PushReadBurstData (
+  -- Push Burst Data into Byte Burst FIFO.   
+  ------------------------------------------------------------
+    constant ReadBurstFifo  : In    osvvm.ScoreboardPkg_slv.ScoreboardIdType ;
+    constant BurstFifoMode  : In    AddressBusFifoBurstModeType ;
+    variable ReadData       : InOut std_logic_vector ;
+    variable BytesToReceive : InOut integer ; 
+    constant ByteAddress    : In    integer := 0 
+  ) is
+  begin
+    case BurstFifoMode is
+      when ADDRESS_BUS_BURST_BYTE_MODE => 
+        PushReadBurstByteData(ReadBurstFifo, ReadData, BytesToReceive, ByteAddress) ;
+        
+      when ADDRESS_BUS_BURST_WORD_MODE => 
+        Push(ReadBurstFifo, ReadData) ; 
+
+      when others => 
+        -- Already checked, this should never happen
+        Alert("PushReadBurstData: BurstFifoMode Invalid Mode: " & to_string(BurstFifoMode), FAILURE) ;
+    end case ; 
+  end procedure PushReadBurstData ; 
+
+
+-- ====  Older Version Directed FIFO intereaction
   
   ------------------------------------------------------------
   -- Local
@@ -706,6 +865,8 @@ package body Axi4ModelPkg is
         Alert("PushReadBurstData: BurstFifoMode Invalid Mode: " & to_string(BurstFifoMode), FAILURE) ;
     end case ; 
   end procedure PushReadBurstData ; 
+  
+  
 
 --!!  Deprecated
 --!!  ------------------------------------------------------------

@@ -115,79 +115,7 @@ architecture TestHarness of TbAxi4 is
       User(7 downto 0)
     )
   ) ;
---   WriteAddress (  ),
---   WriteData    (  ),  -- WID only AXI3
---   WriteResponse( BID(7 downto 0), BUser(7 downto 0) ),
---   ReadAddress  ( ARAddr(open), ARID(7 downto 0), ARUser(7 downto 0) ),
---   ReadData     ( RData(open), RID(7 downto 0), RUser(7 downto 0) )
 
-
-  -- Aliases to make access to record elements convenient
-  -- This is only needed for model use them
-  -- Write Address
-  alias  AWAddr    : std_logic_vector is AxiBus.WriteAddress.Addr ;
-  alias  AWProt    : Axi4ProtType     is AxiBus.WriteAddress.Prot ;
-  alias  AWValid   : std_logic        is AxiBus.WriteAddress.Valid ;
-  alias  AWReady   : std_logic        is AxiBus.WriteAddress.Ready ;
-  -- Axi4 Full
-  alias  AWID      : std_logic_vector is AxiBus.WriteAddress.ID ;
-  alias  AWLen     : std_logic_vector is AxiBus.WriteAddress.Len ;
-  alias  AWSize    : std_logic_vector is AxiBus.WriteAddress.Size ;
-  alias  AWBurst   : std_logic_vector is AxiBus.WriteAddress.Burst ;
-  alias  AWLock    : std_logic        is AxiBus.WriteAddress.Lock ;
-  alias  AWCache   : std_logic_vector is AxiBus.WriteAddress.Cache ;
-  alias  AWQOS     : std_logic_vector is AxiBus.WriteAddress.QOS ;
-  alias  AWRegion  : std_logic_vector is AxiBus.WriteAddress.Region ;
-  alias  AWUser    : std_logic_vector is AxiBus.WriteAddress.User ;
-
-  -- Write Data
-  alias  WData     : std_logic_vector is AxiBus.WriteData.Data ;
-  alias  WStrb     : std_logic_vector is AxiBus.WriteData.Strb ;
-  alias  WValid    : std_logic        is AxiBus.WriteData.Valid ;
-  alias  WReady    : std_logic        is AxiBus.WriteData.Ready ;
-  -- AXI4 Full
-  alias  WLast     : std_logic        is AxiBus.WriteData.Last ;
-  alias  WUser     : std_logic_vector is AxiBus.WriteData.User ;
-  -- AXI3
-  alias  WID       : std_logic_vector is AxiBus.WriteData.ID ;
-
-  -- Write Response
-  alias  BResp     : Axi4RespType     is AxiBus.WriteResponse.Resp ;
-  alias  BValid    : std_logic        is AxiBus.WriteResponse.Valid ;
-  alias  BReady    : std_logic        is AxiBus.WriteResponse.Ready ;
-  -- AXI4 Full
-  alias  BID       : std_logic_vector is AxiBus.WriteResponse.ID ;
-  alias  BUser     : std_logic_vector is AxiBus.WriteResponse.User ;
-
-  -- Read Address
-  alias  ARAddr    : std_logic_vector is AxiBus.ReadAddress.Addr ;
-  alias  ARProt    : Axi4ProtType     is AxiBus.ReadAddress.Prot ;
-  alias  ARValid   : std_logic        is AxiBus.ReadAddress.Valid ;
-  alias  ARReady   : std_logic        is AxiBus.ReadAddress.Ready ;
-  -- Axi4 Full
-  alias  ARID      : std_logic_vector is AxiBus.ReadAddress.ID ;
-  -- BurstLength = AxLen+1.  AXI4: 7:0,  AXI3: 3:0
-  alias  ARLen     : std_logic_vector is AxiBus.ReadAddress.Len ;
-  -- #Bytes in transfer = 2**AxSize
-  alias  ARSize    : std_logic_vector is AxiBus.ReadAddress.Size ;
-  -- AxBurst = (Fixed, Incr, Wrap, NotDefined)
-  alias  ARBurst   : std_logic_vector is AxiBus.ReadAddress.Burst ;
-  alias  ARLock    : std_logic        is AxiBus.ReadAddress.Lock ;
-  -- AxCache One-hot (Write-Allocate, Read-Allocate, Modifiable, Bufferable)
-  alias  ARCache   : std_logic_vector is AxiBus.ReadAddress.Cache  ;
-  alias  ARQOS     : std_logic_vector is AxiBus.ReadAddress.QOS    ;
-  alias  ARRegion  : std_logic_vector is AxiBus.ReadAddress.Region ;
-  alias  ARUser    : std_logic_vector is AxiBus.ReadAddress.User   ;
-
-  -- Read Data
-  alias  RData     : std_logic_vector is AxiBus.ReadData.Data ;
-  alias  RResp     : Axi4RespType     is AxiBus.ReadData.Resp ;
-  alias  RValid    : std_logic        is AxiBus.ReadData.Valid ;
-  alias  RReady    : std_logic        is AxiBus.ReadData.Ready ;
-  -- AXI4 Full
-  alias  RID       : std_logic_vector is AxiBus.ReadData.ID   ;
-  alias  RLast     : std_logic        is AxiBus.ReadData.Last ;
-  alias  RUser     : std_logic_vector is AxiBus.ReadData.User ;
 
   component TestCtrl is
     port (
@@ -226,36 +154,8 @@ begin
     nReset      => nReset,
 
     -- AXI Master Functional Interface
---    AxiBus  => AxiBus
-    -- Mapping aliases on Left Hand Side (most similar to basic design)
-    AxiBus.WriteAddress.Addr       => AWAddr  ,
-    AxiBus.WriteAddress.Prot       => AWProt  ,
-    AxiBus.WriteAddress.Valid      => AWValid ,
-    AxiBus.WriteAddress.Ready      => AWReady ,
-    AxiBus.WriteAddress.ID         => AWID    ,
-    AxiBus.WriteAddress.Len        => AWLen   ,
-    AxiBus.WriteAddress.Size       => AWSize  ,
-    AxiBus.WriteAddress.Burst      => AWBurst ,
-    AxiBus.WriteAddress.Lock       => AWLock  ,
-    AxiBus.WriteAddress.Cache      => AWCache ,
-    AxiBus.WriteAddress.QOS        => AWQOS   ,
-    AxiBus.WriteAddress.Region     => AWRegion,
-    AxiBus.WriteAddress.User       => AWUser  ,
+    AxiBus  => AxiBus,
 
-    -- Mapping record elements on Left Hand Side (easiest way to connect Master to Responder DUT)
-    AxiBus.WriteData.Data          => AxiBus.WriteData.Data   ,
-    AxiBus.WriteData.Strb          => AxiBus.WriteData.Strb   ,
-    AxiBus.WriteData.Valid         => AxiBus.WriteData.Valid  ,
-    AxiBus.WriteData.Ready         => AxiBus.WriteData.Ready  ,
-    AxiBus.WriteData.Last          => AxiBus.WriteData.Last  ,
-    AxiBus.WriteData.User          => AxiBus.WriteData.User  ,
-    AxiBus.WriteData.ID            => AxiBus.WriteData.ID  ,
-
-    -- Mapping bus subrecords on left hand side (because it is easy)
-    AxiBus.WriteResponse           => AxiBus.WriteResponse ,
-    AxiBus.ReadAddress             => AxiBus.ReadAddress ,
-    AxiBus.ReadData                => AxiBus.ReadData ,
-    
     -- Testbench Transaction Interface
     TransRec    => ResponderRec
   ) ;

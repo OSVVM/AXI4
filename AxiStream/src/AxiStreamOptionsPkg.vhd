@@ -20,13 +20,14 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2018   2018.05    Initial revision
+--    03/2021   2021.03    Updated for detecting multiple drivers
 --    01/2020   2020.01    Updated license notice
+--    05/2018   2018.05    Initial revision
 --
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.
+--  Copyright (c) 2018 - 2021 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.

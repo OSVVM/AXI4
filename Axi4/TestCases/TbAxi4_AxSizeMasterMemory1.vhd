@@ -128,24 +128,24 @@ begin
     log(TbMasterID, "Write with parameters setting #1, Defaults") ;
     increment(TransactionCount) ;
     Addr := X"0000_0000" ; 
-    WriteBurstFifo.Push(X"UUUU_2211") ;  
-    WriteBurstFifo.Push(X"4433_UUUU") ;  
-    WriteBurstFifo.Push(X"UUUU_6655") ;  
-    WriteBurstFifo.Push(X"8877_UUUU") ;  
-    WriteBurstFifo.Push(X"UUUU_AA99") ;  
-    WriteBurstFifo.Push(X"CCBB_UUUU") ;  
-    WriteBurstFifo.Push(X"UUUU_EEDD") ;  
-    WriteBurstFifo.Push(X"00FF_UUUU") ;  
+    Push(WriteBurstFifo, X"UUUU_2211") ;  
+    Push(WriteBurstFifo, X"4433_UUUU") ;  
+    Push(WriteBurstFifo, X"UUUU_6655") ;  
+    Push(WriteBurstFifo, X"8877_UUUU") ;  
+    Push(WriteBurstFifo, X"UUUU_AA99") ;  
+    Push(WriteBurstFifo, X"CCBB_UUUU") ;  
+    Push(WriteBurstFifo, X"UUUU_EEDD") ;  
+    Push(WriteBurstFifo, X"00FF_UUUU") ;  
     WriteBurst(MasterRec, Addr, 8) ;
     
-    WriteBurstFifo.Push(X"UUUU_1111") ;  
-    WriteBurstFifo.Push(X"2222_UUUU") ;  
-    WriteBurstFifo.Push(X"UUUU_3333") ;  
-    WriteBurstFifo.Push(X"4444_UUUU") ;  
-    WriteBurstFifo.Push(X"UUUU_5555") ;  
-    WriteBurstFifo.Push(X"6666_UUUU") ;  
-    WriteBurstFifo.Push(X"UUUU_7777") ;  
-    WriteBurstFifo.Push(X"8888_UUUU") ;  
+    Push(WriteBurstFifo, X"UUUU_1111") ;  
+    Push(WriteBurstFifo, X"2222_UUUU") ;  
+    Push(WriteBurstFifo, X"UUUU_3333") ;  
+    Push(WriteBurstFifo, X"4444_UUUU") ;  
+    Push(WriteBurstFifo, X"UUUU_5555") ;  
+    Push(WriteBurstFifo, X"6666_UUUU") ;  
+    Push(WriteBurstFifo, X"UUUU_7777") ;  
+    Push(WriteBurstFifo, X"8888_UUUU") ;  
     WriteBurst(MasterRec, Addr+128, 8) ;
     
     WaitForClock(MasterRec, 4) ; 
@@ -163,16 +163,16 @@ begin
     log(TbMasterID, "Write with parameters setting #2") ;
     increment(TransactionCount) ;
     Addr := Addr + 256 ; 
-    WriteBurstFifo.Push(X"CCDD_EEFF") ;  
-    WriteBurstFifo.Push(X"8899_AABB") ;  
-    WriteBurstFifo.Push(X"4455_6677") ;  
-    WriteBurstFifo.Push(X"1122_3344") ;  
+    Push(WriteBurstFifo, X"CCDD_EEFF") ;  
+    Push(WriteBurstFifo, X"8899_AABB") ;  
+    Push(WriteBurstFifo, X"4455_6677") ;  
+    Push(WriteBurstFifo, X"1122_3344") ;  
     WriteBurst(MasterRec, Addr, 4) ;
     
-    WriteBurstFifo.Push(X"9999_8888") ;  
-    WriteBurstFifo.Push(X"7777_6666") ;  
-    WriteBurstFifo.Push(X"5555_4444") ;  
-    WriteBurstFifo.Push(X"3333_2222") ;  
+    Push(WriteBurstFifo, X"9999_8888") ;  
+    Push(WriteBurstFifo, X"7777_6666") ;  
+    Push(WriteBurstFifo, X"5555_4444") ;  
+    Push(WriteBurstFifo, X"3333_2222") ;  
     WriteBurst(MasterRec, Addr+128, 4) ;
     
     WaitForClock(MasterRec, 4) ; 
@@ -192,24 +192,24 @@ begin
     WaitForBarrier(RunTest) ;
     log(TbMasterID, "Write with parameters setting #3") ;
     Addr := Addr + 256 ; 
-    WriteBurstFifo.Push(X"UUUU_UU11") ;  
-    WriteBurstFifo.Push(X"UUUU_22UU") ;  
-    WriteBurstFifo.Push(X"UU33_UUUU") ;  
-    WriteBurstFifo.Push(X"44UU_UUUU") ;  
-    WriteBurstFifo.Push(X"UUUU_UU55") ;  
-    WriteBurstFifo.Push(X"UUUU_66UU") ;  
-    WriteBurstFifo.Push(X"UU77_UUUU") ;  
-    WriteBurstFifo.Push(X"88UU_UUUU") ;  
+    Push(WriteBurstFifo, X"UUUU_UU11") ;  
+    Push(WriteBurstFifo, X"UUUU_22UU") ;  
+    Push(WriteBurstFifo, X"UU33_UUUU") ;  
+    Push(WriteBurstFifo, X"44UU_UUUU") ;  
+    Push(WriteBurstFifo, X"UUUU_UU55") ;  
+    Push(WriteBurstFifo, X"UUUU_66UU") ;  
+    Push(WriteBurstFifo, X"UU77_UUUU") ;  
+    Push(WriteBurstFifo, X"88UU_UUUU") ;  
     WriteBurst(MasterRec, Addr, 8) ;
     
-    WriteBurstFifo.Push(X"UUUU_UU11") ;  
-    WriteBurstFifo.Push(X"UUUU_33UU") ;  
-    WriteBurstFifo.Push(X"UU22_UUUU") ;  
-    WriteBurstFifo.Push(X"44UU_UUUU") ;  
-    WriteBurstFifo.Push(X"UUUU_UU55") ;  
-    WriteBurstFifo.Push(X"UUUU_77UU") ;  
-    WriteBurstFifo.Push(X"UU66_UUUU") ;  
-    WriteBurstFifo.Push(X"88UU_UUUU") ;  
+    Push(WriteBurstFifo, X"UUUU_UU11") ;  
+    Push(WriteBurstFifo, X"UUUU_33UU") ;  
+    Push(WriteBurstFifo, X"UU22_UUUU") ;  
+    Push(WriteBurstFifo, X"44UU_UUUU") ;  
+    Push(WriteBurstFifo, X"UUUU_UU55") ;  
+    Push(WriteBurstFifo, X"UUUU_77UU") ;  
+    Push(WriteBurstFifo, X"UU66_UUUU") ;  
+    Push(WriteBurstFifo, X"88UU_UUUU") ;  
     WriteBurst(MasterRec, Addr+128, 8) ;
 
     WaitForClock(MasterRec, 4) ; 
@@ -227,12 +227,12 @@ begin
     log(TbMasterID, "Write with parameters setting #4") ;
     increment(TransactionCount) ;
     Addr := Addr + 256 ; 
-    WriteBurstFifo.Push(X"CCDD_EEFF") ;  
-    WriteBurstFifo.Push(X"8899_AABB") ;  
+    Push(WriteBurstFifo, X"CCDD_EEFF") ;  
+    Push(WriteBurstFifo, X"8899_AABB") ;  
     WriteBurst(MasterRec, Addr, 2) ;
     
-    WriteBurstFifo.Push(X"9999_8888") ;  
-    WriteBurstFifo.Push(X"7777_6666") ;  
+    Push(WriteBurstFifo, X"9999_8888") ;  
+    Push(WriteBurstFifo, X"7777_6666") ;  
     WriteBurst(MasterRec, Addr+128, 2) ;
     
     WaitForClock(MasterRec, 4) ; 
@@ -255,16 +255,16 @@ begin
     increment(TransactionCount) ;
     Addr := X"0000_0000" ; 
     ReadBurst(MasterRec, Addr, 4) ;
-    ReadBurstFifo.Check(X"4433_2211") ;  
-    ReadBurstFifo.Check(X"8877_6655") ;  
-    ReadBurstFifo.Check(X"CCBB_AA99") ;  
-    ReadBurstFifo.Check(X"00FF_EEDD") ;  
+   Check(ReadBurstFifo, X"4433_2211") ;  
+   Check(ReadBurstFifo, X"8877_6655") ;  
+   Check(ReadBurstFifo, X"CCBB_AA99") ;  
+   Check(ReadBurstFifo, X"00FF_EEDD") ;  
     
     ReadBurst(MasterRec, Addr+128, 4) ;
-    ReadBurstFifo.Check(X"2222_1111") ;  
-    ReadBurstFifo.Check(X"4444_3333") ;  
-    ReadBurstFifo.Check(X"6666_5555") ;  
-    ReadBurstFifo.Check(X"8888_7777") ;  
+   Check(ReadBurstFifo, X"2222_1111") ;  
+   Check(ReadBurstFifo, X"4444_3333") ;  
+   Check(ReadBurstFifo, X"6666_5555") ;  
+   Check(ReadBurstFifo, X"8888_7777") ;  
     
     WaitForClock(MasterRec, 4) ; 
     BlankLine(2) ;
@@ -282,24 +282,24 @@ begin
     increment(TransactionCount) ;
     Addr := Addr + 256 ; 
     ReadBurst(MasterRec, Addr, 8) ;
-    ReadBurstFifo.Check(X"----_EEFF") ;  
-    ReadBurstFifo.Check(X"CCDD_----") ;  
-    ReadBurstFifo.Check(X"----_AABB") ;  
-    ReadBurstFifo.Check(X"8899_----") ;  
-    ReadBurstFifo.Check(X"----_6677") ;  
-    ReadBurstFifo.Check(X"4455_----") ;  
-    ReadBurstFifo.Check(X"----_3344") ;  
-    ReadBurstFifo.Check(X"1122_----") ;  
+   Check(ReadBurstFifo, X"----_EEFF") ;  
+   Check(ReadBurstFifo, X"CCDD_----") ;  
+   Check(ReadBurstFifo, X"----_AABB") ;  
+   Check(ReadBurstFifo, X"8899_----") ;  
+   Check(ReadBurstFifo, X"----_6677") ;  
+   Check(ReadBurstFifo, X"4455_----") ;  
+   Check(ReadBurstFifo, X"----_3344") ;  
+   Check(ReadBurstFifo, X"1122_----") ;  
     
     ReadBurst(MasterRec, Addr+128, 8) ;
-    ReadBurstFifo.Check(X"----_8888") ;  
-    ReadBurstFifo.Check(X"9999_8888") ;  
-    ReadBurstFifo.Check(X"----_6666") ;  
-    ReadBurstFifo.Check(X"7777_----") ;  
-    ReadBurstFifo.Check(X"----_4444") ;  
-    ReadBurstFifo.Check(X"5555_----") ;  
-    ReadBurstFifo.Check(X"----_2222") ;  
-    ReadBurstFifo.Check(X"3333_----") ;  
+   Check(ReadBurstFifo, X"----_8888") ;  
+   Check(ReadBurstFifo, X"9999_8888") ;  
+   Check(ReadBurstFifo, X"----_6666") ;  
+   Check(ReadBurstFifo, X"7777_----") ;  
+   Check(ReadBurstFifo, X"----_4444") ;  
+   Check(ReadBurstFifo, X"5555_----") ;  
+   Check(ReadBurstFifo, X"----_2222") ;  
+   Check(ReadBurstFifo, X"3333_----") ;  
     
     WaitForClock(MasterRec, 4) ; 
     BlankLine(2) ;
@@ -319,12 +319,12 @@ begin
     log(TbMasterID, "Read with parameters setting #3") ;
     Addr := Addr + 256 ; 
     ReadBurst(MasterRec, Addr, 2) ;
-    ReadBurstFifo.Check(X"4433_2211") ;  
-    ReadBurstFifo.Check(X"8877_6655") ;  
+   Check(ReadBurstFifo, X"4433_2211") ;  
+   Check(ReadBurstFifo, X"8877_6655") ;  
     
     ReadBurst(MasterRec, Addr+128, 2) ;
-    ReadBurstFifo.Check(X"4422_3311") ;  
-    ReadBurstFifo.Check(X"8866_7755") ;  
+   Check(ReadBurstFifo, X"4422_3311") ;  
+   Check(ReadBurstFifo, X"8866_7755") ;  
 
     WaitForClock(MasterRec, 4) ; 
     BlankLine(2) ;
@@ -342,24 +342,24 @@ begin
     increment(TransactionCount) ;
     Addr := Addr + 256 ; 
     ReadBurst(MasterRec, Addr, 8) ;
-    ReadBurstFifo.Check(X"----_--FF") ;  
-    ReadBurstFifo.Check(X"----_EE--") ;  
-    ReadBurstFifo.Check(X"--DD_----") ;  
-    ReadBurstFifo.Check(X"CC--_----") ;  
-    ReadBurstFifo.Check(X"----_--BB") ;  
-    ReadBurstFifo.Check(X"----_AA--") ;  
-    ReadBurstFifo.Check(X"--99_----") ;  
-    ReadBurstFifo.Check(X"88--_----") ;  
+   Check(ReadBurstFifo, X"----_--FF") ;  
+   Check(ReadBurstFifo, X"----_EE--") ;  
+   Check(ReadBurstFifo, X"--DD_----") ;  
+   Check(ReadBurstFifo, X"CC--_----") ;  
+   Check(ReadBurstFifo, X"----_--BB") ;  
+   Check(ReadBurstFifo, X"----_AA--") ;  
+   Check(ReadBurstFifo, X"--99_----") ;  
+   Check(ReadBurstFifo, X"88--_----") ;  
     
     ReadBurst(MasterRec, Addr+128, 8) ;
-    ReadBurstFifo.Check(X"----_--88") ;  
-    ReadBurstFifo.Check(X"----_88--") ;  
-    ReadBurstFifo.Check(X"--99_----") ;  
-    ReadBurstFifo.Check(X"99--_----") ;  
-    ReadBurstFifo.Check(X"----_--66") ;  
-    ReadBurstFifo.Check(X"----_66--") ;  
-    ReadBurstFifo.Check(X"--77_----") ;  
-    ReadBurstFifo.Check(X"77--_----") ;  
+   Check(ReadBurstFifo, X"----_--88") ;  
+   Check(ReadBurstFifo, X"----_88--") ;  
+   Check(ReadBurstFifo, X"--99_----") ;  
+   Check(ReadBurstFifo, X"99--_----") ;  
+   Check(ReadBurstFifo, X"----_--66") ;  
+   Check(ReadBurstFifo, X"----_66--") ;  
+   Check(ReadBurstFifo, X"--77_----") ;  
+   Check(ReadBurstFifo, X"77--_----") ;  
     
     WaitForClock(MasterRec, 4) ; 
     BlankLine(2) ;

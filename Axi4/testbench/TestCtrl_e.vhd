@@ -50,6 +50,7 @@ library ieee ;
   
 library OSVVM ; 
   context OSVVM.OsvvmContext ; 
+  use osvvm.ScoreboardPkg_slv.all ;
 
 library OSVVM_AXI4 ;
   context OSVVM_AXI4.Axi4Context ; 
@@ -71,6 +72,8 @@ entity TestCtrl is
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
     
   -- Access Burst FIFOs in Axi4Master using external names
-  alias WriteBurstFifo is <<variable ^.Master_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
-  alias ReadBurstFifo  is <<variable ^.Master_1.ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+--  alias WriteBurstFifo is <<variable ^.Master_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+--  alias ReadBurstFifo  is <<variable ^.Master_1.ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+  alias WriteBurstFifo : ScoreboardIdType is MasterRec.WriteBurstFifo ;
+  alias ReadBurstFifo  : ScoreboardIdType is MasterRec.ReadBurstFifo ;
 end entity TestCtrl ;

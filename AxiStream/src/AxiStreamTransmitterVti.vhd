@@ -19,12 +19,13 @@
 --
 --  Revision History:
 --    Date       Version    Description
+--    06/2021    2021.06    Updated Burst FIFOs.
 --    02/2021    2021.02    Added Valid Delays.  Added MultiDriver Detect.  Updated Generics.
 --    12/2020    2020.12    Created Virtual Transaction Interface from AxiStreamTransmitter.vhd
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.
+--  Copyright (c) 2018 - 2021 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.

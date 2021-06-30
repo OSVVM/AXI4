@@ -19,7 +19,7 @@
 --
 --  Revision History:
 --    Date       Version    Description
---    05/2021    2021.05    Updated Burst FIFOs.
+--    06/2021    2021.06    Updated Burst FIFOs.
 --    02/2021    2021.02    Added Valid Delays.  Added MultiDriver Detect.  Updated Generics.
 --    10/2020    2020.10    Added Bursting per updates to Model Independent Transactions
 --    07/2020    2020.07    Updated for Streaming Model Independent Transactions
@@ -29,7 +29,7 @@
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.
+--  Copyright (c) 2018 - 2021 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.

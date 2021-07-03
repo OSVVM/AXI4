@@ -185,7 +185,7 @@ begin
       
   begin
     wait for 0 ns ; 
-    TransRec.BurstFifo <= NewID("TxBurstFifo", ModelID) ;
+    TransRec.BurstFifo <= NewID("RxBurstFifo", ModelID) ;
     wait for 0 ns ; 
 --    SetAlertLogID(TransRec.BurstFifo, MODEL_INSTANCE_NAME & ": BurstFifo", ModelID) ;
     BurstFifoID        <= GetAlertLogID(TransRec.BurstFifo) ; 

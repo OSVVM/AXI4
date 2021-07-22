@@ -309,7 +309,7 @@ begin
           end if ;
 
           (LocalAW.Addr, LocalAW.Prot) := WriteAddressFifo.pop ;
-          TransRec.Address       <= ToTransaction(LocalAW.Addr, TransRec.Address'length) ;
+          TransRec.Address       <= SafeResize(LocalAW.Addr, TransRec.Address'length) ;
           WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
 
 --!! Address checks intentionally removed - only want an error if the value changes.  
@@ -342,7 +342,7 @@ begin
 
           
           LocalWD.Data := AlignDataBusToBytes(LocalWD.Data, TransRec.DataWidth, WriteByteAddr) ;
-          TransRec.DataFromModel  <= ToTransaction(LocalWD.Data, TransRec.DataFromModel'length) ;
+          TransRec.DataFromModel  <= SafeResize(LocalWD.Data, TransRec.DataFromModel'length) ;
           
           if LocalWD.Last = '1' then
             WriteDataTransactionCount := Increment(WriteDataTransactionCount) ; 
@@ -399,7 +399,7 @@ begin
             WaitForToggle(ReadAddressReceiveCount) ;
           end if ;
           (LocalAR.Addr, LocalAR.Prot)  := ReadAddressFifo.pop ;
-          TransRec.Address         <= ToTransaction(LocalAR.Addr, TransRec.Address'length) ;
+          TransRec.Address         <= SafeResize(LocalAR.Addr, TransRec.Address'length) ;
 --         AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Slave Read, Address length does not match", FAILURE) ;
 --!TODO Add Check here for actual PROT vs expected (ModelRProt)
 --        TransRec.Prot           <= to_integer(LocalAR.Prot) ;
@@ -414,7 +414,7 @@ begin
           CheckDataWidth  (ModelID, TransRec.DataWidth, ReadByteAddr, AXI_DATA_WIDTH, "Read Data", ReadDataRequestCount) ; 
  
           -- Get Read Data Response Values
-          LocalRD.Data  := AlignBytesToDataBus(FromTransaction(TransRec.DataToModel, LocalRD.Data'length), TransRec.DataWidth, ReadByteAddr) ;
+          LocalRD.Data  := AlignBytesToDataBus(SafeResize(TransRec.DataToModel, LocalRD.Data'length), TransRec.DataWidth, ReadByteAddr) ;
           ReadDataFifo.push(LocalRD.Data & ModelRResp) ;
           Increment(ReadDataRequestCount) ;
 

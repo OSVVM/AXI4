@@ -208,9 +208,9 @@ begin
           TransRec.IntToModel <= BurstFifoMode ;
 
         when SEND | SEND_ASYNC =>
-          Data   := FromTransaction(TransRec.DataToModel, Data'length) ;
+          Data   := SafeResize(TransRec.DataToModel, Data'length) ;
           Param  := UpdateOptions(
-                      Param      => FromTransaction(TransRec.ParamToModel, TransRec.ParamToModel'length),
+                      Param      => SafeResize(TransRec.ParamToModel, TransRec.ParamToModel'length),
                       ParamID    => ParamID,
                       ParamDest  => ParamDest,
                       ParamUser  => ParamUser,
@@ -226,7 +226,7 @@ begin
 
         when SEND_BURST | SEND_BURST_ASYNC =>
           Param  := UpdateOptions(
-                      Param      => FromTransaction(TransRec.ParamToModel, TransRec.ParamToModel'length),
+                      Param      => SafeResize(TransRec.ParamToModel, TransRec.ParamToModel'length),
                       ParamID    => ParamID,
                       ParamDest  => ParamDest,
                       ParamUser  => ParamUser,
@@ -283,13 +283,13 @@ begin
               TransmitReadyTimeOut      <= TransRec.IntToModel ;
 
             when DEFAULT_ID =>
-              ParamID         <= FromTransaction(TransRec.ParamToModel, ParamID'length) ;
+              ParamID         <= SafeResize(TransRec.ParamToModel, ParamID'length) ;
 
             when DEFAULT_DEST =>
-              ParamDest       <= FromTransaction(TransRec.ParamToModel, ParamDest'length) ;
+              ParamDest       <= SafeResize(TransRec.ParamToModel, ParamDest'length) ;
 
             when DEFAULT_USER =>
-              ParamUser       <= FromTransaction(TransRec.ParamToModel, ParamUser'length) ;
+              ParamUser       <= SafeResize(TransRec.ParamToModel, ParamUser'length) ;
 
             when DEFAULT_LAST =>
               ParamLast       <= TransRec.IntToModel ;
@@ -312,13 +312,13 @@ begin
               TransRec.IntFromModel   <=  TransmitReadyTimeOut ;
 
             when DEFAULT_ID =>
-              TransRec.ParamFromModel <= ToTransaction(ParamID, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ParamID, TransRec.ParamFromModel'length) ;
 
             when DEFAULT_DEST =>
-              TransRec.ParamFromModel <= ToTransaction(ParamDest, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ParamDest, TransRec.ParamFromModel'length) ;
 
             when DEFAULT_USER =>
-              TransRec.ParamFromModel <= ToTransaction(ParamUser, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ParamUser, TransRec.ParamFromModel'length) ;
 
             when DEFAULT_LAST =>
               TransRec.IntFromModel   <= ParamLast ;

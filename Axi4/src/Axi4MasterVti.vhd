@@ -362,7 +362,7 @@ begin
         -- Model Transaction Dispatch
         when WRITE_OP | WRITE_ADDRESS | WRITE_DATA | ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
           -- For All Write Operations - Write Address and Write Data
-          LAW.Addr  := FromTransaction(TransRec.Address, LAW.Addr'length) ;
+          LAW.Addr  := SafeResize(TransRec.Address, LAW.Addr'length) ;
           WriteByteAddr := CalculateByteAddress(LAW.Addr, AXI_BYTE_ADDR_WIDTH) ;
 
           if IsWriteAddress(Operation) then
@@ -381,7 +381,7 @@ begin
             -- Single Transfer Write Data Handling
             CheckDataIsBytes(ModelID, TransRec.DataWidth, "Master Write: ", WriteDataRequestCount+1) ;
             CheckDataWidth  (ModelID, TransRec.DataWidth, WriteByteAddr, AXI_DATA_WIDTH, "Master Write: ", WriteDataRequestCount+1) ;
-            LWD.Data  := AlignBytesToDataBus(FromTransaction(TransRec.DataToModel, LWD.Data'length), TransRec.DataWidth, WriteByteAddr) ;
+            LWD.Data  := AlignBytesToDataBus(SafeResize(TransRec.DataToModel, LWD.Data'length), TransRec.DataWidth, WriteByteAddr) ;
             LWD.Strb  := CalculateWriteStrobe(LWD.Data) ;
             WriteDataFifo.Push('0' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
 
@@ -416,7 +416,7 @@ begin
 
         -- Model Transaction Dispatch
         when WRITE_BURST | ASYNC_WRITE_BURST =>
-          LAW.Addr  := FromTransaction(TransRec.Address, LAW.Addr'length) ;
+          LAW.Addr  := SafeResize(TransRec.Address, LAW.Addr'length) ;
           WriteByteAddr := CalculateByteAddress(LAW.Addr, AXI_BYTE_ADDR_WIDTH);
           BytesPerTransfer := AXI_DATA_BYTE_WIDTH ;
 --!!          BytesPerTransfer := 2**to_integer(LAW.Size);
@@ -492,7 +492,7 @@ begin
         when READ_OP | READ_CHECK | READ_ADDRESS | READ_DATA | READ_DATA_CHECK | ASYNC_READ_ADDRESS | ASYNC_READ_DATA | ASYNC_READ_DATA_CHECK =>
           if IsReadAddress(Operation) then
             -- Send Read Address to Read Address Handler and Read Data Handler
-            LAR.Addr   :=  FromTransaction(TransRec.Address, LAR.Addr'length) ;
+            LAR.Addr   :=  SafeResize(TransRec.Address, LAR.Addr'length) ;
             ReadByteAddr  :=  CalculateByteAddress(LAR.Addr, AXI_BYTE_ADDR_WIDTH);
             AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Read Address length does not match", FAILURE) ;
             BytesPerTransfer := 2**to_integer(LAR.Size);
@@ -530,11 +530,11 @@ begin
             CheckDataWidth  (ModelID, TransRec.DataWidth, ReadByteAddr, AXI_DATA_WIDTH, "Master Read: ", ReadDataExpectCount) ;
             LRD.Data := AlignDataBusToBytes(LRD.Data, TransRec.DataWidth, ReadByteAddr) ;
 --            AxiReadDataAlignCheck (ModelID, LRD.Data, TransRec.DataWidth, LAR.Addr, AXI_DATA_BYTE_WIDTH, AXI_BYTE_ADDR_WIDTH) ;
-            TransRec.DataFromModel <= ToTransaction(LRD.Data, TransRec.DataFromModel'length) ;
+            TransRec.DataFromModel <= SafeResize(LRD.Data, TransRec.DataFromModel'length) ;
 
             -- Check or Log Read Data
             if IsReadCheck(TransRec.Operation) then
-              ExpectedData := FromTransaction(TransRec.DataToModel, ExpectedData'length) ;
+              ExpectedData := SafeResize(TransRec.DataToModel, ExpectedData'length) ;
   --!!9 TODO:  Change format to Transaction #, Address, Prot, Read Data
   --!! Run regressions before changing
               AffirmIf( DataCheckID, LRD.Data = ExpectedData,
@@ -562,7 +562,7 @@ begin
         when READ_BURST =>
           if IsReadAddress(Operation) then
             -- Send Read Address to Read Address Handler and Read Data Handler
-            LAR.Addr   :=  FromTransaction(TransRec.Address, LAR.Addr'length) ;
+            LAR.Addr   :=  SafeResize(TransRec.Address, LAR.Addr'length) ;
             ReadByteAddr  :=  CalculateByteAddress(LAR.Addr, AXI_BYTE_ADDR_WIDTH);
 --            AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Read Address length does not match", FAILURE) ;
             BytesPerTransfer := 2**to_integer(LAR.Size);

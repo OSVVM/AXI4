@@ -246,8 +246,8 @@ begin
               (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
               BurstTransferCount := BurstTransferCount + 1 ; 
             end if ; 
-            TransRec.DataFromModel  <= ToTransaction(Data, TransRec.DataFromModel'length) ; 
-            TransRec.ParamFromModel <= ToTransaction(Param, TransRec.ParamFromModel'length) ; 
+            TransRec.DataFromModel  <= SafeResize(Data, TransRec.DataFromModel'length) ; 
+            TransRec.ParamFromModel <= SafeResize(Param, TransRec.ParamFromModel'length) ; 
             
             DispatcherReceiveCount := DispatcherReceiveCount + 1 ; 
             
@@ -257,9 +257,9 @@ begin
             end if ; 
             
             if IsCheck(Operation) then 
-              ExpectedData  := FromTransaction(TransRec.DataToModel, ExpectedData'length) ;
+              ExpectedData  := SafeResize(TransRec.DataToModel, ExpectedData'length) ;
               ExpectedParam  := UpdateOptions(
-                          Param      => FromTransaction(TransRec.ParamToModel, ExpectedParam'length),
+                          Param      => SafeResize(TransRec.ParamToModel, ExpectedParam'length),
                           ParamID    => ParamID, 
                           ParamDest  => ParamDest,
                           ParamUser  => ParamUser,
@@ -328,8 +328,8 @@ begin
           
             BurstTransferCount      := BurstTransferCount + 1 ; 
             TransRec.IntFromModel   <= FifoWordCount ; 
-            TransRec.DataFromModel  <= ToTransaction(Data, TransRec.DataFromModel'length) ; 
-            TransRec.ParamFromModel <= ToTransaction(Param, TransRec.ParamFromModel'length) ; 
+            TransRec.DataFromModel  <= SafeResize(Data, TransRec.DataFromModel'length) ; 
+            TransRec.ParamFromModel <= SafeResize(Param, TransRec.ParamFromModel'length) ; 
             
             DispatcherReceiveCount := DispatcherReceiveCount + 1 ; -- Operation or #Words Transfered based?
             Log(ModelID, 
@@ -402,7 +402,7 @@ begin
               ) ;
             end if ; 
             ExpectedParam  := UpdateOptions(
-                        Param      => FromTransaction(TransRec.ParamToModel, ExpectedParam'length),
+                        Param      => SafeResize(TransRec.ParamToModel, ExpectedParam'length),
                         ParamID    => ParamID, 
                         ParamDest  => ParamDest,
                         ParamUser  => ParamUser,
@@ -426,8 +426,8 @@ begin
             
             BurstTransferCount      := BurstTransferCount + 1 ; 
             TransRec.IntFromModel   <= FifoWordCount ; 
-            TransRec.DataFromModel  <= ToTransaction(Data, TransRec.DataFromModel'length) ; 
-            TransRec.ParamFromModel <= ToTransaction(Param, TransRec.ParamFromModel'length) ; 
+            TransRec.DataFromModel  <= SafeResize(Data, TransRec.DataFromModel'length) ; 
+            TransRec.ParamFromModel <= SafeResize(Param, TransRec.ParamFromModel'length) ; 
             
             DispatcherReceiveCount := DispatcherReceiveCount + 1 ; -- Operation or #Words Transfered based?
             wait for 0 ns ; 
@@ -447,13 +447,13 @@ begin
               DropUndriven    := TransRec.BoolToModel ;
               
             when DEFAULT_ID =>                      
-              ParamID         <= FromTransaction(TransRec.ParamToModel, ParamID'length) ;
+              ParamID         <= SafeResize(TransRec.ParamToModel, ParamID'length) ;
               
             when DEFAULT_DEST => 
-              ParamDest       <= FromTransaction(TransRec.ParamToModel, ParamDest'length) ;
+              ParamDest       <= SafeResize(TransRec.ParamToModel, ParamDest'length) ;
               
             when DEFAULT_USER =>
-              ParamUser       <= FromTransaction(TransRec.ParamToModel, ParamUser'length) ;
+              ParamUser       <= SafeResize(TransRec.ParamToModel, ParamUser'length) ;
               
             when DEFAULT_LAST =>
               ParamLast       <= TransRec.IntToModel ;
@@ -476,13 +476,13 @@ begin
               TransRec.BoolFromModel <= DropUndriven ;
               
             when DEFAULT_ID =>                      
-              TransRec.ParamFromModel <= ToTransaction(ParamID, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ParamID, TransRec.ParamFromModel'length) ;
               
             when DEFAULT_DEST => 
-              TransRec.ParamFromModel <= ToTransaction(ParamDest, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ParamDest, TransRec.ParamFromModel'length) ;
               
             when DEFAULT_USER =>
-              TransRec.ParamFromModel <= ToTransaction(ParamUser, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ParamUser, TransRec.ParamFromModel'length) ;
               
             when DEFAULT_LAST =>
               TransRec.IntFromModel   <= ParamLast ;

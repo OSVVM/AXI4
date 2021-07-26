@@ -102,19 +102,11 @@ entity AxiStreamTransmitter is
     TransRec  : inout StreamRecType
   ) ;
 
-  -- Burst Interface
-  -- Access via external names
---  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-
   -- Derive AXI interface properties from interface signals
   constant AXI_STREAM_DATA_WIDTH   : integer := TData'length ;
 
 end entity AxiStreamTransmitter ;
 architecture SimpleTransmitter of AxiStreamTransmitter is
-  constant AXI_STREAM_DATA_BYTE_WIDTH  : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
-  constant AXI_ID_WIDTH   : integer    := TID'length ;
-  constant AXI_DEST_WIDTH : integer    := TDest'length ;
-
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
     IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamTransmitter'PATH_NAME))) ;
@@ -122,7 +114,11 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
   signal ModelID, BusFailedID : AlertLogIDType ;
 --  signal ProtocolID, DataCheckID : AlertLogIDType ;
 
-  shared variable TransmitFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+  constant AXI_STREAM_DATA_BYTE_WIDTH  : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
+  constant AXI_ID_WIDTH   : integer    := TID'length ;
+  constant AXI_DEST_WIDTH : integer    := TDest'length ;
+
+  signal TransmitFifo : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
 
   signal TransmitRequestCount, TransmitDoneCount      : integer := 0 ;
 
@@ -151,12 +147,12 @@ begin
     variable ID : AlertLogIDType ;
   begin
     -- Alerts
-    ID                      := GetAlertLogID(MODEL_INSTANCE_NAME) ;
-    ModelID                 <= ID ;
---    ProtocolID              <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
---    DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
-    BusFailedID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
-    TransmitFifo.SetAlertLogID(MODEL_INSTANCE_NAME & ": TransmitFifo", ID) ; 
+    ID              := GetAlertLogID(MODEL_INSTANCE_NAME) ;
+    ModelID         <= ID ;
+--    ProtocolID      <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
+--    DataCheckID     <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
+    BusFailedID     <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
+    TransmitFifo    <= NewID(MODEL_INSTANCE_NAME & ": TransmitFifo", ID) ; 
     wait ;
   end process Initialize ;
 
@@ -217,7 +213,7 @@ begin
                       ParamLast  => ParamLast,
                       Count      => ((TransmitRequestCount+1) - LastOffsetCount)
                     ) ;
-          TransmitFifo.Push('0' & Data & Param) ;
+          Push(TransmitFifo, '0' & Data & Param) ;
           Increment(TransmitRequestCount) ;
           wait for 0 ns ;
           if IsBlocking(TransRec.Operation) then
@@ -263,7 +259,7 @@ begin
             end case ;
   --          Param(0) := '1' when i = 0 else Last ;  -- TLast
             Param(0) := '1' when i = 0 else '0' ;  -- TLast
-            TransmitFifo.Push('1' & Data & Param) ;
+            Push(TransmitFifo, '1' & Data & Param) ;
           end loop ;
 
           wait for 0 ns ;
@@ -328,6 +324,11 @@ begin
               wait for 0 ns ;
           end case ;
 
+        when MULTIPLE_DRIVER_DETECT =>
+          Alert(ModelID, "AxiStreamTransmitter: Multiple Drivers on Transaction Record." & 
+                         "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
+          wait for 0 ns ;  wait for 0 ns ;
+
         -- The End -- Done
         when others =>
           Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
@@ -364,15 +365,16 @@ begin
     TStrb   <= (TStrb'range => 'X') ;
     TKeep   <= (TKeep'range => 'X') ;
     TLast   <= 'X' ;
+    wait for 0 ns ; -- Allow TransmitFifo to initialize 
 
     TransmitLoop : loop
       -- Find Transaction
-      if TransmitFifo.Empty then
+      if Empty(TransmitFifo) then
          WaitForToggle(TransmitRequestCount) ;
       end if ;
 
       -- Get Transaction
-      (Burst, Data, ID, Dest, User, Last) := TransmitFifo.Pop ;
+      (Burst, Data, ID, Dest, User, Last) := Pop(TransmitFifo) ;
 
       if NewTransfer or not Burst then
         WaitForClock(Clk, ValidDelayCycles) ;
@@ -448,5 +450,4 @@ begin
       wait for 0 ns ;
     end loop TransmitLoop ;
   end process TransmitHandler ;
-
 end architecture SimpleTransmitter ;

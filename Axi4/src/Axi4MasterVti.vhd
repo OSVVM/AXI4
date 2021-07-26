@@ -137,26 +137,26 @@ port (
 end entity Axi4MasterVti ;
 architecture AxiFull of Axi4MasterVti is
 
-  constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
-  constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
-  constant AXI_STRB_WIDTH      : integer := AXI_DATA_WIDTH/8 ;
-
   -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4MasterVti'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
 
+  constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
+  constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
+  constant AXI_STRB_WIDTH      : integer := AXI_DATA_WIDTH/8 ;
+
   -- Internal Resources
-  shared variable WriteAddressFifo            : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable WriteDataFifo               : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+  signal WriteAddressFifo            : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal WriteDataFifo               : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
 
-  shared variable ReadAddressFifo             : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable ReadAddressTransactionFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable ReadDataFifo                : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+  signal ReadAddressFifo             : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal ReadAddressTransactionFifo  : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal ReadDataFifo                : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
 
-  shared variable WriteResponseScoreboard     : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable ReadResponseScoreboard      : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+  signal WriteResponseScoreboard     : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal ReadResponseScoreboard      : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
 
   signal WriteAddressRequestCount, WriteAddressDoneCount      : integer := 0 ;
   signal WriteDataRequestCount,    WriteDataDoneCount         : integer := 0 ;
@@ -192,22 +192,16 @@ begin
     DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
     BusFailedID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
 
-    WriteResponseScoreboard.SetAlertLogID( MODEL_INSTANCE_NAME & ": WriteResponse Scoreboard", ID);
-    ReadResponseScoreboard.SetAlertLogID(  MODEL_INSTANCE_NAME & ": ReadResponse Scoreboard",  ID);
+    WriteResponseScoreboard <= NewID( MODEL_INSTANCE_NAME & ": WriteResponse Scoreboard", ID);
+    ReadResponseScoreboard  <= NewID( MODEL_INSTANCE_NAME & ": ReadResponse Scoreboard",  ID);
 
-    -- FIFOS.  FIFOS share main ID as they only generate errors if the model uses them wrong
-    WriteAddressFifo.SetAlertLogID(ID);
-    WriteDataFifo.SetAlertLogID(ID);
-    ReadAddressFifo.SetAlertLogID(ID);
-    ReadAddressTransactionFifo.SetAlertLogID(ID);
-    ReadDataFifo.SetAlertLogID(ID);
-
-    -- Giving each FIFO a unique name
-    WriteAddressFifo.SetName(            MODEL_INSTANCE_NAME & ": WriteAddressFIFO");
-    WriteDataFifo.SetName(               MODEL_INSTANCE_NAME & ": WriteDataFifo");
-    ReadAddressFifo.SetName(             MODEL_INSTANCE_NAME & ": ReadAddressFifo");
-    ReadAddressTransactionFifo.SetName(  MODEL_INSTANCE_NAME & ": ReadAddressTransactionFifo");
-    ReadDataFifo.SetName(                MODEL_INSTANCE_NAME & ": ReadDataFifo");
+    -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
+    --   FIFOS only generate usage type errors 
+    WriteAddressFifo           <= NewID(MODEL_INSTANCE_NAME & ": WriteAddressFIFO",             ID, DoNotReport => TRUE);
+    WriteDataFifo              <= NewID(MODEL_INSTANCE_NAME & ": WriteDataFifo",                ID, DoNotReport => TRUE);
+    ReadAddressFifo            <= NewID(MODEL_INSTANCE_NAME & ": ReadAddressFifo",              ID, DoNotReport => TRUE);
+    ReadAddressTransactionFifo <= NewID(MODEL_INSTANCE_NAME & ": ReadAddressTransactionFifo",   ID, DoNotReport => TRUE);
+    ReadDataFifo               <= NewID(MODEL_INSTANCE_NAME & ": ReadDataFifo",                 ID, DoNotReport => TRUE);
 
     wait ;
   end process Initialize ;
@@ -250,8 +244,8 @@ begin
 
     variable Operation       : AddressBusOperationType ;
     variable TransactionCount : integer := 0 ; 
-    variable WriteAddressTransactionCount  : integer := 0 ; 
-    variable WriteDataTransactionCount     : integer := 0 ; 
+--    variable WriteAddressTransactionCount  : integer := 0 ; 
+--    variable WriteDataTransactionCount     : integer := 0 ; 
     variable WriteResponseTransactionCount : integer := 0 ; 
   begin
     AxiDefaults := InitAxi4Rec(AxiDefaults, '0') ;
@@ -371,10 +365,10 @@ begin
             LAW.Len := (others => '0') ;
 
             -- Initiate Write Address
-            WriteAddressFifo.Push(LAW.Addr  & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
+            Push(WriteAddressFifo, LAW.Addr  & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
             Increment(WriteAddressRequestCount) ;
             
-            WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
+--            WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
           end if ;
 
           if IsWriteData(Operation) then
@@ -383,25 +377,25 @@ begin
             CheckDataWidth  (ModelID, TransRec.DataWidth, WriteByteAddr, AXI_DATA_WIDTH, "Master Write: ", WriteDataRequestCount+1) ;
             LWD.Data  := AlignBytesToDataBus(SafeResize(TransRec.DataToModel, LWD.Data'length), TransRec.DataWidth, WriteByteAddr) ;
             LWD.Strb  := CalculateWriteStrobe(LWD.Data) ;
-            WriteDataFifo.Push('0' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
+            Push(WriteDataFifo, '0' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
 
             Increment(WriteDataRequestCount) ;
-            WriteDataTransactionCount    := Increment(WriteDataTransactionCount) ; 
-          end if ;
-          
---!! If burst emulation is added, then this will need to be a while loop since
---!! more than one transaction will be dispatched at a time.
-          if WriteAddressTransactionCount /= WriteResponseTransactionCount and
-             WriteDataTransactionCount /= WriteResponseTransactionCount then
-            -- Queue Expected Write Response
-            WriteResponseScoreboard.Push(LWR.Resp) ;
-            Increment(WriteResponseExpectCount) ;
-            WriteResponseTransactionCount := Increment(WriteResponseTransactionCount) ; 
+--            WriteDataTransactionCount    := Increment(WriteDataTransactionCount) ; 
           end if ;
           
           -- Transaction wait time and allow RequestCounts a delta cycle to update
           wait for 0 ns ;  wait for 0 ns ;
 
+--!! If burst emulation is added, then this will need to be a while loop since
+--!! more than one transaction will be dispatched at a time.
+          if WriteAddressRequestCount /= WriteResponseTransactionCount and
+             WriteDataRequestCount /= WriteResponseTransactionCount then
+            -- Queue Expected Write Response
+            Push(WriteResponseScoreboard, LWR.Resp) ;
+            Increment(WriteResponseExpectCount) ;
+            WriteResponseTransactionCount := Increment(WriteResponseTransactionCount) ; 
+          end if ;
+          
           if IsBlockOnWriteAddress(Operation) and
               WriteAddressRequestCount /= WriteAddressDoneCount then
             -- Block until both write address done.
@@ -437,10 +431,10 @@ begin
             end if ;
             
             -- Initiate Write Address
-            WriteAddressFifo.Push(LAW.Addr  & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
+            Push(WriteAddressFifo, LAW.Addr  & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
 
             Increment(WriteAddressRequestCount) ;
-            WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
+--            WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
           end if ;
 
           if IsWriteData(Operation) then
@@ -454,29 +448,29 @@ begin
             PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, WriteByteAddr) ;
 
             for BurstLoop in TransfersInBurst downto 2 loop    
-              WriteDataFifo.Push('1' & '0' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
+              Push(WriteDataFifo, '1' & '0' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
               PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, 0) ;
             end loop ; 
             
             -- Special handle last push
-            WriteDataFifo.Push('1' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
+            Push(WriteDataFifo, '1' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
 
             -- Increment(WriteDataRequestCount) ;
             WriteDataRequestCount        <= Increment(WriteDataRequestCount, TransfersInBurst) ;
-            WriteDataTransactionCount    := Increment(WriteDataTransactionCount) ; 
-          end if ;
-
---!! will need to be a while loop if more than one transaction can be dispatched at a time.
---!! only happens if bursts are emulated - ie translated from a burst cycle to a multiple individual cycles
-          if WriteAddressTransactionCount /= WriteResponseTransactionCount and WriteDataTransactionCount /= WriteResponseTransactionCount then
-            -- Queue Expected Write Response
-            WriteResponseScoreboard.Push(LWR.Resp) ;
-            Increment(WriteResponseExpectCount) ;
-            WriteResponseTransactionCount := Increment(WriteResponseTransactionCount) ; 
+--            WriteDataTransactionCount    := Increment(WriteDataTransactionCount) ; 
           end if ;
 
           -- Transaction wait time and allow RequestCounts a delta cycle to update
           wait for 0 ns ;  wait for 0 ns ;
+
+--!! will need to be a while loop if more than one transaction can be dispatched at a time.
+--!! only happens if bursts are emulated - ie translated from a burst cycle to a multiple individual cycles
+          if WriteAddressRequestCount /= WriteResponseTransactionCount and WriteDataRequestCount /= WriteResponseTransactionCount then
+            -- Queue Expected Write Response
+            Push(WriteResponseScoreboard, LWR.Resp) ;
+            Increment(WriteResponseExpectCount) ;
+            WriteResponseTransactionCount := Increment(WriteResponseTransactionCount) ; 
+          end if ;
 
           if IsBlockOnWriteAddress(Operation) and
               WriteAddressRequestCount /= WriteAddressDoneCount then
@@ -499,33 +493,33 @@ begin
 
             LAR.Len := (others => '0') ;
 
-            ReadAddressFifo.Push(LAR.Addr & LAR.Len & LAR.Prot & LAR.ID & LAR.Size & LAR.Burst & LAR.Lock & LAR.Cache & LAR.QOS & LAR.Region & LAR.User) ;
-            ReadAddressTransactionFifo.Push(LAR.Addr & LAR.Prot);
+            Push(ReadAddressFifo, LAR.Addr & LAR.Len & LAR.Prot & LAR.ID & LAR.Size & LAR.Burst & LAR.Lock & LAR.Cache & LAR.QOS & LAR.Region & LAR.User) ;
+            Push(ReadAddressTransactionFifo, LAR.Addr & LAR.Prot);
             Increment(ReadAddressRequestCount) ;
 
             -- Expect a Read Data Cycle
-            ReadResponseScoreboard.Push(LRD.Resp) ;
+            Push(ReadResponseScoreboard, LRD.Resp) ;
             increment(ReadDataExpectCount) ;
           end if ;
           wait for 0 ns ; 
 
-          if IsTryReadData(Operation) and ReadDataFifo.Empty then
+          if IsTryReadData(Operation) and Empty(ReadDataFifo) then
             -- Data not available
             -- ReadDataReceiveCount < ReadDataTransactionCount then
             TransRec.BoolFromModel <= FALSE ;
             TransRec.DataFromModel <= (TransRec.DataFromModel'range => '0') ; 
           elsif IsReadData(Operation) then
-            (LAR.Addr, ReadProt) := ReadAddressTransactionFifo.Pop ;
+            (LAR.Addr, ReadProt) := Pop(ReadAddressTransactionFifo) ;
             ReadByteAddr  :=  CalculateByteAddress(LAR.Addr, AXI_BYTE_ADDR_WIDTH);
 
             -- Wait for Data Ready
-            if ReadDataFifo.Empty then
+            if Empty(ReadDataFifo) then
               WaitForToggle(ReadDataReceiveCount) ;
             end if ;
             TransRec.BoolFromModel <= TRUE ;
 
             -- Get Read Data
-            LRD.Data := ReadDataFifo.Pop ;
+            LRD.Data := Pop(ReadDataFifo) ;
             CheckDataIsBytes(ModelID, TransRec.DataWidth, "Master Read: ", ReadDataExpectCount) ;
             CheckDataWidth  (ModelID, TransRec.DataWidth, ReadByteAddr, AXI_DATA_WIDTH, "Master Read: ", ReadDataExpectCount) ;
             LRD.Data := AlignDataBusToBytes(LRD.Data, TransRec.DataWidth, ReadByteAddr) ;
@@ -575,13 +569,13 @@ begin
             end if ;
             LAR.Len := to_slv(TransfersInBurst - 1, LAR.Len'length) ;
 
-            ReadAddressFifo.Push(LAR.Addr & LAR.Len & LAR.Prot & LAR.ID & LAR.Size & LAR.Burst & LAR.Lock & LAR.Cache & LAR.QOS & LAR.Region & LAR.User) ;
-            ReadAddressTransactionFifo.Push(LAR.Addr & LAR.Prot);
+            Push(ReadAddressFifo, LAR.Addr & LAR.Len & LAR.Prot & LAR.ID & LAR.Size & LAR.Burst & LAR.Lock & LAR.Cache & LAR.QOS & LAR.Region & LAR.User) ;
+            Push(ReadAddressTransactionFifo, LAR.Addr & LAR.Prot);
             Increment(ReadAddressRequestCount) ;
 
             -- Expect a Read Data Cycle
             for i in 1 to TransfersInBurst loop
-              ReadResponseScoreboard.Push(LRD.Resp) ;
+              Push(ReadResponseScoreboard, LRD.Resp) ;
             end loop ;
   -- Should this be + TransfersInBurst ; ???
             ReadDataExpectCount <= Increment(ReadDataExpectCount, TransfersInBurst) ;
@@ -593,13 +587,13 @@ begin
   --!!3 First Check IsReadData, then Calculate #Transfers,
   --!!3 Then if TryRead, and ReadDataFifo.FifoCount < #Transfers, then FALSE
   --!!3 Which reverses the order of the following IF statements
-          if IsTryReadData(Operation) and ReadDataFifo.Empty then
+          if IsTryReadData(Operation) and Empty(ReadDataFifo) then
             -- Data not available
             -- ReadDataReceiveCount < ReadDataTransactionCount then
             TransRec.BoolFromModel <= FALSE ;
           elsif IsReadData(Operation) then
             TransRec.BoolFromModel <= TRUE ;
-            (LAR.Addr, ReadProt) := ReadAddressTransactionFifo.Pop ;
+            (LAR.Addr, ReadProt) := Pop(ReadAddressTransactionFifo) ;
             ReadByteAddr := CalculateByteAddress(LAR.Addr, AXI_BYTE_ADDR_WIDTH);
             BytesPerTransfer := 2**to_integer(LAR.Size);
 --!!            BytesPerTransfer  := AXI_DATA_BYTE_WIDTH ;
@@ -617,10 +611,10 @@ begin
             end if ; 
 
             for BurstLoop in 1 to TransfersInBurst loop
-              if ReadDataFifo.Empty then
+              if Empty(ReadDataFifo) then
                 WaitForToggle(ReadDataReceiveCount) ;
               end if ;
-              LRD.Data := ReadDataFifo.Pop ;
+              LRD.Data := Pop(ReadDataFifo) ;
               
               PushReadBurstData(TransRec.ReadBurstFifo, BurstFifoMode, LRD.Data, BytesToReceive, ReadByteAddr) ;
               ReadByteAddr := 0 ;
@@ -651,7 +645,7 @@ begin
           wait for 0 ns ;  wait for 0 ns ;
 
         when MULTIPLE_DRIVER_DETECT =>
-          Alert(ModelID, "Axi4Master: Multiple Drivers on Transaction Record." & 
+          Alert(ModelID, "Axi4MasterVti: Multiple Drivers on Transaction Record." & 
                          "  Transaction # " & to_string(TransactionCount), FAILURE) ;
           wait for 0 ns ;  wait for 0 ns ;
 
@@ -685,13 +679,14 @@ begin
     AW.QOS    <= (Local.QOS'range    => '0') ;
     AW.Region <= (Local.Region'range => '0') ;
     AW.User   <= (Local.User'range   => '0') ;
+    wait for 0 ns ; -- Allow WriteAddressFifo to initialize
 
     WriteAddressLoop : loop
       -- Find Transaction
-      if WriteAddressFifo.Empty then
+      if Empty(WriteAddressFifo) then
          WaitForToggle(WriteAddressRequestCount) ;
       end if ;
-      (Local.Addr, Local.Len, Local.Prot, Local.ID, Local.Size, Local.Burst, Local.Lock, Local.Cache, Local.QOS, Local.Region, Local.User) := WriteAddressFifo.Pop ;
+      (Local.Addr, Local.Len, Local.Prot, Local.ID, Local.Size, Local.Burst, Local.Lock, Local.Cache, Local.QOS, Local.Region, Local.User) := Pop(WriteAddressFifo) ;
 
       WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_ADDRESS_VALID_DELAY_CYCLES)))) ; 
 
@@ -779,13 +774,14 @@ begin
     WD.User  <= (Local.User'range => '0') ;
     -- AXI3
     WD.ID    <= (Local.ID'range   => '0') ;
+    wait for 0 ns ; -- Allow WriteDataFifo to initialize
 
     WriteDataLoop : loop
       -- Find Transaction
-      if WriteDataFifo.Empty then
+      if Empty(WriteDataFifo) then
          WaitForToggle(WriteDataRequestCount) ;
       end if ;
-      (Burst, Local.Last, Local.Data, Local.Strb, Local.User, Local.ID) := WriteDataFifo.Pop ;
+      (Burst, Local.Last, Local.Data, Local.Strb, Local.User, Local.ID) := Pop(WriteDataFifo) ;
             
       if NewTransfer then
         WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_DATA_VALID_DELAY_CYCLES)))) ; 
@@ -853,11 +849,12 @@ begin
   begin
     -- initialize
     AxiBus.WriteResponse.Ready <= '0' ;
+    wait for 0 ns ; -- Allow WriteResponseScoreboard to initialize
 
     WriteResponseOperation : loop
       -- Find Expected Transaction
       WriteResponseActive <= FALSE ;
-      if WriteResponseScoreboard.empty then
+      if empty(WriteResponseScoreboard) then
         WaitForToggle(WriteResponseExpectCount) ;
       end if ;
       WriteResponseActive <= TRUE ;
@@ -884,7 +881,7 @@ begin
       ) ;
 
       -- Check Write Response
-      WriteResponseScoreboard.Check(AxiBus.WriteResponse.Resp) ;
+      Check(WriteResponseScoreboard, AxiBus.WriteResponse.Resp) ;
 
       -- Signal Completion
       increment(WriteResponseReceiveCount) ;
@@ -934,14 +931,15 @@ begin
     AR.QOS    <= (Local.QOS'range    => '0') ;
     AR.Region <= (Local.Region'range => '0') ;
     AR.User   <= (Local.User'range   => '0') ;
+    wait for 0 ns ; -- Allow ReadAddressFifo to initialize
 
 
     AddressReadLoop : loop
       -- Find Transaction
-      if ReadAddressFifo.Empty then
+      if Empty(ReadAddressFifo) then
          WaitForToggle(ReadAddressRequestCount) ;
       end if ;
-      (Local.Addr, Local.Len, Local.Prot, Local.ID, Local.Size, Local.Burst, Local.Lock, Local.Cache, Local.QOS, Local.Region, Local.User) := ReadAddressFifo.Pop ;
+      (Local.Addr, Local.Len, Local.Prot, Local.ID, Local.Size, Local.Burst, Local.Lock, Local.Cache, Local.QOS, Local.Region, Local.User) := Pop(ReadAddressFifo) ;
 
       WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_ADDRESS_VALID_DELAY_CYCLES)))) ; 
 
@@ -1041,8 +1039,8 @@ begin
       ) ;
 
       -- capture data
-      ReadDataFifo.push(AxiBus.ReadData.Data) ;
-      ReadResponseScoreboard.Check(AxiBus.ReadData.Resp) ;
+      push(ReadDataFifo, AxiBus.ReadData.Data) ;
+      Check(ReadResponseScoreboard, AxiBus.ReadData.Resp) ;
 
       increment(ReadDataReceiveCount) ;
       wait for 0 ns ; -- Allow ReadDataReceiveCount to update

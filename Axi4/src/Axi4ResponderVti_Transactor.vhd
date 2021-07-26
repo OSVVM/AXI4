@@ -114,23 +114,22 @@ end entity Axi4ResponderVti ;
 
 architecture TransactorResponder of Axi4ResponderVti is
 
-  constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
-  constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
-
   -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4ResponderVti'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
 
-  shared variable WriteAddressFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable WriteDataFifo        : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable WriteTransactionFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable WriteResponseFifo    : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+  constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
+  constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 
-  shared variable ReadAddressFifo      : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable ReadAddressTransactionFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable ReadDataFifo         : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+  signal WriteAddressFifo           : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal WriteDataFifo              : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal WriteTransactionFifo       : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal WriteResponseFifo          : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal ReadAddressFifo            : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal ReadAddressTransactionFifo : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal ReadDataFifo               : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
 
   -- Setup so that if no configuration is done, accept transactions
   signal WriteAddressExpectCount     : integer := 0 ;
@@ -180,22 +179,17 @@ begin
     DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
     BusFailedID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
 
-    -- FIFOS.  FIFOS share main ID as they only generate errors if the model uses them wrong
-    WriteAddressFifo.SetAlertLogID(ID);
-    WriteAddressFifo.SetName(     MODEL_INSTANCE_NAME & ": WriteAddressFIFO");
-    WriteDataFifo.SetAlertLogID(ID);
-    WriteDataFifo.SetName(        MODEL_INSTANCE_NAME & ": WriteDataFifo");
-    WriteTransactionFifo.SetAlertLogID(ID);
-    WriteTransactionFifo.SetName( MODEL_INSTANCE_NAME & ": WriteTransactionFifo");
-    WriteResponseFifo.SetAlertLogID(ID);
-    WriteResponseFifo.SetName(    MODEL_INSTANCE_NAME & ": WriteResponseFifo");
+    -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
+    --   FIFOS only generate usage type errors 
+    WriteAddressFifo           <= NewID(MODEL_INSTANCE_NAME & ": WriteAddressFIFO",             ID, DoNotReport => TRUE);
+    WriteDataFifo              <= NewID(MODEL_INSTANCE_NAME & ": WriteDataFifo",                ID, DoNotReport => TRUE);
+    WriteTransactionFifo       <= NewID(MODEL_INSTANCE_NAME & ": WriteTransactionFifo",         ID, DoNotReport => TRUE);
+    WriteResponseFifo          <= NewID(MODEL_INSTANCE_NAME & ": WriteResponseFifo",            ID, DoNotReport => TRUE);
 
-    ReadAddressFifo.SetAlertLogID(ID);
-    ReadAddressFifo.SetName(      MODEL_INSTANCE_NAME & ": ReadAddressTransactionFifo");
-    ReadAddressTransactionFifo.SetAlertLogID(ID);
-    ReadAddressTransactionFifo.SetName(      MODEL_INSTANCE_NAME & ": ReadAddressTransactionFifo");
-    ReadDataFifo.SetAlertLogID(ID);
-    ReadDataFifo.SetName(         MODEL_INSTANCE_NAME & ": ReadDataFifo");
+    ReadAddressFifo            <= NewID(MODEL_INSTANCE_NAME & ": ReadAddressFifo",              ID, DoNotReport => TRUE);
+    ReadAddressTransactionFifo <= NewID(MODEL_INSTANCE_NAME & ": ReadAddressTransactionFifo",   ID, DoNotReport => TRUE);
+    ReadDataFifo               <= NewID(MODEL_INSTANCE_NAME & ": ReadDataFifo",                 ID, DoNotReport => TRUE);
+
     wait ;
   end process Initalize ;
 
@@ -243,23 +237,23 @@ begin
       when WAIT_FOR_TRANSACTION =>
         -- wait for write or read transaction to be available
         loop
-          exit when not WriteAddressFifo.empty and not WriteDataFifo.empty ; -- Write Available
-          exit when not ReadAddressFifo.empty ; -- Read Available
+          exit when not empty(WriteAddressFifo) and not empty(WriteDataFifo) ; -- Write Available
+          exit when not empty(ReadAddressFifo) ; -- Read Available
           wait on WriteAddressReceiveCount, WriteDataReceiveCount, ReadAddressReceiveCount ;
         end loop ;
 
       when WAIT_FOR_WRITE_TRANSACTION =>
         -- wait for write transaction to be available
-        if WriteAddressFifo.empty then
+        if empty(WriteAddressFifo) then
           WaitForToggle(WriteAddressReceiveCount) ;
         end if ;
-        if WriteDataFifo.empty then
+        if empty(WriteDataFifo) then
           WaitForToggle(WriteDataReceiveCount) ;
         end if ;
 
       when WAIT_FOR_READ_TRANSACTION =>
         -- wait for read transaction to be available
-        if ReadAddressFifo.empty then
+        if empty(ReadAddressFifo) then
           WaitForToggle(ReadAddressReceiveCount) ;
         end if ;
 
@@ -298,8 +292,8 @@ begin
       when WRITE_OP | WRITE_ADDRESS | WRITE_DATA |
            ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
 
-        if (IsTryWriteAddress(TransRec.Operation) and WriteAddressFifo.empty) or
-           (IsTryWriteData(TransRec.Operation)    and WriteDataFifo.empty) then
+        if (IsTryWriteAddress(TransRec.Operation) and empty(WriteAddressFifo)) or
+           (IsTryWriteData(TransRec.Operation)    and empty(WriteDataFifo)) then
           WriteAvailable         := FALSE ;
           TransRec.DataFromModel <= (TransRec.DataFromModel'range => '0') ; 
         else
@@ -309,11 +303,11 @@ begin
 
         if WriteAvailable and IsWriteAddress(TransRec.Operation) then
           -- Find Write Address transaction
-          if WriteAddressFifo.empty then
+          if empty(WriteAddressFifo) then
             WaitForToggle(WriteAddressReceiveCount) ;
           end if ;
 
-          (LocalAW.Addr, LocalAW.Prot) := WriteAddressFifo.pop ;
+          (LocalAW.Addr, LocalAW.Prot) := pop(WriteAddressFifo) ;
           TransRec.Address       <= SafeResize(LocalAW.Addr, TransRec.Address'length) ;
           WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
 
@@ -326,7 +320,7 @@ begin
 
         if WriteAvailable and IsWriteData(TransRec.Operation) then
           -- Find Write Data transaction
-          if WriteDataFifo.empty then
+          if empty(WriteDataFifo) then
             WaitForToggle(WriteDataReceiveCount) ;
           end if ;
 
@@ -338,7 +332,7 @@ begin
             WriteByteAddr := TransRec.AddrWidth mod AXI_DATA_BYTE_WIDTH ;
           end if ; 
           
-          (LocalWD.Data, LocalWD.Strb, LocalWD.Last, LocalWD.User, LocalWD.ID) := WriteDataFifo.pop ;
+          (LocalWD.Data, LocalWD.Strb, LocalWD.Last, LocalWD.User, LocalWD.ID) := pop(WriteDataFifo) ;
           GetAxi4Parameter(Params, WRITE_DATA_FILTER_UNDRIVEN, FilterUndrivenWriteData) ;
           GetAxi4Parameter(Params, WRITE_DATA_UNDRIVEN_VALUE,  UndrivenWriteDataValue) ;
           if FilterUndrivenWriteData then
@@ -369,7 +363,7 @@ begin
 
         if WriteAddressTransactionCount /= WriteResponseTransactionCount and 
               WriteDataTransactionCount /= WriteResponseTransactionCount then
-          WriteResponseFifo.push(ModelBResp) ;
+          push(WriteResponseFifo, ModelBResp) ;
           increment(WriteReceiveCount) ;
           WriteResponseTransactionCount := Increment(WriteResponseTransactionCount) ; 
         end if ;
@@ -391,7 +385,7 @@ begin
       when READ_OP | READ_ADDRESS | READ_DATA |
            ASYNC_READ | ASYNC_READ_ADDRESS | ASYNC_READ_DATA =>
 
-        if (IsTryReadAddress(TransRec.Operation) and ReadAddressFifo.empty) then
+        if (IsTryReadAddress(TransRec.Operation) and empty(ReadAddressFifo)) then
           ReadAvailable          := FALSE ;
         else
           ReadAvailable          := TRUE ;
@@ -400,10 +394,10 @@ begin
 
         if ReadAvailable and IsReadAddress(TransRec.Operation) then
           -- Expect Read Address Cycle
-          if ReadAddressFifo.empty then
+          if empty(ReadAddressFifo) then
             WaitForToggle(ReadAddressReceiveCount) ;
           end if ;
-          (LocalAR.Addr, LocalAR.Prot)  := ReadAddressFifo.pop ;
+          (LocalAR.Addr, LocalAR.Prot)  := pop(ReadAddressFifo) ;
           TransRec.Address         <= SafeResize(LocalAR.Addr, TransRec.Address'length) ;
 --         AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Slave Read, Address length does not match", FAILURE) ;
 --!TODO Add Check here for actual PROT vs expected (ModelRProt)
@@ -411,7 +405,7 @@ begin
         end if ;
 
         if ReadAvailable and IsReadData(TransRec.Operation) then
-          LocalAR.Addr := ReadAddressTransactionFifo.Pop ;
+          LocalAR.Addr := pop(ReadAddressTransactionFifo) ;
           ReadByteAddr  :=  CalculateByteAddress(LocalAR.Addr, AXI_BYTE_ADDR_WIDTH);
 
           -- Data Sizing Checks
@@ -420,7 +414,7 @@ begin
  
           -- Get Read Data Response Values
           LocalRD.Data  := AlignBytesToDataBus(SafeResize(TransRec.DataToModel, LocalRD.Data'length), TransRec.DataWidth, ReadByteAddr) ;
-          ReadDataFifo.push(LocalRD.Data & ModelRResp) ;
+          push(ReadDataFifo, LocalRD.Data & ModelRResp) ;
           Increment(ReadDataRequestCount) ;
 
 -- Currently all ReadData Operations are Async
@@ -476,7 +470,7 @@ begin
         wait for 0 ns ; 
 
       when MULTIPLE_DRIVER_DETECT =>
-        Alert(ModelID, "Axi4Responder: Multiple Drivers on Transaction Record." & 
+        Alert(ModelID, "Axi4ResponderVti: Multiple Drivers on Transaction Record." & 
                        "  Transaction # " & to_string(TransactionCount), FAILURE) ;
         wait for 0 ns ;  
 
@@ -520,7 +514,7 @@ begin
       ) ;
 
       -- capture address, prot
-      WriteAddressFifo.push(AW.Addr & AW.Prot) ;
+      push(WriteAddressFifo, AW.Addr & AW.Prot) ;
 
       -- Log this operation
       Log(ModelID,
@@ -568,10 +562,10 @@ begin
 
       -- capture Data, wstrb
       if WD.Valid = '1' then
-        WriteDataFifo.push(WD.Data & WD.Strb & WD.Last & WD.User) ;
+        push(WriteDataFifo, WD.Data & WD.Strb & WD.Last & WD.User) ;
       else
         -- On failure to receive Valid, assert LAST
-        WriteDataFifo.push(WD.Data & WD.Strb & '1' & WD.User) ;
+        push(WriteDataFifo, WD.Data & WD.Strb & '1' & WD.User) ;
       end if ;
 
       -- Log this operation
@@ -604,6 +598,7 @@ begin
     WR.Resp  <= (WR.Resp'range => '0') ;
     WR.ID    <= (WR.ID'range => '0') ;
     WR.User  <= (WR.User'range => '0') ;
+    wait for 0 ns ; -- Allow WriteResponseFifo to initialize
 
     WriteResponseLoop : loop
       -- Find Transaction
@@ -612,8 +607,8 @@ begin
       if WriteResponseDoneCount >= WriteReceiveCount then
         WaitForToggle(WriteReceiveCount) ;
       end if ;
-      if not WriteResponseFifo.Empty then
-        Local.Resp := WriteResponseFifo.pop ;
+      if not empty(WriteResponseFifo) then
+        Local.Resp := pop(WriteResponseFifo) ;
       else
         Local.Resp := AXI4_RESP_OKAY ;
       end if ;
@@ -687,8 +682,8 @@ begin
       ) ;
 
       -- capture address, prot
-      ReadAddressFifo.push(AR.Addr & AR.Prot) ;
-      ReadAddressTransactionFifo.Push(AR.Addr) ;
+      push(ReadAddressFifo, AR.Addr & AR.Prot) ;
+      push(ReadAddressTransactionFifo, AR.Addr) ;
       increment(ReadAddressReceiveCount) ;
       wait for 0 ns ;
 
@@ -717,6 +712,7 @@ begin
     RD.Resp  <= (RD.Resp'range => '0') ;
     RD.ID    <= (RD.ID'range => '0') ;
     RD.User  <= (RD.User'range => '0') ; 
+    wait for 0 ns ; -- Allow ReadDataFifo to initialize
 
     ReadDataLoop : loop
       -- Start a Read Data Response Transaction after receiving a read address
@@ -726,15 +722,15 @@ begin
 
       WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_DELAY_CYCLES)))) ; 
 
-      if ReadDataFifo.Empty then
+      if empty(ReadDataFifo) then
         WaitForToggle(ReadDataRequestCount) ;
       end if ;
 
-      (Local.Data, Local.Resp) := ReadDataFifo.pop ;
+      (Local.Data, Local.Resp) := pop(ReadDataFifo) ;
 
 --      -- Find Response if available
---      if not ReadDataFifo.Empty then
---        (Local.Data, Local.Resp) := ReadDataFifo.pop ;
+--      if not empty(ReadDataFifo) then
+--        (Local.Data, Local.Resp) := pop(ReadDataFifo) ;
 --      else
 --        Local.Data := to_slv(ReadAddressReceiveCount, RData'length) ;
 --        Local.Resp := AXI4_RESP_OKAY ;

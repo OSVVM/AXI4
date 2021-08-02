@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
 --    06/2021   2021.06    GHDL support + new memory data structure  
 --    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.   
 --    06/2020   2020.06    Derived from Axi4Responder.vhd
@@ -127,12 +128,12 @@ architecture MemoryResponder of Axi4Memory is
       DataWidth  => 8                -- Memory is byte oriented
     ) ; 
 
-  shared variable WriteAddressFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable WriteDataFifo        : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable WriteResponseFifo    : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-
-  shared variable ReadAddressFifo      : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-  shared variable ReadDataFifo         : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+  signal WriteAddressFifo     : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal WriteDataFifo        : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal WriteResponseFifo    : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  
+  signal ReadAddressFifo      : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal ReadDataFifo         : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
 
   -- Setup so that if no configuration is done, accept transactions
   signal WriteAddressExpectCount     : integer := 0 ;
@@ -179,19 +180,13 @@ begin
     BusFailedID  <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
     DataCheckID  <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
 
-    -- Use model ID as AlertLogID as only message is FIFO Empty while Read failure
-    WriteAddressFifo.SetAlertLogID (ID);
-    WriteDataFifo.SetAlertLogID    (ID);
-    WriteResponseFifo.SetAlertLogID(ID);
-    ReadAddressFifo.SetAlertLogID  (ID);
-    ReadDataFifo.SetAlertLogID     (ID);
-
-    -- Set Names for the FIFO so reporting identifies which FIFO has the issue.
-    WriteAddressFifo.SetName (MODEL_INSTANCE_NAME & ": WriteAddressFIFO");
-    WriteDataFifo.SetName    (MODEL_INSTANCE_NAME & ": WriteDataFifo");
-    WriteResponseFifo.SetName(MODEL_INSTANCE_NAME & ": WriteResponseFifo");
-    ReadAddressFifo.SetName  (MODEL_INSTANCE_NAME & ": ReadAddressFifo");
-    ReadDataFifo.SetName     (MODEL_INSTANCE_NAME & ": ReadDataFifo");
+    -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
+    --   FIFOS only generate usage type errors 
+    WriteAddressFifo    <= NewID(MODEL_INSTANCE_NAME & ": WriteAddressFIFO",   ID, DoNotReport => TRUE);
+    WriteDataFifo       <= NewID(MODEL_INSTANCE_NAME & ": WriteDataFifo",      ID, DoNotReport => TRUE);
+    WriteResponseFifo   <= NewID(MODEL_INSTANCE_NAME & ": WriteResponseFifo",  ID, DoNotReport => TRUE);
+    ReadAddressFifo     <= NewID(MODEL_INSTANCE_NAME & ": ReadAddressFifo",    ID, DoNotReport => TRUE);
+    ReadDataFifo        <= NewID(MODEL_INSTANCE_NAME & ": ReadDataFifo",       ID, DoNotReport => TRUE);
     wait ;
   end process InitalizeAlertLogIDs ;
 
@@ -206,19 +201,6 @@ begin
     ) ;
     wait ;
   end process InitalizeOptions ;
-
-
---  ------------------------------------------------------------
---  --  Initialize Memory
---  ------------------------------------------------------------
---  InitalizeMemory : process
---  begin
---    Memory.MemInit (
---      AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
---      DataWidth  => 8                -- Memory is byte oriented
---    ) ;
---    wait ;
---  end process InitalizeMemory ;
 
 
   ------------------------------------------------------------
@@ -281,8 +263,8 @@ begin
 
       when WRITE_OP =>
         -- Back door Write access to memory.  Completes without time passing.
-        Address    := FromTransaction(TransRec.Address, Address'length) ;
-        Data       := FromTransaction(TransRec.DataToModel, Data'length) ;
+        Address    := SafeResize(TransRec.Address, Address'length) ;
+        Data       := SafeResize(TransRec.DataToModel, Data'length) ;
         DataWidth  := TransRec.DataWidth ;
         NumBytes   := DataWidth / 8 ;
 
@@ -297,7 +279,7 @@ begin
 
       when READ_OP | READ_CHECK =>
         -- Back door Read access to memory.  Completes without time passing.
-        Address    := FromTransaction(TransRec.Address, Address'length) ;
+        Address    := SafeResize(TransRec.Address, Address'length) ;
 --        ByteAddr   := CalculateByteAddress(Address, AXI_BYTE_ADDR_WIDTH);
         Data       := (others => '0') ;
         DataWidth  := TransRec.DataWidth ;
@@ -313,10 +295,10 @@ begin
           Data((8*i + 7)  downto 8*i) := ByteData ;
         end loop ;
 
-        TransRec.DataFromModel <= ToTransaction(Data, TransRec.DataFromModel'length) ;
+        TransRec.DataFromModel <= SafeResize(Data, TransRec.DataFromModel'length) ;
 
         if IsReadCheck(TransRec.Operation) then
-          ExpectedData := FromTransaction(TransRec.DataToModel, ExpectedData'length) ;
+          ExpectedData := SafeResize(TransRec.DataToModel, ExpectedData'length) ;
           AffirmIf( DataCheckID, Data = ExpectedData,
             "Read Address: " & to_hstring(Address) &
             "  Data: " & to_hstring(Data) &
@@ -433,7 +415,7 @@ begin
       ) ;
 
       -- Send Address Information to WriteHandler
-      WriteAddressFifo.push(AW.Addr & AW.Len & AW.Prot & AW.Size & AW.Burst & AW.ID & AW.User ) ;
+      push(WriteAddressFifo, AW.Addr & AW.Len & AW.Prot & AW.Size & AW.Burst & AW.ID & AW.User ) ;
 
       -- Signal completion
       increment(WriteAddressReceiveCount) ;
@@ -473,7 +455,7 @@ begin
 
 
       -- Send to WriteHandler
-      WriteDataFifo.push(WD.Data & WD.Strb) ;
+      push(WriteDataFifo, WD.Data & WD.Strb) ;
 
 --!! Add AXI Full Information
 --!9 Resolve Level
@@ -502,102 +484,91 @@ begin
   WriteHandler : process
     variable LAW : AxiBus.WriteAddress'subtype ;
     alias AW : AxiBus.WriteAddress'subtype is AxiBus.WriteAddress ;
-/*    
-    variable LAW : Axi4WriteAddressRecType (
-                          Addr(AW.Addr'range),
-                          ID(AW.ID'range),
-                          User(AW.User'range)
-                        ) ;
-*/                        
     variable LWD : AxiBus.WriteData'subtype ;
     alias    WD  : AxiBus.WriteData'subtype is AxiBus.WriteData ;
- /*   
-    variable LWD : Axi4WriteDataRecType (
-                      Data(WD.Data'range),
-                      Strb(WD.Strb'range),
-                      User(WD.User'range),
-                      ID(WD.ID'range)
-                    ) ;
-*/
     variable BurstLen         : integer ;
     variable ByteAddressBits  : integer ;
     variable BytesPerTransfer : integer ;
     variable TransferAddress, MemoryAddress : std_logic_vector(LAW.Addr'range) ;
     variable ByteData         : std_logic_vector(7 downto 0) ;
   begin
-    -- Find Write Address and Data transaction
-    if WriteAddressFifo.empty then
-      WaitForToggle(WriteAddressReceiveCount) ;
-    end if ;
-    (LAW.Addr, LAW.Len, LAW.Prot, LAW.Size, LAW.Burst, LAW.ID, LAW.User) := WriteAddressFifo.pop ;
-
-    if LAW.Len'length > 0 then
-      BurstLen := to_integer(LAW.Len) + 1 ;
-    else
-      BurstLen := 1 ;
-    end if ;
-
-    if LAW.Size'length > 0 then
-      ByteAddressBits   := to_integer(LAW.Size) ;
-      BytesPerTransfer  := 2 ** ByteAddressBits ;
-    else
-      ByteAddressBits   := AXI_BYTE_ADDR_WIDTH ;
-      BytesPerTransfer  := AXI_DATA_BYTE_WIDTH ;
-    end if ;
-
-    -- first word in a burst or single word transfer
-    TransferAddress  := LAW.Addr(LAW.Addr'left downto ByteAddressBits) & (ByteAddressBits downto 1 => '0') ;
-    -- GetWordAddr(Addr, BytesPerTransfer) ;
-    MemoryAddress    := TransferAddress(LAW.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
-    -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
-
---!3 Delay before first word - burst vs. single word
-
-    -- Burst transfers
-    BurstLoop : for i in 1 to BurstLen loop
-      -- Wait for Data
-      if WriteDataFifo.empty then
-        WaitForToggle(WriteDataReceiveCount) ;
+    wait for 0 ns ; -- Allow WriteAddressFifo to initialize
+    
+    WriteHandlerLoop : loop 
+      -- Find Write Address and Data transaction
+      if empty(WriteAddressFifo) then
+        WaitForToggle(WriteAddressReceiveCount) ;
       end if ;
-      (LWD.Data, LWD.Strb) := WriteDataFifo.pop ;
+      (LAW.Addr, LAW.Len, LAW.Prot, LAW.Size, LAW.Burst, LAW.ID, LAW.User) := pop(WriteAddressFifo) ;
 
-      if i = 1 then
-        Log(ModelID,
-          "Memory Write." &
-          "  AWAddr: "    & to_hstring(LAW.Addr) &
-          "  AWProt: "    & to_string (LAW.Prot) &
-          "  WData: "     & to_hstring(LWD.Data) &
-          "  WStrb: "     & to_string (LWD.Strb) &
-          "  Operation# " & to_string (WriteReceiveCount),
-          INFO
-        ) ;
+      if LAW.Len'length > 0 then
+        BurstLen := to_integer(LAW.Len) + 1 ;
+      else
+        BurstLen := 1 ;
       end if ;
 
-      -- Memory is byte oriented.  Access as Bytes
-      for j in 0 to AXI_DATA_BYTE_WIDTH-1 loop
-        if LWD.Strb(j) = '1' then
-          ByteData := LWD.Data((8*j + 7)  downto 8*j) ;
-          MemWrite(MemoryID, MemoryAddress + j, ByteData) ;
-        end if ;
-      end loop ;
+      if LAW.Size'length > 0 then
+        ByteAddressBits   := to_integer(LAW.Size) ;
+        BytesPerTransfer  := 2 ** ByteAddressBits ;
+      else
+        ByteAddressBits   := AXI_BYTE_ADDR_WIDTH ;
+        BytesPerTransfer  := AXI_DATA_BYTE_WIDTH ;
+      end if ;
 
---!5        GetNextBurstAddress(Address, BurstType) ;  -- to support Wrap addressing
-      TransferAddress := TransferAddress + BytesPerTransfer ;
-      MemoryAddress   := TransferAddress(LAW.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
+      -- first word in a burst or single word transfer
+      TransferAddress  := LAW.Addr(LAW.Addr'left downto ByteAddressBits) & (ByteAddressBits downto 1 => '0') ;
+      -- GetWordAddr(Addr, BytesPerTransfer) ;
+      MemoryAddress    := TransferAddress(LAW.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
       -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
 
-      --!3 Delay between burst words - burst vs. single word
+  --!3 Delay before first word - burst vs. single word
 
-    end loop BurstLoop ;
+      -- Burst transfers
+      BurstLoop : for i in 1 to BurstLen loop
+        -- Wait for Data
+        if empty(WriteDataFifo) then
+          WaitForToggle(WriteDataReceiveCount) ;
+        end if ;
+        (LWD.Data, LWD.Strb) := pop(WriteDataFifo) ;
 
---!3 Delay after last word - burst vs. single word
+        if i = 1 then
+          Log(ModelID,
+            "Memory Write." &
+            "  AWAddr: "    & to_hstring(LAW.Addr) &
+            "  AWProt: "    & to_string (LAW.Prot) &
+            "  WData: "     & to_hstring(LWD.Data) &
+            "  WStrb: "     & to_string (LWD.Strb) &
+            "  Operation# " & to_string (WriteReceiveCount),
+            INFO
+          ) ;
+        end if ;
 
---!9 Get response from Params
---!9 Does response vary with Address?
---!! Only one response per burst cycle.  Last cycle of a burst only
-    WriteResponseFifo.push(ModelBResp & LAW.ID & LAW.User) ;
-    increment(WriteReceiveCount) ;
-    wait for 0 ns ;
+        -- Memory is byte oriented.  Access as Bytes
+        for j in 0 to AXI_DATA_BYTE_WIDTH-1 loop
+          if LWD.Strb(j) = '1' then
+            ByteData := LWD.Data((8*j + 7)  downto 8*j) ;
+            MemWrite(MemoryID, MemoryAddress + j, ByteData) ;
+          end if ;
+        end loop ;
+
+  --!5        GetNextBurstAddress(Address, BurstType) ;  -- to support Wrap addressing
+        TransferAddress := TransferAddress + BytesPerTransfer ;
+        MemoryAddress   := TransferAddress(LAW.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
+        -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
+
+        --!3 Delay between burst words - burst vs. single word
+
+      end loop BurstLoop ;
+
+  --!3 Delay after last word - burst vs. single word
+
+  --!9 Get response from Params
+  --!9 Does response vary with Address?
+  --!! Only one response per burst cycle.  Last cycle of a burst only
+      push(WriteResponseFifo, ModelBResp & LAW.ID & LAW.User) ;
+      increment(WriteReceiveCount) ;
+      wait for 0 ns ;
+    end loop WriteHandlerLoop ; 
   end process WriteHandler ;
 
 
@@ -609,10 +580,6 @@ begin
     alias    WR    : AxiBus.WriteResponse'subtype is AxiBus.WriteResponse ;
     variable Local : AxiBus.WriteResponse'subtype ;
     
-    -- variable Local : Axi4WriteResponseRecType (
-                          -- ID(WR.ID'range),
-                          -- User(WR.User'range)
-                        -- ) ;
     variable WriteResponseReadyTimeOut : integer := 25 ;
   begin
     -- initialize
@@ -620,13 +587,14 @@ begin
     WR.Resp  <= (Local.Resp'range => '0') ;
     WR.ID    <= (Local.ID'range => '0') ;
     WR.User  <= (Local.User'range => '0') ;
+    wait for 0 ns ; -- Allow WriteResponseFifo to initialize
 
     WriteResponseLoop : loop
       -- Find Transaction
-      if WriteResponseFifo.Empty then
+      if empty(WriteResponseFifo) then
         WaitForToggle(WriteReceiveCount) ;
       end if ;
-      (Local.Resp, Local.ID, Local.User) := WriteResponseFifo.pop ;
+      (Local.Resp, Local.ID, Local.User) := pop(WriteResponseFifo) ;
 
       WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_RESPONSE_VALID_DELAY_CYCLES)))) ; 
 
@@ -717,7 +685,7 @@ begin
       ) ;
 
       -- Send Address Information to ReadHandler
-      ReadAddressFifo.push(AR.Addr & AR.Len & AR.Prot & AR.Size & AR.Burst & AR.ID & AR.User ) ;
+      push(ReadAddressFifo, AR.Addr & AR.Len & AR.Prot & AR.Size & AR.Burst & AR.ID & AR.User ) ;
 
     -- Signal completion
       increment(ReadAddressReceiveCount) ;
@@ -757,66 +725,69 @@ begin
     variable MemoryAddress, TransferAddress : std_logic_vector(LAR.Addr'length-1 downto 0) ;
     variable ByteData         : std_logic_vector(7 downto 0) ;
   begin
-    if ReadAddressFifo.Empty then
-      WaitForToggle(ReadAddressReceiveCount) ;
-    end if ;
-    (LAR.Addr, LAR.Len, LAR.Prot, LAR.Size, LAR.Burst, LAR.ID, LAR.User) := ReadAddressFifo.pop ;
+    wait for 0 ns ; -- Allow ReadAddressFifo to initialize
 
---!6 Add delay to access memory by type of address: Single Word, First Burst, Burst, Last Burst
+    ReadHandlerLoop : loop 
+      if empty(ReadAddressFifo) then
+        WaitForToggle(ReadAddressReceiveCount) ;
+      end if ;
+      (LAR.Addr, LAR.Len, LAR.Prot, LAR.Size, LAR.Burst, LAR.ID, LAR.User) := pop(ReadAddressFifo) ;
 
-    if LAR.Len'length > 0 then
-      BurstLen := to_integer(LAR.Len) + 1 ;
-    else
-      BurstLen := 1 ;
-    end if ;
+  --!6 Add delay to access memory by type of address: Single Word, First Burst, Burst, Last Burst
 
-    if LAR.Size'length > 0 then
-      ByteAddressBits   := to_integer(LAR.Size) ;
-      BytesPerTransfer  := 2 ** ByteAddressBits ;
-    else
-      ByteAddressBits   := AXI_BYTE_ADDR_WIDTH ;
-      BytesPerTransfer  := AXI_DATA_BYTE_WIDTH ;
-    end if ;
-
-    -- first word in a burst or single word transfer
-    TransferAddress  := LAR.Addr(LAR.Addr'left downto ByteAddressBits) & (ByteAddressBits downto 1 => '0') ;
-    -- GetWordAddr(Addr, BytesPerTransfer) ;
-    MemoryAddress    := TransferAddress(LAR.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
-    -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
-
-    LRD.Last := '0' ;
-    BurstLoop : for i in 1 to BurstLen loop
-      -- Memory is byte oriented.  Access as Bytes
-      for i in 0 to AXI_DATA_BYTE_WIDTH-1 loop
-        MemRead(MemoryID, MemoryAddress + i, ByteData) ;
-        LRD.Data((8*i + 7)  downto 8*i) := ByteData ;
-      end loop ;
-
-      if i = 1 then
-        Log(ModelID,
-          "Memory Read." &
-          "  ARAddr: "    & to_hstring(LAR.Addr) &
-          "  ARProt: "    & to_string (LAR.Prot) &
-          "  RData: "     & to_hstring(LRD.Data) &
-          "  Operation# " & to_string (ReadDataRequestCount),
-          INFO
-        ) ;
+      if LAR.Len'length > 0 then
+        BurstLen := to_integer(LAR.Len) + 1 ;
+      else
+        BurstLen := 1 ;
       end if ;
 
---!5        GetNextBurstAddress(TransferAddress, BurstType) ;  -- to support Wrap
-      TransferAddress := TransferAddress + BytesPerTransfer ;
-      MemoryAddress    := TransferAddress(TransferAddress'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
+      if LAR.Size'length > 0 then
+        ByteAddressBits   := to_integer(LAR.Size) ;
+        BytesPerTransfer  := 2 ** ByteAddressBits ;
+      else
+        ByteAddressBits   := AXI_BYTE_ADDR_WIDTH ;
+        BytesPerTransfer  := AXI_DATA_BYTE_WIDTH ;
+      end if ;
+
+      -- first word in a burst or single word transfer
+      TransferAddress  := LAR.Addr(LAR.Addr'left downto ByteAddressBits) & (ByteAddressBits downto 1 => '0') ;
+      -- GetWordAddr(Addr, BytesPerTransfer) ;
+      MemoryAddress    := TransferAddress(LAR.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
       -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
 
-      if i = BurstLen then
-        LRD.Last := '1' ;
-      end if ;
-      ReadDataFifo.push(LRD.Data & LRD.Last & ModelRResp & LAR.ID & LAR.User) ;
-      increment(ReadDataRequestCount) ;
-      wait for 0 ns ;
+      LRD.Last := '0' ;
+      BurstLoop : for i in 1 to BurstLen loop
+        -- Memory is byte oriented.  Access as Bytes
+        for i in 0 to AXI_DATA_BYTE_WIDTH-1 loop
+          MemRead(MemoryID, MemoryAddress + i, ByteData) ;
+          LRD.Data((8*i + 7)  downto 8*i) := ByteData ;
+        end loop ;
 
-    end loop BurstLoop ;
+        if i = 1 then
+          Log(ModelID,
+            "Memory Read." &
+            "  ARAddr: "    & to_hstring(LAR.Addr) &
+            "  ARProt: "    & to_string (LAR.Prot) &
+            "  RData: "     & to_hstring(LRD.Data) &
+            "  Operation# " & to_string (ReadDataRequestCount),
+            INFO
+          ) ;
+        end if ;
 
+  --!5        GetNextBurstAddress(TransferAddress, BurstType) ;  -- to support Wrap
+        TransferAddress := TransferAddress + BytesPerTransfer ;
+        MemoryAddress    := TransferAddress(TransferAddress'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
+        -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
+
+        if i = BurstLen then
+          LRD.Last := '1' ;
+        end if ;
+        push(ReadDataFifo, LRD.Data & LRD.Last & ModelRResp & LAR.ID & LAR.User) ;
+        increment(ReadDataRequestCount) ;
+        wait for 0 ns ;
+
+      end loop BurstLoop ;
+    end loop ReadHandlerLoop ;
   end process ReadHandler ;
 
 
@@ -843,12 +814,13 @@ begin
     RD.ID    <= (Local.ID'range => '0') ;
     RD.User  <= (Local.User'range => '0') ;
     RD.Last  <= '0' ;
+    wait for 0 ns ; -- Allow ReadDataFifo to initialize
 
     ReadDataLoop : loop
-      if ReadDataFifo.Empty then
+      if empty(ReadDataFifo) then
         WaitForToggle(ReadDataRequestCount) ;
       end if ;
-      (Local.Data, Local.Last, Local.Resp, Local.ID, Local.User) := ReadDataFifo.pop ;
+      (Local.Data, Local.Last, Local.Resp, Local.ID, Local.User) := pop(ReadDataFifo) ;
 
       if NewTransfer then
         WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_DELAY_CYCLES)))) ; 

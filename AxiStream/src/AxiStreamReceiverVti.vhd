@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date       Version    Description
+--    07/2021    2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
 --    06/2021    2021.06    Updated Burst FIFOs.
 --    02/2021    2021.02    Added MultiDriver Detect.  Updated Generics.   
 --    12/2020    2020.12    Created Virtual Transaction Interface from AxiStreamReceiver.vhd
@@ -100,6 +101,12 @@ entity AxiStreamReceiverVti is
 
 end entity AxiStreamReceiverVti ;
 architecture behavioral of AxiStreamReceiverVti is
+  constant MODEL_INSTANCE_NAME : string :=
+    -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
+    IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamReceiverVti'PATH_NAME))) ;
+
+  signal ModelID, ProtocolID, DataCheckID, BusFailedID, BurstFifoID : AlertLogIDType ; 
+  
   constant ID_LEN       : integer := TID'length ;
   constant DEST_LEN     : integer := TDest'length ;
   constant USER_LEN     : integer := TUser'length ;
@@ -108,13 +115,7 @@ architecture behavioral of AxiStreamReceiverVti is
   constant DEST_RIGHT   : integer := USER_RIGHT + USER_LEN ; 
   constant ID_RIGHT     : integer := DEST_RIGHT + DEST_LEN ; 
 
-  constant MODEL_INSTANCE_NAME : string :=
-    -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
-    IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamReceiverVti'PATH_NAME))) ;
-
-  signal ModelID, ProtocolID, DataCheckID, BusFailedID, BurstFifoID : AlertLogIDType ; 
-  
-  shared variable ReceiveFifo   : osvvm.ScoreboardPkg_slv.ScoreboardPType ; 
+  signal ReceiveFifo : osvvm.ScoreboardPkg_slv.ScoreboardIDType ; 
 
   signal ReceiveCount : integer := 0 ;   
   signal ReceiveByteCount, TransferByteCount : integer := 0 ;   
@@ -143,12 +144,12 @@ begin
     variable ID : AlertLogIDType ; 
   begin
     -- Alerts 
-    ID                      := GetAlertLogID(MODEL_INSTANCE_NAME) ; 
-    ModelID                 <= ID ; 
---    ProtocolID              <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
-    DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
-    BusFailedID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
-    ReceiveFifo.SetAlertLogID(MODEL_INSTANCE_NAME & ": ReceiveFifo", ID) ; 
+    ID            := GetAlertLogID(MODEL_INSTANCE_NAME) ; 
+    ModelID       <= ID ; 
+--    ProtocolID    <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
+    DataCheckID   <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
+    BusFailedID   <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
+    ReceiveFifo   <= NewID(MODEL_INSTANCE_NAME & ": ReceiveFifo", ID) ; 
     wait ; 
   end process Initialize ;
 
@@ -184,7 +185,7 @@ begin
       
   begin
     wait for 0 ns ; 
-    TransRec.BurstFifo <= NewID("TxBurstFifo", ModelID) ;
+    TransRec.BurstFifo <= NewID("RxBurstFifo", ModelID) ;
     wait for 0 ns ; 
 --    SetAlertLogID(TransRec.BurstFifo, MODEL_INSTANCE_NAME & ": BurstFifo", ModelID) ;
     BurstFifoID        <= GetAlertLogID(TransRec.BurstFifo) ; 
@@ -209,7 +210,7 @@ begin
 
         when GET_TRANSACTION_COUNT =>
   --!! This is GetTotalTransactionCount vs. GetPendingTransactionCount
-  --!!  Get Pending Get Count = ReceiveFifo.GetFifoCount
+  --!!  Get Pending Get Count = GetFifoCount(ReceiveFifo)
           TransRec.IntFromModel <= ReceiveCount ;
           wait for 0 ns ; 
 
@@ -225,7 +226,7 @@ begin
           TransRec.IntToModel <= BurstFifoMode ;
 
         when GET | TRY_GET | CHECK | TRY_CHECK =>
-          if ReceiveFifo.empty and  IsTry(Operation) then
+          if Empty(ReceiveFifo) and  IsTry(Operation) then
             -- Return if no data
             TransRec.BoolFromModel  <= FALSE ; 
             TransRec.DataFromModel  <= (TransRec.DataFromModel'range => '0') ; 
@@ -234,20 +235,20 @@ begin
           else 
             -- Get data
             TransRec.BoolFromModel <= TRUE ; 
-            if ReceiveFifo.empty then 
+            if Empty(ReceiveFifo) then 
               -- Wait for data
               WaitForToggle(ReceiveCount) ;
             end if ; 
             -- Put Data and Parameters into record
-            (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
+            (Data, Param, BurstBoundary) := pop(ReceiveFifo) ;
             if BurstBoundary = '1' then 
               -- At BurstBoundary, there is always another word that 
               -- follows that triggered the Burst Boundary
-              (Data, Param, BurstBoundary) := ReceiveFifo.pop ;
+              (Data, Param, BurstBoundary) := pop(ReceiveFifo) ;
               BurstTransferCount := BurstTransferCount + 1 ; 
             end if ; 
-            TransRec.DataFromModel  <= ToTransaction(Data, TransRec.DataFromModel'length) ; 
-            TransRec.ParamFromModel <= ToTransaction(Param, TransRec.ParamFromModel'length) ; 
+            TransRec.DataFromModel  <= SafeResize(Data, TransRec.DataFromModel'length) ; 
+            TransRec.ParamFromModel <= SafeResize(Param, TransRec.ParamFromModel'length) ; 
             
             DispatcherReceiveCount := DispatcherReceiveCount + 1 ; 
             
@@ -257,9 +258,9 @@ begin
             end if ; 
             
             if IsCheck(Operation) then 
-              ExpectedData  := FromTransaction(TransRec.DataToModel, ExpectedData'length) ;
+              ExpectedData  := SafeResize(TransRec.DataToModel, ExpectedData'length) ;
               ExpectedParam  := UpdateOptions(
-                          Param      => FromTransaction(TransRec.ParamToModel, ExpectedParam'length),
+                          Param      => SafeResize(TransRec.ParamToModel, ExpectedParam'length),
                           ParamID    => ParamID, 
                           ParamDest  => ParamDest,
                           ParamUser  => ParamUser,
@@ -301,7 +302,7 @@ begin
             -- ReceiveFIFO: (TData & TID & TDest & TUser & TLast) 
             FifoWordCount := 0 ; 
             loop
-              (PopData, PopParam, BurstBoundary) := ReceiveFifo.pop ;
+              (PopData, PopParam, BurstBoundary) := pop(ReceiveFifo) ;
               -- BurstBoundary indication does not contain data for 
               -- this transaction so exit
               exit when BurstBoundary = '1' ;  
@@ -328,8 +329,8 @@ begin
           
             BurstTransferCount      := BurstTransferCount + 1 ; 
             TransRec.IntFromModel   <= FifoWordCount ; 
-            TransRec.DataFromModel  <= ToTransaction(Data, TransRec.DataFromModel'length) ; 
-            TransRec.ParamFromModel <= ToTransaction(Param, TransRec.ParamFromModel'length) ; 
+            TransRec.DataFromModel  <= SafeResize(Data, TransRec.DataFromModel'length) ; 
+            TransRec.ParamFromModel <= SafeResize(Param, TransRec.ParamFromModel'length) ; 
             
             DispatcherReceiveCount := DispatcherReceiveCount + 1 ; -- Operation or #Words Transfered based?
             Log(ModelID, 
@@ -359,7 +360,7 @@ begin
             FifoWordCount  := 0 ; 
             loop
              -- ReceiveFIFO: (TData & TID & TDest & TUser & TLast) 
-             (PopData, PopParam, BurstBoundary) := ReceiveFifo.pop ;
+             (PopData, PopParam, BurstBoundary) := pop(ReceiveFifo) ;
               -- BurstBoundary indication does not contain data for 
               -- this transaction so exit
               exit when BurstBoundary = '1' ;  
@@ -402,7 +403,7 @@ begin
               ) ;
             end if ; 
             ExpectedParam  := UpdateOptions(
-                        Param      => FromTransaction(TransRec.ParamToModel, ExpectedParam'length),
+                        Param      => SafeResize(TransRec.ParamToModel, ExpectedParam'length),
                         ParamID    => ParamID, 
                         ParamDest  => ParamDest,
                         ParamUser  => ParamUser,
@@ -426,8 +427,8 @@ begin
             
             BurstTransferCount      := BurstTransferCount + 1 ; 
             TransRec.IntFromModel   <= FifoWordCount ; 
-            TransRec.DataFromModel  <= ToTransaction(Data, TransRec.DataFromModel'length) ; 
-            TransRec.ParamFromModel <= ToTransaction(Param, TransRec.ParamFromModel'length) ; 
+            TransRec.DataFromModel  <= SafeResize(Data, TransRec.DataFromModel'length) ; 
+            TransRec.ParamFromModel <= SafeResize(Param, TransRec.ParamFromModel'length) ; 
             
             DispatcherReceiveCount := DispatcherReceiveCount + 1 ; -- Operation or #Words Transfered based?
             wait for 0 ns ; 
@@ -447,13 +448,13 @@ begin
               DropUndriven    := TransRec.BoolToModel ;
               
             when DEFAULT_ID =>                      
-              ParamID         <= FromTransaction(TransRec.ParamToModel, ParamID'length) ;
+              ParamID         <= SafeResize(TransRec.ParamToModel, ParamID'length) ;
               
             when DEFAULT_DEST => 
-              ParamDest       <= FromTransaction(TransRec.ParamToModel, ParamDest'length) ;
+              ParamDest       <= SafeResize(TransRec.ParamToModel, ParamDest'length) ;
               
             when DEFAULT_USER =>
-              ParamUser       <= FromTransaction(TransRec.ParamToModel, ParamUser'length) ;
+              ParamUser       <= SafeResize(TransRec.ParamToModel, ParamUser'length) ;
               
             when DEFAULT_LAST =>
               ParamLast       <= TransRec.IntToModel ;
@@ -476,13 +477,13 @@ begin
               TransRec.BoolFromModel <= DropUndriven ;
               
             when DEFAULT_ID =>                      
-              TransRec.ParamFromModel <= ToTransaction(ParamID, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ParamID, TransRec.ParamFromModel'length) ;
               
             when DEFAULT_DEST => 
-              TransRec.ParamFromModel <= ToTransaction(ParamDest, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ParamDest, TransRec.ParamFromModel'length) ;
               
             when DEFAULT_USER =>
-              TransRec.ParamFromModel <= ToTransaction(ParamUser, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ParamUser, TransRec.ParamFromModel'length) ;
               
             when DEFAULT_LAST =>
               TransRec.IntFromModel   <= ParamLast ;
@@ -493,6 +494,11 @@ begin
           end case ;
         -- The End -- Done  
           
+        when MULTIPLE_DRIVER_DETECT =>
+          Alert(ModelID, "AxiStreamReceiverVti: Multiple Drivers on Transaction Record." & 
+                         "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
+          wait for 0 ns ;  wait for 0 ns ;
+
         when others =>
           Alert(ModelID, "Unimplemented Transaction: " & to_string(Operation), FAILURE) ;
           wait for 0 ns ; 
@@ -520,7 +526,8 @@ begin
   begin
     -- Initialize
     TReady  <= '0' ;
-  
+    wait for 0 ns ; -- Allow ReceiveFifo to initialize 
+    
     ReceiveLoop : loop 
     
     
@@ -568,7 +575,7 @@ begin
 
       if (TID /= LastID or TDest /= LastDest) and LastLast /= '1' then
         -- push a burst boundary word, only the Burst Boundary value matters
-        ReceiveFifo.push(Data & TID & TDest & TUser & Last & '1') ;
+        push(ReceiveFifo, Data & TID & TDest & TUser & Last & '1') ;
         BurstReceiveCount <= BurstReceiveCount + 1 ; 
         if Last = '1' then
           wait for 0 ns ;  
@@ -579,7 +586,7 @@ begin
       LastDest := TDest ;
       LastLast := Last ;
       -- capture this transaction
-      ReceiveFifo.push(Data & TID & TDest & TUser & Last & '0') ;
+      push(ReceiveFifo, Data & TID & TDest & TUser & Last & '0') ;
       if Last = '1' then 
         BurstReceiveCount <= BurstReceiveCount + 1 ; 
       end if ; 
@@ -603,6 +610,4 @@ begin
       wait for 0 ns ;
     end loop ReceiveLoop ; 
   end process ReceiveHandler ;
-
-
 end architecture behavioral ;

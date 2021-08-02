@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date       Version    Description
+--    07/2021    2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
 --    06/2021    2021.06    Updated Burst FIFOs.
 --    02/2021    2021.02    Added Valid Delays.  Added MultiDriver Detect.  Updated Generics.
 --    10/2020    2020.10    Added Bursting per updates to Model Independent Transactions
@@ -102,19 +103,11 @@ entity AxiStreamTransmitter is
     TransRec  : inout StreamRecType
   ) ;
 
-  -- Burst Interface
-  -- Access via external names
---  shared variable BurstFifo     : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
-
   -- Derive AXI interface properties from interface signals
   constant AXI_STREAM_DATA_WIDTH   : integer := TData'length ;
 
 end entity AxiStreamTransmitter ;
 architecture SimpleTransmitter of AxiStreamTransmitter is
-  constant AXI_STREAM_DATA_BYTE_WIDTH  : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
-  constant AXI_ID_WIDTH   : integer    := TID'length ;
-  constant AXI_DEST_WIDTH : integer    := TDest'length ;
-
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
     IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamTransmitter'PATH_NAME))) ;
@@ -122,7 +115,11 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
   signal ModelID, BusFailedID : AlertLogIDType ;
 --  signal ProtocolID, DataCheckID : AlertLogIDType ;
 
-  shared variable TransmitFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType ;
+  constant AXI_STREAM_DATA_BYTE_WIDTH  : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
+  constant AXI_ID_WIDTH   : integer    := TID'length ;
+  constant AXI_DEST_WIDTH : integer    := TDest'length ;
+
+  signal TransmitFifo : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
 
   signal TransmitRequestCount, TransmitDoneCount      : integer := 0 ;
 
@@ -151,12 +148,12 @@ begin
     variable ID : AlertLogIDType ;
   begin
     -- Alerts
-    ID                      := GetAlertLogID(MODEL_INSTANCE_NAME) ;
-    ModelID                 <= ID ;
---    ProtocolID              <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
---    DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
-    BusFailedID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
-    TransmitFifo.SetAlertLogID(MODEL_INSTANCE_NAME & ": TransmitFifo", ID) ; 
+    ID              := GetAlertLogID(MODEL_INSTANCE_NAME) ;
+    ModelID         <= ID ;
+--    ProtocolID      <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
+--    DataCheckID     <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
+    BusFailedID     <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
+    TransmitFifo    <= NewID(MODEL_INSTANCE_NAME & ": TransmitFifo", ID) ; 
     wait ;
   end process Initialize ;
 
@@ -208,16 +205,16 @@ begin
           TransRec.IntToModel <= BurstFifoMode ;
 
         when SEND | SEND_ASYNC =>
-          Data   := FromTransaction(TransRec.DataToModel, Data'length) ;
+          Data   := SafeResize(TransRec.DataToModel, Data'length) ;
           Param  := UpdateOptions(
-                      Param      => FromTransaction(TransRec.ParamToModel, TransRec.ParamToModel'length),
+                      Param      => SafeResize(TransRec.ParamToModel, TransRec.ParamToModel'length),
                       ParamID    => ParamID,
                       ParamDest  => ParamDest,
                       ParamUser  => ParamUser,
                       ParamLast  => ParamLast,
                       Count      => ((TransmitRequestCount+1) - LastOffsetCount)
                     ) ;
-          TransmitFifo.Push('0' & Data & Param) ;
+          Push(TransmitFifo, '0' & Data & Param) ;
           Increment(TransmitRequestCount) ;
           wait for 0 ns ;
           if IsBlocking(TransRec.Operation) then
@@ -226,7 +223,7 @@ begin
 
         when SEND_BURST | SEND_BURST_ASYNC =>
           Param  := UpdateOptions(
-                      Param      => FromTransaction(TransRec.ParamToModel, TransRec.ParamToModel'length),
+                      Param      => SafeResize(TransRec.ParamToModel, TransRec.ParamToModel'length),
                       ParamID    => ParamID,
                       ParamDest  => ParamDest,
                       ParamUser  => ParamUser,
@@ -263,7 +260,7 @@ begin
             end case ;
   --          Param(0) := '1' when i = 0 else Last ;  -- TLast
             Param(0) := '1' when i = 0 else '0' ;  -- TLast
-            TransmitFifo.Push('1' & Data & Param) ;
+            Push(TransmitFifo, '1' & Data & Param) ;
           end loop ;
 
           wait for 0 ns ;
@@ -283,13 +280,13 @@ begin
               TransmitReadyTimeOut      <= TransRec.IntToModel ;
 
             when DEFAULT_ID =>
-              ParamID         <= FromTransaction(TransRec.ParamToModel, ParamID'length) ;
+              ParamID         <= SafeResize(TransRec.ParamToModel, ParamID'length) ;
 
             when DEFAULT_DEST =>
-              ParamDest       <= FromTransaction(TransRec.ParamToModel, ParamDest'length) ;
+              ParamDest       <= SafeResize(TransRec.ParamToModel, ParamDest'length) ;
 
             when DEFAULT_USER =>
-              ParamUser       <= FromTransaction(TransRec.ParamToModel, ParamUser'length) ;
+              ParamUser       <= SafeResize(TransRec.ParamToModel, ParamUser'length) ;
 
             when DEFAULT_LAST =>
               ParamLast       <= TransRec.IntToModel ;
@@ -312,13 +309,13 @@ begin
               TransRec.IntFromModel   <=  TransmitReadyTimeOut ;
 
             when DEFAULT_ID =>
-              TransRec.ParamFromModel <= ToTransaction(ParamID, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ParamID, TransRec.ParamFromModel'length) ;
 
             when DEFAULT_DEST =>
-              TransRec.ParamFromModel <= ToTransaction(ParamDest, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ParamDest, TransRec.ParamFromModel'length) ;
 
             when DEFAULT_USER =>
-              TransRec.ParamFromModel <= ToTransaction(ParamUser, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ParamUser, TransRec.ParamFromModel'length) ;
 
             when DEFAULT_LAST =>
               TransRec.IntFromModel   <= ParamLast ;
@@ -327,6 +324,11 @@ begin
               Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
               wait for 0 ns ;
           end case ;
+
+        when MULTIPLE_DRIVER_DETECT =>
+          Alert(ModelID, "AxiStreamTransmitter: Multiple Drivers on Transaction Record." & 
+                         "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
+          wait for 0 ns ;  wait for 0 ns ;
 
         -- The End -- Done
         when others =>
@@ -364,15 +366,16 @@ begin
     TStrb   <= (TStrb'range => 'X') ;
     TKeep   <= (TKeep'range => 'X') ;
     TLast   <= 'X' ;
+    wait for 0 ns ; -- Allow TransmitFifo to initialize 
 
     TransmitLoop : loop
       -- Find Transaction
-      if TransmitFifo.Empty then
+      if Empty(TransmitFifo) then
          WaitForToggle(TransmitRequestCount) ;
       end if ;
 
       -- Get Transaction
-      (Burst, Data, ID, Dest, User, Last) := TransmitFifo.Pop ;
+      (Burst, Data, ID, Dest, User, Last) := Pop(TransmitFifo) ;
 
       if NewTransfer or not Burst then
         WaitForClock(Clk, ValidDelayCycles) ;
@@ -448,5 +451,4 @@ begin
       wait for 0 ns ;
     end loop TransmitLoop ;
   end process TransmitHandler ;
-
 end architecture SimpleTransmitter ;

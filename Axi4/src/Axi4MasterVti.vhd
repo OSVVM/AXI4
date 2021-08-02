@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
 --    06/2021   2021.06    GHDL support + New Burst FIFOs 
 --    02/2021   2021.02    Added MultiDriver Detect.  Added Valid Delays.  Updated Generics.   
 --    12/2020   2020.12    Added Burst Word Mode.  Refactored code.  Added VTI
@@ -136,7 +137,6 @@ port (
         ) ;
 end entity Axi4MasterVti ;
 architecture AxiFull of Axi4MasterVti is
-
   -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4MasterVti'PATH_NAME))) ;
@@ -244,9 +244,6 @@ begin
 
     variable Operation       : AddressBusOperationType ;
     variable TransactionCount : integer := 0 ; 
---    variable WriteAddressTransactionCount  : integer := 0 ; 
---    variable WriteDataTransactionCount     : integer := 0 ; 
-    variable WriteResponseTransactionCount : integer := 0 ; 
   begin
     AxiDefaults := InitAxi4Rec(AxiDefaults, '0') ;
     LAW.Size    := to_slv(AXI_BYTE_ADDR_WIDTH, LAW.Size'length) ;
@@ -259,8 +256,6 @@ begin
     wait for 0 ns ; 
     TransRec.WriteBurstFifo <= NewID(MODEL_INSTANCE_NAME & ": WriteBurstFifo", ModelID) ;
     TransRec.ReadBurstFifo  <= NewID(MODEL_INSTANCE_NAME & ": ReadBurstFifo",  ModelID) ;
---    WriteBurstFifo.SetAlertLogID( MODEL_INSTANCE_NAME & ": Write Burst FIFO", ID) ;
---    ReadBurstFifo.SetAlertLogID( MODEL_INSTANCE_NAME & ": Read Burst FIFO", ID) ;
     
 --!! AWCache, ARCache Defaults
     loop
@@ -367,8 +362,6 @@ begin
             -- Initiate Write Address
             Push(WriteAddressFifo, LAW.Addr  & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
             Increment(WriteAddressRequestCount) ;
-            
---            WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
           end if ;
 
           if IsWriteData(Operation) then
@@ -380,20 +373,19 @@ begin
             Push(WriteDataFifo, '0' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
 
             Increment(WriteDataRequestCount) ;
---            WriteDataTransactionCount    := Increment(WriteDataTransactionCount) ; 
           end if ;
           
-          -- Transaction wait time and allow RequestCounts a delta cycle to update
-          wait for 0 ns ;  wait for 0 ns ;
+          -- Allow RequestCounts to update
+          wait for 0 ns ;  
 
 --!! If burst emulation is added, then this will need to be a while loop since
 --!! more than one transaction will be dispatched at a time.
-          if WriteAddressRequestCount /= WriteResponseTransactionCount and
-             WriteDataRequestCount /= WriteResponseTransactionCount then
+          if WriteAddressRequestCount /= WriteResponseExpectCount and
+             WriteDataRequestCount    /= WriteResponseExpectCount 
+          then
             -- Queue Expected Write Response
             Push(WriteResponseScoreboard, LWR.Resp) ;
             Increment(WriteResponseExpectCount) ;
-            WriteResponseTransactionCount := Increment(WriteResponseTransactionCount) ; 
           end if ;
           
           if IsBlockOnWriteAddress(Operation) and
@@ -434,7 +426,6 @@ begin
             Push(WriteAddressFifo, LAW.Addr  & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
 
             Increment(WriteAddressRequestCount) ;
---            WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
           end if ;
 
           if IsWriteData(Operation) then
@@ -457,29 +448,29 @@ begin
 
             -- Increment(WriteDataRequestCount) ;
             WriteDataRequestCount        <= Increment(WriteDataRequestCount, TransfersInBurst) ;
---            WriteDataTransactionCount    := Increment(WriteDataTransactionCount) ; 
           end if ;
 
-          -- Transaction wait time and allow RequestCounts a delta cycle to update
-          wait for 0 ns ;  wait for 0 ns ;
+          -- Allow RequestCounts to update
+          wait for 0 ns ;  
 
 --!! will need to be a while loop if more than one transaction can be dispatched at a time.
 --!! only happens if bursts are emulated - ie translated from a burst cycle to a multiple individual cycles
-          if WriteAddressRequestCount /= WriteResponseTransactionCount and WriteDataRequestCount /= WriteResponseTransactionCount then
+          if WriteAddressRequestCount /= WriteResponseExpectCount and 
+             WriteDataRequestCount    /= WriteResponseExpectCount 
+          then
             -- Queue Expected Write Response
             Push(WriteResponseScoreboard, LWR.Resp) ;
             Increment(WriteResponseExpectCount) ;
-            WriteResponseTransactionCount := Increment(WriteResponseTransactionCount) ; 
           end if ;
 
           if IsBlockOnWriteAddress(Operation) and
               WriteAddressRequestCount /= WriteAddressDoneCount then
-            -- Block until both write address done.
+            -- Block until write address done.
             wait until WriteAddressRequestCount = WriteAddressDoneCount ;
           end if ;
           if IsBlockOnWriteData(Operation) and
               WriteDataRequestCount /= WriteDataDoneCount then
-            -- Block until both write data done.
+            -- Block until write data done.
             wait until WriteDataRequestCount = WriteDataDoneCount ;
           end if ;
 

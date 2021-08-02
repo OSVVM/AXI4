@@ -18,10 +18,11 @@
 --        http://www.SynthWorks.com
 --
 --  Revision History:
---    Date       Version    Description
---    06/2021    2021.06    Updated Burst FIFOs.
---    02/2021    2021.02    Added Valid Delays.  Added MultiDriver Detect.  Updated Generics.
---    12/2020    2020.12    Created Virtual Transaction Interface from AxiStreamTransmitter.vhd
+--    Date      Version    Description
+--    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
+--    06/2021   2021.06    Updated Burst FIFOs.
+--    02/2021   2021.02    Added Valid Delays.  Added MultiDriver Detect.  Updated Generics.
+--    12/2020   2020.12    Created Virtual Transaction Interface from AxiStreamTransmitter.vhd
 --
 --  This file is part of OSVVM.
 --

@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
 --    06/2021   2021.06    GHDL support + new memory data structure  
 --    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.   
 --    12/2020   2020.12    Added VTI based on Axi4Memory.vhd

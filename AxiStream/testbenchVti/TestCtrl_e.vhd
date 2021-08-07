@@ -69,7 +69,7 @@ entity TestCtrl is
   constant DATA_WIDTH : integer := StreamTxRec.DataToModel'length ; 
   constant DATA_BYTES : integer := DATA_WIDTH/8 ; 
   
-  -- Access Burst FIFOs in Axi4Master using external names
+  -- Simplifying access to Burst FIFOs using aliases
   alias TxBurstFifo : ScoreboardIdType is StreamTxRec.BurstFifo ; 
   alias RxBurstFifo : ScoreboardIdType is StreamRxRec.BurstFifo ;
   

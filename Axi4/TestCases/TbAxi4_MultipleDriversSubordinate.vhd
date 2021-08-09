@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_MultipleDriversMaster.vhd
+--  File Name:         TbAxi4_MultipleDriversSubordinate.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -39,7 +39,7 @@
 --  limitations under the License.
 --  
 
-architecture MultipleDriversMaster of TestCtrl is
+architecture MultipleDriversSubordinate of TestCtrl is
 
   signal TestDone, Sync : integer_barrier := 1 ;
  
@@ -52,14 +52,14 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_MultipleDriversMaster") ;
+    SetAlertLogName("TbAxi4_MultipleDriversSubordinate") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
-    SetAlertStopCount(FAILURE, 2) ;    -- Allow 2 FAILURE Alerts
+    SetAlertStopCount(FAILURE, 2) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_MultipleDriversMaster.txt") ;
+    TranscriptOpen("./results/TbAxi4_MultipleDriversSubordinate.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -74,7 +74,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_MultipleDriversMaster.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MultipleDriversMaster.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_MultipleDriversSubordinate.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MultipleDriversSubordinate.txt", "") ; 
     
     print("") ;
     ReportAlerts(ExternalErrors => (FAILURE => -1, ERROR => 0, WARNING => 0)) ; 
@@ -84,42 +84,45 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
+    variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
   begin
     wait until nReset = '1' ;  
-    WaitForClock(MasterRec, 2) ; 
-    WaitForClock(MasterRec, 3) ; 
+    WaitForClock(ManagerRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
+    WaitForClock(SubordinateRec, 2) ;
+
+    WaitForBarrier(TestDone) ;
+    wait ;
+  end process ManagerProc ;
+
+
+  ------------------------------------------------------------
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
+  ------------------------------------------------------------
+  SubordinateProc : process
+    variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
+    variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
+  begin
+    wait until nReset = '1' ;  
+    WaitForClock(SubordinateRec, 1) ; 
+    WaitForClock(SubordinateRec, 1) ; 
     
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process SubordinateProc ;
 
 
-  ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
-  ------------------------------------------------------------
-  ResponderProc : process
-  begin
-    wait until nReset = '1' ;  
-    WaitForClock(ResponderRec, 2) ; 
-    WaitForClock(ResponderRec, 2) ; 
-    WaitForClock(MasterRec, 2) ;
-    
-    WaitForBarrier(TestDone) ;
-    wait ;
-  end process ResponderProc ;
+end MultipleDriversSubordinate ;
 
-
-end MultipleDriversMaster ;
-
-Configuration TbAxi4_MultipleDriversMaster of TbAxi4 is
+Configuration TbAxi4_MultipleDriversSubordinate of TbAxi4 is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(MultipleDriversMaster) ; 
+      use entity work.TestCtrl(MultipleDriversSubordinate) ; 
     end for ; 
   end for ; 
-end TbAxi4_MultipleDriversMaster ; 
+end TbAxi4_MultipleDriversSubordinate ; 

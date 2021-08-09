@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_AxSizeMasterMemory2.vhd
+--  File Name:         TbAxi4_AxSizeManagerMemory2.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---    For Master and Memory: 
+--    For Manager and Memory: 
 --        AWSIZE, ARSIZE
 --        Address boundaries on non-word boundaries
 --
@@ -41,12 +41,12 @@
 --  limitations under the License.
 --  
 
-architecture AxSizeMasterMemory2 of TestCtrl is
+architecture AxSizeManagerMemory2 of TestCtrl is
 
   signal TestDone, SetParams, RunTest, Sync : integer_barrier := 1 ;
 
-  signal TbMasterID : AlertLogIDType ; 
-  signal TbResponderID  : AlertLogIDType ; 
+  signal TbManagerID : AlertLogIDType ; 
+  signal TbSubordinateID  : AlertLogIDType ; 
   signal TransactionCount : integer := 0 ; 
   constant BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;   
 --  constant BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_BYTE_MODE ;   
@@ -61,15 +61,15 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_AxSizeMasterMemory2") ;
-    TbMasterID <= GetAlertLogID("TB Master Proc") ;
-    TbResponderID <= GetAlertLogID("TB Responder Proc") ;
+    SetAlertLogName("TbAxi4_AxSizeManagerMemory2") ;
+    TbManagerID <= GetAlertLogID("TB Manager Proc") ;
+    TbSubordinateID <= GetAlertLogID("TB Subordinate Proc") ;
     SetLogEnable(PASSED, TRUE) ;  -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_AxSizeMasterMemory2.txt") ;
+    TranscriptOpen("./results/TbAxi4_AxSizeManagerMemory2.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -85,7 +85,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_AxSizeMasterMemory2.txt", "../sim_shared/validated_results/TbAxi4_AxSizeMasterMemory2.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_AxSizeManagerMemory2.txt", "../sim_shared/validated_results/TbAxi4_AxSizeManagerMemory2.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 
@@ -95,37 +95,37 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiResponder
+  -- ManagerProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable Addr, ExpAddr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data, ExpData : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;  
     variable ValidDelayCycleOption : Axi4OptionsType ; 
     variable IntOption  : integer ; 
   begin
-    -- Must set Master options before start otherwise, ready will be active on first cycle.
+    -- Must set Manager options before start otherwise, ready will be active on first cycle.
     wait for 0 ns ; 
    
 ------------------------------------------------------  Check Defaults
     --------------------------------  Get and Check Defaults - Write
-    log(TbMasterID, "Checking IF Parameters for Write Address") ;
-    GetAxi4Options(MasterRec, AWSIZE,   IntOption) ;      -- 3 bits 2**N bytes
-    AffirmIfEqual(TbMasterID, IntOption,  2, "AWSIZE") ; 
+    log(TbManagerID, "Checking IF Parameters for Write Address") ;
+    GetAxi4Options(ManagerRec, AWSIZE,   IntOption) ;      -- 3 bits 2**N bytes
+    AffirmIfEqual(TbManagerID, IntOption,  2, "AWSIZE") ; 
 
 
-    WaitForClock(MasterRec, 4) ; 
+    WaitForClock(ManagerRec, 4) ; 
     
 ------------------------------------------------------  Write Test 1.
     --------------------------------  Set #1
-    SetAxi4Options(MasterRec, AWSIZE,   1) ;      -- 3 bits 2**N bytes
+    SetAxi4Options(ManagerRec, AWSIZE,   1) ;      -- 3 bits 2**N bytes
     
     --------------------------------  Get and Check #1
-    GetAxi4Options(MasterRec, AWSIZE,   IntOption) ;      -- 3 bits 2**N bytes
-    AffirmIfEqual(TbMasterID, IntOption,  1, "AWSIZE") ; 
+    GetAxi4Options(ManagerRec, AWSIZE,   IntOption) ;      -- 3 bits 2**N bytes
+    AffirmIfEqual(TbManagerID, IntOption,  1, "AWSIZE") ; 
     
     --------------------------------  Do Writes #1
-    log(TbMasterID, "Write with parameters setting #1, Defaults") ;
+    log(TbManagerID, "Write with parameters setting #1, Defaults") ;
     increment(TransactionCount) ;
     Addr := X"0000_0000" + 2 ; 
     Push(WriteBurstFifo, X"00FF_UUUU") ;  
@@ -136,7 +136,7 @@ begin
     Push(WriteBurstFifo, X"UUUU_AA99") ;  
     Push(WriteBurstFifo, X"CCBB_UUUU") ;  
     Push(WriteBurstFifo, X"UUUU_EEDD") ;  
-    WriteBurst(MasterRec, Addr, 8) ;
+    WriteBurst(ManagerRec, Addr, 8) ;
     
     Push(WriteBurstFifo, X"0000_UUUU") ;  
     Push(WriteBurstFifo, X"UUUU_1111") ;  
@@ -146,21 +146,21 @@ begin
     Push(WriteBurstFifo, X"UUUU_5555") ;  
     Push(WriteBurstFifo, X"6666_UUUU") ;  
     Push(WriteBurstFifo, X"UUUU_7777") ;  
-    WriteBurst(MasterRec, Addr+128, 8) ;
+    WriteBurst(ManagerRec, Addr+128, 8) ;
     
-    WaitForClock(MasterRec, 4) ; 
+    WaitForClock(ManagerRec, 4) ; 
     BlankLine(2) ;
 
 ------------------------------------------------------  Write Test 2.
     --------------------------------  Set #2
-    SetAxi4Options(MasterRec, AWSIZE,   2) ;      -- 3 bits 2**N bytes
+    SetAxi4Options(ManagerRec, AWSIZE,   2) ;      -- 3 bits 2**N bytes
     
     --------------------------------  Get and Check #2
-    GetAxi4Options(MasterRec, AWSIZE,   IntOption) ;      -- 3 bits 2**N bytes
-    AffirmIfEqual(TbMasterID, IntOption,  2, "AWSIZE") ; 
+    GetAxi4Options(ManagerRec, AWSIZE,   IntOption) ;      -- 3 bits 2**N bytes
+    AffirmIfEqual(TbManagerID, IntOption,  2, "AWSIZE") ; 
     
     --------------------------------  Do Writes #2
-    log(TbMasterID, "Write with parameters setting #2") ;
+    log(TbManagerID, "Write with parameters setting #2") ;
     increment(TransactionCount) ;
     Addr := X"0000_0000" + 256 + 2 ; 
     Push(WriteBurstFifo, X"CCDD_UUUU") ;  
@@ -168,31 +168,31 @@ begin
     Push(WriteBurstFifo, X"4455_6677") ;  
     Push(WriteBurstFifo, X"1122_3344") ;  
     Push(WriteBurstFifo, X"UUUU_EEFF") ;  
-    WriteBurst(MasterRec, Addr, 5) ;
+    WriteBurst(ManagerRec, Addr, 5) ;
     
     Push(WriteBurstFifo, X"9999_UUUU") ;  
     Push(WriteBurstFifo, X"7777_6666") ;  
     Push(WriteBurstFifo, X"5555_4444") ;  
     Push(WriteBurstFifo, X"3333_2222") ;  
     Push(WriteBurstFifo, X"UUUU_0000") ;  
-    WriteBurst(MasterRec, Addr+128, 5) ;
+    WriteBurst(ManagerRec, Addr+128, 5) ;
     
-    WaitForClock(MasterRec, 4) ; 
+    WaitForClock(ManagerRec, 4) ; 
     BlankLine(2) ;
 
 ------------------------------------------------------  Write Test 3.  Set and Get, Do Write
     WaitForBarrier(SetParams) ;
     increment(TransactionCount) ;
     --------------------------------  Set #3, None - Using Defaults
-    SetAxi4Options(MasterRec, AWSIZE,   0) ;      -- 3 bits 2**N bytes
+    SetAxi4Options(ManagerRec, AWSIZE,   0) ;      -- 3 bits 2**N bytes
     
     --------------------------------  Get and Check #3
-    GetAxi4Options(MasterRec, AWSIZE,   IntOption) ;      -- 3 bits 2**N bytes
-    AffirmIfEqual(TbMasterID, IntOption,  0, "AWSIZE") ; 
+    GetAxi4Options(ManagerRec, AWSIZE,   IntOption) ;      -- 3 bits 2**N bytes
+    AffirmIfEqual(TbManagerID, IntOption,  0, "AWSIZE") ; 
     
     --------------------------------  Do Writes #3
     WaitForBarrier(RunTest) ;
-    log(TbMasterID, "Write with parameters setting #3") ;
+    log(TbManagerID, "Write with parameters setting #3") ;
     Addr := X"0000_0000" + 512 + 1 ;  -- Byte 1
     Push(WriteBurstFifo, X"UUUU_22UU") ;  
     Push(WriteBurstFifo, X"UU33_UUUU") ;  
@@ -202,7 +202,7 @@ begin
     Push(WriteBurstFifo, X"UU77_UUUU") ;  
     Push(WriteBurstFifo, X"88UU_UUUU") ;  
     Push(WriteBurstFifo, X"UUUU_UU99") ;  
-    WriteBurst(MasterRec, Addr, 8) ;
+    WriteBurst(ManagerRec, Addr, 8) ;
     
     Push(WriteBurstFifo, X"44UU_UUUU") ;  
     Push(WriteBurstFifo, X"UUUU_UU55") ;  
@@ -212,34 +212,34 @@ begin
     Push(WriteBurstFifo, X"UUUU_UU99") ;  
     Push(WriteBurstFifo, X"UUUU_BBUU") ;  
     Push(WriteBurstFifo, X"UUAA_UUUU") ;  
-    WriteBurst(MasterRec, Addr+128+2, 8) ;  -- Byte 3
+    WriteBurst(ManagerRec, Addr+128+2, 8) ;  -- Byte 3
 
-    WaitForClock(MasterRec, 4) ; 
+    WaitForClock(ManagerRec, 4) ; 
     BlankLine(2) ;
 
 ------------------------------------------------------  Write Test 4.
     --------------------------------  Set #4
-    SetAxi4Options(MasterRec, AWSIZE,   2) ;      -- 3 bits 2**N bytes
+    SetAxi4Options(ManagerRec, AWSIZE,   2) ;      -- 3 bits 2**N bytes
     
     --------------------------------  Get and Check #4
-    GetAxi4Options(MasterRec, AWSIZE,   IntOption) ;      -- 3 bits 2**N bytes
-    AffirmIfEqual(TbMasterID, IntOption,  2, "AWSIZE") ; 
+    GetAxi4Options(ManagerRec, AWSIZE,   IntOption) ;      -- 3 bits 2**N bytes
+    AffirmIfEqual(TbManagerID, IntOption,  2, "AWSIZE") ; 
     
     --------------------------------  Do Writes #4
-    log(TbMasterID, "Write with parameters setting #4") ;
+    log(TbManagerID, "Write with parameters setting #4") ;
     increment(TransactionCount) ;
     Addr := X"0000_0000" + 1024 + 1 ;  -- Byte 1
     Push(WriteBurstFifo, X"CCDD_EEUU") ;  
     Push(WriteBurstFifo, X"8899_AABB") ;  
     Push(WriteBurstFifo, X"UUUU_UU77") ;  
-    WriteBurst(MasterRec, Addr, 3) ;
+    WriteBurst(ManagerRec, Addr, 3) ;
     
     Push(WriteBurstFifo, X"99UU_UUUU") ;  
     Push(WriteBurstFifo, X"7777_6666") ;  
     Push(WriteBurstFifo, X"UU55_4444") ;  
-    WriteBurst(MasterRec, Addr+128+2, 3) ; -- Byte 3
+    WriteBurst(ManagerRec, Addr+128+2, 3) ; -- Byte 3
     
-    WaitForClock(MasterRec, 4) ; 
+    WaitForClock(ManagerRec, 4) ; 
     BlankLine(2) ;
 
 --  ==================================================  Read Tests
@@ -248,46 +248,46 @@ begin
     
 ------------------------------------------------------  Read Test 1.
     --------------------------------  Set #1
-    SetAxi4Options(MasterRec, ARSIZE,   2) ;      -- 3 bits 2**N bytes
+    SetAxi4Options(ManagerRec, ARSIZE,   2) ;      -- 3 bits 2**N bytes
     
     --------------------------------  Get and Check #1
-    GetAxi4Options(MasterRec, ARSIZE,   IntOption) ;      -- 3 bits 2**N bytes
-    AffirmIfEqual(TbMasterID, IntOption,  2, "ARSIZE") ; 
+    GetAxi4Options(ManagerRec, ARSIZE,   IntOption) ;      -- 3 bits 2**N bytes
+    AffirmIfEqual(TbManagerID, IntOption,  2, "ARSIZE") ; 
     
     --------------------------------  Do Reads #1
-    log(TbMasterID, "Read with parameters setting #1, Defaults") ;
+    log(TbManagerID, "Read with parameters setting #1, Defaults") ;
     increment(TransactionCount) ;
     Addr := X"0000_0000" + 2 ; 
-    ReadBurst(MasterRec, Addr, 5) ;
+    ReadBurst(ManagerRec, Addr, 5) ;
    Check(ReadBurstFifo, X"00FF_----") ;  
    Check(ReadBurstFifo, X"4433_2211") ;  
    Check(ReadBurstFifo, X"8877_6655") ;  
    Check(ReadBurstFifo, X"CCBB_AA99") ;  
    Check(ReadBurstFifo, X"----_EEDD") ;  
     
-    ReadBurst(MasterRec, Addr+128, 5) ;
+    ReadBurst(ManagerRec, Addr+128, 5) ;
    Check(ReadBurstFifo, X"0000_----") ;  
    Check(ReadBurstFifo, X"2222_1111") ;  
    Check(ReadBurstFifo, X"4444_3333") ;  
    Check(ReadBurstFifo, X"6666_5555") ;  
    Check(ReadBurstFifo, X"----_7777") ;  
     
-    WaitForClock(MasterRec, 4) ; 
+    WaitForClock(ManagerRec, 4) ; 
     BlankLine(2) ;
 
 ------------------------------------------------------  Read Test 2.
     --------------------------------  Set #2
-    SetAxi4Options(MasterRec, ARSIZE,   1) ;      -- 3 bits 2**N bytes
+    SetAxi4Options(ManagerRec, ARSIZE,   1) ;      -- 3 bits 2**N bytes
     
     --------------------------------  Get and Check #2
-    GetAxi4Options(MasterRec, ARSIZE,   IntOption) ;      -- 3 bits 2**N bytes
-    AffirmIfEqual(TbMasterID, IntOption,  1, "ARSIZE") ; 
+    GetAxi4Options(ManagerRec, ARSIZE,   IntOption) ;      -- 3 bits 2**N bytes
+    AffirmIfEqual(TbManagerID, IntOption,  1, "ARSIZE") ; 
     
     --------------------------------  Do Reads #2
-    log(TbMasterID, "Read with parameters setting #2") ;
+    log(TbManagerID, "Read with parameters setting #2") ;
     increment(TransactionCount) ;
     Addr := X"0000_0000" + 256 + 2 ; 
-    ReadBurst(MasterRec, Addr, 8) ;
+    ReadBurst(ManagerRec, Addr, 8) ;
    Check(ReadBurstFifo, X"CCDD_----") ;  
    Check(ReadBurstFifo, X"----_AABB") ;  
    Check(ReadBurstFifo, X"8899_----") ;  
@@ -297,7 +297,7 @@ begin
    Check(ReadBurstFifo, X"1122_----") ;  
    Check(ReadBurstFifo, X"----_EEFF") ;  
     
-    ReadBurst(MasterRec, Addr+128, 8) ;
+    ReadBurst(ManagerRec, Addr+128, 8) ;
    Check(ReadBurstFifo, X"9999_----") ;  
    Check(ReadBurstFifo, X"----_6666") ;  
    Check(ReadBurstFifo, X"7777_----") ;  
@@ -307,49 +307,49 @@ begin
    Check(ReadBurstFifo, X"3333_----") ;  
    Check(ReadBurstFifo, X"----_0000") ;  
     
-    WaitForClock(MasterRec, 4) ; 
+    WaitForClock(ManagerRec, 4) ; 
     BlankLine(2) ;
 
 ------------------------------------------------------  Read Test 3.  Set and Get, Do Read
     WaitForBarrier(SetParams) ;
     increment(TransactionCount) ;
     --------------------------------  Set #3, None - Using Defaults
-    SetAxi4Options(MasterRec, ARSIZE,   2) ;      -- 3 bits 2**N bytes
+    SetAxi4Options(ManagerRec, ARSIZE,   2) ;      -- 3 bits 2**N bytes
     
     --------------------------------  Get and Check #3
-    GetAxi4Options(MasterRec, ARSIZE,   IntOption) ;      -- 3 bits 2**N bytes
-    AffirmIfEqual(TbMasterID, IntOption,  2, "ARSIZE") ; 
+    GetAxi4Options(ManagerRec, ARSIZE,   IntOption) ;      -- 3 bits 2**N bytes
+    AffirmIfEqual(TbManagerID, IntOption,  2, "ARSIZE") ; 
     
     --------------------------------  Do Reads #3
     WaitForBarrier(RunTest) ;
-    log(TbMasterID, "Read with parameters setting #3") ;
+    log(TbManagerID, "Read with parameters setting #3") ;
     Addr := X"0000_0000" + 512 + 1 ;  -- Byte 1
-    ReadBurst(MasterRec, Addr, 3) ;
+    ReadBurst(ManagerRec, Addr, 3) ;
    Check(ReadBurstFifo, X"4433_22--") ;  
    Check(ReadBurstFifo, X"8877_6655") ;  
    Check(ReadBurstFifo, X"----_--99") ;  
     
-    ReadBurst(MasterRec, Addr+128+2, 3) ; -- Byte 3
+    ReadBurst(ManagerRec, Addr+128+2, 3) ; -- Byte 3
    Check(ReadBurstFifo, X"44--_----") ;  
    Check(ReadBurstFifo, X"8866_7755") ;  
    Check(ReadBurstFifo, X"--AA_BB99") ;  
 
-    WaitForClock(MasterRec, 4) ; 
+    WaitForClock(ManagerRec, 4) ; 
     BlankLine(2) ;
 
 ------------------------------------------------------  Read Test 4.
     --------------------------------  Set #4
-    SetAxi4Options(MasterRec, ARSIZE,   0) ;      -- 3 bits 2**N bytes
+    SetAxi4Options(ManagerRec, ARSIZE,   0) ;      -- 3 bits 2**N bytes
     
     --------------------------------  Get and Check #4
-    GetAxi4Options(MasterRec, ARSIZE,   IntOption) ;      -- 3 bits 2**N bytes
-    AffirmIfEqual(TbMasterID, IntOption,  0, "ARSIZE") ; 
+    GetAxi4Options(ManagerRec, ARSIZE,   IntOption) ;      -- 3 bits 2**N bytes
+    AffirmIfEqual(TbManagerID, IntOption,  0, "ARSIZE") ; 
     
     --------------------------------  Do Reads #4
-    log(TbMasterID, "Read with parameters setting #4") ;
+    log(TbManagerID, "Read with parameters setting #4") ;
     increment(TransactionCount) ;
     Addr := X"0000_0000" + 1024 + 1 ;  -- Byte 1
-    ReadBurst(MasterRec, Addr, 8) ;
+    ReadBurst(ManagerRec, Addr, 8) ;
    Check(ReadBurstFifo, X"----_EE--") ;  
    Check(ReadBurstFifo, X"--DD_----") ;  
    Check(ReadBurstFifo, X"CC--_----") ;  
@@ -359,7 +359,7 @@ begin
    Check(ReadBurstFifo, X"88--_----") ;  
    Check(ReadBurstFifo, X"----_--77") ;  
     
-    ReadBurst(MasterRec, Addr+128+2, 8) ; -- Byte 3
+    ReadBurst(ManagerRec, Addr+128+2, 8) ; -- Byte 3
    Check(ReadBurstFifo, X"99--_----") ;  
    Check(ReadBurstFifo, X"----_--66") ;  
    Check(ReadBurstFifo, X"----_66--") ;  
@@ -369,21 +369,21 @@ begin
    Check(ReadBurstFifo, X"----_44--") ;  
    Check(ReadBurstFifo, X"--55_----") ;  
 
-    WaitForClock(MasterRec, 4) ; 
+    WaitForClock(ManagerRec, 4) ; 
     BlankLine(2) ;
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MasterRec, 2) ;
+    WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
   
   
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  ResponderProc : process
+  SubordinateProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
     variable IntOption : integer ; 
@@ -393,17 +393,17 @@ begin
     -- Memory only responds during this test
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process SubordinateProc ;
 
-end AxSizeMasterMemory2 ;
+end AxSizeManagerMemory2 ;
 
-Configuration TbAxi4_AxSizeMasterMemory2 of TbAxi4Memory is
+Configuration TbAxi4_AxSizeManagerMemory2 of TbAxi4Memory is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(AxSizeMasterMemory2) ; 
+      use entity work.TestCtrl(AxSizeManagerMemory2) ; 
     end for ; 
---!!    for Responder_1 : Axi4Responder 
+--!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 
-end TbAxi4_AxSizeMasterMemory2 ; 
+end TbAxi4_AxSizeManagerMemory2 ; 

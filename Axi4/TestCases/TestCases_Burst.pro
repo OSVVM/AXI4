@@ -56,24 +56,24 @@ simulate TbAxi4_MemoryBurstByte1
 analyze  TbAxi4_MemoryBurstSparse1.vhd
 simulate TbAxi4_MemoryBurstSparse1
 
-analyze  TbAxi4_ReleaseAcquireMaster1.vhd
-simulate TbAxi4_ReleaseAcquireMaster1
+analyze  TbAxi4_ReleaseAcquireManager1.vhd
+simulate TbAxi4_ReleaseAcquireManager1
 
-analyze  TbAxi4_AxSizeMasterMemory1.vhd
-simulate TbAxi4_AxSizeMasterMemory1
-analyze  TbAxi4_AxSizeMasterMemory2.vhd
-simulate TbAxi4_AxSizeMasterMemory2
+analyze  TbAxi4_AxSizeManagerMemory1.vhd
+simulate TbAxi4_AxSizeManagerMemory1
+analyze  TbAxi4_AxSizeManagerMemory2.vhd
+simulate TbAxi4_AxSizeManagerMemory2
 
-analyze  TbAxi4_AxiIfOptionsMasterMemory.vhd
-simulate TbAxi4_AxiIfOptionsMasterMemory
+analyze  TbAxi4_AxiIfOptionsManagerMemory.vhd
+simulate TbAxi4_AxiIfOptionsManagerMemory
 
-analyze  TbAxi4_TransactionApiMasterBurst.vhd
-simulate TbAxi4_TransactionApiMasterBurst
+analyze  TbAxi4_TransactionApiManagerBurst.vhd
+simulate TbAxi4_TransactionApiManagerBurst
 analyze  TbAxi4_TransactionApiMemoryBurst.vhd
 simulate TbAxi4_TransactionApiMemoryBurst
 
-analyze  TbAxi4_ValidTimingBurstMaster.vhd
-simulate TbAxi4_ValidTimingBurstMaster
+analyze  TbAxi4_ValidTimingBurstManager.vhd
+simulate TbAxi4_ValidTimingBurstManager
 analyze  TbAxi4_ValidTimingBurstMemory.vhd
 simulate TbAxi4_ValidTimingBurstMemory
 

@@ -53,7 +53,7 @@ library osvvm_common ;
 package Axi4ComponentPkg is
 
   ------------------------------------------------------------
-  component Axi4Master is
+  component Axi4Manager is
   ------------------------------------------------------------
     generic (
       MODEL_ID_NAME    : string := "" ;
@@ -107,17 +107,17 @@ package Axi4ComponentPkg is
       Clk         : in   std_logic ;
       nReset      : in   std_logic ;
 
-      -- AXI Master Functional Interface
+      -- AXI Manager Functional Interface
       AxiBus      : inout Axi4RecType ;
 
       -- Testbench Transaction Interface
       TransRec    : inout AddressBusRecType 
     ) ;
-  end component Axi4Master ;
+  end component Axi4Manager ;
 
 
   ------------------------------------------------------------
-  component Axi4Responder is
+  component Axi4Subordinate is
   ------------------------------------------------------------
     generic (
       MODEL_ID_NAME   : string := "" ;
@@ -147,13 +147,13 @@ package Axi4ComponentPkg is
       Clk         : in   std_logic ;
       nReset      : in   std_logic ;
 
-      -- AXI Master Functional Interface
+      -- AXI Manager Functional Interface
       AxiBus      : inout Axi4RecType ;
 
       -- Testbench Transaction Interface
       TransRec    : inout AddressBusRecType
     ) ;
-  end component Axi4Responder ;
+  end component Axi4Subordinate ;
 
 
   ------------------------------------------------------------
@@ -189,7 +189,7 @@ package Axi4ComponentPkg is
       Clk         : in   std_logic ;
       nReset      : in   std_logic ;
 
-      -- AXI Responder Interface
+      -- AXI Subordinate Interface
       AxiBus      : inout Axi4RecType ;
 
       -- Testbench Transaction Interface
@@ -206,7 +206,7 @@ package Axi4ComponentPkg is
       Clk         : in   std_logic ;
       nReset      : in   std_logic ;
 
-      -- AXI Master Functional Interface
+      -- AXI Manager Functional Interface
       AxiBus      : in    Axi4RecType
     ) ;
   end component Axi4Monitor ;

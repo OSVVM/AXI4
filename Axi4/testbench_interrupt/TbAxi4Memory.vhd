@@ -69,15 +69,15 @@ architecture TestHarness of TbAxi4Memory is
 --    DataToModel(AXI_DATA_WIDTH-1 downto 0),
 --    DataFromModel(AXI_DATA_WIDTH-1 downto 0)
 --  ) ;
---  signal MasterRec   : LocalTransactionRecType ;
---  signal ResponderRec  : LocalTransactionRecType ;
-  signal MasterRec, InterruptRec, VCRec, ResponderRec  : AddressBusRecType (
+--  signal ManagerRec   : LocalTransactionRecType ;
+--  signal SubordinateRec  : LocalTransactionRecType ;
+  signal ManagerRec, InterruptRec, VCRec, SubordinateRec  : AddressBusRecType (
           Address(AXI_ADDR_WIDTH-1 downto 0),
           DataToModel(AXI_DATA_WIDTH-1 downto 0),
           DataFromModel(AXI_DATA_WIDTH-1 downto 0)
         ) ;
 
---  -- AXI Master Functional Interface
+--  -- AXI Manager Functional Interface
 --  signal   AxiBus : Axi4RecType(
 --    WriteAddress( AWAddr(AXI_ADDR_WIDTH-1 downto 0) ),
 --    WriteData   ( WData (AXI_DATA_WIDTH-1 downto 0),   WStrb(AXI_STRB_WIDTH-1 downto 0) ),
@@ -119,9 +119,9 @@ architecture TestHarness of TbAxi4Memory is
       nReset         : In    std_logic ;
 
       -- Transaction Interfaces
-      MasterRec      : inout AddressBusRecType ;
+      ManagerRec      : inout AddressBusRecType ;
       InterruptRec   : inout AddressBusRecType ;
-      ResponderRec   : inout AddressBusRecType
+      SubordinateRec   : inout AddressBusRecType
     ) ;
   end component TestCtrl ;
 
@@ -148,7 +148,7 @@ begin
     tpd         => tpd
   ) ;
 
-  -- Behavioral model.  Replaces DUT for testing Axi4Master
+  -- Behavioral model.  Replaces DUT for testing Axi4Manager
   ------------------------------------------------------------
   Memory_1 : Axi4Memory
   ------------------------------------------------------------
@@ -157,11 +157,11 @@ begin
     Clk         => Clk,
     nReset      => nReset,
 
-    -- AXI Master Functional Interface
+    -- AXI Manager Functional Interface
     AxiBus      => AxiBus,
     
     -- Testbench Transaction Interface
-    TransRec    => ResponderRec
+    TransRec    => SubordinateRec
   ) ;
   
   ------------------------------------------------------------
@@ -172,7 +172,7 @@ begin
     IntReq       => IntReq,
 
     -- From TestCtrl
-    TransRec     => MasterRec,
+    TransRec     => ManagerRec,
     InterruptRec => InterruptRec,
     
     -- To Verification Component
@@ -180,14 +180,14 @@ begin
   ) ;
 
   ------------------------------------------------------------
-  Master_1 : Axi4Master
+  Manager_1 : Axi4Manager
   ------------------------------------------------------------
   port map (
     -- Globals
     Clk         => Clk,
     nReset      => nReset,
 
-    -- AXI Master Functional Interface
+    -- AXI Manager Functional Interface
     AxiBus      => AxiBus,
 
     -- Testbench Transaction Interface
@@ -203,7 +203,7 @@ begin
     Clk         => Clk,
     nReset      => nReset,
 
-    -- AXI Master Functional Interface
+    -- AXI Manager Functional Interface
     AxiBus      => AxiBus
   ) ;
 
@@ -216,9 +216,9 @@ begin
     nReset        => nReset,
 
     -- Transaction Interfaces
-    MasterRec     => MasterRec,
+    ManagerRec     => ManagerRec,
     InterruptRec  => InterruptRec,
-    ResponderRec  => ResponderRec
+    SubordinateRec  => SubordinateRec
   ) ;
 
 end architecture TestHarness ;

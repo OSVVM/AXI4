@@ -85,62 +85,62 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
 
   begin
     wait until nReset = '1' ;  
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     log("Write with ByteAddr = 0, 4 Bytes") ;
     for i in 3 to 10 loop
       Push(WriteBurstFifo, to_slv(i, 8)) ;
     end loop ;
-    WriteBurst(MasterRec, X"0000_1002", 8) ;
+    WriteBurst(ManagerRec, X"0000_1002", 8) ;
     
---    WaitForClock(MasterRec, 18) ; 
+--    WaitForClock(ManagerRec, 18) ; 
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MasterRec, 2) ;
+    WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
 
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  ResponderProc : process
+  SubordinateProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;  
 --    alias  WReady    : std_logic        is AxiLiteBus.WriteData.WReady ;
     
   begin
 --    WReady <= 'Z' ; 
-    WaitForClock(ResponderRec, 2) ; 
+    WaitForClock(SubordinateRec, 2) ; 
     -- Write and Read with ByteAddr = 0, 4 Bytes
-    GetWrite(ResponderRec, Addr, Data) ;
-    AffirmIfEqual(Addr, X"0000_1002", "Responder Write Addr: ") ;
-    AffirmIfEqual(Data, X"0403_----", "Responder Write Data: ") ;
-    GetWriteData(ResponderRec, Data) ;
-    AffirmIfEqual(Data, X"0807_0605", "Responder Write Data: ") ;
-    GetWriteData(ResponderRec, Data) ;
-    AffirmIfEqual(Data, X"----_0A09", "Responder Write Data: ") ;
+    GetWrite(SubordinateRec, Addr, Data) ;
+    AffirmIfEqual(Addr, X"0000_1002", "Subordinate Write Addr: ") ;
+    AffirmIfEqual(Data, X"0403_----", "Subordinate Write Data: ") ;
+    GetWriteData(SubordinateRec, Data) ;
+    AffirmIfEqual(Data, X"0807_0605", "Subordinate Write Data: ") ;
+    GetWriteData(SubordinateRec, Data) ;
+    AffirmIfEqual(Data, X"----_0A09", "Subordinate Write Data: ") ;
 
     
-    -- Force the Responder to allow the bus to transfer the write burst
+    -- Force the Subordinate to allow the bus to transfer the write burst
 --    WReady <= force '1' ; 
     
---    WaitForClock(ResponderRec, 18) ; 
+--    WaitForClock(SubordinateRec, 18) ; 
 
     -- Wait for outputs to propagate and signal TestDone
---    WaitForClock(ResponderRec, 2) ;
+--    WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process SubordinateProc ;
 
 
 end BasicBurst ;

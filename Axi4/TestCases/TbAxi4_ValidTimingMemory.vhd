@@ -45,8 +45,8 @@
 architecture ValidTimingMemory of TestCtrl is
 
   signal TestDone, MemorySync : integer_barrier := 1 ;
-  signal TbMasterID : AlertLogIDType ; 
-  signal TbResponderID  : AlertLogIDType ; 
+  signal TbManagerID : AlertLogIDType ; 
+  signal TbSubordinateID  : AlertLogIDType ; 
   signal TransactionCount : integer := 0 ; 
 
 begin
@@ -59,8 +59,8 @@ begin
   begin
     -- Initialization of test
     SetAlertLogName("TbAxi4_ValidTimingMemory") ;
-    TbMasterID <= GetAlertLogID("TB Master Proc") ;
-    TbResponderID <= GetAlertLogID("TB Responder Proc") ;
+    TbManagerID <= GetAlertLogID("TB Manager Proc") ;
+    TbSubordinateID <= GetAlertLogID("TB Subordinate Proc") ;
     SetLogEnable(PASSED, TRUE) ;  -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
@@ -91,60 +91,60 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiResponder
+  -- ManagerProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable Addr, ExpAddr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data, ExpData : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;  
   begin
-    -- Must set Master options before start otherwise, ready will be active on first cycle.
+    -- Must set Manager options before start otherwise, ready will be active on first cycle.
     wait for 0 ns ; 
-    WaitForClock(MasterRec, 3) ; 
+    WaitForClock(ManagerRec, 3) ; 
     
     for k in 0 to 1 loop 
       for j in 0 to 4 loop 
-        WaitForClock(MasterRec, 4) ; 
+        WaitForClock(ManagerRec, 4) ; 
 
         Addr := X"0000_0000" + k*256 + j*16 ; 
         Data := X"0000_0000" + k*256 + j*16 ; 
 --        if k /= 2 then 
-        log(TbMasterID, "MasterRec, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
-        WriteAsync(MasterRec, Addr,    Data) ;
-        WriteAsync(MasterRec, Addr+4,  Data+1) ;
-        WriteAsync(MasterRec, Addr+8,  Data+2) ;
-        WriteAsync(MasterRec, Addr+12, Data+3) ;
---          WaitForClock(MasterRec, 16) ; 
-        WaitForTransaction(MasterRec) ;
-        WaitForClock(MasterRec, 4) ; 
+        log(TbManagerID, "ManagerRec, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
+        WriteAsync(ManagerRec, Addr,    Data) ;
+        WriteAsync(ManagerRec, Addr+4,  Data+1) ;
+        WriteAsync(ManagerRec, Addr+8,  Data+2) ;
+        WriteAsync(ManagerRec, Addr+12, Data+3) ;
+--          WaitForClock(ManagerRec, 16) ; 
+        WaitForTransaction(ManagerRec) ;
+        WaitForClock(ManagerRec, 4) ; 
 --        else
-        log(TbMasterID, "MasterRec, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
-        ReadAddressAsync(MasterRec, Addr) ;
-        ReadAddressAsync(MasterRec, Addr+4) ;
-        ReadAddressAsync(MasterRec, Addr+8) ;
-        ReadAddressAsync(MasterRec, Addr+12) ;
-        ReadCheckData(MasterRec, Data) ;
-        ReadCheckData(MasterRec, Data+1) ;
-        ReadCheckData(MasterRec, Data+2) ;
-        ReadCheckData(MasterRec, Data+3) ;
-        WaitForClock(MasterRec, 4) ; 
+        log(TbManagerID, "ManagerRec, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
+        ReadAddressAsync(ManagerRec, Addr) ;
+        ReadAddressAsync(ManagerRec, Addr+4) ;
+        ReadAddressAsync(ManagerRec, Addr+8) ;
+        ReadAddressAsync(ManagerRec, Addr+12) ;
+        ReadCheckData(ManagerRec, Data) ;
+        ReadCheckData(ManagerRec, Data+1) ;
+        ReadCheckData(ManagerRec, Data+2) ;
+        ReadCheckData(ManagerRec, Data+3) ;
+        WaitForClock(ManagerRec, 4) ; 
 --        end if ; 
         WaitForBarrier(MemorySync) ;
       end loop ; 
     end loop ; 
 
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MasterRec, 2) ;
+    WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
   
   
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  ResponderProc : process
+  SubordinateProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
     variable IntOption  : integer ; 
@@ -152,19 +152,19 @@ begin
   begin
   
     -- Check Defaults
-    GetAxi4Options(ResponderRec, WRITE_RESPONSE_VALID_DELAY_CYCLES, IntOption) ;
-    AffirmIfEqual(TbResponderID, IntOption, 0, "WRITE_RESPONSE_VALID_DELAY_CYCLES") ;
+    GetAxi4Options(SubordinateRec, WRITE_RESPONSE_VALID_DELAY_CYCLES, IntOption) ;
+    AffirmIfEqual(TbSubordinateID, IntOption, 0, "WRITE_RESPONSE_VALID_DELAY_CYCLES") ;
 
-    GetAxi4Options(ResponderRec, READ_DATA_VALID_DELAY_CYCLES, IntOption) ;
-    AffirmIfEqual(TbResponderID, IntOption, 0, "READ_DATA_VALID_DELAY_CYCLES") ;
+    GetAxi4Options(SubordinateRec, READ_DATA_VALID_DELAY_CYCLES, IntOption) ;
+    AffirmIfEqual(TbSubordinateID, IntOption, 0, "READ_DATA_VALID_DELAY_CYCLES") ;
 
     for k in 0 to 1 loop 
       case k is 
         when 0 => 
-          log(TbResponderID, "Write Response") ;
+          log(TbSubordinateID, "Write Response") ;
           ValidDelayCycleOption  := WRITE_RESPONSE_VALID_DELAY_CYCLES ;
         when 1 => 
-          log(TbResponderID, "Read Data") ;
+          log(TbSubordinateID, "Read Data") ;
           ValidDelayCycleOption  := READ_DATA_VALID_DELAY_CYCLES ;
         when others => 
           alert("K Loop Index Out of Range", FAILURE) ;
@@ -172,21 +172,21 @@ begin
       for j in 0 to 4 loop 
         case j is 
           when 0 => 
-            log(TbResponderID, "Valid Delay Cycles Default 0") ;
+            log(TbSubordinateID, "Valid Delay Cycles Default 0") ;
           when 1 => 
-            log(TbResponderID, "Valid Delay Cycles 2") ;
-            SetAxi4Options(ResponderRec, ValidDelayCycleOption, 2) ;
+            log(TbSubordinateID, "Valid Delay Cycles 2") ;
+            SetAxi4Options(SubordinateRec, ValidDelayCycleOption, 2) ;
           when 2 => 
-            log(TbResponderID, "Valid Delay Cycles 4") ;
-            SetAxi4Options(ResponderRec, ValidDelayCycleOption, 4) ;
+            log(TbSubordinateID, "Valid Delay Cycles 4") ;
+            SetAxi4Options(SubordinateRec, ValidDelayCycleOption, 4) ;
           when 3 => 
-            log(TbResponderID, "Valid Delay Cycles 6") ;
-            SetAxi4Options(ResponderRec, ValidDelayCycleOption, 6) ;
+            log(TbSubordinateID, "Valid Delay Cycles 6") ;
+            SetAxi4Options(SubordinateRec, ValidDelayCycleOption, 6) ;
           when 4 => 
-            log(TbResponderID, "Valid Delay Cycles 0") ;
-            SetAxi4Options(ResponderRec, ValidDelayCycleOption, 0) ;
+            log(TbSubordinateID, "Valid Delay Cycles 0") ;
+            SetAxi4Options(SubordinateRec, ValidDelayCycleOption, 0) ;
           when others => 
-            Alert(TbResponderID, "Unimplemented test case", FAILURE)  ; 
+            Alert(TbSubordinateID, "Unimplemented test case", FAILURE)  ; 
         end case ; 
         increment(TransactionCount) ;
 
@@ -196,7 +196,7 @@ begin
     end loop ; 
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process SubordinateProc ;
 
 end ValidTimingMemory ;
 
@@ -205,7 +205,7 @@ Configuration TbAxi4_ValidTimingMemory of TbAxi4Memory is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(ValidTimingMemory) ; 
     end for ; 
---!!    for Responder_1 : Axi4Responder 
+--!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 

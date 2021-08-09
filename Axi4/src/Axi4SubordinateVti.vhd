@@ -1,6 +1,6 @@
 --
---  File Name:         Axi4ResponderVti_Transactor.vhd
---  Design Unit Name:  Axi4ResponderVti
+--  File Name:         Axi4SubordinateVti_Transactor.vhd
+--  Design Unit Name:  Axi4SubordinateVti
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Simple AXI Full Responder Transactor Model
+--      Simple AXI Full Subordinate Transactor Model
 --
 --
 --  Developed by:
@@ -61,7 +61,7 @@ library OSVVM_Common ;
   use work.Axi4ModelPkg.all ;
   use work.Axi4CommonPkg.all ;
 
-entity Axi4ResponderVti is
+entity Axi4SubordinateVti is
 generic (
   MODEL_ID_NAME   : string := "" ;
   tperiod_Clk     : time   := 10 ns ;
@@ -91,7 +91,7 @@ port (
   nReset      : in   std_logic ;
 
 
-  -- AXI Master Functional Interface
+  -- AXI Manager Functional Interface
   AxiBus      : inout Axi4RecType 
 ) ;
 
@@ -111,13 +111,13 @@ port (
           DataFromModel(AXI_DATA_WIDTH-1 downto 0)
         ) ;
         
-end entity Axi4ResponderVti ;
+end entity Axi4SubordinateVti ;
 
-architecture TransactorResponder of Axi4ResponderVti is
+architecture Transactor of Axi4SubordinateVti is
 
   -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
-    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4ResponderVti'PATH_NAME))) ;
+    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4SubordinateVti'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
 
@@ -471,7 +471,7 @@ begin
         wait for 0 ns ; 
 
       when MULTIPLE_DRIVER_DETECT =>
-        Alert(ModelID, "Axi4ResponderVti: Multiple Drivers on Transaction Record." & 
+        Alert(ModelID, "Axi4SubordinateVti: Multiple Drivers on Transaction Record." & 
                        "  Transaction # " & to_string(TransactionCount), FAILURE) ;
         wait for 0 ns ;  
 
@@ -777,4 +777,4 @@ begin
       wait for 0 ns ;
     end loop ReadDataLoop ;
   end process ReadDataHandler ;
-end architecture TransactorResponder ;
+end architecture Transactor ;

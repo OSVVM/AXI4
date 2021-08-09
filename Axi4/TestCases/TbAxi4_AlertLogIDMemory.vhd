@@ -42,7 +42,7 @@
 architecture AlertLogIDMemory of TestCtrl is
 
   signal TestDone, Sync : integer_barrier := 1 ;
-  signal TbMasterID, TbResponderID : AlertLogIDType ; 
+  signal TbManagerID, TbSubordinateID : AlertLogIDType ; 
  
 begin
 
@@ -54,8 +54,8 @@ begin
   begin
     -- Initialization of test
     SetAlertLogName("TbAxi4_AlertLogIDMemory") ;
-    TbMasterID     <= GetAlertLogID("Master") ;
-    TbResponderID  <= GetAlertLogID("Responder") ;
+    TbManagerID     <= GetAlertLogID("Manager") ;
+    TbSubordinateID  <= GetAlertLogID("Subordinate") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
     SetAlertStopCount(FAILURE, 2) ;    -- Enable INFO logs
@@ -87,58 +87,58 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
   begin
     wait until nReset = '1' ;  
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
 
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  ResponderProc : process
+  SubordinateProc : process
     variable AlertLogID : AlertLogIDType ; 
     variable Count1, Count2 : integer ; 
   begin
     wait until nReset = '1' ;  
-    WaitForClock(ResponderRec, 2) ; 
+    WaitForClock(SubordinateRec, 2) ; 
     
-    GetAlertLogID(ResponderRec, AlertLogID) ;
-    GetErrorCount(ResponderRec, Count1) ;
-    AffirmIfEqual(TbResponderID, Count1, 0, "GetErrorCount") ;
+    GetAlertLogID(SubordinateRec, AlertLogID) ;
+    GetErrorCount(SubordinateRec, Count1) ;
+    AffirmIfEqual(TbSubordinateID, Count1, 0, "GetErrorCount") ;
     Count2 := GetAlertCount(AlertLogID) ;
-    AffirmIfEqual(TbResponderID, Count2, 0, "GetAlertCount") ;
+    AffirmIfEqual(TbSubordinateID, Count2, 0, "GetAlertCount") ;
     
     Alert(AlertLogID, "Injected Error 1", ERROR) ;
-    GetErrorCount(ResponderRec, Count1) ;
-    AffirmIfEqual(TbResponderID, Count1, 1, "GetErrorCount") ;
+    GetErrorCount(SubordinateRec, Count1) ;
+    AffirmIfEqual(TbSubordinateID, Count1, 1, "GetErrorCount") ;
     Count2 := GetAlertCount(AlertLogID) ;
-    AffirmIfEqual(TbResponderID, Count2, 1, "GetAlertCount") ;
+    AffirmIfEqual(TbSubordinateID, Count2, 1, "GetAlertCount") ;
 
     SetAlertStopCount(AlertLogID, FAILURE, 10) ;
     Alert(AlertLogID, "Injected FAILURE 1", FAILURE) ;
-    GetErrorCount(ResponderRec, Count1) ;
-    AffirmIfEqual(TbResponderID, Count1, 2, "GetErrorCount") ;
+    GetErrorCount(SubordinateRec, Count1) ;
+    AffirmIfEqual(TbSubordinateID, Count1, 2, "GetErrorCount") ;
     Count2 := GetAlertCount(AlertLogID) ;
-    AffirmIfEqual(TbResponderID, Count2, 2, "GetAlertCount") ;
+    AffirmIfEqual(TbSubordinateID, Count2, 2, "GetAlertCount") ;
 
     Alert(AlertLogID, "Injected WARNING 1", WARNING) ;
-    GetErrorCount(ResponderRec, Count1) ;
-    AffirmIfEqual(TbResponderID, Count1, 3, "GetErrorCount") ;
+    GetErrorCount(SubordinateRec, Count1) ;
+    AffirmIfEqual(TbSubordinateID, Count1, 3, "GetErrorCount") ;
     Count2 := GetAlertCount(AlertLogID) ;
-    AffirmIfEqual(TbResponderID, Count2, 3, "GetAlertCount") ;
+    AffirmIfEqual(TbSubordinateID, Count2, 3, "GetAlertCount") ;
 
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process SubordinateProc ;
 
 
 end AlertLogIDMemory ;
@@ -148,7 +148,7 @@ Configuration TbAxi4_AlertLogIDMemory of TbAxi4Memory is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(AlertLogIDMemory) ; 
     end for ; 
---!!    for Responder_1 : Axi4Responder 
+--!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 

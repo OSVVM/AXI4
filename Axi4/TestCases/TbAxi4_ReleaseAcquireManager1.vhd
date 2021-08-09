@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_ReleaseAcquireMaster1.vhd
+--  File Name:         TbAxi4_ReleaseAcquireManager1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -39,7 +39,7 @@
 --  limitations under the License.
 --  
 
-architecture ReleaseAcquireMaster1 of TestCtrl is
+architecture ReleaseAcquireManager1 of TestCtrl is
 
   signal Sync1, TestDone : integer_barrier := 1 ;
   signal TbID : AlertLogIDType ; 
@@ -53,14 +53,14 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_ReleaseAcquireMaster1") ;
+    SetAlertLogName("TbAxi4_ReleaseAcquireManager1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
     TbID <= GetAlertLogID("Testbench") ;
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_ReleaseAcquireMaster1.txt") ;
+    TranscriptOpen("./results/TbAxi4_ReleaseAcquireManager1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -75,7 +75,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_ReleaseAcquireMaster1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_ReleaseAcquireMaster1.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_ReleaseAcquireManager1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_ReleaseAcquireManager1.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 
@@ -85,115 +85,115 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc1
-  --   Generate transactions for AxiMaster
+  -- ManagerProc1
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc1 : process
+  ManagerProc1 : process
     variable StartTime : time ; 
     variable IntOption  : integer ; 
     variable BoolOption : boolean ; 
   begin
     wait until nReset = '1' ;  
     -- First Alignment to clock
-    WaitForClock(MasterRec, 1) ; 
+    WaitForClock(ManagerRec, 1) ; 
     StartTime := now ; 
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     AffirmIfEqual(NOW, StartTime + 20 ns, "Expected Completion Time") ;
 
     -- Setting and checking values set 
-    SetAxi4Options(MasterRec, WRITE_RESPONSE_READY_DELAY_CYCLES, 2) ;
-    GetAxi4Options(MasterRec, WRITE_RESPONSE_READY_DELAY_CYCLES, IntOption) ;
+    SetAxi4Options(ManagerRec, WRITE_RESPONSE_READY_DELAY_CYCLES, 2) ;
+    GetAxi4Options(ManagerRec, WRITE_RESPONSE_READY_DELAY_CYCLES, IntOption) ;
     AffirmIfEqual(TbID, IntOption, 2, "WRITE_RESPONSE_READY_DELAY_CYCLES") ;
-    SetAxi4Options(MasterRec, WRITE_RESPONSE_READY_BEFORE_VALID, TRUE) ;
-    GetAxi4Options(MasterRec, WRITE_RESPONSE_READY_BEFORE_VALID, BoolOption) ;
+    SetAxi4Options(ManagerRec, WRITE_RESPONSE_READY_BEFORE_VALID, TRUE) ;
+    GetAxi4Options(ManagerRec, WRITE_RESPONSE_READY_BEFORE_VALID, BoolOption) ;
     AffirmIfEqual(TbID, BoolOption, TRUE, "WRITE_RESPONSE_READY_BEFORE_VALID") ;
 
-    SetAxi4Options(MasterRec, READ_DATA_READY_DELAY_CYCLES, 2) ;
-    GetAxi4Options(MasterRec, READ_DATA_READY_DELAY_CYCLES, IntOption) ;
+    SetAxi4Options(ManagerRec, READ_DATA_READY_DELAY_CYCLES, 2) ;
+    GetAxi4Options(ManagerRec, READ_DATA_READY_DELAY_CYCLES, IntOption) ;
     AffirmIfEqual(TbID, IntOption, 2, "READ_DATA_READY_DELAY_CYCLES") ;
-    SetAxi4Options(MasterRec, READ_DATA_READY_BEFORE_VALID, TRUE) ;
-    GetAxi4Options(MasterRec, READ_DATA_READY_BEFORE_VALID, BoolOption) ;
+    SetAxi4Options(ManagerRec, READ_DATA_READY_BEFORE_VALID, TRUE) ;
+    GetAxi4Options(ManagerRec, READ_DATA_READY_BEFORE_VALID, BoolOption) ;
     AffirmIfEqual(TbID, BoolOption, TRUE, "READ_DATA_READY_BEFORE_VALID") ;
 
-    Write(MasterRec, X"1000_1000", X"5555_5555" ) ;
-    ReadCheck(MasterRec, X"1000_1000", X"5555_5555" ) ;
+    Write(ManagerRec, X"1000_1000", X"5555_5555" ) ;
+    ReadCheck(ManagerRec, X"1000_1000", X"5555_5555" ) ;
     PushBurstIncrement(WriteBurstFifo, 3, 6, AXI_DATA_WIDTH) ;
-    WriteBurst(MasterRec, X"0000_0008", 6) ;
-    ReadBurst (MasterRec, X"0000_0008", 6) ;
+    WriteBurst(ManagerRec, X"0000_0008", 6) ;
+    ReadBurst (ManagerRec, X"0000_0008", 6) ;
     CheckBurstIncrement(ReadBurstFifo, 3, 6, AXI_DATA_WIDTH) ;
 
     WaitForBarrier(Sync1) ;
-    ReleaseTransactionRecord(MasterRec) ; 
+    ReleaseTransactionRecord(ManagerRec) ; 
     
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc1 ;
+  end process ManagerProc1 ;
   
   ------------------------------------------------------------
-  -- MasterProc2
-  --   Generate transactions for AxiMaster
+  -- ManagerProc2
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc2 : process
+  ManagerProc2 : process
     variable StartTime : time ; 
     variable IntOption  : integer ; 
     variable BoolOption : boolean ; 
   begin
     WaitForBarrier(Sync1) ;
-    AcquireTransactionRecord(MasterRec) ;
+    AcquireTransactionRecord(ManagerRec) ;
 
     StartTime := now ; 
-    WaitForClock(MasterRec, 1) ; 
+    WaitForClock(ManagerRec, 1) ; 
     AffirmIfEqual(NOW, StartTime + 10 ns, "Expected Completion Time") ;
     
     -- Setting and checking values set 
-    SetAxi4Options(MasterRec, WRITE_RESPONSE_READY_DELAY_CYCLES, 1) ;
-    GetAxi4Options(MasterRec, WRITE_RESPONSE_READY_DELAY_CYCLES, IntOption) ;
+    SetAxi4Options(ManagerRec, WRITE_RESPONSE_READY_DELAY_CYCLES, 1) ;
+    GetAxi4Options(ManagerRec, WRITE_RESPONSE_READY_DELAY_CYCLES, IntOption) ;
     AffirmIfEqual(TbID, IntOption, 1, "WRITE_RESPONSE_READY_DELAY_CYCLES") ;
-    SetAxi4Options(MasterRec, WRITE_RESPONSE_READY_BEFORE_VALID, FALSE) ;
-    GetAxi4Options(MasterRec, WRITE_RESPONSE_READY_BEFORE_VALID, BoolOption) ;
+    SetAxi4Options(ManagerRec, WRITE_RESPONSE_READY_BEFORE_VALID, FALSE) ;
+    GetAxi4Options(ManagerRec, WRITE_RESPONSE_READY_BEFORE_VALID, BoolOption) ;
     AffirmIfEqual(TbID, BoolOption, FALSE, "WRITE_RESPONSE_READY_BEFORE_VALID") ;
 
-    SetAxi4Options(MasterRec, READ_DATA_READY_DELAY_CYCLES, 1) ;
-    GetAxi4Options(MasterRec, READ_DATA_READY_DELAY_CYCLES, IntOption) ;
+    SetAxi4Options(ManagerRec, READ_DATA_READY_DELAY_CYCLES, 1) ;
+    GetAxi4Options(ManagerRec, READ_DATA_READY_DELAY_CYCLES, IntOption) ;
     AffirmIfEqual(TbID, IntOption, 1, "READ_DATA_READY_DELAY_CYCLES") ;
-    SetAxi4Options(MasterRec, READ_DATA_READY_BEFORE_VALID, FALSE) ;
-    GetAxi4Options(MasterRec, READ_DATA_READY_BEFORE_VALID, BoolOption) ;
+    SetAxi4Options(ManagerRec, READ_DATA_READY_BEFORE_VALID, FALSE) ;
+    GetAxi4Options(ManagerRec, READ_DATA_READY_BEFORE_VALID, BoolOption) ;
     AffirmIfEqual(TbID, BoolOption, FALSE, "READ_DATA_READY_BEFORE_VALID") ;
     
 
-    Write(MasterRec, X"1000_2000", X"AAAA_AAAA" ) ;
-    ReadCheck(MasterRec, X"1000_2000", X"AAAA_AAAA" ) ;
+    Write(ManagerRec, X"1000_2000", X"AAAA_AAAA" ) ;
+    ReadCheck(ManagerRec, X"1000_2000", X"AAAA_AAAA" ) ;
     PushBurstIncrement(WriteBurstFifo, 10, 4, AXI_DATA_WIDTH) ;
-    WriteBurst(MasterRec, X"0000_1008", 4) ;
-    ReadBurst (MasterRec, X"0000_1008", 4) ;
+    WriteBurst(ManagerRec, X"0000_1008", 4) ;
+    ReadBurst (ManagerRec, X"0000_1008", 4) ;
     CheckBurstIncrement(ReadBurstFifo, 10, 4, AXI_DATA_WIDTH) ;
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MasterRec, 2) ;
+    WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc2 ;
+  end process ManagerProc2 ;
 
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  ResponderProc : process
+  SubordinateProc : process
   begin
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process SubordinateProc ;
 
 
-end ReleaseAcquireMaster1 ;
+end ReleaseAcquireManager1 ;
 
-Configuration TbAxi4_ReleaseAcquireMaster1 of TbAxi4Memory is
+Configuration TbAxi4_ReleaseAcquireManager1 of TbAxi4Memory is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(ReleaseAcquireMaster1) ; 
+      use entity work.TestCtrl(ReleaseAcquireManager1) ; 
     end for ; 
---!!    for Responder_1 : Axi4Responder 
+--!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 
-end TbAxi4_ReleaseAcquireMaster1 ; 
+end TbAxi4_ReleaseAcquireManager1 ; 

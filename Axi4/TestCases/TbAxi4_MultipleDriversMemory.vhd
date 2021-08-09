@@ -84,37 +84,37 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
   begin
     wait until nReset = '1' ;  
-    WaitForClock(MasterRec, 2) ; 
-    WaitForClock(MasterRec, 2) ; 
-    WaitForClock(ResponderRec, 2) ;
+    WaitForClock(ManagerRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
+    WaitForClock(SubordinateRec, 2) ;
 
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
 
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  ResponderProc : process
+  SubordinateProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
   begin
     wait until nReset = '1' ;  
-    WaitForClock(ResponderRec, 1) ; 
-    WaitForClock(ResponderRec, 1) ; 
+    WaitForClock(SubordinateRec, 1) ; 
+    WaitForClock(SubordinateRec, 1) ; 
     
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process SubordinateProc ;
 
 
 end MultipleDriversMemory ;
@@ -124,7 +124,7 @@ Configuration TbAxi4_MultipleDriversMemory of TbAxi4Memory is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(MultipleDriversMemory) ; 
     end for ; 
---!!    for Responder_1 : Axi4Responder 
+--!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 

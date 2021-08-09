@@ -1,6 +1,6 @@
 --
---  File Name:         Axi4Responder_Transactor.vhd
---  Design Unit Name:  Axi4Responder
+--  File Name:         Axi4Subordinate.vhd
+--  Design Unit Name:  Axi4Subordinate
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Simple AXI Full Responder Transactor Model
+--      Simple AXI Full Subordinate Transactor Model
 --
 --
 --  Developed by:
@@ -61,7 +61,7 @@ library OSVVM_Common ;
   use work.Axi4ModelPkg.all ;
   use work.Axi4CommonPkg.all ;
 
-entity Axi4Responder is
+entity Axi4Subordinate is
 generic (
   MODEL_ID_NAME   : string := "" ;
   tperiod_Clk     : time   := 10 ns ;
@@ -90,7 +90,7 @@ port (
   Clk         : in   std_logic ;
   nReset      : in   std_logic ;
 
-  -- AXI Master Functional Interface
+  -- AXI Manager Functional Interface
   AxiBus      : inout Axi4RecType ;
 
   -- Testbench Transaction Interface
@@ -105,13 +105,13 @@ port (
   constant AXI_ADDR_WIDTH : integer := AxiBus.WriteAddress.Addr'length ;
   constant AXI_DATA_WIDTH : integer := AxiBus.WriteData.Data'length ;
 
-end entity Axi4Responder ;
+end entity Axi4Subordinate ;
 
-architecture TransactorResponder of Axi4Responder is
+architecture Transactor of Axi4Subordinate is
 
   -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
-    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Responder'PATH_NAME))) ;
+    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Subordinate'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
 
@@ -465,7 +465,7 @@ begin
         wait for 0 ns ; 
 
       when MULTIPLE_DRIVER_DETECT =>
-        Alert(ModelID, "Axi4Responder: Multiple Drivers on Transaction Record." & 
+        Alert(ModelID, "Axi4Subordinate: Multiple Drivers on Transaction Record." & 
                        "  Transaction # " & to_string(TransactionCount), FAILURE) ;
         wait for 0 ns ;  
 
@@ -771,4 +771,4 @@ begin
       wait for 0 ns ;
     end loop ReadDataLoop ;
   end process ReadDataHandler ;
-end architecture TransactorResponder ;
+end architecture Transactor ;

@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_ValidTimingBurstMaster.vhd
+--  File Name:         TbAxi4_ValidTimingBurstManager.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -42,11 +42,11 @@
 --  limitations under the License.
 --  
 
-architecture ValidTimingBurstMaster of TestCtrl is
+architecture ValidTimingBurstManager of TestCtrl is
 
   signal TestDone, MemorySync : integer_barrier := 1 ;
-  signal TbMasterID : AlertLogIDType ; 
-  signal TbResponderID  : AlertLogIDType ; 
+  signal TbManagerID : AlertLogIDType ; 
+  signal TbSubordinateID  : AlertLogIDType ; 
   signal TransactionCount : integer := 0 ; 
 
   constant BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;   
@@ -62,15 +62,15 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_ValidTimingBurstMaster") ;
-    TbMasterID <= GetAlertLogID("TB Master Proc") ;
-    TbResponderID <= GetAlertLogID("TB Responder Proc") ;
+    SetAlertLogName("TbAxi4_ValidTimingBurstManager") ;
+    TbManagerID <= GetAlertLogID("TB Manager Proc") ;
+    TbSubordinateID <= GetAlertLogID("TB Subordinate Proc") ;
     SetLogEnable(PASSED, TRUE) ;  -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_ValidTimingBurstMaster.txt") ;
+    TranscriptOpen("./results/TbAxi4_ValidTimingBurstManager.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -86,7 +86,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_ValidTimingBurstMaster.txt", "../sim_shared/validated_results/TbAxi4_ValidTimingBurstMaster.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_ValidTimingBurstManager.txt", "../sim_shared/validated_results/TbAxi4_ValidTimingBurstManager.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 
@@ -96,43 +96,43 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiResponder
+  -- ManagerProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable Addr, ExpAddr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data, ExpData : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;  
     variable ValidDelayCycleOption : Axi4OptionsType ; 
     variable IntOption  : integer ; 
   begin
-    -- Must set Master options before start otherwise, ready will be active on first cycle.
+    -- Must set Manager options before start otherwise, ready will be active on first cycle.
     wait for 0 ns ; 
-    WaitForClock(MasterRec, 3) ; 
+    WaitForClock(ManagerRec, 3) ; 
     
     -- Check Defaults
-    GetAxi4Options(MasterRec, WRITE_ADDRESS_VALID_DELAY_CYCLES, IntOption) ;
-    AffirmIfEqual(TbMasterID, IntOption, 0, "WRITE_ADDRESS_VALID_DELAY_CYCLES") ;
+    GetAxi4Options(ManagerRec, WRITE_ADDRESS_VALID_DELAY_CYCLES, IntOption) ;
+    AffirmIfEqual(TbManagerID, IntOption, 0, "WRITE_ADDRESS_VALID_DELAY_CYCLES") ;
 
-    GetAxi4Options(MasterRec, WRITE_DATA_VALID_DELAY_CYCLES, IntOption) ;
-    AffirmIfEqual(TbMasterID, IntOption, 0, "WRITE_DATA_VALID_DELAY_CYCLES") ;
+    GetAxi4Options(ManagerRec, WRITE_DATA_VALID_DELAY_CYCLES, IntOption) ;
+    AffirmIfEqual(TbManagerID, IntOption, 0, "WRITE_DATA_VALID_DELAY_CYCLES") ;
 
-    GetAxi4Options(MasterRec, WRITE_DATA_VALID_BURST_DELAY_CYCLES, IntOption) ;
-    AffirmIfEqual(TbMasterID, IntOption, 0, "WRITE_DATA_VALID_BURST_DELAY_CYCLES") ;
+    GetAxi4Options(ManagerRec, WRITE_DATA_VALID_BURST_DELAY_CYCLES, IntOption) ;
+    AffirmIfEqual(TbManagerID, IntOption, 0, "WRITE_DATA_VALID_BURST_DELAY_CYCLES") ;
 
-    GetAxi4Options(MasterRec, READ_ADDRESS_VALID_DELAY_CYCLES, IntOption) ;
-    AffirmIfEqual(TbMasterID, IntOption, 0, "READ_ADDRESS_VALID_DELAY_CYCLES") ;
+    GetAxi4Options(ManagerRec, READ_ADDRESS_VALID_DELAY_CYCLES, IntOption) ;
+    AffirmIfEqual(TbManagerID, IntOption, 0, "READ_ADDRESS_VALID_DELAY_CYCLES") ;
 
 
     for k in 0 to 2 loop 
       case k is 
         when 0 => 
-          log(TbMasterID, "Write Address") ;
+          log(TbManagerID, "Write Address") ;
           ValidDelayCycleOption  := WRITE_ADDRESS_VALID_DELAY_CYCLES ;
         when 1 => 
-          log(TbMasterID, "Write Data") ;
+          log(TbManagerID, "Write Data") ;
           ValidDelayCycleOption  := WRITE_DATA_VALID_DELAY_CYCLES ;
         when 2 => 
-          log(TbMasterID, "Read Address") ;
+          log(TbManagerID, "Read Address") ;
           ValidDelayCycleOption  := READ_ADDRESS_VALID_DELAY_CYCLES ;
         when others => 
           alert("K Loop Index Out of Range", FAILURE) ;
@@ -140,84 +140,84 @@ begin
       for j in 0 to 3 loop 
         case j is 
           when 0 => 
-            log(TbMasterID, "Valid Delay Cycles Default 0") ;
+            log(TbManagerID, "Valid Delay Cycles Default 0") ;
           when 1 => 
-            log(TbMasterID, "Valid Delay Cycles 2") ;
-            SetAxi4Options(MasterRec, ValidDelayCycleOption, 2) ;
+            log(TbManagerID, "Valid Delay Cycles 2") ;
+            SetAxi4Options(ManagerRec, ValidDelayCycleOption, 2) ;
             if k = 1 then  
-              SetAxi4Options(MasterRec, WRITE_DATA_VALID_BURST_DELAY_CYCLES, 2) ;
+              SetAxi4Options(ManagerRec, WRITE_DATA_VALID_BURST_DELAY_CYCLES, 2) ;
             end if ; 
           when 2 => 
-            log(TbMasterID, "Valid Delay Cycles 4") ;
-            SetAxi4Options(MasterRec, ValidDelayCycleOption, 4) ;
+            log(TbManagerID, "Valid Delay Cycles 4") ;
+            SetAxi4Options(ManagerRec, ValidDelayCycleOption, 4) ;
             if k = 1 then  
-              log(TbMasterID, "Valid Delay Burst Cycles 1") ;
-              SetAxi4Options(MasterRec, WRITE_DATA_VALID_BURST_DELAY_CYCLES, 1) ;
+              log(TbManagerID, "Valid Delay Burst Cycles 1") ;
+              SetAxi4Options(ManagerRec, WRITE_DATA_VALID_BURST_DELAY_CYCLES, 1) ;
             end if ; 
           when 3 => 
-            log(TbMasterID, "Valid Delay Cycles 0") ;
-            SetAxi4Options(MasterRec, ValidDelayCycleOption, 0) ;
+            log(TbManagerID, "Valid Delay Cycles 0") ;
+            SetAxi4Options(ManagerRec, ValidDelayCycleOption, 0) ;
             if k = 1 then  
-              SetAxi4Options(MasterRec, WRITE_DATA_VALID_BURST_DELAY_CYCLES, 0) ;
+              SetAxi4Options(ManagerRec, WRITE_DATA_VALID_BURST_DELAY_CYCLES, 0) ;
             end if ; 
           when others => 
-            Alert(TbMasterID, "Unimplemented test case", FAILURE)  ; 
+            Alert(TbManagerID, "Unimplemented test case", FAILURE)  ; 
         end case ; 
         increment(TransactionCount) ;
-        WaitForClock(MasterRec, 4) ; 
+        WaitForClock(ManagerRec, 4) ; 
 
         Addr := X"0000_0000" + k*(2**12) + j*(2**8) ; 
         Data := X"0000_0000" + k*(2**12) + j*(2**8) ; 
         PushBurstIncrement(WriteBurstFifo, to_integer(Data), 4*8, DATA_WIDTH) ;
-        WriteBurstAsync(MasterRec, Addr,        8) ;
-        WriteBurstAsync(MasterRec, Addr+(8*4),  8) ;
-        WriteBurstAsync(MasterRec, Addr+(16*4), 8) ;
-        WriteBurstAsync(MasterRec, Addr+(24*4), 8) ;
-        WaitForClock(MasterRec, 8) ; 
+        WriteBurstAsync(ManagerRec, Addr,        8) ;
+        WriteBurstAsync(ManagerRec, Addr+(8*4),  8) ;
+        WriteBurstAsync(ManagerRec, Addr+(16*4), 8) ;
+        WriteBurstAsync(ManagerRec, Addr+(24*4), 8) ;
+        WaitForClock(ManagerRec, 8) ; 
         
         -- Make sure Writes finish before reads start when write data is delayed
-        if k = 1 then WaitForTransaction(MasterRec) ;  end if ; 
+        if k = 1 then WaitForTransaction(ManagerRec) ;  end if ; 
         
-        ReadBurst(MasterRec, Addr,        8) ;
-        ReadBurst(MasterRec, Addr+(8*4),  8) ;
-        ReadBurst(MasterRec, Addr+(16*4), 8) ;
-        ReadBurst(MasterRec, Addr+(24*4), 8) ;
+        ReadBurst(ManagerRec, Addr,        8) ;
+        ReadBurst(ManagerRec, Addr+(8*4),  8) ;
+        ReadBurst(ManagerRec, Addr+(16*4), 8) ;
+        ReadBurst(ManagerRec, Addr+(24*4), 8) ;
         CheckBurstIncrement(ReadBurstFifo, to_integer(Data), 4*8, DATA_WIDTH) ;
-        WaitForClock(MasterRec, 8) ; 
+        WaitForClock(ManagerRec, 8) ; 
 --        WaitForBarrier(MemorySync) ;
         print("") ; print("") ;
       end loop ; 
     end loop ; 
 
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MasterRec, 2) ;
+    WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
   
   
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  ResponderProc : process
+  SubordinateProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
   begin
-    -- Memory responder does nothing active during this test
+    -- Memory Subordinate does nothing active during this test
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process SubordinateProc ;
 
-end ValidTimingBurstMaster ;
+end ValidTimingBurstManager ;
 
-Configuration TbAxi4_ValidTimingBurstMaster of TbAxi4Memory is
+Configuration TbAxi4_ValidTimingBurstManager of TbAxi4Memory is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(ValidTimingBurstMaster) ; 
+      use entity work.TestCtrl(ValidTimingBurstManager) ; 
     end for ; 
---!!    for Responder_1 : Axi4Responder 
+--!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 
-end TbAxi4_ValidTimingBurstMaster ; 
+end TbAxi4_ValidTimingBurstManager ; 

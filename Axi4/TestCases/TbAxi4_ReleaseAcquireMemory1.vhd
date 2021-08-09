@@ -85,82 +85,82 @@ begin
   end process ControlProc ; 
   
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
   begin
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
   ------------------------------------------------------------
-  -- ResponderProc1
-  --   Generate transactions for AxiMaster
+  -- SubordinateProc1
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  ResponderProc1 : process
+  SubordinateProc1 : process
     variable StartTime : time ; 
     variable IntOption  : integer ; 
     variable BoolOption : boolean ; 
   begin
     wait until nReset = '1' ;  
     -- Align to the first clock
-    WaitForClock(ResponderRec, 1) ; 
+    WaitForClock(SubordinateRec, 1) ; 
     StartTime := now ; 
-    WaitForClock(ResponderRec, 2) ; 
+    WaitForClock(SubordinateRec, 2) ; 
     AffirmIfEqual(NOW, StartTime + 20 ns, "Expected Completion Time") ;
 
     -- Setting and checking values set 
-    SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 2) ;
-    GetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, IntOption) ;
+    SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 2) ;
+    GetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, IntOption) ;
     AffirmIfEqual(TbID, IntOption, 2, "WRITE_ADDRESS_READY_DELAY_CYCLES") ;
-    SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, TRUE) ;
-    GetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, BoolOption) ;
+    SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, TRUE) ;
+    GetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, BoolOption) ;
     AffirmIfEqual(TbID, BoolOption, TRUE, "WRITE_ADDRESS_READY_BEFORE_VALID") ;
 
 
-    Write(ResponderRec, X"1000_1000", X"5555_5555" ) ;
-    ReadCheck(ResponderRec, X"1000_1000", X"5555_5555" ) ;
+    Write(SubordinateRec, X"1000_1000", X"5555_5555" ) ;
+    ReadCheck(SubordinateRec, X"1000_1000", X"5555_5555" ) ;
 
     WaitForBarrier(Sync1) ;
-    ReleaseTransactionRecord(ResponderRec) ; 
+    ReleaseTransactionRecord(SubordinateRec) ; 
     
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc1 ;
+  end process SubordinateProc1 ;
   
   ------------------------------------------------------------
-  -- ResponderProc2
-  --   Generate transactions for AxiMaster
+  -- SubordinateProc2
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  ResponderProc2 : process
+  SubordinateProc2 : process
     variable StartTime : time ; 
     variable IntOption  : integer ; 
     variable BoolOption : boolean ; 
   begin
     WaitForBarrier(Sync1) ;
-    AcquireTransactionRecord(ResponderRec) ;
+    AcquireTransactionRecord(SubordinateRec) ;
 
     StartTime := now ; 
-    WaitForClock(ResponderRec, 1) ; 
+    WaitForClock(SubordinateRec, 1) ; 
     AffirmIfEqual(NOW, StartTime + 10 ns, "Expected Completion Time") ;
     
     -- Setting and checking values set 
-    SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 1) ;
-    GetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, IntOption) ;
+    SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 1) ;
+    GetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, IntOption) ;
     AffirmIfEqual(TbID, IntOption, 1, "WRITE_ADDRESS_READY_DELAY_CYCLES") ;
-    SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, FALSE) ;
-    GetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, BoolOption) ;
+    SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, FALSE) ;
+    GetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, BoolOption) ;
     AffirmIfEqual(TbID, BoolOption, FALSE, "WRITE_ADDRESS_READY_BEFORE_VALID") ;
 
-    Write(ResponderRec, X"1000_2000", X"AAAA_AAAA" ) ;
-    ReadCheck(ResponderRec, X"1000_2000", X"AAAA_AAAA" ) ;
+    Write(SubordinateRec, X"1000_2000", X"AAAA_AAAA" ) ;
+    ReadCheck(SubordinateRec, X"1000_2000", X"AAAA_AAAA" ) ;
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(ResponderRec, 2) ;
+    WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc2 ;
+  end process SubordinateProc2 ;
 
 
 end ReleaseAcquireMemory1 ;
@@ -170,7 +170,7 @@ Configuration TbAxi4_ReleaseAcquireMemory1 of TbAxi4Memory is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(ReleaseAcquireMemory1) ; 
     end for ; 
---!!    for Responder_1 : Axi4Responder 
+--!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 

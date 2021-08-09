@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Simple AXI Lite Master Model
+--      Simple AXI Lite Manager Model
 --
 --
 --  Developed by:
@@ -122,23 +122,23 @@ begin
   ) ;
 
   -- Behavioral model.  Replaces DUT for labs
-  Responder_1 : Axi4MemoryVti
+  Subordinate_1 : Axi4MemoryVti
   port map (
     -- Globals
     Clk         => Clk,
     nReset      => nReset,
 
-    -- AXI Master Functional Interface
+    -- AXI Manager Functional Interface
     AxiBus       => AxiBus
   ) ;
 
-  Master_1 : Axi4MasterVti
+  Manager_1 : Axi4ManagerVti
   port map (
     -- Globals
     Clk         => Clk,
     nReset      => nReset,
 
-    -- AXI Master Functional Interface
+    -- AXI Manager Functional Interface
     AxiBus      => AxiBus
   ) ;
 
@@ -149,7 +149,7 @@ begin
     Clk         => Clk,
     nReset      => nReset,
 
-    -- AXI Master Functional Interface
+    -- AXI Manager Functional Interface
     AxiBus      => AxiBus
   ) ;
 

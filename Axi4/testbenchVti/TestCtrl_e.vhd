@@ -62,17 +62,17 @@ entity TestCtrl is
   ) ;
   
   -- Connect transaction interfaces using external names
-  alias MasterRec    is <<signal ^.Master_1.TransRec : AddressBusRecType>> ;
-  alias ResponderRec is <<signal ^.Responder_1.TransRec : AddressBusRecType>> ;
+  alias ManagerRec    is <<signal ^.Manager_1.TransRec : AddressBusRecType>> ;
+  alias SubordinateRec is <<signal ^.Subordinate_1.TransRec : AddressBusRecType>> ;
   
-  -- Derive AXI interface properties from the MasterRec
-  constant AXI_ADDR_WIDTH : integer := MasterRec.Address'length ; 
-  constant AXI_DATA_WIDTH : integer := MasterRec.DataToModel'length ;  
+  -- Derive AXI interface properties from the ManagerRec
+  constant AXI_ADDR_WIDTH : integer := ManagerRec.Address'length ; 
+  constant AXI_DATA_WIDTH : integer := ManagerRec.DataToModel'length ;  
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 
   -- Simplifying access to Burst FIFOs using aliases
-  alias WriteBurstFifo : ScoreboardIdType is MasterRec.WriteBurstFifo ;
-  alias ReadBurstFifo  : ScoreboardIdType is MasterRec.ReadBurstFifo ;
+  alias WriteBurstFifo : ScoreboardIdType is ManagerRec.WriteBurstFifo ;
+  alias ReadBurstFifo  : ScoreboardIdType is ManagerRec.ReadBurstFifo ;
 
 end entity TestCtrl ;

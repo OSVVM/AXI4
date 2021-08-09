@@ -1,6 +1,6 @@
 --
---  File Name:         Axi4Master.vhd
---  Design Unit Name:  Axi4Master
+--  File Name:         Axi4Manager.vhd
+--  Design Unit Name:  Axi4Manager
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      AXI Full Master Model
+--      AXI Full Manager Model
 --
 --
 --  Developed by:
@@ -63,7 +63,7 @@ library osvvm_common ;
   use work.Axi4InterfacePkg.all ;
   use work.Axi4CommonPkg.all ;
 
-entity Axi4Master is
+entity Axi4Manager is
 generic (
   MODEL_ID_NAME    : string := "" ;
   tperiod_Clk      : time   := 10 ns ;
@@ -116,7 +116,7 @@ port (
   Clk         : in   std_logic ;
   nReset      : in   std_logic ;
 
-  -- AXI Master Functional Interface
+  -- AXI Manager Functional Interface
   AxiBus      : inout Axi4RecType ;
 
   -- Testbench Transaction Interface
@@ -130,12 +130,12 @@ port (
   -- Derive AXI interface properties from the AxiBus
   constant AXI_ADDR_WIDTH      : integer := AxiBus.WriteAddress.Addr'length ;
   constant AXI_DATA_WIDTH      : integer := AxiBus.WriteData.Data'length ;
-end entity Axi4Master ;
-architecture AxiFull of Axi4Master is
+end entity Axi4Manager ;
+architecture AxiFull of Axi4Manager is
 
   -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
-    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Master'PATH_NAME))) ;
+    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Manager'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
 
@@ -362,8 +362,8 @@ begin
 
           if IsWriteData(Operation) then
             -- Single Transfer Write Data Handling
-            CheckDataIsBytes(ModelID, TransRec.DataWidth, "Master Write: ", WriteDataRequestCount+1) ;
-            CheckDataWidth  (ModelID, TransRec.DataWidth, WriteByteAddr, AXI_DATA_WIDTH, "Master Write: ", WriteDataRequestCount+1) ;
+            CheckDataIsBytes(ModelID, TransRec.DataWidth, "Manager Write: ", WriteDataRequestCount+1) ;
+            CheckDataWidth  (ModelID, TransRec.DataWidth, WriteByteAddr, AXI_DATA_WIDTH, "Manager Write: ", WriteDataRequestCount+1) ;
             LWD.Data  := AlignBytesToDataBus(SafeResize(TransRec.DataToModel, LWD.Data'length), TransRec.DataWidth, WriteByteAddr) ;
             LWD.Strb  := CalculateWriteStrobe(LWD.Data) ;
             Push(WriteDataFifo, '0' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
@@ -507,8 +507,8 @@ begin
 
             -- Get Read Data
             LRD.Data := Pop(ReadDataFifo) ;
-            CheckDataIsBytes(ModelID, TransRec.DataWidth, "Master Read: ", ReadDataExpectCount) ;
-            CheckDataWidth  (ModelID, TransRec.DataWidth, ReadByteAddr, AXI_DATA_WIDTH, "Master Read: ", ReadDataExpectCount) ;
+            CheckDataIsBytes(ModelID, TransRec.DataWidth, "Manager Read: ", ReadDataExpectCount) ;
+            CheckDataWidth  (ModelID, TransRec.DataWidth, ReadByteAddr, AXI_DATA_WIDTH, "Manager Read: ", ReadDataExpectCount) ;
             LRD.Data := AlignDataBusToBytes(LRD.Data, TransRec.DataWidth, ReadByteAddr) ;
 --            AxiReadDataAlignCheck (ModelID, LRD.Data, TransRec.DataWidth, LAR.Addr, AXI_DATA_BYTE_WIDTH, AXI_BYTE_ADDR_WIDTH) ;
             TransRec.DataFromModel <= SafeResize(LRD.Data, TransRec.DataFromModel'length) ;
@@ -632,7 +632,7 @@ begin
           wait for 0 ns ;  wait for 0 ns ;
 
         when MULTIPLE_DRIVER_DETECT =>
-          Alert(ModelID, "Axi4Master: Multiple Drivers on Transaction Record." & 
+          Alert(ModelID, "Axi4Manager: Multiple Drivers on Transaction Record." & 
                          "  Transaction # " & to_string(TransactionCount), FAILURE) ;
           wait for 0 ns ;  wait for 0 ns ;
 

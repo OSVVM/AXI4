@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Simple AXI Full Memory Responder Model
+--      Simple AXI Full Memory Subordinate Model
 --
 --
 --  Developed by:
@@ -22,7 +22,7 @@
 --    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
 --    06/2021   2021.06    GHDL support + new memory data structure  
 --    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.   
---    06/2020   2020.06    Derived from Axi4Responder.vhd
+--    06/2020   2020.06    Derived from Axi4Subordinate.vhd
 --
 --
 --  This file is part of OSVVM.
@@ -91,7 +91,7 @@ port (
   Clk         : in   std_logic ;
   nReset      : in   std_logic ;
 
-  -- AXI Responder Interface
+  -- AXI Subordinate Interface
   AxiBus      : inout Axi4RecType ;
 
   -- Testbench Transaction Interface
@@ -108,7 +108,7 @@ port (
   
 end entity Axi4Memory ;
 
-architecture MemoryResponder of Axi4Memory is
+architecture MemorySubordinate of Axi4Memory is
   constant AXI_DATA_BYTE_WIDTH  : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH  : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 
@@ -876,4 +876,4 @@ begin
     end loop ReadDataLoop ;
   end process ReadDataHandler ;
 
-end architecture MemoryResponder ;
+end architecture MemorySubordinate ;

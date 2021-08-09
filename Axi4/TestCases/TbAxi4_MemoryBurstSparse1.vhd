@@ -87,15 +87,15 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable ByteData : std_logic_vector(7 downto 0) ;
     variable BurstVal : AddressBusFifoBurstModeType ; 
   begin
     wait until nReset = '1' ;  
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     
 ----------------------------------------  Test 1, Word Aligned
     log("Write with ByteAddr = 8, 12 Bytes -- word aligned") ;
@@ -111,10 +111,10 @@ begin
     Push(WriteBurstFifo, X"UU0D_0C0B") ;
     Push(WriteBurstFifo, X"100F_0EUU") ;
     
-    WriteBurst(MasterRec, X"0000_1000", 9) ;
+    WriteBurst(ManagerRec, X"0000_1000", 9) ;
 
 
-    ReadBurst (MasterRec, X"0000_1000", 9) ;
+    ReadBurst (ManagerRec, X"0000_1000", 9) ;
     
    Check(ReadBurstFifo, X"----_--01") ;
    Check(ReadBurstFifo, X"----_02--") ;
@@ -144,9 +144,9 @@ begin
     Push(WriteBurstFifo, X"UU14_UUUU") ;
     Push(WriteBurstFifo, X"15UU_UUUU") ;
     
-    WriteBurst(MasterRec, X"0000_2001", 11) ;
+    WriteBurst(ManagerRec, X"0000_2001", 11) ;
 
-    ReadBurst(MasterRec, X"0000_2001", 11) ;
+    ReadBurst(ManagerRec, X"0000_2001", 11) ;
    Check(ReadBurstFifo, X"--02_01--") ;
    Check(ReadBurstFifo, X"05--_0403") ;
    Check(ReadBurstFifo, X"8877_--06") ;
@@ -165,24 +165,24 @@ begin
     WaitForBarrier(WriteDone) ;
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MasterRec, 2) ;
+    WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
 
   ------------------------------------------------------------
   -- MemoryProc
-  --   Generate transactions for AxiResponder
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
   MemoryProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ; 
   begin
-    WaitForClock(ResponderRec, 2) ; 
+    WaitForClock(SubordinateRec, 2) ; 
    
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(ResponderRec, 2) ;
+    WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process MemoryProc ;
@@ -195,7 +195,7 @@ Configuration TbAxi4_MemoryBurstSparse1 of TbAxi4Memory is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(MemoryBurstSparse1) ; 
     end for ; 
---!!    for Responder_1 : Axi4Responder 
+--!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 

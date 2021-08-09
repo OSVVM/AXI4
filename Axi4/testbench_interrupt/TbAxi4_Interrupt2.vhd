@@ -41,7 +41,7 @@
 
 architecture Interrupt2 of TestCtrl is
 
-  signal MasterSync1, MemorySync1, TestDone : integer_barrier := 1 ;
+  signal ManagerSync1, MemorySync1, TestDone : integer_barrier := 1 ;
  
 begin
 
@@ -84,55 +84,55 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) := (others => '0') ;    
   begin
     wait until nReset = '1' ;  
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     
     for i in 0 to 7 loop 
       blankline(2) ; 
       log("Main Starting Writes.  Loop #" & to_string(i)) ;
-      Write(MasterRec, X"1000_0000", Data ) ;
-      Write(MasterRec, X"1000_0004", Data + 1 ) ;
-      Write(MasterRec, X"1000_0008", Data + 2 ) ;
-      Write(MasterRec, X"1000_000C", Data + 3 ) ;
+      Write(ManagerRec, X"1000_0000", Data ) ;
+      Write(ManagerRec, X"1000_0004", Data + 1 ) ;
+      Write(ManagerRec, X"1000_0008", Data + 2 ) ;
+      Write(ManagerRec, X"1000_000C", Data + 3 ) ;
       
       IntReq <= '1' after i * 10 ns + 5 ns, '0' after i * 10 ns + 50 ns ;  
       wait for 9 ns ; 
-      Write(MasterRec, X"1000_0010", Data + 4 ) ;
-      ReadCheck(MasterRec, X"1000_0010", Data + 4 ) ;
-      Write(MasterRec, X"1000_0014", Data + 5 ) ;
-      ReadCheck(MasterRec, X"1000_0014", Data + 5 ) ;
-      WaitForClock(MasterRec, 1) ; 
+      Write(ManagerRec, X"1000_0010", Data + 4 ) ;
+      ReadCheck(ManagerRec, X"1000_0010", Data + 4 ) ;
+      Write(ManagerRec, X"1000_0014", Data + 5 ) ;
+      ReadCheck(ManagerRec, X"1000_0014", Data + 5 ) ;
+      WaitForClock(ManagerRec, 1) ; 
       log("WaitForClock #1 finished") ;
-      WaitForClock(MasterRec, 1) ; 
+      WaitForClock(ManagerRec, 1) ; 
       log("WaitForClock #2 finished") ;
 
       blankline(2) ; 
       log("Main Starting Reads.  Loop #" & to_string(i)) ;
-      ReadCheck(MasterRec, X"A000_2000", Data ) ;
-      ReadCheck(MasterRec, X"A000_2004", Data + 1 ) ;
-      ReadCheck(MasterRec, X"A000_2008", Data + 2 ) ;
-      ReadCheck(MasterRec, X"A000_200C", Data + 3 ) ;
+      ReadCheck(ManagerRec, X"A000_2000", Data ) ;
+      ReadCheck(ManagerRec, X"A000_2004", Data + 1 ) ;
+      ReadCheck(ManagerRec, X"A000_2008", Data + 2 ) ;
+      ReadCheck(ManagerRec, X"A000_200C", Data + 3 ) ;
 
       Data := Data + X"10" ;
     end loop ; 
 
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MasterRec, 2) ;
+    WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
 
   ------------------------------------------------------------
   -- InterruptProc
-  --   Generate transactions for AxiResponder
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
   InterruptProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) := (others => '0') ;    
@@ -158,19 +158,19 @@ begin
   end process InterruptProc ;
 
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  ResponderProc : process
+  SubordinateProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
   begin
 
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(ResponderRec, 2) ;
+    WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process SubordinateProc ;
 
 
 end Interrupt2 ;
@@ -180,7 +180,7 @@ Configuration TbAxi4_Interrupt2 of TbAxi4Memory is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(Interrupt2) ; 
     end for ; 
---!!    for Responder_1 : Axi4Responder 
+--!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 

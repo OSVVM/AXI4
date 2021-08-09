@@ -41,7 +41,7 @@
 
 architecture InterruptBurst2 of TestCtrl is
 
-  signal MasterSync1, MemorySync1, TestDone : integer_barrier := 1 ;
+  signal ManagerSync1, MemorySync1, TestDone : integer_barrier := 1 ;
  
 begin
 
@@ -84,36 +84,36 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable Data : integer := 0 ;    
   begin
     wait until nReset = '1' ;  
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     
     for i in 0 to 7 loop 
       blankline(2) ; 
       log("Main Starting Writes.  Loop #" & to_string(i)) ;
       PushBurstIncrement(WriteBurstFifo, Data, 4, AXI_DATA_WIDTH) ;
-      WriteBurst(MasterRec, X"1000_0000", 4) ;
+      WriteBurst(ManagerRec, X"1000_0000", 4) ;
       
       IntReq <= '1' after i * 10 ns + 5 ns, '0' after i * 10 ns + 80 ns ;  
       wait for 9 ns ; 
       PushBurstIncrement(WriteBurstFifo, Data+4, 4, AXI_DATA_WIDTH) ;
-      WriteBurst(MasterRec, X"2000_0000", 4) ;
-      ReadBurst(MasterRec,  X"2000_0000", 4) ;
+      WriteBurst(ManagerRec, X"2000_0000", 4) ;
+      ReadBurst(ManagerRec,  X"2000_0000", 4) ;
       CheckBurstIncrement(ReadBurstFifo, Data+4, 4, AXI_DATA_WIDTH) ; 
 
-      WaitForClock(MasterRec, 1) ; 
+      WaitForClock(ManagerRec, 1) ; 
       log("WaitForClock #1 finished") ;
-      WaitForClock(MasterRec, 1) ; 
+      WaitForClock(ManagerRec, 1) ; 
       log("WaitForClock #2 finished") ;
 
       blankline(2) ; 
       log("Main Starting Reads.  Loop #" & to_string(i)) ;
-      ReadBurst(MasterRec, X"A000_2000", 4) ;
+      ReadBurst(ManagerRec, X"A000_2000", 4) ;
       CheckBurstIncrement(ReadBurstFifo, Data+16, 4, AXI_DATA_WIDTH) ; 
 
       Data := Data + 16#10# ;
@@ -121,15 +121,15 @@ begin
 
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MasterRec, 2) ;
+    WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
 
   ------------------------------------------------------------
   -- InterruptProc
-  --   Generate transactions for AxiResponder
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
   InterruptProc : process
     variable Data : integer := 0 ;    
@@ -156,19 +156,19 @@ begin
   end process InterruptProc ;
 
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  ResponderProc : process
+  SubordinateProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
   begin
 
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(ResponderRec, 2) ;
+    WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process SubordinateProc ;
 
 
 end InterruptBurst2 ;
@@ -178,7 +178,7 @@ Configuration TbAxi4_InterruptBurst2 of TbAxi4Memory is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(InterruptBurst2) ; 
     end for ; 
---!!    for Responder_1 : Axi4Responder 
+--!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 

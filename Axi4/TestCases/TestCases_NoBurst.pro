@@ -52,12 +52,12 @@ simulate TbAxi4_RandomReadWrite
 analyze  TbAxi4_RandomReadWriteByte1.vhd
 simulate TbAxi4_RandomReadWriteByte1
 
-analyze  TbAxi4_ResponderReadWrite1.vhd
-simulate TbAxi4_ResponderReadWrite1
-analyze  TbAxi4_ResponderReadWrite2.vhd
-simulate TbAxi4_ResponderReadWrite2
-analyze  TbAxi4_ResponderReadWrite3.vhd
-simulate TbAxi4_ResponderReadWrite3
+analyze  TbAxi4_SubordinateReadWrite1.vhd
+simulate TbAxi4_SubordinateReadWrite1
+analyze  TbAxi4_SubordinateReadWrite2.vhd
+simulate TbAxi4_SubordinateReadWrite2
+analyze  TbAxi4_SubordinateReadWrite3.vhd
+simulate TbAxi4_SubordinateReadWrite3
 
 analyze  TbAxi4_ReadWriteAsync1.vhd
 simulate TbAxi4_ReadWriteAsync1
@@ -68,42 +68,42 @@ simulate TbAxi4_ReadWriteAsync3
 analyze  TbAxi4_ReadWriteAsync4.vhd
 simulate TbAxi4_ReadWriteAsync4
 
-analyze  TbAxi4_ResponderReadWriteAsync1.vhd
-simulate TbAxi4_ResponderReadWriteAsync1
-analyze  TbAxi4_ResponderReadWriteAsync2.vhd
-simulate TbAxi4_ResponderReadWriteAsync2
+analyze  TbAxi4_SubordinateReadWriteAsync1.vhd
+simulate TbAxi4_SubordinateReadWriteAsync1
+analyze  TbAxi4_SubordinateReadWriteAsync2.vhd
+simulate TbAxi4_SubordinateReadWriteAsync2
 
-analyze  TbAxi4_MultipleDriversMaster.vhd
-simulate TbAxi4_MultipleDriversMaster
-analyze  TbAxi4_MultipleDriversResponder.vhd
-simulate TbAxi4_MultipleDriversResponder
+analyze  TbAxi4_MultipleDriversManager.vhd
+simulate TbAxi4_MultipleDriversManager
+analyze  TbAxi4_MultipleDriversSubordinate.vhd
+simulate TbAxi4_MultipleDriversSubordinate
 
-analyze  TbAxi4_ReleaseAcquireResponder1.vhd
-simulate TbAxi4_ReleaseAcquireResponder1
+analyze  TbAxi4_ReleaseAcquireSubordinate1.vhd
+simulate TbAxi4_ReleaseAcquireSubordinate1
 
-analyze  TbAxi4_AlertLogIDMaster.vhd
-simulate TbAxi4_AlertLogIDMaster
-analyze  TbAxi4_AlertLogIDResponder.vhd
-simulate TbAxi4_AlertLogIDResponder
+analyze  TbAxi4_AlertLogIDManager.vhd
+simulate TbAxi4_AlertLogIDManager
+analyze  TbAxi4_AlertLogIDSubordinate.vhd
+simulate TbAxi4_AlertLogIDSubordinate
 
-analyze  TbAxi4_TransactionApiResponder.vhd
-simulate TbAxi4_TransactionApiResponder
+analyze  TbAxi4_TransactionApiSubordinate.vhd
+simulate TbAxi4_TransactionApiSubordinate
 
-analyze  TbAxi4_ValidTimingMaster.vhd
-simulate TbAxi4_ValidTimingMaster
-analyze  TbAxi4_ValidTimingResponder.vhd
-simulate TbAxi4_ValidTimingResponder
+analyze  TbAxi4_ValidTimingManager.vhd
+simulate TbAxi4_ValidTimingManager
+analyze  TbAxi4_ValidTimingSubordinate.vhd
+simulate TbAxi4_ValidTimingSubordinate
 
-analyze  TbAxi4_ReadyTimingResponder.vhd
-simulate TbAxi4_ReadyTimingResponder
+analyze  TbAxi4_ReadyTimingSubordinate.vhd
+simulate TbAxi4_ReadyTimingSubordinate
 
-analyze  TbAxi4_AxiIfOptionsMasterResponder.vhd
-simulate TbAxi4_AxiIfOptionsMasterResponder
+analyze  TbAxi4_AxiIfOptionsManagerSubordinate.vhd
+simulate TbAxi4_AxiIfOptionsManagerSubordinate
 
-analyze  TbAxi4_TimeOutMaster.vhd
-simulate TbAxi4_TimeOutMaster
-analyze  TbAxi4_TimeOutResponder.vhd
-simulate TbAxi4_TimeOutResponder
+analyze  TbAxi4_TimeOutManager.vhd
+simulate TbAxi4_TimeOutManager
+analyze  TbAxi4_TimeOutSubordinate.vhd
+simulate TbAxi4_TimeOutSubordinate
 
 ## Memory
 analyze  TbAxi4_MemoryReadWrite1.vhd
@@ -123,16 +123,16 @@ simulate TbAxi4_AlertLogIDMemory
 analyze  TbAxi4_TimeOutMemory.vhd
 simulate TbAxi4_TimeOutMemory
 
-analyze  TbAxi4_TransactionApiMaster.vhd
-simulate TbAxi4_TransactionApiMaster
+analyze  TbAxi4_TransactionApiManager.vhd
+simulate TbAxi4_TransactionApiManager
 analyze  TbAxi4_TransactionApiMemory.vhd
 simulate TbAxi4_TransactionApiMemory
 
 analyze  TbAxi4_ValidTimingMemory.vhd
 simulate TbAxi4_ValidTimingMemory
 
-analyze  TbAxi4_ReadyTimingMaster.vhd
-simulate TbAxi4_ReadyTimingMaster
+analyze  TbAxi4_ReadyTimingManager.vhd
+simulate TbAxi4_ReadyTimingManager
 
 analyze  TbAxi4_ReadyTimingMemory.vhd
 simulate TbAxi4_ReadyTimingMemory

@@ -53,7 +53,7 @@ library osvvm_common ;
 package Axi4ComponentVtiPkg is
 
   ------------------------------------------------------------
-  component Axi4MasterVti is
+  component Axi4ManagerVti is
   ------------------------------------------------------------
     generic (
       MODEL_ID_NAME    : string := "" ;
@@ -107,14 +107,14 @@ package Axi4ComponentVtiPkg is
       Clk         : in   std_logic ;
       nReset      : in   std_logic ;
 
-      -- AXI Master Functional Interface
+      -- AXI Manager Functional Interface
       AxiBus  : inout Axi4RecType
     ) ;
-  end component Axi4MasterVti ;
+  end component Axi4ManagerVti ;
 
 
   ------------------------------------------------------------
-  component Axi4ResponderVti is
+  component Axi4SubordinateVti is
   ------------------------------------------------------------
     generic (
       MODEL_ID_NAME   : string := "" ;
@@ -144,10 +144,10 @@ package Axi4ComponentVtiPkg is
       Clk         : in   std_logic ;
       nReset      : in   std_logic ;
 
-      -- AXI Master Functional Interface
+      -- AXI Manager Functional Interface
       AxiBus      : inout Axi4RecType
     ) ;
-  end component Axi4ResponderVti ;
+  end component Axi4SubordinateVti ;
 
 
   ------------------------------------------------------------

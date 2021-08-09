@@ -45,8 +45,8 @@ architecture ReadWriteAsync3 of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
   signal TestStart : integer_barrier := 1 ;
-  signal TbMasterID : AlertLogIDType ; 
-  signal TbResponderID  : AlertLogIDType ; 
+  signal TbManagerID : AlertLogIDType ; 
+  signal TbSubordinateID  : AlertLogIDType ; 
 
 begin
 
@@ -58,8 +58,8 @@ begin
   begin
     -- Initialization of test
     SetAlertLogName("TbAxi4_ReadWriteAsync3") ;
-    TbMasterID <= GetAlertLogID("TestCtrl: AxiMaster") ;
-    TbResponderID <= GetAlertLogID("TestCtrl: AxiResponder") ;
+    TbManagerID <= GetAlertLogID("TestCtrl: AxiManager") ;
+    TbSubordinateID <= GetAlertLogID("TestCtrl: AxiSubordinate") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
 --    SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
@@ -91,120 +91,120 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
   begin
     WaitForBarrier(TestStart) ;  -- Wait for initialization in ControlProc
     SetLogEnable(INFO, FALSE) ;    -- Enable INFO logs
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     
-    log(TbMasterID, "Testing 32 Bit Write Asynchronous Transaction", INFO) ;
-    WriteAsync(MasterRec, X"AAAA_AAA0", X"5555_5555" ) ;
+    log(TbManagerID, "Testing 32 Bit Write Asynchronous Transaction", INFO) ;
+    WriteAsync(ManagerRec, X"AAAA_AAA0", X"5555_5555" ) ;
     
-    WaitForClock(MasterRec, 4) ; 
+    WaitForClock(ManagerRec, 4) ; 
     blankline(1);
     
-    log(TbMasterID, "Testing 32 Bit Read Address Asynchronous Transaction", INFO) ;
-    ReadAddressAsync(MasterRec, X"1111_1110") ;
-    log(TbMasterID, "Testing 32 Bit Read Data Transaction", INFO) ;
-    ReadCheckData(MasterRec, X"2222_2222") ;
+    log(TbManagerID, "Testing 32 Bit Read Address Asynchronous Transaction", INFO) ;
+    ReadAddressAsync(ManagerRec, X"1111_1110") ;
+    log(TbManagerID, "Testing 32 Bit Read Data Transaction", INFO) ;
+    ReadCheckData(ManagerRec, X"2222_2222") ;
     
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     blankline(2);
     
 --%% ADD Your Test Code After Here:
 
 
     -- 5.2, 8 bit Writes
-    log(TbMasterID, "Testing 8 Bit Write Asynchronous Transaction", INFO) ; 
-    WriteAsync(MasterRec, X"AAAA_AAA0", X"11" ) ;
-    WriteAsync(MasterRec, X"AAAA_AAA1", X"22" ) ;
-    WriteAsync(MasterRec, X"AAAA_AAA2", X"33" ) ;
-    WriteAsync(MasterRec, X"AAAA_AAA3", X"44" ) ;
+    log(TbManagerID, "Testing 8 Bit Write Asynchronous Transaction", INFO) ; 
+    WriteAsync(ManagerRec, X"AAAA_AAA0", X"11" ) ;
+    WriteAsync(ManagerRec, X"AAAA_AAA1", X"22" ) ;
+    WriteAsync(ManagerRec, X"AAAA_AAA2", X"33" ) ;
+    WriteAsync(ManagerRec, X"AAAA_AAA3", X"44" ) ;
     
-    WaitForClock(MasterRec, 8) ; 
+    WaitForClock(ManagerRec, 8) ; 
     blankline(2);
     
     -- 5.2, 8 bit Reads
-    log(TbMasterID, "Testing 8 Bit Read Address Asynchronous Transaction", INFO) ; 
-    ReadAddressAsync(MasterRec,  X"1111_1110") ;
-    ReadAddressAsync(MasterRec,  X"1111_1111") ;
-    ReadAddressAsync(MasterRec,  X"1111_1112") ;
-    ReadAddressAsync(MasterRec,  X"1111_1113") ;
+    log(TbManagerID, "Testing 8 Bit Read Address Asynchronous Transaction", INFO) ; 
+    ReadAddressAsync(ManagerRec,  X"1111_1110") ;
+    ReadAddressAsync(ManagerRec,  X"1111_1111") ;
+    ReadAddressAsync(ManagerRec,  X"1111_1112") ;
+    ReadAddressAsync(ManagerRec,  X"1111_1113") ;
     
-    log(TbMasterID, "Testing 8 Bit Read Data Transaction", INFO) ; 
-    ReadCheckData(MasterRec,  X"AA") ;
-    ReadCheckData(MasterRec,  X"BB") ;
-    ReadCheckData(MasterRec,  X"CC") ;
-    ReadCheckData(MasterRec,  X"DD") ;
+    log(TbManagerID, "Testing 8 Bit Read Data Transaction", INFO) ; 
+    ReadCheckData(ManagerRec,  X"AA") ;
+    ReadCheckData(ManagerRec,  X"BB") ;
+    ReadCheckData(ManagerRec,  X"CC") ;
+    ReadCheckData(ManagerRec,  X"DD") ;
     
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     blankline(2);
     -- SetLogEnable(INFO, FALSE) ;    -- Disable INFO logs
     
 
     -- 5.3, 16 bit Write Address
-    log(TbMasterID, "Testing 16 Bit Write Address Asynchronous Transaction", INFO) ; 
-    WriteAddressAsync(MasterRec, X"BBBB_BBB0" ) ;
-    WriteAddressAsync(MasterRec, X"BBBB_BBB1" ) ;
-    WriteAddressAsync(MasterRec, X"BBBB_BBB2" ) ;
+    log(TbManagerID, "Testing 16 Bit Write Address Asynchronous Transaction", INFO) ; 
+    WriteAddressAsync(ManagerRec, X"BBBB_BBB0" ) ;
+    WriteAddressAsync(ManagerRec, X"BBBB_BBB1" ) ;
+    WriteAddressAsync(ManagerRec, X"BBBB_BBB2" ) ;
     
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     blankline(2);
 
     -- 5.3, 16 bit Write Data
-    log(TbMasterID, "Testing 16 Bit Write Data Asynchronous Transaction", INFO) ; 
-    WriteDataAsync(MasterRec, X"2211" ) ;
-    WriteDataAsync(MasterRec, X"01", X"33_22" ) ;
-    WriteDataAsync(MasterRec, X"02", X"4433" ) ;
+    log(TbManagerID, "Testing 16 Bit Write Data Asynchronous Transaction", INFO) ; 
+    WriteDataAsync(ManagerRec, X"2211" ) ;
+    WriteDataAsync(ManagerRec, X"01", X"33_22" ) ;
+    WriteDataAsync(ManagerRec, X"02", X"4433" ) ;
 
     blankline(2);
 
     -- 5.3, 16 bit Reads
-    log(TbMasterID, "Testing 16 Bit Read Address Asynchronous Transaction", INFO) ; 
-    ReadAddressAsync(MasterRec,  X"1111_1110") ;
-    ReadAddressAsync(MasterRec,  X"1111_1111") ;
-    ReadAddressAsync(MasterRec,  X"1111_1112") ;
+    log(TbManagerID, "Testing 16 Bit Read Address Asynchronous Transaction", INFO) ; 
+    ReadAddressAsync(ManagerRec,  X"1111_1110") ;
+    ReadAddressAsync(ManagerRec,  X"1111_1111") ;
+    ReadAddressAsync(ManagerRec,  X"1111_1112") ;
     
-    log(TbMasterID, "Testing 16 Bit Read Data Transaction", INFO) ; 
-    ReadCheckData(MasterRec,  X"BBAA") ;
-    ReadCheckData(MasterRec,  X"CCBB") ;
-    ReadCheckData(MasterRec,  X"DDCC") ;
+    log(TbManagerID, "Testing 16 Bit Read Data Transaction", INFO) ; 
+    ReadCheckData(ManagerRec,  X"BBAA") ;
+    ReadCheckData(ManagerRec,  X"CCBB") ;
+    ReadCheckData(ManagerRec,  X"DDCC") ;
 
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     blankline(2);
     
 
     -- 5.4, 24 bit Write Data
-    log(TbMasterID, "Testing 24 Bit Write Data Asynchronous Transaction", INFO) ;
-    WriteDataAsync(MasterRec, X"33_2211" ) ;
-    WriteDataAsync(MasterRec, X"01", X"4433_22" ) ;
+    log(TbManagerID, "Testing 24 Bit Write Data Asynchronous Transaction", INFO) ;
+    WriteDataAsync(ManagerRec, X"33_2211" ) ;
+    WriteDataAsync(ManagerRec, X"01", X"4433_22" ) ;
 
-    WaitForClock(MasterRec, 1) ; 
+    WaitForClock(ManagerRec, 1) ; 
     blankline(2);
 
     -- 5.4, 24 bit Write Address
-    log(TbMasterID, "Testing 24 Bit Write Address Asynchronous Transaction", INFO) ;
-    WriteAddressAsync(MasterRec, X"CCCC_CCC0" ) ;
-    WriteAddressAsync(MasterRec, X"CCCC_CCC1" ) ;
+    log(TbManagerID, "Testing 24 Bit Write Address Asynchronous Transaction", INFO) ;
+    WriteAddressAsync(ManagerRec, X"CCCC_CCC0" ) ;
+    WriteAddressAsync(ManagerRec, X"CCCC_CCC1" ) ;
 
     blankline(2);
 
     -- 5.3, 24 bit Reads
-    log(TbMasterID, "Testing 24 Bit Read Address Asynchronous Transaction", INFO) ;
-    log(TbMasterID, "ReadAddressAsync, Addr: 1111_1110") ;
-    ReadAddressAsync(MasterRec,  X"1111_1110") ;
-    log(TbMasterID, "ReadAddressAsync, Addr: 1111_1111") ;
-    ReadAddressAsync(MasterRec,  X"1111_1111") ;
-    log(TbMasterID, "ReadData, Data: CC_BBAA") ;
-    ReadCheckData(MasterRec,  X"CC_BBAA") ;
-    log(TbMasterID, "ReadData, Data: DDCC_BB") ;
-    ReadCheckData(MasterRec,  X"DDCC_BB") ;
+    log(TbManagerID, "Testing 24 Bit Read Address Asynchronous Transaction", INFO) ;
+    log(TbManagerID, "ReadAddressAsync, Addr: 1111_1110") ;
+    ReadAddressAsync(ManagerRec,  X"1111_1110") ;
+    log(TbManagerID, "ReadAddressAsync, Addr: 1111_1111") ;
+    ReadAddressAsync(ManagerRec,  X"1111_1111") ;
+    log(TbManagerID, "ReadData, Data: CC_BBAA") ;
+    ReadCheckData(ManagerRec,  X"CC_BBAA") ;
+    log(TbManagerID, "ReadData, Data: DDCC_BB") ;
+    ReadCheckData(ManagerRec,  X"DDCC_BB") ;
     
 -- %% ADD Your Test Code Before Here
 
@@ -215,100 +215,100 @@ begin
 
 
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MasterRec, 2) ;
+    WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
 
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  ResponderProc : process
+  SubordinateProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
   begin
-    WaitForClock(ResponderRec, 2) ; 
+    WaitForClock(SubordinateRec, 2) ; 
     -- Write and Read with ByteAddr = 0, 4 Bytes
-    GetWrite(ResponderRec, Addr, Data) ;
-    AffirmIfEqual(TbResponderID, Addr, X"AAAA_AAA0", "Responder Write Addr: ") ;
-    AffirmIfEqual(TbResponderID, Data, X"5555_5555", "Responder Write Data: ") ;
+    GetWrite(SubordinateRec, Addr, Data) ;
+    AffirmIfEqual(TbSubordinateID, Addr, X"AAAA_AAA0", "Subordinate Write Addr: ") ;
+    AffirmIfEqual(TbSubordinateID, Data, X"5555_5555", "Subordinate Write Data: ") ;
     
-    SendRead(ResponderRec, Addr, X"2222_2222") ; 
-    AffirmIfEqual(TbResponderID, Addr, X"1111_1110", "Responder Read Addr: ") ;
+    SendRead(SubordinateRec, Addr, X"2222_2222") ; 
+    AffirmIfEqual(TbSubordinateID, Addr, X"1111_1110", "Subordinate Read Addr: ") ;
 
     
     -- Write and Read with 1 Byte, and ByteAddr = 0, 1, 2, 3
-    -- Write(MasterRec, X"AAAA_AAA0", X"11" ) ;
-    GetWrite(ResponderRec, Addr, Data) ;
-    AffirmIfEqual(TbResponderID, Addr, X"AAAA_AAA0", "Responder Write Addr: ") ;
-    AffirmIfEqual(TbResponderID, Data, X"0000_0011", "Responder Write Data: ") ;
-    -- Write(MasterRec, X"AAAA_AAA1", X"22" ) ;
-    GetWrite(ResponderRec, Addr, Data) ;
-    AffirmIfEqual(TbResponderID, Addr, X"AAAA_AAA1", "Responder Write Addr: ") ;
-    AffirmIfEqual(TbResponderID, Data, X"0000_2200", "Responder Write Data: ") ;
-    -- Write(MasterRec, X"AAAA_AAA2", X"33" ) ;
-    GetWrite(ResponderRec, Addr, Data) ;
-    AffirmIfEqual(TbResponderID, Addr, X"AAAA_AAA2", "Responder Write Addr: ") ;
-    AffirmIfEqual(TbResponderID, Data, X"0033_0000", "Responder Write Data: ") ;
-    -- Write(MasterRec, X"AAAA_AAA3", X"44" ) ;
-    GetWrite(ResponderRec, Addr, Data) ;
-    AffirmIfEqual(TbResponderID, Addr, X"AAAA_AAA3", "Responder Write Addr: ") ;
-    AffirmIfEqual(TbResponderID, Data, X"4400_0000", "Responder Write Data: ") ;
+    -- Write(ManagerRec, X"AAAA_AAA0", X"11" ) ;
+    GetWrite(SubordinateRec, Addr, Data) ;
+    AffirmIfEqual(TbSubordinateID, Addr, X"AAAA_AAA0", "Subordinate Write Addr: ") ;
+    AffirmIfEqual(TbSubordinateID, Data, X"0000_0011", "Subordinate Write Data: ") ;
+    -- Write(ManagerRec, X"AAAA_AAA1", X"22" ) ;
+    GetWrite(SubordinateRec, Addr, Data) ;
+    AffirmIfEqual(TbSubordinateID, Addr, X"AAAA_AAA1", "Subordinate Write Addr: ") ;
+    AffirmIfEqual(TbSubordinateID, Data, X"0000_2200", "Subordinate Write Data: ") ;
+    -- Write(ManagerRec, X"AAAA_AAA2", X"33" ) ;
+    GetWrite(SubordinateRec, Addr, Data) ;
+    AffirmIfEqual(TbSubordinateID, Addr, X"AAAA_AAA2", "Subordinate Write Addr: ") ;
+    AffirmIfEqual(TbSubordinateID, Data, X"0033_0000", "Subordinate Write Data: ") ;
+    -- Write(ManagerRec, X"AAAA_AAA3", X"44" ) ;
+    GetWrite(SubordinateRec, Addr, Data) ;
+    AffirmIfEqual(TbSubordinateID, Addr, X"AAAA_AAA3", "Subordinate Write Addr: ") ;
+    AffirmIfEqual(TbSubordinateID, Data, X"4400_0000", "Subordinate Write Data: ") ;
 
-    SendRead(ResponderRec, Addr, X"0000_00AA") ; 
-    AffirmIfEqual(TbResponderID, Addr, X"1111_1110", "Responder Read Addr: ") ;
-    SendRead(ResponderRec, Addr, X"0000_BB00") ; 
-    AffirmIfEqual(TbResponderID, Addr, X"1111_1111", "Responder Read Addr: ") ;
-    SendRead(ResponderRec, Addr, X"00CC_0000") ; 
-    AffirmIfEqual(TbResponderID, Addr, X"1111_1112", "Responder Read Addr: ") ;
-    SendRead(ResponderRec, Addr, X"DD00_0000") ; 
-    AffirmIfEqual(TbResponderID, Addr, X"1111_1113", "Responder Read Addr: ") ;
+    SendRead(SubordinateRec, Addr, X"0000_00AA") ; 
+    AffirmIfEqual(TbSubordinateID, Addr, X"1111_1110", "Subordinate Read Addr: ") ;
+    SendRead(SubordinateRec, Addr, X"0000_BB00") ; 
+    AffirmIfEqual(TbSubordinateID, Addr, X"1111_1111", "Subordinate Read Addr: ") ;
+    SendRead(SubordinateRec, Addr, X"00CC_0000") ; 
+    AffirmIfEqual(TbSubordinateID, Addr, X"1111_1112", "Subordinate Read Addr: ") ;
+    SendRead(SubordinateRec, Addr, X"DD00_0000") ; 
+    AffirmIfEqual(TbSubordinateID, Addr, X"1111_1113", "Subordinate Read Addr: ") ;
 
 
     -- Write and Read with 2 Bytes, and ByteAddr = 0, 1, 2
-    -- Write(MasterRec, X"BBBB_BBB0", X"2211" ) ;
-    GetWrite(ResponderRec, Addr, Data) ;
-    AffirmIfEqual(TbResponderID, Addr, X"BBBB_BBB0", "Responder Write Addr: ") ;
-    AffirmIfEqual(TbResponderID, Data, X"0000_2211", "Responder Write Data: ") ;
-    -- Write(MasterRec, X"BBBB_BBB1", X"3322" ) ;
-    GetWrite(ResponderRec, Addr, Data) ;
-    AffirmIfEqual(TbResponderID, Addr, X"BBBB_BBB1", "Responder Write Addr: ") ;
-    AffirmIfEqual(TbResponderID, Data, X"0033_2200", "Responder Write Data: ") ;
-    -- Write(MasterRec, X"BBBB_BBB2", X"4433" ) ;
-    GetWrite(ResponderRec, Addr, Data) ;
-    AffirmIfEqual(TbResponderID, Addr, X"BBBB_BBB2", "Responder Write Addr: ") ;
-    AffirmIfEqual(TbResponderID, Data, X"4433_0000", "Responder Write Data: ") ;
+    -- Write(ManagerRec, X"BBBB_BBB0", X"2211" ) ;
+    GetWrite(SubordinateRec, Addr, Data) ;
+    AffirmIfEqual(TbSubordinateID, Addr, X"BBBB_BBB0", "Subordinate Write Addr: ") ;
+    AffirmIfEqual(TbSubordinateID, Data, X"0000_2211", "Subordinate Write Data: ") ;
+    -- Write(ManagerRec, X"BBBB_BBB1", X"3322" ) ;
+    GetWrite(SubordinateRec, Addr, Data) ;
+    AffirmIfEqual(TbSubordinateID, Addr, X"BBBB_BBB1", "Subordinate Write Addr: ") ;
+    AffirmIfEqual(TbSubordinateID, Data, X"0033_2200", "Subordinate Write Data: ") ;
+    -- Write(ManagerRec, X"BBBB_BBB2", X"4433" ) ;
+    GetWrite(SubordinateRec, Addr, Data) ;
+    AffirmIfEqual(TbSubordinateID, Addr, X"BBBB_BBB2", "Subordinate Write Addr: ") ;
+    AffirmIfEqual(TbSubordinateID, Data, X"4433_0000", "Subordinate Write Data: ") ;
 
-    SendRead(ResponderRec, Addr, X"0000_BBAA") ; 
-    AffirmIfEqual(TbResponderID, Addr, X"1111_1110", "Responder Read Addr: ") ;
-    SendRead(ResponderRec, Addr, X"00CC_BB00") ; 
-    AffirmIfEqual(TbResponderID, Addr, X"1111_1111", "Responder Read Addr: ") ;
-    SendRead(ResponderRec, Addr, X"DDCC_0000") ; 
-    AffirmIfEqual(TbResponderID, Addr, X"1111_1112", "Responder Read Addr: ") ;
+    SendRead(SubordinateRec, Addr, X"0000_BBAA") ; 
+    AffirmIfEqual(TbSubordinateID, Addr, X"1111_1110", "Subordinate Read Addr: ") ;
+    SendRead(SubordinateRec, Addr, X"00CC_BB00") ; 
+    AffirmIfEqual(TbSubordinateID, Addr, X"1111_1111", "Subordinate Read Addr: ") ;
+    SendRead(SubordinateRec, Addr, X"DDCC_0000") ; 
+    AffirmIfEqual(TbSubordinateID, Addr, X"1111_1112", "Subordinate Read Addr: ") ;
 
     -- Write and Read with 3 Bytes and ByteAddr = 0. 1
-    -- Write(MasterRec, X"CCCC_CCC0", X"332211" ) ;
-    GetWrite(ResponderRec, Addr, Data) ;
-    AffirmIfEqual(TbResponderID, Addr, X"CCCC_CCC0", "Responder Write Addr: ") ;
-    AffirmIfEqual(TbResponderID, Data, X"0033_2211", "Responder Write Data: ") ;
-    -- Write(MasterRec, X"CCCC_CCC1", X"443322" ) ;
-    GetWrite(ResponderRec, Addr, Data) ;
-    AffirmIfEqual(TbResponderID, Addr, X"CCCC_CCC1", "Responder Write Addr: ") ;
-    AffirmIfEqual(TbResponderID, Data, X"4433_2200", "Responder Write Data: ") ;
+    -- Write(ManagerRec, X"CCCC_CCC0", X"332211" ) ;
+    GetWrite(SubordinateRec, Addr, Data) ;
+    AffirmIfEqual(TbSubordinateID, Addr, X"CCCC_CCC0", "Subordinate Write Addr: ") ;
+    AffirmIfEqual(TbSubordinateID, Data, X"0033_2211", "Subordinate Write Data: ") ;
+    -- Write(ManagerRec, X"CCCC_CCC1", X"443322" ) ;
+    GetWrite(SubordinateRec, Addr, Data) ;
+    AffirmIfEqual(TbSubordinateID, Addr, X"CCCC_CCC1", "Subordinate Write Addr: ") ;
+    AffirmIfEqual(TbSubordinateID, Data, X"4433_2200", "Subordinate Write Data: ") ;
 
-    SendRead(ResponderRec, Addr, X"00CC_BBAA") ; 
-    AffirmIfEqual(TbResponderID, Addr, X"1111_1110", "Responder Read Addr: ") ;
-    SendRead(ResponderRec, Addr, X"DDCC_BB00") ; 
-    AffirmIfEqual(TbResponderID, Addr, X"1111_1111", "Responder Read Addr: ") ;
+    SendRead(SubordinateRec, Addr, X"00CC_BBAA") ; 
+    AffirmIfEqual(TbSubordinateID, Addr, X"1111_1110", "Subordinate Read Addr: ") ;
+    SendRead(SubordinateRec, Addr, X"DDCC_BB00") ; 
+    AffirmIfEqual(TbSubordinateID, Addr, X"1111_1111", "Subordinate Read Addr: ") ;
 
 
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(ResponderRec, 2) ;
+    WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process SubordinateProc ;
 
 
 end ReadWriteAsync3 ;

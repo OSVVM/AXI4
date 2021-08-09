@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Simple AXI Lite Master Model
+--      Simple AXI Lite Manager Model
 --
 --
 --  Developed by:
@@ -72,15 +72,15 @@ architecture TestHarness of TbAxi4 is
 --    DataToModel(AXI_DATA_WIDTH-1 downto 0),
 --    DataFromModel(AXI_DATA_WIDTH-1 downto 0)
 --  ) ;
---  signal MasterRec   : LocalTransactionRecType ;
---  signal ResponderRec  : LocalTransactionRecType ;
-  signal MasterRec, ResponderRec  : AddressBusRecType (
+--  signal ManagerRec   : LocalTransactionRecType ;
+--  signal SubordinateRec  : LocalTransactionRecType ;
+  signal ManagerRec, SubordinateRec  : AddressBusRecType (
           Address(AXI_ADDR_WIDTH-1 downto 0),
           DataToModel(AXI_DATA_WIDTH-1 downto 0),
           DataFromModel(AXI_DATA_WIDTH-1 downto 0)
         ) ;
 
---  -- AXI Master Functional Interface
+--  -- AXI Manager Functional Interface
 --  signal   AxiBus : Axi4RecType(
 --    WriteAddress( AWAddr(AXI_ADDR_WIDTH-1 downto 0) ),
 --    WriteData   ( WData (AXI_DATA_WIDTH-1 downto 0),   WStrb(AXI_STRB_WIDTH-1 downto 0) ),
@@ -123,8 +123,8 @@ architecture TestHarness of TbAxi4 is
       nReset         : In    std_logic ;
 
       -- Transaction Interfaces
-      MasterRec      : inout AddressBusRecType ;
-      ResponderRec   : inout AddressBusRecType
+      ManagerRec      : inout AddressBusRecType ;
+      SubordinateRec   : inout AddressBusRecType
     ) ;
   end component TestCtrl ;
 
@@ -147,30 +147,30 @@ begin
   ) ;
 
   -- Behavioral model.  Replaces DUT for labs
-  Responder_1 : Axi4Responder
+  Subordinate_1 : Axi4Subordinate
   port map (
     -- Globals
     Clk         => Clk,
     nReset      => nReset,
 
-    -- AXI Master Functional Interface
+    -- AXI Manager Functional Interface
     AxiBus  => AxiBus,
 
     -- Testbench Transaction Interface
-    TransRec    => ResponderRec
+    TransRec    => SubordinateRec
   ) ;
 
-  Master_1 : Axi4Master
+  Manager_1 : Axi4Manager
   port map (
     -- Globals
     Clk         => Clk,
     nReset      => nReset,
 
-    -- AXI Master Functional Interface
+    -- AXI Manager Functional Interface
     AxiBus      => AxiBus,
 
     -- Testbench Transaction Interface
-    TransRec    => MasterRec
+    TransRec    => ManagerRec
   ) ;
 
 
@@ -180,7 +180,7 @@ begin
     Clk         => Clk,
     nReset      => nReset,
 
-    -- AXI Master Functional Interface
+    -- AXI Manager Functional Interface
     AxiBus      => AxiBus
   ) ;
 
@@ -191,8 +191,8 @@ begin
     nReset        => nReset,
 
     -- Transaction Interfaces
-    MasterRec     => MasterRec,
-    ResponderRec  => ResponderRec
+    ManagerRec     => ManagerRec,
+    SubordinateRec  => SubordinateRec
   ) ;
 
 end architecture TestHarness ;

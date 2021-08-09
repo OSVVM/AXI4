@@ -56,7 +56,7 @@ port (
   Clk         : in   std_logic ;
   nReset      : in   std_logic ;
 
-  -- AXI Master Functional Interface
+  -- AXI Manager Functional Interface
   AxiBus      : in    Axi4RecType 
 ) ;
    

@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_TransactionApiMasterBurst.vhd
+--  File Name:         TbAxi4_TransactionApiManagerBurst.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -39,11 +39,11 @@
 --  limitations under the License.
 --  
 
-architecture TransactionApiMasterBurst of TestCtrl is
+architecture TransactionApiManagerBurst of TestCtrl is
 
   signal TestDone, MemorySync : integer_barrier := 1 ;
-  signal TbMasterID : AlertLogIDType ; 
-  signal TbResponderID  : AlertLogIDType ; 
+  signal TbManagerID : AlertLogIDType ; 
+  signal TbSubordinateID  : AlertLogIDType ; 
   signal WaitForTransactionCount : integer := 0 ; 
 
   constant BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;   
@@ -59,15 +59,15 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_TransactionApiMasterBurst") ;
-    TbMasterID <= GetAlertLogID("TB Master Proc") ;
-    TbResponderID <= GetAlertLogID("TB Responder Proc") ;
+    SetAlertLogName("TbAxi4_TransactionApiManagerBurst") ;
+    TbManagerID <= GetAlertLogID("TB Manager Proc") ;
+    TbSubordinateID <= GetAlertLogID("TB Subordinate Proc") ;
     SetLogEnable(PASSED, TRUE) ;  -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_TransactionApiMasterBurst.txt") ;
+    TranscriptOpen("./results/TbAxi4_TransactionApiManagerBurst.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -82,7 +82,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_TransactionApiMasterBurst.txt", "../../sim_results/Axi4/TbAxi4_TransactionApiMasterBurst.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_TransactionApiManagerBurst.txt", "../../sim_results/Axi4/TbAxi4_TransactionApiManagerBurst.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 
@@ -92,10 +92,10 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiResponder
+  -- ManagerProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable Addr, ExpAddr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data, ExpData : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;  
     variable Count : integer ; 
@@ -103,67 +103,67 @@ begin
     variable Available : boolean ; 
   begin
     wait until nReset = '1' ;  
-    -- Must set Master options before start otherwise, ready will be active on first cycle.
+    -- Must set Manager options before start otherwise, ready will be active on first cycle.
     wait for 0 ns ; 
     -- Verify Initial values of Transaction Counts
-    GetTransactionCount(MasterRec, Count) ;  -- Expect 1
-    AffirmIfEqual(TbMasterID, Count, 1, "GetTransactionCount") ;
-    GetWriteTransactionCount(MasterRec, Count) ; -- Expect 0
-    AffirmIfEqual(TbMasterID, Count, 0, "GetTransactionWriteCount") ;
-    GetReadTransactionCount(MasterRec, Count) ; -- Expect 0
-    AffirmIfEqual(TbMasterID, Count, 0, "GetTransactionReadCount") ;
+    GetTransactionCount(ManagerRec, Count) ;  -- Expect 1
+    AffirmIfEqual(TbManagerID, Count, 1, "GetTransactionCount") ;
+    GetWriteTransactionCount(ManagerRec, Count) ; -- Expect 0
+    AffirmIfEqual(TbManagerID, Count, 0, "GetTransactionWriteCount") ;
+    GetReadTransactionCount(ManagerRec, Count) ; -- Expect 0
+    AffirmIfEqual(TbManagerID, Count, 0, "GetTransactionReadCount") ;
     
-    WaitForClock(MasterRec, 4) ; 
+    WaitForClock(ManagerRec, 4) ; 
     
     -- Write Tests
     Addr := X"0000_0000" ; 
     Data := X"0000_0000" ; 
-    log(TbMasterID, "WriteAsync, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
+    log(TbManagerID, "WriteAsync, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
     PushBurstIncrement(WriteBurstFifo, to_integer(Data), 32, DATA_WIDTH) ;
-    WriteBurstAsync(MasterRec, Addr, 8) ;
-    WriteBurstAsync(MasterRec, Addr+64, 8) ;
-    WaitForTransaction(MasterRec) ;
+    WriteBurstAsync(ManagerRec, Addr, 8) ;
+    WriteBurstAsync(ManagerRec, Addr+64, 8) ;
+    WaitForTransaction(ManagerRec) ;
     WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetTransactionCount(MasterRec, Count) ;  -- Expect 8
-    AffirmIfEqual(TbMasterID, Count, 8, "GetTransactionCount") ;
-    GetWriteTransactionCount(MasterRec, Count) ; -- Expect 2
-    AffirmIfEqual(TbMasterID, Count, 2, "GetTransactionWriteCount") ;
+    GetTransactionCount(ManagerRec, Count) ;  -- Expect 8
+    AffirmIfEqual(TbManagerID, Count, 8, "GetTransactionCount") ;
+    GetWriteTransactionCount(ManagerRec, Count) ; -- Expect 2
+    AffirmIfEqual(TbManagerID, Count, 2, "GetTransactionWriteCount") ;
     
-    WaitForClock(MasterRec, 4) ;
+    WaitForClock(ManagerRec, 4) ;
     
-    WriteBurstAsync(MasterRec, Addr+128, 8) ;
-    WriteBurstAsync(MasterRec, Addr+256, 8) ;
-    WaitForWriteTransaction(MasterRec) ;
+    WriteBurstAsync(ManagerRec, Addr+128, 8) ;
+    WriteBurstAsync(ManagerRec, Addr+256, 8) ;
+    WaitForWriteTransaction(ManagerRec) ;
     WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetTransactionCount(MasterRec, Count) ;  -- Expect 14
-    AffirmIfEqual(TbMasterID, Count, 14, "GetTransactionCount") ;
-    GetWriteTransactionCount(MasterRec, Count) ; -- Expect 4
-    AffirmIfEqual(TbMasterID, Count, 4, "GetTransactionWriteCount") ;
+    GetTransactionCount(ManagerRec, Count) ;  -- Expect 14
+    AffirmIfEqual(TbManagerID, Count, 14, "GetTransactionCount") ;
+    GetWriteTransactionCount(ManagerRec, Count) ; -- Expect 4
+    AffirmIfEqual(TbManagerID, Count, 4, "GetTransactionWriteCount") ;
     
-    WaitForClock(MasterRec, 4) ;
+    WaitForClock(ManagerRec, 4) ;
     
-    ReadBurst(MasterRec, Addr    , 8) ; 
-    ReadBurst(MasterRec, Addr+64 , 8) ; 
-    ReadBurst(MasterRec, Addr+128, 8) ; 
-    ReadBurst(MasterRec, Addr+256, 8) ; 
+    ReadBurst(ManagerRec, Addr    , 8) ; 
+    ReadBurst(ManagerRec, Addr+64 , 8) ; 
+    ReadBurst(ManagerRec, Addr+128, 8) ; 
+    ReadBurst(ManagerRec, Addr+256, 8) ; 
     CheckBurstIncrement(ReadBurstFifo, to_integer(Data), 32, DATA_WIDTH) ;
 
 
-    WaitForClock(MasterRec, 4) ;
+    WaitForClock(ManagerRec, 4) ;
 
 
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MasterRec, 2) ;
+    WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
   
   
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  ResponderProc : process
+  SubordinateProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
     variable IntOption  : integer ; 
@@ -173,17 +173,17 @@ begin
 
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process SubordinateProc ;
 
-end TransactionApiMasterBurst ;
+end TransactionApiManagerBurst ;
 
-Configuration TbAxi4_TransactionApiMasterBurst of TbAxi4Memory is
+Configuration TbAxi4_TransactionApiManagerBurst of TbAxi4Memory is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(TransactionApiMasterBurst) ; 
+      use entity work.TestCtrl(TransactionApiManagerBurst) ; 
     end for ; 
---!!    for Responder_1 : Axi4Responder 
+--!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 
-end TbAxi4_TransactionApiMasterBurst ; 
+end TbAxi4_TransactionApiManagerBurst ; 

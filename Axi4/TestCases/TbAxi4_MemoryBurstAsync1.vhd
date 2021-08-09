@@ -87,46 +87,46 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable ByteData : std_logic_vector(7 downto 0) ;
     variable BurstVal : AddressBusFifoBurstModeType ; 
   begin
     wait until nReset = '1' ;  
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     
-    GetBurstMode(MasterRec, BurstVal) ;
+    GetBurstMode(ManagerRec, BurstVal) ;
     AffirmIf(BurstVal = ADDRESS_BUS_BURST_WORD_MODE, "Default BurstMode is ADDRESS_BUS_BURST_WORD_MODE " & to_string(BurstVal)) ; 
-    SetBurstMode(MasterRec, BURST_MODE) ;
-    GetBurstMode(MasterRec, BurstVal) ;
+    SetBurstMode(ManagerRec, BURST_MODE) ;
+    GetBurstMode(ManagerRec, BurstVal) ;
     AffirmIfEqual(BurstVal, BURST_MODE, "BurstMode") ; 
     
     log("Write with ByteAddr = 8, 12 Bytes -- word aligned") ;
     PushBurstIncrement(WriteBurstFifo, 3, 12, DATA_WIDTH) ;
-    WriteBurstAsync(MasterRec, X"0000_0008", 12) ;
+    WriteBurstAsync(ManagerRec, X"0000_0008", 12) ;
 
     log("Write with ByteAddr = x1A, 13 Bytes -- unaligned") ;
     Push(WriteBurstFifo, X"0001_UUUU") ;
     PushBurst(WriteBurstFifo, (3,5,7,9,11,13,15,17,19,21,23,25), DATA_WIDTH) ;
-    WriteBurstAsync(MasterRec, X"0000_100A", 13) ;
+    WriteBurstAsync(ManagerRec, X"0000_100A", 13) ;
 
     log("Write with ByteAddr = 31, 12 Bytes -- unaligned") ;
     Push(WriteBurstFifo, X"A015_28UU") ;
     PushBurstRandom(WriteBurstFifo, 7, 12, DATA_WIDTH) ;
-    WriteBurstAsync(MasterRec, X"0000_3001", 13) ;
+    WriteBurstAsync(ManagerRec, X"0000_3001", 13) ;
     
-    WaitForTransaction(MasterRec) ;
+    WaitForTransaction(ManagerRec) ;
 
-    ReadBurst (MasterRec, X"0000_0008", 12) ;
+    ReadBurst (ManagerRec, X"0000_0008", 12) ;
     CheckBurstIncrement(ReadBurstFifo, 3, 12, DATA_WIDTH) ;
     
-    ReadBurst (MasterRec, X"0000_100A", 13) ;
+    ReadBurst (ManagerRec, X"0000_100A", 13) ;
    Check(ReadBurstFifo, X"0001_----") ; -- First Byte not aligned
     CheckBurst(ReadBurstFifo, (3,5,7,9,11,13,15,17,19,21,23,25), DATA_WIDTH) ;
 
-    ReadBurst (MasterRec, X"0000_3001", 13) ;
+    ReadBurst (ManagerRec, X"0000_3001", 13) ;
    Check(ReadBurstFifo, X"A015_28--") ; -- First Byte not aligned
     CheckBurstRandom(ReadBurstFifo, 7, 12, DATA_WIDTH) ;
 
@@ -143,31 +143,31 @@ begin
     Push(WriteBurstFifo, X"UU0D_0C0B") ;
     Push(WriteBurstFifo, X"100F_0EUU") ;
     
-    WriteBurstAsync(MasterRec, X"0000_5050", 1) ;
-    WriteBurstAsync(MasterRec, X"0000_5051", 1) ;
-    WriteBurstAsync(MasterRec, X"0000_5052", 1) ;
-    WriteBurstAsync(MasterRec, X"0000_5053", 1) ;
+    WriteBurstAsync(ManagerRec, X"0000_5050", 1) ;
+    WriteBurstAsync(ManagerRec, X"0000_5051", 1) ;
+    WriteBurstAsync(ManagerRec, X"0000_5052", 1) ;
+    WriteBurstAsync(ManagerRec, X"0000_5053", 1) ;
     
-    WriteBurstAsync(MasterRec, X"0000_5060", 1) ;
-    WriteBurstAsync(MasterRec, X"0000_5071", 1) ;
-    WriteBurstAsync(MasterRec, X"0000_5082", 1) ;
+    WriteBurstAsync(ManagerRec, X"0000_5060", 1) ;
+    WriteBurstAsync(ManagerRec, X"0000_5071", 1) ;
+    WriteBurstAsync(ManagerRec, X"0000_5082", 1) ;
     
-    WriteBurstAsync(MasterRec, X"0000_5090", 1) ;
-    WriteBurstAsync(MasterRec, X"0000_50A1", 1) ;
+    WriteBurstAsync(ManagerRec, X"0000_5090", 1) ;
+    WriteBurstAsync(ManagerRec, X"0000_50A1", 1) ;
 
-    WaitForWriteTransaction(MasterRec) ;
+    WaitForWriteTransaction(ManagerRec) ;
 
-    ReadBurst (MasterRec, X"0000_5050", 1) ;
-    ReadBurst (MasterRec, X"0000_5051", 1) ;
-    ReadBurst (MasterRec, X"0000_5052", 1) ;
-    ReadBurst (MasterRec, X"0000_5053", 1) ;
+    ReadBurst (ManagerRec, X"0000_5050", 1) ;
+    ReadBurst (ManagerRec, X"0000_5051", 1) ;
+    ReadBurst (ManagerRec, X"0000_5052", 1) ;
+    ReadBurst (ManagerRec, X"0000_5053", 1) ;
     
-    ReadBurst (MasterRec, X"0000_5060", 1) ;
-    ReadBurst (MasterRec, X"0000_5071", 1) ;
-    ReadBurst (MasterRec, X"0000_5082", 1) ;
+    ReadBurst (ManagerRec, X"0000_5060", 1) ;
+    ReadBurst (ManagerRec, X"0000_5071", 1) ;
+    ReadBurst (ManagerRec, X"0000_5082", 1) ;
 
-    ReadBurst (MasterRec, X"0000_5090", 1) ;
-    ReadBurst (MasterRec, X"0000_50A1", 1) ;
+    ReadBurst (ManagerRec, X"0000_5090", 1) ;
+    ReadBurst (ManagerRec, X"0000_50A1", 1) ;
     
    Check(ReadBurstFifo, X"----_--01") ;
    Check(ReadBurstFifo, X"----_02--") ;
@@ -184,35 +184,35 @@ begin
     WaitForBarrier(WriteDone) ;
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MasterRec, 2) ;
+    WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
 
   ------------------------------------------------------------
   -- MemoryProc
-  --   Generate transactions for AxiResponder
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
   MemoryProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ; 
   begin
-    WaitForClock(ResponderRec, 2) ; 
+    WaitForClock(SubordinateRec, 2) ; 
     
     
     WaitForBarrier(WriteDone) ;
 
     -- Check that write burst was received correctly
-    ReadCheck(ResponderRec, X"0000_0008", X"0000_0003") ;
-    ReadCheck(ResponderRec, X"0000_000C", X"0000_0004") ;
-    ReadCheck(ResponderRec, X"0000_0010", X"0000_0005") ;
-    ReadCheck(ResponderRec, X"0000_0014", X"0000_0006") ;
-    ReadCheck(ResponderRec, X"0000_0018", X"0000_0007") ;
-    ReadCheck(ResponderRec, X"0000_001C", X"0000_0008") ;
+    ReadCheck(SubordinateRec, X"0000_0008", X"0000_0003") ;
+    ReadCheck(SubordinateRec, X"0000_000C", X"0000_0004") ;
+    ReadCheck(SubordinateRec, X"0000_0010", X"0000_0005") ;
+    ReadCheck(SubordinateRec, X"0000_0014", X"0000_0006") ;
+    ReadCheck(SubordinateRec, X"0000_0018", X"0000_0007") ;
+    ReadCheck(SubordinateRec, X"0000_001C", X"0000_0008") ;
 
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(ResponderRec, 2) ;
+    WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process MemoryProc ;
@@ -225,7 +225,7 @@ Configuration TbAxi4_MemoryBurstAsync1 of TbAxi4Memory is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(MemoryBurstAsync1) ; 
     end for ; 
---!!    for Responder_1 : Axi4Responder 
+--!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 

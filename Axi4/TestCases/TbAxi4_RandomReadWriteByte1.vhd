@@ -98,10 +98,10 @@ begin
 
   
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable OpRV           : RandomPType ;   
     variable WaitForClockRV         : RandomPType ;   
     variable DataRV         : RandomPType ;   
@@ -110,8 +110,8 @@ begin
     variable Address        : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable ByteAddress    : integer ;
     variable NumberOfBytes  : integer ;
-    variable MasterData      : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
-    variable ResponderData     : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
+    variable ManagerData      : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
+    variable SubordinateData     : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
     variable ReadData       : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
     
     variable counts : integer_vector(0 to OperationType'Pos(OperationType'Right)) ; 
@@ -123,7 +123,7 @@ begin
     
     -- Find exit of reset
     wait until nReset = '1' ;  
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     
     -- Distribution for Test Operations
     counts := (WRITE_OP_INDEX => 500, READ_OP_INDEX => 500) ;
@@ -136,43 +136,43 @@ begin
       ByteAddress    := to_integer(Address(1 downto 0)) ;
       NumberOfBytes  := OpRv.RandInt(1, AXI_DATA_BYTES - ByteAddress) ;
 
-      -- Get MasterData right aligned and ResponderData word aligned
-      ResponderData  := (others => '0') ;
-      MasterData     := (others => '0') ;
+      -- Get ManagerData right aligned and SubordinateData word aligned
+      SubordinateData  := (others => '0') ;
+      ManagerData     := (others => '0') ;
       for i in AXI_DATA_BYTES - 1 downto 0 loop
-        ResponderData := ResponderData(AXI_DATA_BYTES*8 - 9 downto 0) & (0 to 7 => '0') ;
+        SubordinateData := SubordinateData(AXI_DATA_BYTES*8 - 9 downto 0) & (0 to 7 => '0') ;
         if i >= ByteAddress and i < ByteAddress + NumberOfBytes then
-          ResponderData(7 downto 0) := DataRV.RandSlv(0, 255, 8) ;
-          MasterData := MasterData(AXI_DATA_BYTES*8 - 9 downto 0) & ResponderData(7 downto 0) ;
+          SubordinateData(7 downto 0) := DataRV.RandSlv(0, 255, 8) ;
+          ManagerData := ManagerData(AXI_DATA_BYTES*8 - 9 downto 0) & SubordinateData(7 downto 0) ;
         end if ; 
       end loop ;
       
-      -- Send the operation to the Responder Handler
-      OperationFifo.push(OperationSlv & Address & ResponderData) ;
+      -- Send the operation to the Subordinate Handler
+      OperationFifo.push(OperationSlv & Address & SubordinateData) ;
       Increment(OperationCount) ;
       
       -- 20 % of the time add a no-op cycle with a delay of 1 to 5 clocks
       if WaitForClockRV.DistInt((8, 2)) = 1 then 
-        WaitForClock(MasterRec, WaitForClockRV.RandInt(1, 5)) ; 
+        WaitForClock(ManagerRec, WaitForClockRV.RandInt(1, 5)) ; 
       end if ; 
       
       -- Do the Operation
       case OperationType'val(OperationInt) is
         when WRITE_OP =>  
           counts(WRITE_OP_INDEX) := counts(WRITE_OP_INDEX) - 1 ; 
-          -- Log("Starting: Master Write with Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
-          Write(MasterRec, Address, MasterData(NumberOfBytes*8-1 downto 0)) ;
+          -- Log("Starting: Manager Write with Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
+          Write(ManagerRec, Address, ManagerData(NumberOfBytes*8-1 downto 0)) ;
           
         when READ_OP =>  
           counts(READ_OP_INDEX) := counts(READ_OP_INDEX) - 1 ; 
-          -- Log("Starting: Master Read with Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
+          -- Log("Starting: Manager Read with Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
           ReadData := (others => '0') ;  -- Clear out all data values for short reads
           if counts(READ_OP_INDEX) mod 2 = 0 then 
-            Read(MasterRec, Address, ReadData(NumberOfBytes*8-1 downto 0)) ;
-            AffirmIf(ReadData = MasterData, "AXI Master Read Data: "& to_hstring(ReadData), 
-                     "  Expected: " & to_hstring(MasterData) & "  ByteAddress: " & to_string(ByteAddress)) ;
+            Read(ManagerRec, Address, ReadData(NumberOfBytes*8-1 downto 0)) ;
+            AffirmIf(ReadData = ManagerData, "AXI Manager Read Data: "& to_hstring(ReadData), 
+                     "  Expected: " & to_hstring(ManagerData) & "  ByteAddress: " & to_string(ByteAddress)) ;
           else
-            ReadCheck(MasterRec, Address, MasterData(NumberOfBytes*8-1 downto 0)) ;
+            ReadCheck(ManagerRec, Address, ManagerData(NumberOfBytes*8-1 downto 0)) ;
           end if ; 
 
         when others =>
@@ -183,23 +183,23 @@ begin
     end loop OperationLoop ; 
     
     TestActive <= FALSE ; 
-    -- Allow Responder to catch up before signaling OperationCount (needed when WRITE_OP is last)
-    -- Wait must be enough to allow initial WaitForClock in Responder to expire
-    WaitForClock(MasterRec, 10) ;
+    -- Allow Subordinate to catch up before signaling OperationCount (needed when WRITE_OP is last)
+    -- Wait must be enough to allow initial WaitForClock in Subordinate to expire
+    WaitForClock(ManagerRec, 10) ;
     Increment(OperationCount) ;
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MasterRec, 2) ;
+    WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
 
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  ResponderProc : process
+  SubordinateProc : process
     variable WaitForClockRV         : RandomPType ;   
     variable OperationSlv   : OperationSlvType ; 
     variable Address        : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
@@ -218,7 +218,7 @@ begin
       
       -- 20 % of the time add a no-op cycle with a delay of 1 to 5 clocks
       if WaitForClockRV.DistInt((8, 2)) = 1 then 
-        WaitForClock(ResponderRec, WaitForClockRV.RandInt(1, 5)) ; 
+        WaitForClock(SubordinateRec, WaitForClockRV.RandInt(1, 5)) ; 
       end if ; 
       
       -- Get the Operation
@@ -227,17 +227,17 @@ begin
       -- Do the Operation
       case OperationType'val(to_integer(OperationSlv)) is
         when WRITE_OP =>  
-          -- Log("Starting: Responder Write with Expected Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
-          GetWrite(ResponderRec, ActualAddress, WriteData) ;
-          AffirmIf(ActualAddress = Address, "AXI Responder Write Address: " & to_hstring(ActualAddress), 
+          -- Log("Starting: Subordinate Write with Expected Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
+          GetWrite(SubordinateRec, ActualAddress, WriteData) ;
+          AffirmIf(ActualAddress = Address, "AXI Subordinate Write Address: " & to_hstring(ActualAddress), 
                    "  Expected: " & to_hstring(Address)) ;
-          AffirmIf(WriteData = Data, "AXI Responder Write Data: "& to_hstring(WriteData), 
+          AffirmIf(WriteData = Data, "AXI Subordinate Write Data: "& to_hstring(WriteData), 
                    "  Expected: " & to_hstring(Data)) ;
           
         when READ_OP =>  
-          -- Log("Starting: Responder Read with Expected Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
-          SendRead(ResponderRec, ActualAddress, Data) ; 
-          AffirmIf(ActualAddress = Address, "AXI Responder Read Address: " & to_hstring(ActualAddress), 
+          -- Log("Starting: Subordinate Read with Expected Address: " & to_hstring(Address) & "  Data: " & to_hstring(Data) ) ;
+          SendRead(SubordinateRec, ActualAddress, Data) ; 
+          AffirmIf(ActualAddress = Address, "AXI Subordinate Read Address: " & to_hstring(ActualAddress), 
                    "  Expected: " & to_hstring(Address)) ;
 
         when others =>
@@ -248,10 +248,10 @@ begin
     end loop OperationLoop ; 
 
     -- Wait for outputs to propagate and signal TestDone
-    -- WaitForClock(ResponderRec, 2) ;
+    -- WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process SubordinateProc ;
 
 
 end RandomReadWriteByte1 ;

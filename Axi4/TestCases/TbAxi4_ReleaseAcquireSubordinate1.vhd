@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_ReleaseAcquireResponder1.vhd
+--  File Name:         TbAxi4_ReleaseAcquireSubordinate1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -39,7 +39,7 @@
 --  limitations under the License.
 --  
 
-architecture ReleaseAcquireResponder1 of TestCtrl is
+architecture ReleaseAcquireSubordinate1 of TestCtrl is
 
   signal Sync1, TestDone : integer_barrier := 1 ;
   signal TbID : AlertLogIDType ; 
@@ -53,14 +53,14 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_ReleaseAcquireResponder1") ;
+    SetAlertLogName("TbAxi4_ReleaseAcquireSubordinate1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
     TbID <= GetAlertLogID("Testbench") ;
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_ReleaseAcquireResponder1.txt") ;
+    TranscriptOpen("./results/TbAxi4_ReleaseAcquireSubordinate1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -75,7 +75,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_ReleaseAcquireResponder1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_ReleaseAcquireResponder1.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_ReleaseAcquireSubordinate1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_ReleaseAcquireSubordinate1.txt", "") ; 
     
     print("") ;
     ReportAlerts ; 
@@ -85,36 +85,36 @@ begin
   end process ControlProc ; 
   
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable StartTime : time ; 
   begin
     wait until nReset = '1' ;  
     -- Align to the first clock
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     StartTime := now ; 
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     AffirmIfEqual(NOW, StartTime + 20 ns, "Expected Completion Time") ;
 
-    Write(MasterRec, X"1000_0000", X"5555_5555" ) ;
-    ReadCheck(MasterRec,  X"2000_0000", X"2222_2222") ;
+    Write(ManagerRec, X"1000_0000", X"5555_5555" ) ;
+    ReadCheck(ManagerRec,  X"2000_0000", X"2222_2222") ;
     
     WaitForBarrier(Sync1) ;
     
-    Write(MasterRec, X"1000_1000", X"AAAA_AAAA" ) ;
-    ReadCheck(MasterRec,  X"2000_1000", X"4444_4444") ;
+    Write(ManagerRec, X"1000_1000", X"AAAA_AAAA" ) ;
+    ReadCheck(ManagerRec,  X"2000_1000", X"4444_4444") ;
     
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
   ------------------------------------------------------------
-  -- ResponderProc1
-  --   Generate transactions for AxiMaster
+  -- SubordinateProc1
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  ResponderProc1 : process
+  SubordinateProc1 : process
     variable StartTime : time ; 
     variable IntOption  : integer ; 
     variable BoolOption : boolean ; 
@@ -123,40 +123,40 @@ begin
   begin
     wait until nReset = '1' ;  
     -- Align to the first clock
-    WaitForClock(ResponderRec, 1) ; 
+    WaitForClock(SubordinateRec, 1) ; 
     StartTime := now ; 
-    WaitForClock(ResponderRec, 2) ; 
+    WaitForClock(SubordinateRec, 2) ; 
     AffirmIfEqual(NOW, StartTime + 20 ns, "Expected Completion Time") ;
 
     -- Setting and checking values set 
-    SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 2) ;
-    GetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, IntOption) ;
+    SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 2) ;
+    GetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, IntOption) ;
     AffirmIfEqual(TbID, IntOption, 2, "WRITE_ADDRESS_READY_DELAY_CYCLES") ;
-    SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, TRUE) ;
-    GetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, BoolOption) ;
+    SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, TRUE) ;
+    GetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, BoolOption) ;
     AffirmIfEqual(TbID, BoolOption, TRUE, "WRITE_ADDRESS_READY_BEFORE_VALID") ;
 
 
-    GetWrite(ResponderRec, Addr, Data) ;
-    AffirmIfEqual(Addr, X"1000_0000", "Responder Write Addr: ") ;
-    AffirmIfEqual(Data, X"5555_5555", "Responder Write Data: ") ;
+    GetWrite(SubordinateRec, Addr, Data) ;
+    AffirmIfEqual(Addr, X"1000_0000", "Subordinate Write Addr: ") ;
+    AffirmIfEqual(Data, X"5555_5555", "Subordinate Write Data: ") ;
     
-    SendRead(ResponderRec, Addr, X"2222_2222") ; 
-    AffirmIfEqual(Addr, X"2000_0000", "Responder Read Addr: ") ;
+    SendRead(SubordinateRec, Addr, X"2222_2222") ; 
+    AffirmIfEqual(Addr, X"2000_0000", "Subordinate Read Addr: ") ;
 
 
     WaitForBarrier(Sync1) ;
-    ReleaseTransactionRecord(ResponderRec) ; 
+    ReleaseTransactionRecord(SubordinateRec) ; 
     
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc1 ;
+  end process SubordinateProc1 ;
   
   ------------------------------------------------------------
-  -- ResponderProc2
-  --   Generate transactions for AxiMaster
+  -- SubordinateProc2
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  ResponderProc2 : process
+  SubordinateProc2 : process
     variable StartTime : time ; 
     variable IntOption  : integer ; 
     variable BoolOption : boolean ; 
@@ -164,42 +164,42 @@ begin
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
   begin
     WaitForBarrier(Sync1) ;
-    AcquireTransactionRecord(ResponderRec) ;
-    WaitForClock(ResponderRec, 1) ; 
+    AcquireTransactionRecord(SubordinateRec) ;
+    WaitForClock(SubordinateRec, 1) ; 
 
     StartTime := now ; 
-    WaitForClock(ResponderRec, 1) ; 
+    WaitForClock(SubordinateRec, 1) ; 
     AffirmIfEqual(NOW, StartTime + 10 ns, "Expected Completion Time") ;
     
     -- Setting and checking values set 
-    SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 1) ;
-    GetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, IntOption) ;
+    SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 1) ;
+    GetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, IntOption) ;
     AffirmIfEqual(TbID, IntOption, 1, "WRITE_ADDRESS_READY_DELAY_CYCLES") ;
-    SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, FALSE) ;
-    GetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, BoolOption) ;
+    SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, FALSE) ;
+    GetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, BoolOption) ;
     AffirmIfEqual(TbID, BoolOption, FALSE, "WRITE_ADDRESS_READY_BEFORE_VALID") ;
 
-    GetWrite(ResponderRec, Addr, Data) ;
-    AffirmIfEqual(Addr, X"1000_1000", "Responder Write Addr: ") ;
-    AffirmIfEqual(Data, X"AAAA_AAAA", "Responder Write Data: ") ;
+    GetWrite(SubordinateRec, Addr, Data) ;
+    AffirmIfEqual(Addr, X"1000_1000", "Subordinate Write Addr: ") ;
+    AffirmIfEqual(Data, X"AAAA_AAAA", "Subordinate Write Data: ") ;
     
-    SendRead(ResponderRec, Addr, X"4444_4444") ; 
-    AffirmIfEqual(Addr, X"2000_1000", "Responder Read Addr: ") ;
+    SendRead(SubordinateRec, Addr, X"4444_4444") ; 
+    AffirmIfEqual(Addr, X"2000_1000", "Subordinate Read Addr: ") ;
 
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(ResponderRec, 2) ;
+    WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc2 ;
+  end process SubordinateProc2 ;
 
 
-end ReleaseAcquireResponder1 ;
+end ReleaseAcquireSubordinate1 ;
 
-Configuration TbAxi4_ReleaseAcquireResponder1 of TbAxi4 is
+Configuration TbAxi4_ReleaseAcquireSubordinate1 of TbAxi4 is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(ReleaseAcquireResponder1) ; 
+      use entity work.TestCtrl(ReleaseAcquireSubordinate1) ; 
     end for ; 
   end for ; 
-end TbAxi4_ReleaseAcquireResponder1 ; 
+end TbAxi4_ReleaseAcquireSubordinate1 ; 

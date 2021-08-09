@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_AlertLogIDMaster.vhd
+--  File Name:         TbAxi4_AlertLogIDManager.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -39,10 +39,10 @@
 --  limitations under the License.
 --  
 
-architecture AlertLogIDMaster of TestCtrl is
+architecture AlertLogIDManager of TestCtrl is
 
   signal TestDone, Sync : integer_barrier := 1 ;
-  signal TbMasterID, TbResponderID : AlertLogIDType ; 
+  signal TbManagerID, TbSubordinateID : AlertLogIDType ; 
  
 begin
 
@@ -53,16 +53,16 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_AlertLogIDMaster") ;
-    TbMasterID     <= GetAlertLogID("Master") ;
-    TbResponderID  <= GetAlertLogID("Responder") ;
+    SetAlertLogName("TbAxi4_AlertLogIDManager") ;
+    TbManagerID     <= GetAlertLogID("Manager") ;
+    TbSubordinateID  <= GetAlertLogID("Subordinate") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
     SetAlertStopCount(FAILURE, 2) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_AlertLogIDMaster.txt") ;
+    TranscriptOpen("./results/TbAxi4_AlertLogIDManager.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -77,7 +77,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_AlertLogIDMaster.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_AlertLogIDMaster.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_AlertLogIDManager.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_AlertLogIDManager.txt", "") ; 
     
     print("") ;
     ReportAlerts(ExternalErrors => (FAILURE => -1, ERROR => -1, WARNING => -1)) ; 
@@ -87,68 +87,68 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable AlertLogID : AlertLogIDType ; 
     variable Count1, Count2 : integer ; 
   begin
     wait until nReset = '1' ;  
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     
-    GetAlertLogID(MasterRec, AlertLogID) ;
-    GetErrorCount(MasterRec, Count1) ;
-    AffirmIfEqual(TbMasterID, Count1, 0, "GetErrorCount") ;
+    GetAlertLogID(ManagerRec, AlertLogID) ;
+    GetErrorCount(ManagerRec, Count1) ;
+    AffirmIfEqual(TbManagerID, Count1, 0, "GetErrorCount") ;
     Count2 := GetAlertCount(AlertLogID) ;
-    AffirmIfEqual(TbMasterID, Count2, 0, "GetAlertCount") ;
+    AffirmIfEqual(TbManagerID, Count2, 0, "GetAlertCount") ;
     
     Alert(AlertLogID, "Injected Error 1", ERROR) ;
-    GetErrorCount(MasterRec, Count1) ;
-    AffirmIfEqual(TbMasterID, Count1, 1, "GetErrorCount") ;
+    GetErrorCount(ManagerRec, Count1) ;
+    AffirmIfEqual(TbManagerID, Count1, 1, "GetErrorCount") ;
     Count2 := GetAlertCount(AlertLogID) ;
-    AffirmIfEqual(TbMasterID, Count2, 1, "GetAlertCount") ;
+    AffirmIfEqual(TbManagerID, Count2, 1, "GetAlertCount") ;
 
     SetAlertStopCount(AlertLogID, FAILURE, 10) ;
     Alert(AlertLogID, "Injected FAILURE 1", FAILURE) ;
-    GetErrorCount(MasterRec, Count1) ;
-    AffirmIfEqual(TbMasterID, Count1, 2, "GetErrorCount") ;
+    GetErrorCount(ManagerRec, Count1) ;
+    AffirmIfEqual(TbManagerID, Count1, 2, "GetErrorCount") ;
     Count2 := GetAlertCount(AlertLogID) ;
-    AffirmIfEqual(TbMasterID, Count2, 2, "GetAlertCount") ;
+    AffirmIfEqual(TbManagerID, Count2, 2, "GetAlertCount") ;
 
     Alert(AlertLogID, "Injected WARNING 1", WARNING) ;
-    GetErrorCount(MasterRec, Count1) ;
-    AffirmIfEqual(TbMasterID, Count1, 3, "GetErrorCount") ;
+    GetErrorCount(ManagerRec, Count1) ;
+    AffirmIfEqual(TbManagerID, Count1, 3, "GetErrorCount") ;
     Count2 := GetAlertCount(AlertLogID) ;
-    AffirmIfEqual(TbMasterID, Count2, 3, "GetAlertCount") ;
+    AffirmIfEqual(TbManagerID, Count2, 3, "GetAlertCount") ;
     
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
 
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  ResponderProc : process
+  SubordinateProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
   begin
     wait until nReset = '1' ;  
-    WaitForClock(ResponderRec, 2) ; 
+    WaitForClock(SubordinateRec, 2) ; 
     
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process SubordinateProc ;
 
 
-end AlertLogIDMaster ;
+end AlertLogIDManager ;
 
-Configuration TbAxi4_AlertLogIDMaster of TbAxi4 is
+Configuration TbAxi4_AlertLogIDManager of TbAxi4 is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(AlertLogIDMaster) ; 
+      use entity work.TestCtrl(AlertLogIDManager) ; 
     end for ; 
   end for ; 
-end TbAxi4_AlertLogIDMaster ; 
+end TbAxi4_AlertLogIDManager ; 

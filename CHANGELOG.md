@@ -2,6 +2,7 @@
 
 | Revision  | Revision Date |  Release Summary | 
 ------------|---------------|----------- 
+| 2021.08   | August 2021   |  Updated AXI4 naming to Axi4Manager and Axi4Subordinate.
 | 2021.06   | June 2021     |  Updated Axi4Master[Vti], AxiStreamXX[Vti], Axi4Memory[Vti]
 |           |               |  for new Burst Fifo and Memory data structures
 | 2021.03   | March 2021    |  Minor updates to scripts for case sensitivity on Linux
@@ -12,6 +13,8 @@
 | 2020.02   | February 2020 |  Initial version of AddressBusTransactionPkg.
 | 2018.04   | April 2018    |  Initial public release
 
+## 2021.08 August 2021
+- Updated AXI4 naming to Axi4Manager and Axi4Subordinate to match ARM updated naming
 
 ## 2021.06 June 2021
 - Updated Axi4Master, AxiStreamTransmitter, AxiStreamReceiver for new Burst data structures

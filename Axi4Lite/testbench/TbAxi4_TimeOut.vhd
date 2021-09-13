@@ -85,11 +85,9 @@ begin
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4_TimeOut.txt", "../sim_shared/validated_results/TbAxi4_TimeOut.txt", "") ; 
-    
-    print("") ;
-    ReportAlerts(ExternalErrors => -ExpectedErrors) ; 
-    print("") ;
-    std.env.stop ; 
+
+    EndOfTestSummary(ExternalErrors => -ExpectedErrors) ; 
+    std.env.stop(SumAlertCount(GetAlertCount - ExpectedErrors)) ;
     wait ; 
   end process ControlProc ; 
 

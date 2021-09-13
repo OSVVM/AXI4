@@ -86,11 +86,9 @@ begin
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4_RandomReadWrite.txt", "../sim_shared/validated_results/TbAxi4_RandomReadWrite.txt", "") ; 
-    
-    print("") ;
-    ReportAlerts ; 
-    print("") ;
-    std.env.stop ; 
+
+    EndOfTestSummary ; 
+    std.env.stop(GetAlertCount) ; 
     wait ; 
   end process ControlProc ; 
 

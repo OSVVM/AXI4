@@ -37,25 +37,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
-library osvvm_TbAxi4Lite
-analyze ./testbench/TestCtrl_e.vhd
-analyze ./testbench/TbAxi4.vhd
-analyze ./testbench/TbAxi4_BasicReadWrite.vhd
-analyze ./testbench/TbAxi4_ReadWriteAsync1.vhd
-analyze ./testbench/TbAxi4_ReadWriteAsync2.vhd
-analyze ./testbench/TbAxi4_ReadWriteAsync3.vhd
-analyze ./testbench/TbAxi4_RandomReadWrite.vhd
-analyze ./testbench/TbAxi4_RandomReadWriteByte.vhd
-analyze ./testbench/TbAxi4_TimeOut.vhd
-analyze ./testbench/TbAxi4_WriteOptions.vhd
-analyze ./testbench/TbAxi4_MemoryReadWrite1.vhd
+TestSuite  Axi4Lite
+library    osvvm_TbAxi4Lite
 
-simulate TbAxi4_BasicReadWrite
-simulate TbAxi4_ReadWriteAsync1
-simulate TbAxi4_ReadWriteAsync2
-simulate TbAxi4_ReadWriteAsync3
-simulate TbAxi4_RandomReadWrite
-simulate TbAxi4_RandomReadWriteByte
-simulate TbAxi4_TimeOut
-simulate TbAxi4_WriteOptions
-simulate TbAxi4_MemoryReadWrite1
+include  ./testbench

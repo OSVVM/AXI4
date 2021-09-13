@@ -37,26 +37,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
-library osvvm_TbAxi4Lite
+
+library    osvvm_TbAxi4Lite
+
 analyze TestCtrl_e.vhd
 analyze TbAxi4.vhd
-analyze TbAxi4_BasicReadWrite.vhd
-analyze TbAxi4_ReadWriteAsync1.vhd
-analyze TbAxi4_ReadWriteAsync2.vhd
-analyze TbAxi4_ReadWriteAsync3.vhd
-analyze TbAxi4_RandomReadWrite.vhd
-analyze TbAxi4_RandomReadWriteByte.vhd
-analyze TbAxi4_TimeOut.vhd
-analyze TbAxi4_WriteOptions.vhd
-# analyze TbAxi4_MemoryReadWrite1.vhd
 
-
-simulate TbAxi4_BasicReadWrite
-# simulate TbAxi4_ReadWriteAsync1    
-# simulate TbAxi4_ReadWriteAsync2    
-# simulate TbAxi4_ReadWriteAsync3    
-# simulate TbAxi4_RandomReadWrite    
-# simulate TbAxi4_RandomReadWriteByte    
-# simulate TbAxi4_TimeOut    
-# simulate TbAxi4_WriteOptions 
-# simulate TbAxi4_MemoryReadWrite1
+RunTest TbAxi4_BasicReadWrite.vhd
+RunTest TbAxi4_ReadWriteAsync1.vhd
+RunTest TbAxi4_ReadWriteAsync2.vhd
+RunTest TbAxi4_ReadWriteAsync3.vhd
+RunTest TbAxi4_RandomReadWrite.vhd
+RunTest TbAxi4_RandomReadWriteByte.vhd
+RunTest TbAxi4_TimeOut.vhd
+RunTest TbAxi4_WriteOptions.vhd
+RunTest TbAxi4_MemoryReadWrite1.vhd

@@ -74,11 +74,8 @@ begin
     TranscriptClose ; 
 --    AlertIfDiff("./results/TbStream_AxiSetOptionsBurst1.txt", "../sim_shared/validated_results/TbStream_AxiSetOptionsBurst1.txt", "") ; 
     
-    print("") ;
-    -- Expecting two check errors at 128 and 256
-    ReportAlerts ; 
-    print("") ;
-    std.env.stop ; 
+    EndOfTestSummary ; 
+    std.env.stop(GetAlertCount) ; 
     wait ; 
   end process ControlProc ; 
 

@@ -73,11 +73,8 @@ begin
     TranscriptClose ; 
 --    AlertIfDiff("./results/TbStream_MultipleDriversReceiver1.txt", "../sim_shared/validated_results/TbStream_MultipleDriversReceiver1.txt", "") ; 
     
-    print("") ;
-    -- Expecting five check errors 
-    ReportAlerts(ExternalErrors => (FAILURE => -1, ERROR => 0, WARNING => 0)) ; 
-    print("") ;
-    std.env.stop ; 
+    EndOfTestSummary(ExternalErrors => (FAILURE => -1, ERROR => 0, WARNING => 0)) ; 
+    std.env.stop(SumAlertCount(GetAlertCount + (FAILURE => -1, ERROR => 0, WARNING => 0))) ;
     wait ; 
   end process ControlProc ; 
 

@@ -38,9 +38,8 @@
 #  limitations under the License.
 #  
 
-# Run same AxiStream Tests on VTI models
-library osvvm_TbAxiStreamVti
-analyze ./testbenchVti/TestCtrl_e.vhd
-analyze ./testbenchVti/TbStream.vhd
+TestSuite AxiStream_VTI
+library   osvvm_TbAxiStreamVti
 
-include RunAllTestCases.pro
+include ./testbenchVti
+include ./TestCases

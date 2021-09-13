@@ -77,11 +77,9 @@ begin
     TranscriptClose ; 
 --    AlertIfDiff("./results/TbStream_SendGet1.txt", "../sim_shared/validated_results/TbStream_SendGet1.txt", "") ; 
     
-    print("") ;
     -- Expecting two check errors at 128 and 256
-    ReportAlerts(ExternalErrors => (0, -2, 0)) ; 
-    print("") ;
-    std.env.stop ; 
+    EndOfTestSummary(ExternalErrors => (0, -2, 0)) ; 
+    std.env.stop(SumAlertCount(GetAlertCount + (0, -2, 0))) ;
     wait ; 
   end process ControlProc ; 
 

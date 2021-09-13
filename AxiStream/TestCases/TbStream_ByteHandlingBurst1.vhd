@@ -75,11 +75,8 @@ begin
     TranscriptClose ; 
 --    AlertIfDiff("./results/TbStream_ByteHandlingBurst1.txt", "../sim_shared/validated_results/TbStream_ByteHandlingBurst1.txt", "") ; 
     
-    print("") ;
-    -- Expecting two check errors at 128 and 256
-    ReportAlerts(ExternalErrors => (0, 0, 0)) ; 
-    print("") ;
-    std.env.stop ; 
+    EndOfTestSummary ; 
+    std.env.stop(GetAlertCount) ; 
     wait ; 
   end process ControlProc ; 
 

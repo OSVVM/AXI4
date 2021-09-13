@@ -73,11 +73,8 @@ begin
     TranscriptClose ; 
 --    AlertIfDiff("./results/TbStream_AxiTxValidDelayBurst1.txt", "../sim_shared/validated_results/TbStream_AxiTxValidDelayBurst1.txt", "") ; 
     
-    print("") ;
-    -- Expecting five check errors 
-    ReportAlerts ; 
-    print("") ;
-    std.env.stop ; 
+    EndOfTestSummary ; 
+    std.env.stop(GetAlertCount) ; 
     wait ; 
   end process ControlProc ; 
 

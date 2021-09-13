@@ -73,11 +73,8 @@ begin
     TranscriptClose ; 
 --    AlertIfDiff("./results/TbStream_AxiTiming2.txt", "../sim_shared/validated_results/TbStream_AxiTiming2.txt", "") ; 
     
-    print("") ;
-    -- Expecting two check errors at 128 and 256
-    ReportAlerts(ExternalErrors => (FAILURE => 0, ERROR => 0, WARNING => 0)) ; 
-    print("") ;
-    std.env.stop ; 
+    EndOfTestSummary ; 
+    std.env.stop(GetAlertCount) ; 
     wait ; 
   end process ControlProc ; 
 

@@ -26,7 +26,7 @@
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.  
+--  Copyright (c) 2018 - 2021 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -86,11 +86,9 @@ begin
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4_AxSizeManagerMemory2.txt", "../sim_shared/validated_results/TbAxi4_AxSizeManagerMemory2.txt", "") ; 
-    
-    print("") ;
-    ReportAlerts ; 
-    print("") ;
-    std.env.stop ; 
+
+    EndOfTestSummary ; 
+    std.env.stop(GetAlertCount) ; 
     wait ; 
   end process ControlProc ; 
 

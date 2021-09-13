@@ -46,36 +46,24 @@
 ##
 
 ## Burst
-analyze  TbAxi4_MemoryBurst1.vhd
-simulate TbAxi4_MemoryBurst1
-analyze  TbAxi4_MemoryBurstAsync1.vhd
-simulate TbAxi4_MemoryBurstAsync1
-analyze  TbAxi4_MemoryBurstByte1.vhd
-simulate TbAxi4_MemoryBurstByte1
+RunTest  TbAxi4_MemoryBurst1.vhd
+RunTest  TbAxi4_MemoryBurstAsync1.vhd
+RunTest  TbAxi4_MemoryBurstByte1.vhd
 
-analyze  TbAxi4_MemoryBurstSparse1.vhd
-simulate TbAxi4_MemoryBurstSparse1
+RunTest  TbAxi4_MemoryBurstSparse1.vhd
 
-analyze  TbAxi4_ReleaseAcquireManager1.vhd
-simulate TbAxi4_ReleaseAcquireManager1
+RunTest  TbAxi4_ReleaseAcquireManager1.vhd
 
-analyze  TbAxi4_AxSizeManagerMemory1.vhd
-simulate TbAxi4_AxSizeManagerMemory1
-analyze  TbAxi4_AxSizeManagerMemory2.vhd
-simulate TbAxi4_AxSizeManagerMemory2
+RunTest  TbAxi4_AxSizeManagerMemory1.vhd
+RunTest  TbAxi4_AxSizeManagerMemory2.vhd
 
-analyze  TbAxi4_AxiIfOptionsManagerMemory.vhd
-simulate TbAxi4_AxiIfOptionsManagerMemory
+RunTest  TbAxi4_AxiIfOptionsManagerMemory.vhd
 
-analyze  TbAxi4_TransactionApiManagerBurst.vhd
-simulate TbAxi4_TransactionApiManagerBurst
-analyze  TbAxi4_TransactionApiMemoryBurst.vhd
-simulate TbAxi4_TransactionApiMemoryBurst
+RunTest  TbAxi4_TransactionApiManagerBurst.vhd
+RunTest  TbAxi4_TransactionApiMemoryBurst.vhd
 
-analyze  TbAxi4_ValidTimingBurstManager.vhd
-simulate TbAxi4_ValidTimingBurstManager
-analyze  TbAxi4_ValidTimingBurstMemory.vhd
-simulate TbAxi4_ValidTimingBurstMemory
+RunTest  TbAxi4_ValidTimingBurstManager.vhd
+RunTest  TbAxi4_ValidTimingBurstMemory.vhd
 
 
 

@@ -45,98 +45,61 @@
 ##
 ##
 # Tests for any AXI4 MIT
-analyze  TbAxi4_BasicReadWrite.vhd
-simulate TbAxi4_BasicReadWrite
-analyze  TbAxi4_RandomReadWrite.vhd
-simulate TbAxi4_RandomReadWrite
-analyze  TbAxi4_RandomReadWriteByte1.vhd
-simulate TbAxi4_RandomReadWriteByte1
+RunTest  TbAxi4_BasicReadWrite.vhd
+RunTest  TbAxi4_RandomReadWrite.vhd
+RunTest  TbAxi4_RandomReadWriteByte1.vhd
 
-analyze  TbAxi4_SubordinateReadWrite1.vhd
-simulate TbAxi4_SubordinateReadWrite1
-analyze  TbAxi4_SubordinateReadWrite2.vhd
-simulate TbAxi4_SubordinateReadWrite2
-analyze  TbAxi4_SubordinateReadWrite3.vhd
-simulate TbAxi4_SubordinateReadWrite3
+RunTest  TbAxi4_SubordinateReadWrite1.vhd
+RunTest  TbAxi4_SubordinateReadWrite2.vhd
+RunTest  TbAxi4_SubordinateReadWrite3.vhd
 
-analyze  TbAxi4_ReadWriteAsync1.vhd
-simulate TbAxi4_ReadWriteAsync1
-analyze  TbAxi4_ReadWriteAsync2.vhd
-simulate TbAxi4_ReadWriteAsync2
-analyze  TbAxi4_ReadWriteAsync3.vhd
-simulate TbAxi4_ReadWriteAsync3
-analyze  TbAxi4_ReadWriteAsync4.vhd
-simulate TbAxi4_ReadWriteAsync4
+RunTest  TbAxi4_ReadWriteAsync1.vhd
+RunTest  TbAxi4_ReadWriteAsync2.vhd
+RunTest  TbAxi4_ReadWriteAsync3.vhd
+RunTest  TbAxi4_ReadWriteAsync4.vhd
 
-analyze  TbAxi4_SubordinateReadWriteAsync1.vhd
-simulate TbAxi4_SubordinateReadWriteAsync1
-analyze  TbAxi4_SubordinateReadWriteAsync2.vhd
-simulate TbAxi4_SubordinateReadWriteAsync2
+RunTest  TbAxi4_SubordinateReadWriteAsync1.vhd
+RunTest  TbAxi4_SubordinateReadWriteAsync2.vhd
 
-analyze  TbAxi4_MultipleDriversManager.vhd
-simulate TbAxi4_MultipleDriversManager
-analyze  TbAxi4_MultipleDriversSubordinate.vhd
-simulate TbAxi4_MultipleDriversSubordinate
+RunTest  TbAxi4_MultipleDriversManager.vhd
+RunTest  TbAxi4_MultipleDriversSubordinate.vhd
 
-analyze  TbAxi4_ReleaseAcquireSubordinate1.vhd
-simulate TbAxi4_ReleaseAcquireSubordinate1
+RunTest  TbAxi4_ReleaseAcquireSubordinate1.vhd
 
-analyze  TbAxi4_AlertLogIDManager.vhd
-simulate TbAxi4_AlertLogIDManager
-analyze  TbAxi4_AlertLogIDSubordinate.vhd
-simulate TbAxi4_AlertLogIDSubordinate
+RunTest  TbAxi4_AlertLogIDManager.vhd
+RunTest  TbAxi4_AlertLogIDSubordinate.vhd
 
-analyze  TbAxi4_TransactionApiSubordinate.vhd
-simulate TbAxi4_TransactionApiSubordinate
+RunTest  TbAxi4_TransactionApiSubordinate.vhd
 
-analyze  TbAxi4_ValidTimingManager.vhd
-simulate TbAxi4_ValidTimingManager
-analyze  TbAxi4_ValidTimingSubordinate.vhd
-simulate TbAxi4_ValidTimingSubordinate
+RunTest  TbAxi4_ValidTimingManager.vhd
+RunTest  TbAxi4_ValidTimingSubordinate.vhd
 
-analyze  TbAxi4_ReadyTimingSubordinate.vhd
-simulate TbAxi4_ReadyTimingSubordinate
+RunTest  TbAxi4_ReadyTimingSubordinate.vhd
 
-analyze  TbAxi4_AxiIfOptionsManagerSubordinate.vhd
-simulate TbAxi4_AxiIfOptionsManagerSubordinate
+RunTest  TbAxi4_AxiIfOptionsManagerSubordinate.vhd
 
-analyze  TbAxi4_TimeOutManager.vhd
-simulate TbAxi4_TimeOutManager
-analyze  TbAxi4_TimeOutSubordinate.vhd
-simulate TbAxi4_TimeOutSubordinate
+RunTest  TbAxi4_TimeOutManager.vhd
+RunTest  TbAxi4_TimeOutSubordinate.vhd
 
 ## Memory
-analyze  TbAxi4_MemoryReadWrite1.vhd
-simulate TbAxi4_MemoryReadWrite1
-analyze  TbAxi4_MemoryReadWrite2.vhd
-simulate TbAxi4_MemoryReadWrite2
+RunTest  TbAxi4_MemoryReadWrite1.vhd
+RunTest  TbAxi4_MemoryReadWrite2.vhd
 
-analyze  TbAxi4_MultipleDriversMemory.vhd
-simulate TbAxi4_MultipleDriversMemory
+RunTest  TbAxi4_MultipleDriversMemory.vhd
 
-analyze  TbAxi4_ReleaseAcquireMemory1.vhd
-simulate TbAxi4_ReleaseAcquireMemory1
+RunTest  TbAxi4_ReleaseAcquireMemory1.vhd
 
-analyze  TbAxi4_AlertLogIDMemory.vhd
-simulate TbAxi4_AlertLogIDMemory
+RunTest  TbAxi4_AlertLogIDMemory.vhd
 
-analyze  TbAxi4_TimeOutMemory.vhd
-simulate TbAxi4_TimeOutMemory
+RunTest  TbAxi4_TimeOutMemory.vhd
 
-analyze  TbAxi4_TransactionApiManager.vhd
-simulate TbAxi4_TransactionApiManager
-analyze  TbAxi4_TransactionApiMemory.vhd
-simulate TbAxi4_TransactionApiMemory
+RunTest  TbAxi4_TransactionApiManager.vhd
+RunTest  TbAxi4_TransactionApiMemory.vhd
 
-analyze  TbAxi4_ValidTimingMemory.vhd
-simulate TbAxi4_ValidTimingMemory
+RunTest  TbAxi4_ValidTimingMemory.vhd
 
-analyze  TbAxi4_ReadyTimingManager.vhd
-simulate TbAxi4_ReadyTimingManager
+RunTest  TbAxi4_ReadyTimingManager.vhd
+RunTest  TbAxi4_ReadyTimingMemory.vhd
 
-analyze  TbAxi4_ReadyTimingMemory.vhd
-simulate TbAxi4_ReadyTimingMemory
-
-analyze  TbAxi4_MemoryAsync.vhd
-simulate TbAxi4_MemoryAsync
+RunTest  TbAxi4_MemoryAsync.vhd
 

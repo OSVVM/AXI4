@@ -26,7 +26,7 @@
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.  
+--  Copyright (c) 2018 - 2021 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -86,10 +86,8 @@ begin
     -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4_TimeOutSubordinate.txt", "../sim_shared/validated_results/TbAxi4_TimeOutSubordinate.txt", "") ; 
     
-    print("") ;
-    ReportAlerts(ExternalErrors => -ExpectedErrors) ; 
-    print("") ;
-    std.env.stop ; 
+    EndOfTestSummary(ExternalErrors => -ExpectedErrors) ; 
+    std.env.stop(SumAlertCount(GetAlertCount - ExpectedErrors)) ;
     wait ; 
   end process ControlProc ; 
 

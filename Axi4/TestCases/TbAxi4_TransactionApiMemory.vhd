@@ -79,11 +79,9 @@ begin
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4_TransactionApiMemory.txt", "../../sim_results/Axi4/TbAxi4_TransactionApiMemory.txt", "") ; 
-    
-    print("") ;
-    ReportAlerts ; 
-    print("") ;
-    std.env.stop ; 
+
+    EndOfTestSummary ; 
+    std.env.stop(GetAlertCount) ; 
     wait ; 
   end process ControlProc ; 
 

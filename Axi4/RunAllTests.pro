@@ -37,9 +37,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
-library osvvm_TbAxi4
-analyze ./testbench/TestCtrl_e.vhd
-analyze ./testbench/TbAxi4.vhd
-analyze ./testbench/TbAxi4Memory.vhd
 
-include RunAllTestCases.pro
+TestSuite Axi4Full
+library osvvm_TbAxi4
+
+include ./testbench
+include ./TestCases

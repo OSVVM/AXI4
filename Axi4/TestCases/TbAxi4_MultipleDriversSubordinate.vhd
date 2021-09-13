@@ -24,7 +24,7 @@
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2017 - 2020 by SynthWorks Design Inc.  
+--  Copyright (c) 2017 - 2021 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -75,11 +75,9 @@ begin
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4_MultipleDriversSubordinate.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MultipleDriversSubordinate.txt", "") ; 
-    
-    print("") ;
-    ReportAlerts(ExternalErrors => (FAILURE => -1, ERROR => 0, WARNING => 0)) ; 
-    print("") ;
-    std.env.stop ; 
+
+    EndOfTestSummary(ExternalErrors => (FAILURE => -1, ERROR => 0, WARNING => 0)) ; 
+    std.env.stop(SumAlertCount(GetAlertCount + (FAILURE => -1, ERROR => 0, WARNING => 0))) ;
     wait ; 
   end process ControlProc ; 
 

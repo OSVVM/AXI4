@@ -76,11 +76,9 @@ begin
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4_ReleaseAcquireMemory1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_ReleaseAcquireMemory1.txt", "") ; 
-    
-    print("") ;
-    ReportAlerts ; 
-    print("") ;
-    std.env.stop ; 
+
+    EndOfTestSummary ; 
+    std.env.stop(GetAlertCount) ; 
     wait ; 
   end process ControlProc ; 
   

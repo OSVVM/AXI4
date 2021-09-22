@@ -557,10 +557,10 @@ begin
 
       -- capture Data, wstrb
       if WD.Valid = '1' then
-        push(WriteDataFifo, WD.Data & WD.Strb & WD.Last & WD.User) ;
+        push(WriteDataFifo, WD.Data & WD.Strb & WD.Last & WD.User & WD.ID) ;
       else
         -- On failure to receive Valid, assert LAST
-        push(WriteDataFifo, WD.Data & WD.Strb & '1' & WD.User) ;
+        push(WriteDataFifo, WD.Data & WD.Strb & '1' & WD.User & WD.ID) ;
       end if ;
 
       -- Log this operation

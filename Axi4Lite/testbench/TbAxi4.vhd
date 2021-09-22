@@ -157,23 +157,23 @@ begin
     nReset      => nReset,
 
     -- AXI Master Functional Interface
---    AxiBus  => AxiBus
+    AxiBus  => AxiBus,
     -- Mapping aliases on Left Hand Side (most similar to basic design)
-    AxiBus.WriteAddress.Addr       => AWAddr  ,
-    AxiBus.WriteAddress.Prot       => AWProt  ,
-    AxiBus.WriteAddress.Valid      => AWValid ,
-    AxiBus.WriteAddress.Ready      => AWReady ,
-
-    -- Mapping record elements on Left Hand Side (easiest way to connect Master to Responder DUT)
-    AxiBus.WriteData.Data          => AxiBus.WriteData.Data   ,
-    AxiBus.WriteData.Strb          => AxiBus.WriteData.Strb   ,
-    AxiBus.WriteData.Valid         => AxiBus.WriteData.Valid  ,
-    AxiBus.WriteData.Ready         => AxiBus.WriteData.Ready  ,
-
-    -- Mapping bus subrecords on left hand side (because it is easy)
-    AxiBus.WriteResponse           => AxiBus.WriteResponse ,
-    AxiBus.ReadAddress             => AxiBus.ReadAddress ,
-    AxiBus.ReadData                => AxiBus.ReadData ,
+--      AxiBus.WriteAddress.Addr       => AWAddr  ,
+--      AxiBus.WriteAddress.Prot       => AWProt  ,
+--      AxiBus.WriteAddress.Valid      => AWValid ,
+--      AxiBus.WriteAddress.Ready      => AWReady ,
+--  
+--      -- Mapping record elements on Left Hand Side (easiest way to connect Master to Responder DUT)
+--      AxiBus.WriteData.Data          => AxiBus.WriteData.Data   ,
+--      AxiBus.WriteData.Strb          => AxiBus.WriteData.Strb   ,
+--      AxiBus.WriteData.Valid         => AxiBus.WriteData.Valid  ,
+--      AxiBus.WriteData.Ready         => AxiBus.WriteData.Ready  ,
+--  
+--      -- Mapping bus subrecords on left hand side (because it is easy)
+--      AxiBus.WriteResponse           => AxiBus.WriteResponse ,
+--      AxiBus.ReadAddress             => AxiBus.ReadAddress ,
+--      AxiBus.ReadData                => AxiBus.ReadData ,
 
     -- Testbench Transaction Interface
     TransRec    => ResponderRec

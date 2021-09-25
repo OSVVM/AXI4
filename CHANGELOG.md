@@ -1,17 +1,23 @@
 # AXI4 Verification Component Change Log
 
-| Revision  | Revision Date |  Release Summary | 
-------------|---------------|----------- 
-| 2021.08   | August 2021   |  Updated AXI4 naming to Axi4Manager and Axi4Subordinate.
-| 2021.06   | June 2021     |  Updated Axi4Master[Vti], AxiStreamXX[Vti], Axi4Memory[Vti]
-|           |               |  for new Burst Fifo and Memory data structures
-| 2021.03   | March 2021    |  Minor updates to scripts for case sensitivity on Linux
-| 2021.02   | February 2021 |  Added TRANSMIT_VALID_DELAY_CYCLES to AxiStreamTransmitter
-| 2020.12   | December 2020 |  More Bursting and Virtual Transaction Interfaces.
-| 2020.10   | October 2020  |  Added Bursting to AxiStream. 
-| 2020.07   | July 2020     |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
-| 2020.02   | February 2020 |  Initial version of AddressBusTransactionPkg.
-| 2018.04   | April 2018    |  Initial public release
+| Revision  | Revision Date  |  Release Summary | 
+------------|----------------|----------- 
+| 2021.09   | September 2021 |  Minor bug fix to Axi4Subordinate.  Updates to testbenches to support writing YAML files
+| 2021.08   | August 2021    |  Updated AXI4 naming.  Changed Axi4Master to Axi4Manager and Axi4Responder to Axi4Subordinate.
+| 2021.06   | June 2021      |  Updated Axi4Master[Vti], AxiStreamXX[Vti], Axi4Memory[Vti]
+|           |                |  for new Burst Fifo and Memory data structures
+| 2021.03   | March 2021     |  Minor updates to scripts for case sensitivity on Linux
+| 2021.02   | February 2021  |  Added TRANSMIT_VALID_DELAY_CYCLES to AxiStreamTransmitter
+| 2020.12   | December 2020  |  More Bursting and Virtual Transaction Interfaces.
+| 2020.10   | October 2020   |  Added Bursting to AxiStream. 
+| 2020.07   | July 2020      |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
+| 2020.02   | February 2020  |  Initial version of AddressBusTransactionPkg.
+| 2018.04   | April 2018     |  Initial public release
+
+## 2021.09 September 2021
+- Minor bug fix to Axi4Subordinate.  
+- Updates to testbenches to support writing YAML files.
+- Minor updates to support compilation in Cadence Xcelium.
 
 ## 2021.08 August 2021
 - Updated AXI4 naming to Axi4Manager and Axi4Subordinate to match ARM updated naming

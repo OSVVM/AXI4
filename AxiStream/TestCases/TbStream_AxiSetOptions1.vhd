@@ -73,7 +73,7 @@ begin
     TranscriptClose ; 
 --    AlertIfDiff("./results/TbStream_AxiSetOptions1.txt", "../sim_shared/validated_results/TbStream_AxiSetOptions1.txt", "") ; 
     
-    EndOfTestSummary(ExternalErrors => (0, -5, 0)) ; 
+    EndOfTestReports(ExternalErrors => (0, -5, 0)) ; 
     std.env.stop(SumAlertCount(GetAlertCount + (0, -5, 0))) ;
     wait ; 
   end process ControlProc ; 

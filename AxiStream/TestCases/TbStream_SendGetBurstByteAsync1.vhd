@@ -73,7 +73,7 @@ begin
     TranscriptClose ; 
 --    AlertIfDiff("./results/TbStream_SendGetBurstByteAsync1.txt", "../sim_shared/validated_results/TbStream_SendGetBurstByteAsync1.txt", "") ; 
     
-    EndOfTestSummary ; 
+    EndOfTestReports ; 
     std.env.stop(GetAlertCount) ; 
     wait ; 
   end process ControlProc ; 

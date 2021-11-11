@@ -76,7 +76,7 @@ begin
 --    AlertIfDiff("./results/TbStream_SendGetAsync1.txt", "../sim_shared/validated_results/TbStream_SendGetAsync1.txt", "") ; 
     
     -- Expecting two check errors at 128 and 256
-    EndOfTestSummary(ExternalErrors => (0, -2, 0)) ; 
+    EndOfTestReports(ExternalErrors => (0, -2, 0)) ; 
     std.env.stop(SumAlertCount(GetAlertCount + (0, -2, 0))) ;
     wait ; 
   end process ControlProc ; 

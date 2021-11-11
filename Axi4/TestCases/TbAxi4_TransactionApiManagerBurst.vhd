@@ -84,7 +84,7 @@ begin
     -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4_TransactionApiManagerBurst.txt", "../../sim_results/Axi4/TbAxi4_TransactionApiManagerBurst.txt", "") ; 
 
-    EndOfTestSummary ; 
+    EndOfTestReports ; 
     std.env.stop(GetAlertCount) ; 
     wait ; 
   end process ControlProc ; 

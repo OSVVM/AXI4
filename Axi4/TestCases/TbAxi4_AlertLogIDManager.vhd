@@ -79,7 +79,7 @@ begin
     -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4_AlertLogIDManager.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_AlertLogIDManager.txt", "") ; 
 
-    EndOfTestSummary(ExternalErrors => (FAILURE => -1, ERROR => -1, WARNING => -1)) ; 
+    EndOfTestReports(ExternalErrors => (FAILURE => -1, ERROR => -1, WARNING => -1)) ; 
     std.env.stop(SumAlertCount(GetAlertCount + (FAILURE => -1, ERROR => -1, WARNING => -1))) ;
     wait ; 
   end process ControlProc ; 

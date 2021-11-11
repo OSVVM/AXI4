@@ -76,7 +76,7 @@ begin
     -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4_MultipleDriversManager.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MultipleDriversManager.txt", "") ; 
 
-    EndOfTestSummary(ExternalErrors => (FAILURE => -1, ERROR => 0, WARNING => 0)) ; 
+    EndOfTestReports(ExternalErrors => (FAILURE => -1, ERROR => 0, WARNING => 0)) ; 
     std.env.stop(SumAlertCount(GetAlertCount + (FAILURE => -1, ERROR => 0, WARNING => 0))) ;
     wait ; 
   end process ControlProc ; 

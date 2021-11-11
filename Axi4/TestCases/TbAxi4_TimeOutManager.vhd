@@ -86,7 +86,7 @@ begin
     -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4_TimeOutManager.txt", "../sim_shared/validated_results/TbAxi4_TimeOutManager.txt", "") ; 
     
-    EndOfTestSummary(ExternalErrors => -ExpectedErrors) ; 
+    EndOfTestReports(ExternalErrors => -ExpectedErrors) ; 
     std.env.stop(SumAlertCount(GetAlertCount - ExpectedErrors)) ;
     wait ; 
   end process ControlProc ; 

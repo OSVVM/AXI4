@@ -75,7 +75,7 @@ begin
     -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4_SubordinateReadWrite3.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_SubordinateReadWrite3.txt", "") ; 
 
-    EndOfTestSummary ; 
+    EndOfTestReports ; 
     std.env.stop(GetAlertCount) ; 
     wait ; 
   end process ControlProc ; 

@@ -87,7 +87,7 @@ begin
     -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4_AxSizeManagerMemory1.txt", "../sim_shared/validated_results/TbAxi4_AxSizeManagerMemory1.txt", "") ; 
 
-    EndOfTestSummary ; 
+    EndOfTestReports ; 
     std.env.stop(GetAlertCount) ; 
     wait ; 
   end process ControlProc ; 

@@ -77,8 +77,7 @@ begin
     -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4_Separate1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_Separate1.txt", "") ; 
 
-    ReportAlerts(ExternalErrors => (0, -12, 0)) ; 
-    CreateYamlReport(ExternalErrors => (0, -12, 0)) ; 
+    EndOfTestReports(ExternalErrors => (0, -12, 0)) ; 
     std.env.stop(GetAlertCount - 12) ; 
     wait ; 
   end process ControlProc ; 

@@ -63,6 +63,7 @@ RunTest  TbStream_ByteHandlingAsync1.vhd
 
 ## MIT Blocking Burst Transfers
 RunTest  TbStream_SendGetBurst1.vhd
+RunTest  TbStream_SendGetBurstPattern1.vhd
 RunTest  TbStream_SendGetBurstByte1.vhd
 RunTest  TbStream_ByteHandlingBurst1.vhd
 RunTest  TbStream_ByteHandlingBurstByte1.vhd
@@ -91,6 +92,7 @@ RunTest  TbStream_ReleaseAcquireReceiver1.vhd
 ## AxiStream Specific Tests
 ## AxiStream Blocking, Single Transfers
 RunTest  TbStream_AxiSendGet2.vhd
+RunTest  TbStream_SendGetBurstPattern2.vhd
 RunTest  TbStream_AxiSetOptions1.vhd
 RunTest  TbStream_AxiTxValidDelay1.vhd
 RunTest  TbStream_AxiTiming1.vhd

@@ -119,7 +119,7 @@ begin
 
 
     log("Write with ByteAddr = 31, 12 Words -- unaligned") ;
-    WriteBurstRandom(ManagerRec, X"0000_3001", X"A015_2800", 13) ;
+    WriteBurstRandom    (ManagerRec, X"0000_3001", X"A015_2800", 13) ;
 
     ReadCheckBurstRandom(ManagerRec, X"0000_3001", X"A015_28UU", 13) ;
 

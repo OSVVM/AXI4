@@ -44,5 +44,5 @@ library   osvvm_TbAxiStream
 
 include ./testbench
 # RunTest ./TestCases/TbStream_SendGetBurstPattern1.vhd
-RunTest ./TestCases/TbStream_SendGetBurstPattern2.vhd
+RunTest ./TestCases/TbStream_AxiSendGetBurstPattern2.vhd
 

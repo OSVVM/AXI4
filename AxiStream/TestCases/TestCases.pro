@@ -92,7 +92,6 @@ RunTest  TbStream_ReleaseAcquireReceiver1.vhd
 ## AxiStream Specific Tests
 ## AxiStream Blocking, Single Transfers
 RunTest  TbStream_AxiSendGet2.vhd
-RunTest  TbStream_SendGetBurstPattern2.vhd
 RunTest  TbStream_AxiSetOptions1.vhd
 RunTest  TbStream_AxiTxValidDelay1.vhd
 RunTest  TbStream_AxiTiming1.vhd
@@ -107,6 +106,7 @@ RunTest  TbStream_AxiSetOptionsAsync2.vhd
 
 ## AxiStream Blocking Burst Transfers
 RunTest  TbStream_AxiSendGetBurst2.vhd
+RunTest  TbStream_AxiSendGetBurstPattern2.vhd
 RunTest  TbStream_AxiLastParam1.vhd
 RunTest  TbStream_AxiLastOption1.vhd
 RunTest  TbStream_AxiSetOptionsBurst1.vhd

@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date       Version    Description
+--    01/2022    2022.01    Added GotBurst transaction
 --    07/2021    2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
 --    06/2021    2021.06    Updated Burst FIFOs.
 --    02/2021    2021.02    Added MultiDriver Detect.  Updated Generics.   
@@ -27,7 +28,7 @@
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2018 - 2021 by SynthWorks Design Inc.  
+--  Copyright (c) 2018 - 2022 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -99,11 +100,15 @@ entity AxiStreamReceiverVti is
     ParamFromModel(AXI_STREAM_PARAM_WIDTH-1 downto 0)
   ) ;  
 
-end entity AxiStreamReceiverVti ;
-architecture behavioral of AxiStreamReceiverVti is
+  -- Derive ModelInstance label from path_name
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
     IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamReceiverVti'PATH_NAME))) ;
+
+  constant MODEL_NAME : string := "AxiStreamReceiverVti" ;
+
+end entity AxiStreamReceiverVti ;
+architecture behavioral of AxiStreamReceiverVti is
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID, BurstFifoID : AlertLogIDType ; 
   
@@ -223,7 +228,15 @@ begin
           BurstFifoByteMode   <= (TransRec.IntToModel = STREAM_BURST_BYTE_MODE) ;
               
         when GET_BURST_MODE =>                      
-          TransRec.IntToModel <= BurstFifoMode ;
+          TransRec.IntFromModel <= BurstFifoMode ;
+          
+        when GOT_BURST =>
+          -- Required for CheckBurst with Patterns VectorOfWords, Increment, Random
+          if (BurstReceiveCount - BurstTransferCount) = 0 then
+            TransRec.BoolFromModel  <= FALSE ; 
+          else
+            TransRec.BoolFromModel <= TRUE ; 
+          end if ; 
 
         when GET | TRY_GET | CHECK | TRY_CHECK =>
           if Empty(ReceiveFifo) and  IsTry(Operation) then
@@ -495,7 +508,7 @@ begin
         -- The End -- Done  
           
         when MULTIPLE_DRIVER_DETECT =>
-          Alert(ModelID, "AxiStreamReceiverVti: Multiple Drivers on Transaction Record." & 
+          Alert(ModelID, MODEL_NAME & ": Multiple Drivers on Transaction Record." & 
                          "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
           wait for 0 ns ;  wait for 0 ns ;
 

@@ -106,13 +106,16 @@ port (
   constant AXI_ADDR_WIDTH : integer := AxiBus.WriteAddress.Addr'length ;
   constant AXI_DATA_WIDTH : integer := AxiBus.WriteData.Data'length ;
 
-end entity Axi4Subordinate ;
-
-architecture Transactor of Axi4Subordinate is
-
+  -- Derive ModelInstance label from path_name
   -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Subordinate'PATH_NAME))) ;
+
+  constant MODEL_NAME : string := "Axi4Subordinate" ;
+
+end entity Axi4Subordinate ;
+
+architecture Transactor of Axi4Subordinate is
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
 
@@ -466,7 +469,7 @@ begin
         wait for 0 ns ; 
 
       when MULTIPLE_DRIVER_DETECT =>
-        Alert(ModelID, "Axi4Subordinate: Multiple Drivers on Transaction Record." & 
+          Alert(ModelID, MODEL_NAME & ": Multiple Drivers on Transaction Record." & 
                        "  Transaction # " & to_string(TransactionCount), FAILURE) ;
         wait for 0 ns ;  
 

@@ -135,12 +135,16 @@ port (
           DataToModel  (AXI_DATA_WIDTH-1 downto 0),
           DataFromModel(AXI_DATA_WIDTH-1 downto 0)
         ) ;
-end entity Axi4ManagerVti ;
-architecture AxiFull of Axi4ManagerVti is
-  -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
+
+  -- Derive ModelInstance label from path_name
   constant MODEL_INSTANCE_NAME : string :=
+    -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4ManagerVti'PATH_NAME))) ;
 
+  constant MODEL_NAME : string := "Axi4ManagerVti" ;
+
+end entity Axi4ManagerVti ;
+architecture AxiFull of Axi4ManagerVti is
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
 
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
@@ -636,7 +640,7 @@ begin
           wait for 0 ns ;  wait for 0 ns ;
 
         when MULTIPLE_DRIVER_DETECT =>
-          Alert(ModelID, "Axi4ManagerVti: Multiple Drivers on Transaction Record." & 
+          Alert(ModelID, MODEL_NAME & ": Multiple Drivers on Transaction Record." & 
                          "  Transaction # " & to_string(TransactionCount), FAILURE) ;
           wait for 0 ns ;  wait for 0 ns ;
 

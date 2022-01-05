@@ -111,23 +111,26 @@ port (
           DataToModel  (AXI_DATA_WIDTH-1 downto 0),
           DataFromModel(AXI_DATA_WIDTH-1 downto 0)
         ) ;
-        
+
+  -- Derive ModelInstance label from path_name
+  constant MODEL_INSTANCE_NAME : string :=
+    -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
+    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4MemoryVti'PATH_NAME))) ;
+
+  -- Memory Data Structure, Access via MemoryName
+  constant LOCAL_MEMORY_NAME : string := 
+    IfElse(MEMORY_NAME /= "", MEMORY_NAME, to_lower(Axi4MemoryVti'PATH_NAME) & ":memory") ;
+    
+  constant MODEL_NAME : string := "Axi4MemoryVti" ;
+
 end entity Axi4MemoryVti ;
 
 architecture MemorySubordinate of Axi4MemoryVti is
   constant AXI_DATA_BYTE_WIDTH  : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH  : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 
-  constant MODEL_INSTANCE_NAME : string :=
-    -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
-    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4MemoryVti'PATH_NAME))) ;
-
   signal ModelID, BusFailedID, DataCheckID : AlertLogIDType ;
 
-  -- Memory Data Structure, Access via MemoryName
-  constant LOCAL_MEMORY_NAME : string := 
-    IfElse(MEMORY_NAME /= "", MEMORY_NAME, to_lower(Axi4MemoryVti'PATH_NAME) & ":memory") ;
-    
   constant MemoryID : MemoryIDType := NewID(
       Name       => LOCAL_MEMORY_NAME, 
       AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
@@ -365,7 +368,7 @@ begin
         end if ;
 
       when MULTIPLE_DRIVER_DETECT =>
-        Alert(ModelID, "Axi4MemoryVti: Multiple Drivers on Transaction Record." & 
+          Alert(ModelID, MODEL_NAME & ": Multiple Drivers on Transaction Record." & 
                        "  Transaction # " & to_string(TransactionCount), FAILURE) ;
         wait for 0 ns ;  
 

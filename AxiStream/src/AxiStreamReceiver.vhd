@@ -32,7 +32,7 @@
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2018 - 2021 by SynthWorks Design Inc.  
+--  Copyright (c) 2018 - 2022 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -96,12 +96,16 @@ entity AxiStreamReceiver is
   
   -- Derive AXI interface properties from interface signals
   constant AXI_STREAM_DATA_WIDTH   : integer := TData'length ;
+  
+  -- Derive ModelInstance label from path_name
+  constant MODEL_INSTANCE_NAME : string :=
+  -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
+  IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamReceiver'PATH_NAME))) ;
+
+  constant MODEL_NAME : string := "AxiStreamReceiver" ;
 
 end entity AxiStreamReceiver ;
 architecture behavioral of AxiStreamReceiver is
-  constant MODEL_INSTANCE_NAME : string :=
-    -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
-    IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamReceiver'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID, BurstFifoID : AlertLogIDType ; 
   
@@ -501,7 +505,7 @@ begin
         -- The End -- Done  
           
         when MULTIPLE_DRIVER_DETECT =>
-          Alert(ModelID, "AxiStreamReceiver: Multiple Drivers on Transaction Record." & 
+          Alert(ModelID, MODEL_NAME & ": Multiple Drivers on Transaction Record." & 
                          "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
           wait for 0 ns ;  wait for 0 ns ;
 

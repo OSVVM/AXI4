@@ -106,12 +106,15 @@ entity AxiStreamTransmitter is
   -- Derive AXI interface properties from interface signals
   constant AXI_STREAM_DATA_WIDTH   : integer := TData'length ;
 
-end entity AxiStreamTransmitter ;
-architecture SimpleTransmitter of AxiStreamTransmitter is
+  -- Derive ModelInstance label from path_name
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
     IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamTransmitter'PATH_NAME))) ;
 
+  constant MODEL_NAME : string := "AxiStreamTransmitter" ;
+  
+end entity AxiStreamTransmitter ;
+architecture SimpleTransmitter of AxiStreamTransmitter is
   signal ModelID, BusFailedID : AlertLogIDType ;
 --  signal ProtocolID, DataCheckID : AlertLogIDType ;
 
@@ -326,7 +329,7 @@ begin
           end case ;
 
         when MULTIPLE_DRIVER_DETECT =>
-          Alert(ModelID, "AxiStreamTransmitter: Multiple Drivers on Transaction Record." & 
+          Alert(ModelID, MODEL_NAME & ": Multiple Drivers on Transaction Record." & 
                          "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
           wait for 0 ns ;  wait for 0 ns ;
 

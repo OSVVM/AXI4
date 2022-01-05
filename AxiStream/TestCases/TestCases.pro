@@ -63,7 +63,6 @@ RunTest  TbStream_ByteHandlingAsync1.vhd
 
 ## MIT Blocking Burst Transfers
 RunTest  TbStream_SendGetBurst1.vhd
-RunTest  TbStream_SendGetBurstPattern1.vhd
 RunTest  TbStream_SendGetBurstByte1.vhd
 RunTest  TbStream_ByteHandlingBurst1.vhd
 RunTest  TbStream_ByteHandlingBurstByte1.vhd
@@ -71,6 +70,11 @@ RunTest  TbStream_ByteHandlingBurstByte1.vhd
 ## MIT Blocking Burst that use BurstFifo also as scoreboard
 RunTest  TbStream_SendCheckBurst1.vhd
 RunTest  TbStream_SendCheckBurstByte1.vhd
+
+RunTest TbStream_SendCheckBurstPattern1.vhd
+RunTest TbStream_SendCheckBurstBytePattern1.vhd
+RunTest TbStream_SendCheckBurstAsyncPattern1.vhd
+RunTest TbStream_SendCheckBurstByteAsyncPattern1.vhd
 
 ## MIT Asynchronous Burst Transfers
 RunTest  TbStream_SendGetBurstAsync1.vhd
@@ -106,7 +110,6 @@ RunTest  TbStream_AxiSetOptionsAsync2.vhd
 
 ## AxiStream Blocking Burst Transfers
 RunTest  TbStream_AxiSendGetBurst2.vhd
-RunTest  TbStream_AxiSendGetBurstPattern2.vhd
 RunTest  TbStream_AxiLastParam1.vhd
 RunTest  TbStream_AxiLastOption1.vhd
 RunTest  TbStream_AxiSetOptionsBurst1.vhd
@@ -118,6 +121,8 @@ RunTest  TbStream_AxiSetOptionsBurst3.vhd
 RunTest  TbStream_AxiBurstNoLast1.vhd
 
 RunTest  TbStream_AxiSetOptionsBurstCheck3.vhd
+
+RunTest  TbStream_AxiSendCheckBurstPattern2.vhd
 
 
 ## AxiStream Asynchronous Burst Transfers

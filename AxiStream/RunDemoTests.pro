@@ -43,6 +43,13 @@ TestSuite AxiStream
 library   osvvm_TbAxiStream
 
 include ./testbench
-# RunTest ./TestCases/TbStream_SendGetBurstPattern1.vhd
-RunTest ./TestCases/TbStream_AxiSendGetBurstPattern2.vhd
+# RunTest ./TestCases/TbStream_SendCheckBurstPattern1.vhd
+# RunTest ./TestCases/TbStream_AxiSendCheckBurstPattern2.vhd
+
+RunTest ./TestCases/TbStream_SendCheckBurstPattern1.vhd
+RunTest ./TestCases/TbStream_SendCheckBurstBytePattern1.vhd
+RunTest ./TestCases/TbStream_SendCheckBurstAsyncPattern1.vhd
+RunTest ./TestCases/TbStream_SendCheckBurstByteAsyncPattern1.vhd
+
+RunTest ./TestCases/TbStream_AxiSendCheckBurstPattern2.vhd
 

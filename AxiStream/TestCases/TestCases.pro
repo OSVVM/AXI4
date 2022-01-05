@@ -123,6 +123,7 @@ RunTest  TbStream_AxiBurstNoLast1.vhd
 RunTest  TbStream_AxiSetOptionsBurstCheck3.vhd
 
 RunTest  TbStream_AxiSendCheckBurstPattern2.vhd
+RunTest  TbStream_AxiSendCheckBurstAsyncPattern2.vhd
 
 
 ## AxiStream Asynchronous Burst Transfers

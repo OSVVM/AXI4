@@ -43,3 +43,4 @@ library osvvm_TbAxi4Vti
 
 include ./testbenchVti
 include ./TestCases
+include ./testbench_MultipleMemory

@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date       Version    Description
+--    01/2022    2022.01    Added GotBurst transaction
 --    07/2021    2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
 --    06/2021    2021.06    Updated Burst FIFOs.
 --    02/2021    2021.02    Added MultiDriver Detect.  Updated Generics.   
@@ -220,7 +221,15 @@ begin
           BurstFifoByteMode   <= (TransRec.IntToModel = STREAM_BURST_BYTE_MODE) ;
               
         when GET_BURST_MODE =>                      
-          TransRec.IntToModel <= BurstFifoMode ;
+          TransRec.IntFromModel <= BurstFifoMode ;
+          
+        when GOT_BURST =>
+          -- Required for CheckBurst with Patterns VectorOfWords, Increment, Random
+          if (BurstReceiveCount - BurstTransferCount) = 0 then
+            TransRec.BoolFromModel  <= FALSE ; 
+          else
+            TransRec.BoolFromModel <= TRUE ; 
+          end if ; 
 
         when GET | TRY_GET | CHECK | TRY_CHECK =>
           if Empty(ReceiveFifo) and  IsTry(Operation) then

@@ -98,7 +98,6 @@ begin
     WaitForClock(StreamTxRec, 4) ; 
 
     log("Transmit 13 Words.") ;
-
     SendBurst(StreamTxRec, 
 --        (DATA_ZERO+1, DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         (X"0000_0001", DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,

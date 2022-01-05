@@ -132,23 +132,54 @@ begin
     WaitForClock(StreamRxRec, 2) ; 
     SetBurstMode(StreamRxRec, STREAM_BURST_BYTE_MODE) ;
     
---    log("Transmit 16 bytes.  Incrementing.  Starting with X00010003") ;
-    CheckBurstIncrement(StreamRxRec, DATA_ZERO+3, 16) ;
+--    log("Transmit 16 words.  Incrementing.  Starting with X00010003") ;
+    TryCount := 0 ; 
+    loop 
+      TryCheckBurstIncrement(StreamRxRec, DATA_ZERO+3, 16, Available) ;
+      exit when Available ; 
+      WaitForClock(StreamRxRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     
---    log("Transmit 13 bytes -- unaligned") ;
-    CheckBurst (StreamRxRec, 
+    TryCount := 0 ; 
+    loop 
+--    log("Transmit 13 words -- unaligned") ;
+      TryCheckBurst (StreamRxRec, 
 --        (DATA_ZERO+1, DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         (X"01",        DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
-        DATA_ZERO+21,  DATA_ZERO+23, DATA_ZERO+25) ) ;
+        DATA_ZERO+21,  DATA_ZERO+23, DATA_ZERO+25),
+        Available) ;
+      exit when Available ; 
+      WaitForClock(StreamRxRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
 
---    log("Transmit 8 bytes.") ;
-    CheckBurstRandom(StreamRxRec, DATA_ZERO+16#AA#, 8) ;
-         
+--    log("Transmit 8 words.") ;
+    TryCount := 0 ; 
+    loop 
+      TryCheckBurstRandom(StreamRxRec, DATA_ZERO+16#AA#, 8, Available) ;
+      exit when Available ; 
+      WaitForClock(StreamRxRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
+
     for i in 0 to 6 loop 
-      -- log("Transmit " & to_string(8 + 3*i) & " bytes. Starting with " & to_string(i*32)) ;
-      CheckBurstIncrement(StreamRxRec, DATA_ZERO+i*32, 8 + 3*i) ;
+      -- log("Transmit " & to_string(8 + 3*i) & " words. Starting with " & to_string(i*32)) ;
+      TryCount := 0 ; 
+      loop 
+        TryCheckBurstIncrement(StreamRxRec, DATA_ZERO+i*32, 8 + 3*i, Available) ;
+        exit when Available ; 
+        WaitForClock(StreamRxRec, 1) ; 
+        TryCount := TryCount + 1 ;
+      end loop ;
+      AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
+      
     end loop ; 
+
      
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(StreamRxRec, 2) ;

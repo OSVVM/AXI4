@@ -10,7 +10,7 @@
 --
 --  Description:
 --      Burst Transactions with Full Data Width
---      SendBurstAsync, GetBurst
+--      SendBurstVectorAsync, GetBurst
 --
 --
 --  Developed by:
@@ -97,7 +97,7 @@ begin
     WaitForClock(StreamTxRec, 4) ; 
 
     log("Transmit 13 Words.") ;
-    SendBurstAsync(StreamTxRec, 
+    SendBurstVectorAsync(StreamTxRec, 
 --        (DATA_ZERO+1, DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         (X"0000_0001", DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
@@ -143,7 +143,7 @@ begin
     TryCount := 0 ; 
     loop 
 --    log("Transmit 13 words -- unaligned") ;
-      TryCheckBurst (StreamRxRec, 
+      TryCheckBurstVector (StreamRxRec, 
 --        (DATA_ZERO+1, DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         (X"0000_0001", DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,

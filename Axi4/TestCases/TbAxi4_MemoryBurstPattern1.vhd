@@ -107,12 +107,12 @@ begin
     ReadCheckBurstIncrement(ManagerRec, X"0000_0008", DATA_ZERO+3, 12) ;
     
     log("Write with ByteAddr = x1A, 13 Words -- unaligned") ;
-    WriteBurst(ManagerRec, X"0000_100A", 
+    WriteBurstVector(ManagerRec, X"0000_100A", 
         (X"0001_UUUU", DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
         DATA_ZERO+21,  DATA_ZERO+23, DATA_ZERO+25) ) ;
 
-    ReadCheckBurst(ManagerRec, X"0000_100A", 
+    ReadCheckBurstVector(ManagerRec, X"0000_100A", 
         (X"0001_----", DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
         DATA_ZERO+21,  DATA_ZERO+23, DATA_ZERO+25) ) ;
@@ -125,30 +125,30 @@ begin
 
     log("Write 9 words, with bytes in all different byte positions") ;
     
-    WriteBurst(ManagerRec, X"0000_5050", (1 => X"UUUU_UU01")) ;
-    WriteBurst(ManagerRec, X"0000_5051", (1 => X"UUUU_02UU")) ;
-    WriteBurst(ManagerRec, X"0000_5052", (1 => X"UU03_UUUU")) ;
-    WriteBurst(ManagerRec, X"0000_5053", (1 => X"04UU_UUUU")) ;
+    WriteBurstVector(ManagerRec, X"0000_5050", (1 => X"UUUU_UU01")) ;
+    WriteBurstVector(ManagerRec, X"0000_5051", (1 => X"UUUU_02UU")) ;
+    WriteBurstVector(ManagerRec, X"0000_5052", (1 => X"UU03_UUUU")) ;
+    WriteBurstVector(ManagerRec, X"0000_5053", (1 => X"04UU_UUUU")) ;
 
-    WriteBurst(ManagerRec, X"0000_5060", (1 => X"UUUU_0605")) ;
-    WriteBurst(ManagerRec, X"0000_5071", (1 => X"UU08_07UU")) ;
-    WriteBurst(ManagerRec, X"0000_5082", (1 => X"0A09_UUUU")) ;
+    WriteBurstVector(ManagerRec, X"0000_5060", (1 => X"UUUU_0605")) ;
+    WriteBurstVector(ManagerRec, X"0000_5071", (1 => X"UU08_07UU")) ;
+    WriteBurstVector(ManagerRec, X"0000_5082", (1 => X"0A09_UUUU")) ;
 
-    WriteBurst(ManagerRec, X"0000_5090", (1 => X"UU0D_0C0B")) ;
-    WriteBurst(ManagerRec, X"0000_50A1", (1 => X"100F_0EUU")) ;
+    WriteBurstVector(ManagerRec, X"0000_5090", (1 => X"UU0D_0C0B")) ;
+    WriteBurstVector(ManagerRec, X"0000_50A1", (1 => X"100F_0EUU")) ;
 
 
-    ReadCheckBurst (ManagerRec, X"0000_5050", (1 => X"----_--01")) ;
-    ReadCheckBurst (ManagerRec, X"0000_5051", (1 => X"----_02--")) ;
-    ReadCheckBurst (ManagerRec, X"0000_5052", (1 => X"--03_----")) ;
-    ReadCheckBurst (ManagerRec, X"0000_5053", (1 => X"04--_----")) ;
+    ReadCheckBurstVector (ManagerRec, X"0000_5050", (1 => X"----_--01")) ;
+    ReadCheckBurstVector (ManagerRec, X"0000_5051", (1 => X"----_02--")) ;
+    ReadCheckBurstVector (ManagerRec, X"0000_5052", (1 => X"--03_----")) ;
+    ReadCheckBurstVector (ManagerRec, X"0000_5053", (1 => X"04--_----")) ;
 
-    ReadCheckBurst (ManagerRec, X"0000_5060", (1 => X"----_0605")) ;
-    ReadCheckBurst (ManagerRec, X"0000_5071", (1 => X"--08_07--")) ;
-    ReadCheckBurst (ManagerRec, X"0000_5082", (1 => X"0A09_----")) ;
+    ReadCheckBurstVector (ManagerRec, X"0000_5060", (1 => X"----_0605")) ;
+    ReadCheckBurstVector (ManagerRec, X"0000_5071", (1 => X"--08_07--")) ;
+    ReadCheckBurstVector (ManagerRec, X"0000_5082", (1 => X"0A09_----")) ;
 
-    ReadCheckBurst (ManagerRec, X"0000_5090", (1 => X"--0D_0C0B")) ;
-    ReadCheckBurst (ManagerRec, X"0000_50A1", (1 => X"100F_0E--")) ;
+    ReadCheckBurstVector (ManagerRec, X"0000_5090", (1 => X"--0D_0C0B")) ;
+    ReadCheckBurstVector (ManagerRec, X"0000_50A1", (1 => X"100F_0E--")) ;
     
     WaitForBarrier(WriteDone) ;
     

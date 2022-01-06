@@ -10,7 +10,7 @@
 --
 --  Description:
 --      Validates Stream Model Independent Transactions
---      SendBurst, GetBurst with 2 parameters
+--      SendBurstVector, GetBurst with 2 parameters
 --
 --
 --  Developed by:
@@ -105,7 +105,7 @@ begin
     WaitForClock(StreamTxRec, 4) ; 
 
     log("Transmit 13 bytes.") ;
-    SendBurstAsync(StreamTxRec, 
+    SendBurstVectorAsync(StreamTxRec, 
       (X"01",        DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
       DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
       DATA_ZERO+21,  DATA_ZERO+23, DATA_ZERO+25),
@@ -165,7 +165,7 @@ begin
 --    log("Transmit 30 Bytes -- unaligned") ;
     TryCount := 0 ; 
     loop 
-      TryCheckBurst (StreamRxRec, 
+      TryCheckBurstVector (StreamRxRec, 
         (X"01",        DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
         DATA_ZERO+21,  DATA_ZERO+23, DATA_ZERO+25),

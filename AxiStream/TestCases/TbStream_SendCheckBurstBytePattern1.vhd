@@ -10,7 +10,7 @@
 --
 --  Description:
 --      Burst Transactions with Full Data Width
---      SendBurst, GetBurst
+--      SendBurstVector, GetBurst
 --
 --
 --  Developed by:
@@ -98,7 +98,7 @@ begin
     WaitForClock(StreamTxRec, 4) ; 
 
     log("Transmit 13 bytes.") ;
-    SendBurst(StreamTxRec, 
+    SendBurstVector(StreamTxRec, 
 --        (DATA_ZERO+1, DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         (X"01",        DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
@@ -135,7 +135,7 @@ begin
     CheckBurstIncrement(StreamRxRec, DATA_ZERO+3, 16) ;
     
 --    log("Transmit 13 bytes -- unaligned") ;
-    CheckBurst (StreamRxRec, 
+    CheckBurstVector (StreamRxRec, 
 --        (DATA_ZERO+1, DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         (X"01",        DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,

@@ -164,26 +164,25 @@ begin
     ReadBurst (ManagerRec, X"0000_5090", 1) ;
     ReadBurst (ManagerRec, X"0000_50A1", 1) ;
     
-   Check(ReadBurstFifo, X"----_--01") ;
-   Check(ReadBurstFifo, X"----_02--") ;
-   Check(ReadBurstFifo, X"--03_----") ;
-   Check(ReadBurstFifo, X"04--_----") ;
-    
-   Check(ReadBurstFifo, X"----_0605") ;
-   Check(ReadBurstFifo, X"--08_07--") ;
-   Check(ReadBurstFifo, X"0A09_----") ;
+    Check(ReadBurstFifo, X"----_--01") ;
+    Check(ReadBurstFifo, X"----_02--") ;
+    Check(ReadBurstFifo, X"--03_----") ;
+    Check(ReadBurstFifo, X"04--_----") ;
 
-   Check(ReadBurstFifo, X"--0D_0C0B") ;
-   Check(ReadBurstFifo, X"100F_0E--") ;
+    Check(ReadBurstFifo, X"----_0605") ;
+    Check(ReadBurstFifo, X"--08_07--") ;
+    Check(ReadBurstFifo, X"0A09_----") ;
+
+    Check(ReadBurstFifo, X"--0D_0C0B") ;
+    Check(ReadBurstFifo, X"100F_0E--") ;
 
     WaitForBarrier(WriteDone) ;
-    
+
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process ManagerProc ;
-
 
   ------------------------------------------------------------
   -- MemoryProc
@@ -211,7 +210,6 @@ begin
     WaitForBarrier(TestDone) ;
     wait ;
   end process MemoryProc ;
-
 
 end MemoryBurst1 ;
 

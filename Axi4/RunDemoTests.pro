@@ -42,9 +42,10 @@ TestSuite Axi4Full
 library osvvm_TbAxi4
 
 include ./testbench
+RunTest  ./TestCases/TbAxi4_MemoryBurst1.vhd
+RunTest  ./TestCases/TbAxi4_MemoryBurstAsync1.vhd
+
+RunTest  ./TestCases/TbAxi4_MemoryBurstPattern1.vhd
 RunTest  ./TestCases/TbAxi4_MemoryBurstPattern1.vhd
 RunTest  ./TestCases/TbAxi4_MemoryBurstBytePattern1.vhd
 RunTest  ./TestCases/TbAxi4_MemoryBurstAsyncPattern1.vhd
-
-# RunTest  ./TestCases/TbAxi4_MemoryBurst1.vhd
-# RunTest  ./TestCases/TbAxi4_MemoryBurstAsync1.vhd

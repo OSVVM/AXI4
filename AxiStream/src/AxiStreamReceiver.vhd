@@ -97,10 +97,11 @@ entity AxiStreamReceiver is
   -- Derive AXI interface properties from interface signals
   constant AXI_STREAM_DATA_WIDTH   : integer := TData'length ;
   
-  -- Derive ModelInstance label from path_name
+  -- Use MODEL_ID_NAME Generic if set, otherwise,
+  -- use model instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
-  -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
-  IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamReceiver'PATH_NAME))) ;
+    IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, 
+      to_lower(PathTail(AxiStreamReceiver'PATH_NAME))) ;
 
   constant MODEL_NAME : string := "AxiStreamReceiver" ;
 
@@ -243,6 +244,8 @@ begin
             TransRec.ParamFromModel <= (TransRec.ParamFromModel'range => '0') ;  
             wait for 0 ns ; 
           else 
+            DispatcherReceiveCount := DispatcherReceiveCount + 1 ; 
+            
             -- Get data
             TransRec.BoolFromModel <= TRUE ; 
             if Empty(ReceiveFifo) then 
@@ -259,8 +262,6 @@ begin
             end if ; 
             TransRec.DataFromModel  <= SafeResize(Data, TransRec.DataFromModel'length) ; 
             TransRec.ParamFromModel <= SafeResize(Param, TransRec.ParamFromModel'length) ; 
-            
-            DispatcherReceiveCount := DispatcherReceiveCount + 1 ; 
             
             -- Param: (TID & TDest & TUser & TLast) 
             if Param(0) = '1' then 
@@ -303,6 +304,8 @@ begin
             TransRec.ParamFromModel <= (TransRec.ParamFromModel'range => '0') ;  
             wait for 0 ns ; 
           else
+            DispatcherReceiveCount := DispatcherReceiveCount + 1 ; -- Operation or #Words Transfered based?
+            
             -- Get data
             TransRec.BoolFromModel <= TRUE ;
             if (BurstReceiveCount - BurstTransferCount) = 0 then 
@@ -342,7 +345,6 @@ begin
             TransRec.DataFromModel  <= SafeResize(Data, TransRec.DataFromModel'length) ; 
             TransRec.ParamFromModel <= SafeResize(Param, TransRec.ParamFromModel'length) ; 
             
-            DispatcherReceiveCount := DispatcherReceiveCount + 1 ; -- Operation or #Words Transfered based?
             Log(ModelID, 
               "Burst Receive. " &
               " Operation# " & to_string (DispatcherReceiveCount) &  " " & 
@@ -360,6 +362,7 @@ begin
             TransRec.ParamFromModel <= (TransRec.ParamFromModel'range => '0') ;  
             wait for 0 ns ; 
           else
+            DispatcherReceiveCount := DispatcherReceiveCount + 1 ; -- Operation or #Words Transfered based?
             -- Get data
             TransRec.BoolFromModel <= TRUE ;
             if (BurstReceiveCount - BurstTransferCount) = 0 then 
@@ -440,7 +443,6 @@ begin
             TransRec.DataFromModel  <= SafeResize(Data, TransRec.DataFromModel'length) ; 
             TransRec.ParamFromModel <= SafeResize(Param, TransRec.ParamFromModel'length) ; 
             
-            DispatcherReceiveCount := DispatcherReceiveCount + 1 ; -- Operation or #Words Transfered based?
             wait for 0 ns ; 
           end if ; 
           

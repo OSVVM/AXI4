@@ -100,10 +100,11 @@ entity AxiStreamReceiverVti is
     ParamFromModel(AXI_STREAM_PARAM_WIDTH-1 downto 0)
   ) ;  
 
-  -- Derive ModelInstance label from path_name
+  -- Use MODEL_ID_NAME Generic if set, otherwise,
+  -- use model instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
-    -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
-    IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, to_lower(PathTail(AxiStreamReceiverVti'PATH_NAME))) ;
+    IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, 
+      to_lower(PathTail(AxiStreamReceiverVti'PATH_NAME))) ;
 
   constant MODEL_NAME : string := "AxiStreamReceiverVti" ;
 

@@ -42,7 +42,7 @@
 architecture AxiSendCheckBurstPattern2 of TestCtrl is
 
   signal   TestDone : integer_barrier := 1 ;
---    constant FIFO_WIDTH : integer := DATA_WIDTH ; 
+--  constant FIFO_WIDTH : integer := DATA_WIDTH ; 
   constant FIFO_WIDTH : integer := 8 ; -- BYTE 
   constant DATA_ZERO  : std_logic_vector := (FIFO_WIDTH - 1 downto 0 => '0') ; 
  
@@ -90,7 +90,12 @@ begin
     variable ID   : std_logic_vector(ID_LEN-1 downto 0) ;    -- 8
     variable Dest : std_logic_vector(DEST_LEN-1 downto 0) ;  -- 4
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
+    variable CoverID : CoverageIdType ; 
   begin
+    CoverID := NewID("Cov1") ; 
+    InitSeed(CoverID, 5) ; -- Get a common seed in both processes
+    AddBins(CoverID, 1, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ; 
+    
     wait until nReset = '1' ;  
     WaitForClock(StreamTxRec, 2) ; 
     SetBurstMode(StreamTxRec, STREAM_BURST_BYTE_MODE) ;
@@ -99,32 +104,19 @@ begin
     Dest := to_slv(2, DEST_LEN) ; 
     User := to_slv(3, USER_LEN) ; 
 
-    log("Transmit 16 bytes.  Incrementing.  Starting with X03") ;
-    SendBurstIncrement(StreamTxRec, DATA_ZERO+3, 16, ID & Dest & User & '0') ;
-
+    log("Transmit 16 bytes.  Cover Random") ;
+    SendBurstRandom(StreamTxRec, CoverID, 16, FIFO_WIDTH, ID & Dest & User & '0') ;
     WaitForClock(StreamTxRec, 4) ; 
+
+    log("Transmit 14 bytes.") ;
+    SendBurstRandom(StreamTxRec, CoverID, 14, FIFO_WIDTH, (ID+1) & (Dest+1) & (User+1) & '0') ;
+
+    log("Transmit 17 bytes.") ;
+    SendBurstRandom(StreamTxRec, CoverID, 17, FIFO_WIDTH, (ID+2) & (Dest+2) & (User+2) & '0') ;
+    WaitForClock(StreamTxRec, 7) ; 
 
     log("Transmit 13 bytes.") ;
-    SendBurstVector(StreamTxRec, 
-      (X"01",        DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
-      DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
-      DATA_ZERO+21,  DATA_ZERO+23, DATA_ZERO+25),
-      (ID+1) & (Dest+1) & (User+1) & '0') ;
-
-    WaitForClock(StreamTxRec, 4) ; 
-
-    log("Transmit 15 Bytes.  Random.  Starting with X01") ;
-    SendBurstRandom(StreamTxRec, DATA_ZERO+1, 15, (ID+2) & (Dest+2) & (User+2) & '0') ;
-    
-    ID   := to_slv(8, ID_LEN);
-    Dest := to_slv(9, DEST_LEN) ; 
-    User := to_slv(10, USER_LEN) ; 
-
-    for i in 0 to 6 loop 
-      log("Transmit " & to_string(i + 1) & " Bytes. Starting with " & to_string(i*32)) ;
-      SendBurstIncrement(StreamTxRec, DATA_ZERO+i*32, 1+i, (ID+i/2) & (Dest+i/2) & (User+i/2) & '0') ;
-    end loop ; 
-
+    SendBurstRandom(StreamTxRec, CoverID, 13, FIFO_WIDTH, (ID+3) & (Dest+3) & (User+3) & '0') ;
 
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(StreamTxRec, 2) ;
@@ -142,7 +134,12 @@ begin
     variable ID   : std_logic_vector(ID_LEN-1 downto 0) ;    -- 8
     variable Dest : std_logic_vector(DEST_LEN-1 downto 0) ;  -- 4
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
+    variable CoverID : CoverageIdType ; 
   begin
+    CoverID := NewID("Cov2") ; 
+    InitSeed(CoverID, 5) ; -- Get a common seed in both processes
+    AddBins(CoverID, 1, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ; 
+    
     WaitForClock(StreamRxRec, 2) ; 
     SetBurstMode(StreamRxRec, STREAM_BURST_BYTE_MODE) ;
     
@@ -150,27 +147,20 @@ begin
     Dest := to_slv(2, DEST_LEN) ; 
     User := to_slv(3, USER_LEN) ; 
 
---    log("Transmit 16 Bytes -- word aligned") ;
-    CheckBurstIncrement(StreamRxRec, DATA_ZERO+3, 16, ID & Dest & User & '1') ;
+--    log("Transmit 16 bytes.  Cover Random") ;
+    CheckBurstRandom(StreamRxRec, CoverID, 16, FIFO_WIDTH, ID & Dest & User & '1') ;
 
---    log("Transmit 13 Bytes -- unaligned") ;
-    CheckBurstVector (StreamRxRec, 
-      (X"01",        DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
-      DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
-      DATA_ZERO+21,  DATA_ZERO+23, DATA_ZERO+25),
-      (ID+1) & (Dest+1) & (User+1) & '1') ;
+--    log("Transmit 14 bytes.") ;
+    CheckBurstRandom(StreamRxRec, CoverID, 14, FIFO_WIDTH, (ID+1) & (Dest+1) & (User+1) & '1') ;
 
---    log("Transmit 15 Bytes -- unaligned") ;
-    CheckBurstRandom(StreamRxRec, DATA_ZERO+1, 15, (ID+2) & (Dest+2) & (User+2) & '1') ;
-    
-    ID   := to_slv(8, ID_LEN);
-    Dest := to_slv(9, DEST_LEN) ; 
-    User := to_slv(10, USER_LEN) ; 
+    WaitForClock(StreamRxRec, 7) ; 
 
-    for i in 0 to 6 loop 
---      log("Transmit " & to_string(8+3*i) & " Bytes. Starting with " & to_string(i*32)) ;
-      CheckBurstIncrement(StreamRxRec, DATA_ZERO+i*32, 1+i, (ID+i/2) & (Dest+i/2) & (User+i/2) & '1') ;
-    end loop ; 
+--    log("Transmit 17 bytes.") ;
+    CheckBurstRandom(StreamRxRec, CoverID, 17, FIFO_WIDTH, (ID+2) & (Dest+2) & (User+2) & '1') ;
+
+--    log("Transmit 13 bytes.") ;
+    CheckBurstRandom(StreamRxRec, CoverID, 13, FIFO_WIDTH, (ID+3) & (Dest+3) & (User+3) & '1') ;
+
      
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(StreamRxRec, 2) ;

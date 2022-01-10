@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_MemoryBurst1.vhd
+--  File Name:         TbAxi4_MemoryBurstPattern2.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -19,13 +19,12 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    04/2020   2020.04    Initial revision
---    12/2020   2020.12    Updated signal and port names
+--    01/2022   2022.01    Initial revision
 --
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2020 by SynthWorks Design Inc.  
+--  Copyright (c) 2022 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -40,12 +39,13 @@
 --  limitations under the License.
 --  
 
-architecture MemoryBurst1 of TestCtrl is
+architecture MemoryBurstPattern2 of TestCtrl is
 
   signal TestDone, WriteDone : integer_barrier := 1 ;
   constant BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;   
 --  constant BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_BYTE_MODE ;   
   constant DATA_WIDTH : integer := IfElse(BURST_MODE = ADDRESS_BUS_BURST_BYTE_MODE, 8, AXI_DATA_WIDTH)  ;  
+  constant DATA_ZERO  : std_logic_vector := (DATA_WIDTH - 1 downto 0 => '0') ; 
 
 begin
 
@@ -56,14 +56,14 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_MemoryBurst1") ;
+    SetAlertLogName("TbAxi4_MemoryBurstPattern2") ;
     SetLogEnable(PASSED, TRUE) ;   -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;     -- Enable INFO logs
     SetLogEnable(DEBUG, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_MemoryBurst1.txt") ;
+    TranscriptOpen("./results/TbAxi4_MemoryBurstPattern2.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -77,7 +77,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_MemoryBurst1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MemoryBurst1.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_MemoryBurstPattern2.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MemoryBurstPattern2.txt", "") ; 
 
     EndOfTestReports ; 
     std.env.stop(GetAlertCount) ; 
@@ -91,7 +91,14 @@ begin
   ManagerProc : process
     variable ByteData : std_logic_vector(7 downto 0) ;
     variable BurstVal : AddressBusFifoBurstModeType ; 
+    variable CoverID1, CoverID2 : CoverageIdType ; 
   begin
+    CoverID1 := NewID("Cov1") ; 
+    InitSeed(CoverID1, 5) ; -- Get a common seed in both processes
+    AddBins (CoverID1, 1, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ; 
+    CoverID2 := NewID("Cov2") ; 
+    InitSeed(CoverID2, 5) ; -- Get a common seed in both processes
+    AddBins (CoverID2, 1, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ; 
     wait until nReset = '1' ;  
     WaitForClock(ManagerRec, 2) ; 
     
@@ -101,81 +108,23 @@ begin
     GetBurstMode(ManagerRec, BurstVal) ;
     AffirmIfEqual(BurstVal, BURST_MODE, "BurstMode") ; 
     
-    log("Write with ByteAddr = 8, 12 Bytes -- word aligned") ;
-    PushBurstIncrement(WriteBurstFifo, 3, 12, DATA_WIDTH) ;
-    WriteBurst(ManagerRec, X"0000_0008", 12) ;
-
-    ReadBurst (ManagerRec, X"0000_0008", 12) ;
-    CheckBurstIncrement(ReadBurstFifo, 3, 12, DATA_WIDTH) ;
+    log("Write with Addr = 0008, 12 Words -- word aligned") ;
+    WriteBurstRandom(    ManagerRec, X"0000_0008", CoverID1, 12, DATA_WIDTH) ;
+    ReadCheckBurstRandom(ManagerRec, X"0000_0008", CoverID2, 12, DATA_WIDTH) ;
     
-    log("Write with ByteAddr = x1A, 13 Bytes -- unaligned") ;
-    Push(WriteBurstFifo, X"0001_UUUU") ;
-    PushBurst(WriteBurstFifo, (3,5,7,9,11,13,15,17,19,21,23,25), DATA_WIDTH) ;
-    WriteBurst(ManagerRec, X"0000_100A", 13) ;
+    log("Write with Addr = 1008, 9 Words -- word aligned") ;
+    WriteBurstRandomAsync(ManagerRec, X"0000_1008", CoverID1, 9, DATA_WIDTH) ;
+    WaitForTransaction(ManagerRec) ;
+    ReadCheckBurstRandom( ManagerRec, X"0000_1008", CoverID2, 9, DATA_WIDTH) ;
 
-    ReadBurst (ManagerRec, X"0000_100A", 13) ;
-    Check(ReadBurstFifo, X"0001_----") ; -- First Byte not aligned
-    CheckBurst(ReadBurstFifo, (3,5,7,9,11,13,15,17,19,21,23,25), DATA_WIDTH) ;
-
-    log("Write with ByteAddr = 31, 12 Bytes -- unaligned") ;
-    Push(WriteBurstFifo, X"A015_28UU") ; 
-    PushBurstRandom(WriteBurstFifo, 7, 12, DATA_WIDTH) ;
-
-    WriteBurst(ManagerRec, X"0000_3001", 13) ;
-
-    ReadBurst (ManagerRec, X"0000_3001", 13) ;
-    Check(ReadBurstFifo, X"A015_28--") ; -- First Byte not aligned
-    CheckBurstRandom(ReadBurstFifo, 7, 12, DATA_WIDTH) ;
-
-    log("Write with ByteAddr = 8, 12 Bytes -- word aligned") ;
-    Push(WriteBurstFifo, X"UUUU_UU01") ;
-    Push(WriteBurstFifo, X"UUUU_02UU") ;
-    Push(WriteBurstFifo, X"UU03_UUUU") ;
-    Push(WriteBurstFifo, X"04UU_UUUU") ;
+    log("Write with Addr = 2008, 11 Words -- word aligned") ;
+    WriteBurstRandom(    ManagerRec, X"0000_2008", CoverID1, 11, DATA_WIDTH) ;
+    ReadCheckBurstRandom(ManagerRec, X"0000_2008", CoverID2, 11, DATA_WIDTH) ;
     
-    Push(WriteBurstFifo, X"UUUU_0605") ;
-    Push(WriteBurstFifo, X"UU08_07UU") ;
-    Push(WriteBurstFifo, X"0A09_UUUU") ;
-
-    Push(WriteBurstFifo, X"UU0D_0C0B") ;
-    Push(WriteBurstFifo, X"100F_0EUU") ;
-    
-    WriteBurst(ManagerRec, X"0000_5050", 1) ;
-    WriteBurst(ManagerRec, X"0000_5051", 1) ;
-    WriteBurst(ManagerRec, X"0000_5052", 1) ;
-    WriteBurst(ManagerRec, X"0000_5053", 1) ;
-    
-    WriteBurst(ManagerRec, X"0000_5060", 1) ;
-    WriteBurst(ManagerRec, X"0000_5071", 1) ;
-    WriteBurst(ManagerRec, X"0000_5082", 1) ;
-    
-    WriteBurst(ManagerRec, X"0000_5090", 1) ;
-    WriteBurst(ManagerRec, X"0000_50A1", 1) ;
-
-
-    ReadBurst (ManagerRec, X"0000_5050", 1) ;
-    ReadBurst (ManagerRec, X"0000_5051", 1) ;
-    ReadBurst (ManagerRec, X"0000_5052", 1) ;
-    ReadBurst (ManagerRec, X"0000_5053", 1) ;
-    
-    ReadBurst (ManagerRec, X"0000_5060", 1) ;
-    ReadBurst (ManagerRec, X"0000_5071", 1) ;
-    ReadBurst (ManagerRec, X"0000_5082", 1) ;
-
-    ReadBurst (ManagerRec, X"0000_5090", 1) ;
-    ReadBurst (ManagerRec, X"0000_50A1", 1) ;
-    
-    Check(ReadBurstFifo, X"----_--01") ;
-    Check(ReadBurstFifo, X"----_02--") ;
-    Check(ReadBurstFifo, X"--03_----") ;
-    Check(ReadBurstFifo, X"04--_----") ;
-
-    Check(ReadBurstFifo, X"----_0605") ;
-    Check(ReadBurstFifo, X"--08_07--") ;
-    Check(ReadBurstFifo, X"0A09_----") ;
-
-    Check(ReadBurstFifo, X"--0D_0C0B") ;
-    Check(ReadBurstFifo, X"100F_0E--") ;
+    log("Write with Addr = 3008, 13 Words -- word aligned") ;
+    WriteBurstRandomAsync(ManagerRec, X"0000_3008", CoverID1, 13, DATA_WIDTH) ;
+    WaitForTransaction(ManagerRec) ;
+    ReadCheckBurstRandom( ManagerRec, X"0000_3008", CoverID2, 13, DATA_WIDTH) ;
 
     WaitForBarrier(WriteDone) ;
     
@@ -199,6 +148,7 @@ begin
     
     WaitForBarrier(WriteDone) ;
 
+/*
     -- Check that write burst was received correctly
     ReadCheck(SubordinateRec, X"0000_0008", X"0000_0003") ;
     ReadCheck(SubordinateRec, X"0000_000C", X"0000_0004") ;
@@ -206,7 +156,7 @@ begin
     ReadCheck(SubordinateRec, X"0000_0014", X"0000_0006") ;
     ReadCheck(SubordinateRec, X"0000_0018", X"0000_0007") ;
     ReadCheck(SubordinateRec, X"0000_001C", X"0000_0008") ;
-
+*/
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;
@@ -214,15 +164,15 @@ begin
   end process MemoryProc ;
 
 
-end MemoryBurst1 ;
+end MemoryBurstPattern2 ;
 
-Configuration TbAxi4_MemoryBurst1 of TbAxi4Memory is
+Configuration TbAxi4_MemoryBurstPattern2 of TbAxi4Memory is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(MemoryBurst1) ; 
+      use entity work.TestCtrl(MemoryBurstPattern2) ; 
     end for ; 
 --!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 
-end TbAxi4_MemoryBurst1 ; 
+end TbAxi4_MemoryBurstPattern2 ; 

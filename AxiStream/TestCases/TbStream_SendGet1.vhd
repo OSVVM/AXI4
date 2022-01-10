@@ -106,7 +106,9 @@ begin
       for j in 0 to DATA_BYTES-1 loop 
         Data := to_slv((OffSet + j) mod 256, 8) & Data(Data'left downto 8) ;
       end loop ; 
+      
       Send(StreamTxRec, Data) ;
+      
       GetTransactionCount(StreamTxRec, TransactionCount) ;
       AffirmIfEqual(TransactionCount, i, "Transmit TransactionCount:") ;
       if i mod 2 = 0 then 
@@ -157,16 +159,21 @@ begin
       -- Alternate using Get and Check
       if (i mod 2) /= 0 then 
         Get(StreamRxRec, RxData) ; 
+        
         GetTransactionCount(StreamRxRec, TransactionCount) ;
         AffirmIfEqual(TransactionCount, i, "Receive TranasctionCount:") ;
         AffirmIfEqual(RxData, ExpData, "Get: ") ;
       else 
         -- Create two check failures
         if (i mod 128) /= 0 then 
+        
           Check(StreamRxRec, ExpData) ; 
+          
         else
+        
           -- Create error on model side
           Check(StreamRxRec, ExpData+1) ; 
+          
         end if ; 
         GetTransactionCount(StreamRxRec, TransactionCount) ;
         AffirmIfEqual(TransactionCount, i, "Receive TranasctionCount:") ;

@@ -71,10 +71,12 @@ RunTest  TbStream_ByteHandlingBurstByte1.vhd
 RunTest  TbStream_SendCheckBurst1.vhd
 RunTest  TbStream_SendCheckBurstByte1.vhd
 
-RunTest TbStream_SendCheckBurstPattern1.vhd
-RunTest TbStream_SendCheckBurstBytePattern1.vhd
-RunTest TbStream_SendCheckBurstAsyncPattern1.vhd
-RunTest TbStream_SendCheckBurstByteAsyncPattern1.vhd
+RunTest  TbStream_SendCheckBurstPattern1.vhd
+RunTest  TbStream_SendCheckBurstPattern2.vhd
+RunTest  TbStream_SendCheckBurstBytePattern1.vhd
+RunTest  TbStream_SendCheckBurstAsyncPattern1.vhd
+RunTest  TbStream_SendCheckBurstAsyncPattern2.vhd
+RunTest  TbStream_SendCheckBurstByteAsyncPattern1.vhd
 
 ## MIT Asynchronous Burst Transfers
 RunTest  TbStream_SendGetBurstAsync1.vhd
@@ -107,7 +109,6 @@ RunTest  TbStream_AxiSendGetAsync2.vhd
 RunTest  TbStream_AxiSetOptionsAsync1.vhd
 RunTest  TbStream_AxiSetOptionsAsync2.vhd
 
-
 ## AxiStream Blocking Burst Transfers
 RunTest  TbStream_AxiSendGetBurst2.vhd
 RunTest  TbStream_AxiLastParam1.vhd
@@ -122,9 +123,10 @@ RunTest  TbStream_AxiBurstNoLast1.vhd
 
 RunTest  TbStream_AxiSetOptionsBurstCheck3.vhd
 
+RunTest  TbStream_AxiSendCheckBurstPattern1.vhd
 RunTest  TbStream_AxiSendCheckBurstPattern2.vhd
+RunTest  TbStream_AxiSendCheckBurstAsyncPattern1.vhd
 RunTest  TbStream_AxiSendCheckBurstAsyncPattern2.vhd
-
 
 ## AxiStream Asynchronous Burst Transfers
 RunTest  TbStream_AxiSendGetBurstAsync2.vhd

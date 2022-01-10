@@ -92,18 +92,22 @@ begin
   begin
     CoverID := NewID("Cov1") ; 
     InitSeed(CoverID, 5) ; -- Get a common seed in both processes
-    AddBins(CoverID, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ; 
+    AddBins(CoverID, 1, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ; 
     wait until nReset = '1' ;  
     WaitForClock(StreamTxRec, 2) ; 
     
+    log("Transmit 16 words.  Cover Random") ;
     SendBurstRandom(StreamTxRec, CoverID, 16, FIFO_WIDTH) ; 
     WaitForClock(StreamTxRec, 4) ; 
 
+    log("Transmit 14 words.") ;
     SendBurstRandom(StreamTxRec, CoverID, 14, FIFO_WIDTH) ; 
     
+    log("Transmit 17 words.") ;
     SendBurstRandom(StreamTxRec, CoverID, 17, FIFO_WIDTH) ; 
     WaitForClock(StreamTxRec, 7) ; 
 
+    log("Transmit 13 words.") ;
     SendBurstRandom(StreamTxRec, CoverID, 13, FIFO_WIDTH) ; 
 
     -- Wait for outputs to propagate and signal TestDone
@@ -122,14 +126,17 @@ begin
   begin
     CoverID := NewID("Cov2") ; 
     InitSeed(CoverID, 5) ; -- Get a common seed in both processes
-    AddBins(CoverID, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ; 
+    AddBins(CoverID, 1, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ; 
     WaitForClock(StreamRxRec, 2) ; 
     
+--    log("Transmit 16 words") ;
     CheckBurstRandom(StreamRxRec, CoverID, 16, FIFO_WIDTH) ; 
     WaitForClock(StreamRxRec, 4) ; 
 
+--    log("Transmit 13 words") ;
     CheckBurstRandom(StreamRxRec, CoverID, 14, FIFO_WIDTH) ; 
     
+--    log("Transmit 15 words") ;
     CheckBurstRandom(StreamRxRec, CoverID, 17, FIFO_WIDTH) ; 
     WaitForClock(StreamRxRec, 2) ; 
 

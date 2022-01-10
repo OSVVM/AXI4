@@ -92,7 +92,7 @@ begin
   begin
     CoverID := NewID("Cov1") ; 
     InitSeed(CoverID, 5) ; -- Get a common seed in both processes
-    AddBins(CoverID, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ; 
+    AddBins(CoverID, 1, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ; 
     wait until nReset = '1' ;  
     WaitForClock(StreamTxRec, 2) ; 
     
@@ -123,7 +123,7 @@ begin
   begin
     CoverID := NewID("Cov2") ; 
     InitSeed(CoverID, 5) ; -- Get a common seed in both processes
-    AddBins(CoverID, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ; 
+    AddBins(CoverID, 1, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ; 
     
     WaitForClock(StreamRxRec, 2) ; 
     

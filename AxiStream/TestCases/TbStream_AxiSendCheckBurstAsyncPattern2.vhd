@@ -90,7 +90,12 @@ begin
     variable ID   : std_logic_vector(ID_LEN-1 downto 0) ;    -- 8
     variable Dest : std_logic_vector(DEST_LEN-1 downto 0) ;  -- 4
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
+    variable CoverID : CoverageIdType ; 
   begin
+    CoverID := NewID("Cov1") ; 
+    InitSeed(CoverID, 5) ; -- Get a common seed in both processes
+    AddBins(CoverID, 1, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ; 
+    
     wait until nReset = '1' ;  
     WaitForClock(StreamTxRec, 2) ; 
     SetBurstMode(StreamTxRec, STREAM_BURST_BYTE_MODE) ;
@@ -99,31 +104,19 @@ begin
     Dest := to_slv(2, DEST_LEN) ; 
     User := to_slv(3, USER_LEN) ; 
 
-    log("Transmit 16 bytes.  Incrementing.  Starting with X03") ;
-    SendBurstIncrementAsync(StreamTxRec, DATA_ZERO+3, 16, ID & Dest & User & '0') ;
-
+    log("Transmit 16 bytes.  Cover Random") ;
+    SendBurstRandomAsync(StreamTxRec, CoverID, 16, FIFO_WIDTH, ID & Dest & User & '0') ;
     WaitForClock(StreamTxRec, 4) ; 
+
+    log("Transmit 14 bytes.") ;
+    SendBurstRandomAsync(StreamTxRec, CoverID, 14, FIFO_WIDTH, (ID+1) & (Dest+1) & (User+1) & '0') ;
+
+    log("Transmit 17 bytes.") ;
+    SendBurstRandomAsync(StreamTxRec, CoverID, 17, FIFO_WIDTH, (ID+2) & (Dest+2) & (User+2) & '0') ;
+    WaitForClock(StreamTxRec, 7) ; 
 
     log("Transmit 13 bytes.") ;
-    SendBurstVectorAsync(StreamTxRec, 
-      (X"01",        DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
-      DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
-      DATA_ZERO+21,  DATA_ZERO+23, DATA_ZERO+25),
-      (ID+1) & (Dest+1) & (User+1) & '0') ;
-
-    WaitForClock(StreamTxRec, 4) ; 
-
-    log("Transmit 15 Bytes.  Random.  Starting with X01") ;
-    SendBurstRandomAsync(StreamTxRec, DATA_ZERO+1, 15, (ID+2) & (Dest+2) & (User+2) & '0') ;
-    
-    ID   := to_slv(8, ID_LEN);
-    Dest := to_slv(9, DEST_LEN) ; 
-    User := to_slv(10, USER_LEN) ; 
-
-    for i in 0 to 6 loop 
-      log("Transmit " & to_string(i + 1) & " Bytes. Starting with " & to_string(i*32)) ;
-      SendBurstIncrementAsync(StreamTxRec, DATA_ZERO+i*32, 1+i, (ID+i/2) & (Dest+i/2) & (User+i/2) & '0') ;
-    end loop ; 
+    SendBurstRandomAsync(StreamTxRec, CoverID, 13, FIFO_WIDTH, (ID+3) & (Dest+3) & (User+3) & '0') ;
 
 
     -- Wait for outputs to propagate and signal TestDone
@@ -144,7 +137,12 @@ begin
     variable User : std_logic_vector(USER_LEN-1 downto 0) ;  -- 4
     variable TryCount  : integer ; 
     variable Available : boolean ; 
+    variable CoverID : CoverageIdType ; 
   begin
+    CoverID := NewID("Cov2") ; 
+    InitSeed(CoverID, 5) ; -- Get a common seed in both processes
+    AddBins(CoverID, 1, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ; 
+
     WaitForClock(StreamRxRec, 2) ; 
     SetBurstMode(StreamRxRec, STREAM_BURST_BYTE_MODE) ;
     
@@ -152,57 +150,49 @@ begin
     Dest := to_slv(2, DEST_LEN) ; 
     User := to_slv(3, USER_LEN) ; 
 
---    log("Transmit 32 Bytes -- word aligned") ;
+--    log("Transmit 16 bytes.  Cover Random") ;
     TryCount := 0 ; 
     loop 
-      TryCheckBurstIncrement(StreamRxRec, DATA_ZERO+3, 16, ID & Dest & User & '1', Available) ;
+      TryCheckBurstRandom(StreamRxRec, CoverID, 16, FIFO_WIDTH, ID & Dest & User & '1', Available) ;
       exit when Available ; 
       WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     
---    log("Transmit 30 Bytes -- unaligned") ;
+--    log("Transmit 14 Bytes -- unaligned") ;
     TryCount := 0 ; 
     loop 
-      TryCheckBurstVector (StreamRxRec, 
-        (X"01",        DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
-        DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
-        DATA_ZERO+21,  DATA_ZERO+23, DATA_ZERO+25),
-        (ID+1) & (Dest+1) & (User+1) & '1', 
-        Available) ;
+      TryCheckBurstRandom(StreamRxRec, CoverID, 14, FIFO_WIDTH, (ID+1) & (Dest+1) & (User+1) & '1', Available) ;
       exit when Available ; 
       WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
 
---    log("Transmit 34 Bytes -- unaligned") ;
+    WaitForClock(StreamRxRec, 7) ; 
+
+--    log("Transmit 17 Bytes -- unaligned") ;
     TryCount := 0 ; 
     loop 
-      TryCheckBurstRandom(StreamRxRec, DATA_ZERO+1, 15, (ID+2) & (Dest+2) & (User+2) & '1', Available) ;
+      TryCheckBurstRandom(StreamRxRec, CoverID, 17, FIFO_WIDTH, (ID+2) & (Dest+2) & (User+2) & '1', Available) ;
+      exit when Available ; 
+      WaitForClock(StreamRxRec, 1) ; 
+      TryCount := TryCount + 1 ;
+    end loop ;
+    Print("TryCount " & to_string(TryCount)) ;
+    
+--    log("Transmit 13 Bytes -- unaligned") ;
+    TryCount := 0 ; 
+    loop 
+      TryCheckBurstRandom(StreamRxRec, CoverID, 13, FIFO_WIDTH, (ID+3) & (Dest+3) & (User+3) & '1', Available) ;
       exit when Available ; 
       WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     
-    ID   := to_slv(8, ID_LEN);
-    Dest := to_slv(9, DEST_LEN) ; 
-    User := to_slv(10, USER_LEN) ; 
 
-    for i in 0 to 6 loop 
---      log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
-      TryCount := 0 ; 
-      loop 
-        TryCheckBurstIncrement(StreamRxRec, DATA_ZERO+i*32, 1+i, (ID+i/2) & (Dest+i/2) & (User+i/2) & '1', Available) ;
-        exit when Available ; 
-        WaitForClock(StreamRxRec, 1) ; 
-        TryCount := TryCount + 1 ;
-      end loop ;
-      AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
-    end loop ; 
-     
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(StreamRxRec, 2) ;
     WaitForBarrier(TestDone) ;

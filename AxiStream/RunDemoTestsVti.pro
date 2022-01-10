@@ -39,10 +39,10 @@
 #  
 
 # Run AxiStream Tests
-TestSuite AxiStream
-library   osvvm_TbAxiStream
+TestSuite AxiStream_VTI
+library   osvvm_TbAxiStreamVti
 
-include ./testbench
+include ./testbenchVti
 
 
 RunTest ./TestCases/TbStream_SendGetDemo1.vhd

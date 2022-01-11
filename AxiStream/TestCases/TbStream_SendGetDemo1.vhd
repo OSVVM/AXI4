@@ -93,28 +93,33 @@ begin
     wait until nReset = '1' ;  
     WaitForClock(StreamTxRec, 2) ; 
     
+-- Send and Get    
     log("Transmit 32 words") ;
     for I in 1 to 32 loop 
       Send( StreamTxRec, X"0000_0000" + I ) ; 
     end loop ; 
 
+-- Send and Check    
     log("Transmit 32 words") ;
     for I in 1 to 32 loop 
       Send( StreamTxRec, X"0000_1000" + I ) ; 
     end loop ; 
 
+-- SendBurst and GetBurst    
     log("Send 32 word burst") ;
     for I in 1 to 32 loop 
       Push( StreamTxRec.BurstFifo, X"0000_2000" + I  ) ; 
     end loop ; 
     SendBurst(StreamTxRec, 32) ;
 
+-- SendBurst and CheckBurst    
     log("Send 32 word burst") ;
     for I in 1 to 32 loop 
       Push( StreamTxRec.BurstFifo, X"0000_3000" + I ) ; 
     end loop ; 
     SendBurst(StreamTxRec, 32) ;
 
+-- SendBurst and CheckBurst    
     log("SendBurstVector 13 word burst") ;
     SendBurstVector(StreamTxRec, 
         (X"0000_4001", X"0000_4003", X"0000_4005", X"0000_4007", X"0000_4009",
@@ -122,12 +127,15 @@ begin
          X"0000_4021", X"0000_4023", X"0000_4025") ) ;
    
 
+-- SendBurstIncrement and CheckBurstIncrement    
     log("SendBurstIncrement 16 word burst") ;
     SendBurstIncrement(StreamTxRec, X"0000_5000", 16) ; 
 
+-- SendBurstRandom and CheckBurstRandom    
     log("SendBurstRandom 24 word burst") ;
     SendBurstRandom   (StreamTxRec, X"0000_6000", 24) ; 
     
+-- Coverage:  SendBurstRandom and CheckBurstRandom    
     CoverID := NewID("Cov1") ; 
     InitSeed(CoverID, 5) ; -- Get a common seed in both processes
     AddBins(CoverID, 1, GenBin(16#7000#, 16#7007#) & GenBin(16#7010#, 16#7017#) & GenBin(16#7020#, 16#7027#) & GenBin(16#7030#, 16#7037#)) ; 
@@ -135,6 +143,7 @@ begin
     log("SendBurstRandom 42 word burst") ;
     SendBurstRandom   (StreamTxRec, CoverID, 42, 32) ; 
     
+-- Burst Combining Patterns - Send Get
     log("Combining Patterns:  Vector, Increment, Random, Intelligent Coverage") ;
     PushBurstVector(StreamTxRec.BurstFifo, 
         (X"0000_A001", X"0000_A003", X"0000_A005", X"0000_A007", X"0000_A009",
@@ -149,6 +158,7 @@ begin
     PushBurstRandom(StreamTxRec.BurstFifo, CoverID, 16, 32) ; 
     SendBurst(StreamTxRec, 42) ; 
          
+-- Burst Combining Patterns
     log("Combining Patterns:  Vector, Increment, Random, Intelligent Coverage") ;
     PushBurstVector(StreamTxRec.BurstFifo, 
         (X"0000_B001", X"0000_B003", X"0000_B005", X"0000_B007", X"0000_B009",
@@ -163,10 +173,12 @@ begin
     PushBurstRandom(StreamTxRec.BurstFifo, CoverID, 16, 32) ; 
     SendBurst(StreamTxRec, 42) ; 
 
+-- SendBurstVector - PopBurstVector slv_vector
     log("SendBurstVector 5 word burst") ;
     SendBurstVector(StreamTxRec, 
         (X"0000_C001", X"0000_C003", X"0000_C005", X"0000_C007", X"0000_C009") ) ;
    
+-- SendBurstVector - PopBurstVector integer_vector
     log("SendBurstVector 5 word burst") ;
     PushBurstVector(StreamTxRec.BurstFifo, 
         (16#D001#, 16#D003#, 16#D005#, 16#D007#, 16#D009#), 32 ) ;

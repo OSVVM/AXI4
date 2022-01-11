@@ -624,7 +624,7 @@ package body Axi4OptionsPkg is
     SetAxi4Parameter(Params, READ_DATA_READY_DELAY_CYCLES,       0) ;  
 
     -- Valid Timeouts 
-    SetAxi4Parameter(Params, WRITE_RESPONSE_VALID_TIME_OUT,      25) ; 
+    SetAxi4Parameter(Params, WRITE_RESPONSE_VALID_TIME_OUT,      8192) ; 
     SetAxi4Parameter(Params, READ_DATA_VALID_TIME_OUT,           25) ; 
     
     -- Valid Delays

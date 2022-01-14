@@ -17,13 +17,13 @@
 #
 #  Revision History:
 #    Date      Version    Description
-#     1/2019   2019.01    Compile Script for OSVVM
+#     1/2022   2022.01    Added Tests
 #     1/2020   2020.01    Updated Licenses to Apache
 #
 #
 #  This file is part of OSVVM.
 #  
-#  Copyright (c) 2019 - 2020 by SynthWorks Design Inc.  
+#  Copyright (c) 2019 - 2022 by SynthWorks Design Inc.  
 #  
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -44,5 +44,7 @@
 ## Continuing with library set previously by the above
 ##
 ##
+RunTest  TbAxi4_MemoryReadWriteDemo1.vhd
+
 include TestCases_NoBurst.pro
 include TestCases_Burst.pro

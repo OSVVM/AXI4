@@ -17,6 +17,7 @@
 #
 #  Revision History:
 #    Date      Version    Description
+#     1/2022   2022.01    Added Tests
 #     9/2021   2021.09    RunTest replacing analyze + simulate
 #     5/2021   2021.05    Start of Refactoring TestCases
 #     1/2020   2020.01    Updated Licenses to Apache
@@ -25,7 +26,7 @@
 #
 #  This file is part of OSVVM.
 #  
-#  Copyright (c) 2019 - 2021 by SynthWorks Design Inc.  
+#  Copyright (c) 2019 - 2022 by SynthWorks Design Inc.  
 #  
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -41,10 +42,15 @@
 #  
 
 ##
-## run in conjunction with either 
+## Runs in conjunction with either 
 ## Testbench/Testbench.pro or TestbenchVTI/TestbenchVTI.pro
 ## Continuing with library set previously by the above
 ##
+
+
+## =============================================
+## Run Demo
+RunTest  TbStream_SendGetDemo1.vhd
 
 ## =============================================
 ## MIT Record Checks Single Transfer Tests - only test once for all 

@@ -105,7 +105,7 @@ begin
     AffirmIfEqual(BurstVal, BURST_MODE, "BurstMode") ;
 
 -- Write and Read
-    log("Transmit 16 words") ;
+    log("Write and Read. Addr = 0000.  16 words") ;
     for I in 1 to 16 loop
       Write( ManagerRec, X"0000_0000" + 16*I, X"0000_0000" + I ) ;
     end loop ;
@@ -115,8 +115,8 @@ begin
       AffirmIfEqual(RxData, X"0000_0000" + I, "Read Data " ) ;
     end loop ;
 
--- Write and Check
-    log("Transmit 16 words") ;
+-- Write and ReadCheck
+    log("Write and ReadCheck. Addr = 1000.  16 words") ;
     for I in 1 to 16 loop
       Write( ManagerRec, X"0000_1000" + 16*I, X"0000_1000" + I ) ;
     end loop ;
@@ -126,7 +126,7 @@ begin
     end loop ;
 
 -- WriteBurst and ReadBurst
-    log("Send 16 word burst") ;
+    log("WriteBurst and ReadBurst.  Addr = 2000.  16 words") ;
     for I in 1 to 16 loop
       Push( ManagerRec.WriteBurstFifo, X"0000_2000" + I  ) ;
     end loop ;
@@ -138,7 +138,7 @@ begin
     end loop ;
 
 -- Burst Vector
-    log("Write with ByteAddr = x1A, 13 Words -- unaligned") ;
+    log("Burst Vector.  Addr = 3000, 13 Words -- unaligned") ;
     WriteBurstVector(ManagerRec, X"0000_3000",
         (X"0001_UUUU", DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
@@ -150,27 +150,27 @@ begin
         DATA_ZERO+21,  DATA_ZERO+23, DATA_ZERO+25) ) ;
 
 -- Burst Increment
-    log("Write with Addr = 8, 12 Words -- word aligned") ;
-    WriteBurstIncrement(ManagerRec, X"0000_4000", X"0000_4000"+3, 12) ;
+    log("Burst Increment.  Addr = 4000, 12 Words -- word aligned") ;
+    WriteBurstIncrement    (ManagerRec, X"0000_4000", X"0000_4000"+3, 12) ;
 
     ReadCheckBurstIncrement(ManagerRec, X"0000_4000", X"0000_4000"+3, 12) ;
 
 -- Burst Random
-    log("Write with ByteAddr = 3001, 13 Words -- unaligned") ;
+    log("Burst Random. Addr = 5001, 13 Words -- unaligned") ;
     WriteBurstRandom    (ManagerRec, X"0000_5001", X"A015_2800", 13) ;
 
     ReadCheckBurstRandom(ManagerRec, X"0000_5001", X"A015_28UU", 13) ;
 
 -- Burst Coverage Driven Random
+    log("Burst Coverage Driven Random. Addr = 6000, 12 Words") ;
     CoverID1 := NewID("Cov1") ;
-    InitSeed(CoverID1, 5) ; -- Get a common seed in both processes
+    InitSeed(CoverID1, 5) ; -- Start Write and Read with the same seed value
     AddBins (CoverID1, 1, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ;
-    CoverID2 := NewID("Cov2") ;
-    InitSeed(CoverID2, 5) ; -- Get a common seed in both processes
-    AddBins (CoverID2, 1, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ;
-
-    log("Write with Addr = 0008, 12 Words -- word aligned") ;
     WriteBurstRandom(    ManagerRec, X"0000_6000", CoverID1, 12, DATA_WIDTH) ;
+    
+    CoverID2 := NewID("Cov2") ;
+    InitSeed(CoverID2, 5) ; -- Start Write and Read with the same seed value
+    AddBins (CoverID2, 1, GenBin(0,7) & GenBin(32,39) & GenBin(64,71) & GenBin(96,103)) ;
     ReadCheckBurstRandom(ManagerRec, X"0000_6000", CoverID2, 12, DATA_WIDTH) ;
 
 -- Burst Combining Patterns
@@ -181,7 +181,7 @@ begin
     PushBurstIncrement(ManagerRec.WriteBurstFifo, X"0000_B100", 10) ;
     PushBurstRandom(ManagerRec.WriteBurstFifo, X"0000_B200", 6) ;
     CoverID1 := NewID("Cov1b") ;
-    InitSeed(CoverID1, 5) ; -- Get a common seed in both processes
+    InitSeed(CoverID1, 5) ; -- Start Write and Read with the same seed value
     AddBins(CoverID1, 1,
         GenBin(16#B300#, 16#B307#) & GenBin(16#B310#, 16#B317#) &
         GenBin(16#B320#, 16#B327#) & GenBin(16#B330#, 16#B337#)) ;
@@ -195,7 +195,7 @@ begin
     CheckBurstIncrement(ManagerRec.ReadBurstFifo, X"0000_B100", 10) ;
     CheckBurstRandom(ManagerRec.ReadBurstFifo, X"0000_B200", 6) ;
     CoverID2 := NewID("Cov2b") ;
-    InitSeed(CoverID2, 5) ; -- Get a common seed in both processes
+    InitSeed(CoverID2, 5) ; -- Start Write and Read with the same seed value
     AddBins(CoverID2, 1,
         GenBin(16#B300#, 16#B307#) & GenBin(16#B310#, 16#B317#) &
         GenBin(16#B320#, 16#B327#) & GenBin(16#B330#, 16#B337#)) ;

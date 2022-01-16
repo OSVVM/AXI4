@@ -415,6 +415,7 @@ begin
                 DEBUG 
               ) ;
             end if ; 
+            AffirmIfEqual(ModelID, FifoWordCount, CheckWordCount, "Burst Check WordCount") ; 
             ExpectedParam  := UpdateOptions(
                         Param      => SafeResize(TransRec.ParamToModel, ExpectedParam'length),
                         ParamID    => ParamID, 

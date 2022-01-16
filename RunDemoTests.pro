@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to run all Axi4 tests  
+#        Run all OSVVM AXI4 Verification Component tests   
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -36,21 +36,11 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-#  
+#
 
-TestSuite Axi4Full
-library osvvm_TbAxi4
-
-include ./testbench
-
-RunTest  ./TestCases/TbAxi4_MemoryReadWriteDemo1.vhd
-
-RunTest  ./TestCases/TbAxi4_BasicReadWrite.vhd
-RunTest  ./TestCases/TbAxi4_MemoryBurst1.vhd
-
-# RunTest  ./TestCases/TbAxi4_MemoryBurstAsync1.vhd
-# 
-# RunTest  ./TestCases/TbAxi4_MemoryBurstPattern1.vhd
-# RunTest  ./TestCases/TbAxi4_MemoryBurstPattern2.vhd
-# RunTest  ./TestCases/TbAxi4_MemoryBurstBytePattern1.vhd
-# RunTest  ./TestCases/TbAxi4_MemoryBurstAsyncPattern1.vhd
+# if {$::osvvm::ToolVendor ne "GHDL"} { 
+#   # Has failures.  Keep it commented out until Axi4Lite updated
+#   include ./Axi4Lite/RunDemoTests.pro
+# } 
+include ./Axi4/RunDemoTests.pro
+include ./AxiStream/RunDemoTests.pro

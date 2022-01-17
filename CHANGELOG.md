@@ -2,6 +2,7 @@
 
 | Revision  | Revision Date  |  Release Summary | 
 ------------|----------------|----------- 
+| 2022.01   | January 2022   |  Added test cases to support testing of AddressBus and Stream MIT burst patterns
 | 2021.09   | September 2021 |  Minor bug fix to Axi4Subordinate.  Updates to testbenches to support writing YAML files
 | 2021.08   | August 2021    |  Updated AXI4 naming.  Changed Axi4Master to Axi4Manager and Axi4Responder to Axi4Subordinate.
 | 2021.06   | June 2021      |  Updated Axi4Master[Vti], AxiStreamXX[Vti], Axi4Memory[Vti]
@@ -13,6 +14,12 @@
 | 2020.07   | July 2020      |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
 | 2020.02   | February 2020  |  Initial version of AddressBusTransactionPkg.
 | 2018.04   | April 2018     |  Initial public release
+
+## 2022.01 January 2022
+- Added Test Cases to support testing of AddressBus and Stream MIT burst patterns
+- Moved MODEL_INSTANCE_NAME in Axi4+ and AxiStream+ to entity declaration region
+- Added check to Axi4Stream+ in CheckBurst for BurstLen vs Expected BurstLen
+- AxiStreamReceiver+ added GotBurst transaction
 
 ## 2021.09 September 2021
 - Minor bug fix to Axi4Subordinate.  

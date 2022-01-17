@@ -18,14 +18,15 @@
 --        http://www.SynthWorks.com
 --
 --  Revision History:
---    Date       Version    Description
---    07/2021    2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
---    06/2021    2021.06    Updated Burst FIFOs.
---    02/2021    2021.02    Added Valid Delays.  Added MultiDriver Detect.  Updated Generics.
---    10/2020    2020.10    Added Bursting per updates to Model Independent Transactions
---    07/2020    2020.07    Updated for Streaming Model Independent Transactions
---    01/2020    2020.01    Updated license notice
---    05/2018    2018.05    First Release
+--    Date      Version    Description
+--    01/2022   2022.01    Moved MODEL_INSTANCE_NAME and MODEL_NAME to entity declarative region
+--    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
+--    06/2021   2021.06    Updated Burst FIFOs.
+--    02/2021   2021.02    Added Valid Delays.  Added MultiDriver Detect.  Updated Generics.
+--    10/2020   2020.10    Added Bursting per updates to Model Independent Transactions
+--    07/2020   2020.07    Updated for Streaming Model Independent Transactions
+--    01/2020   2020.01    Updated license notice
+--    05/2018   2018.05    First Release
 --
 --
 --  This file is part of OSVVM.

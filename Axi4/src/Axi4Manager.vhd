@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    01/2022   2022.01    Moved MODEL_INSTANCE_NAME and MODEL_NAME to entity declarative region
 --    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability
 --    06/2021   2021.06    GHDL support + New Burst FIFOs 
 --    02/2021   2021.02    Added MultiDriver Detect.  Added Valid Delays.  Updated Generics.   
@@ -31,7 +32,7 @@
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2017 - 2021 by SynthWorks Design Inc.
+--  Copyright (c) 2017 - 2022 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.

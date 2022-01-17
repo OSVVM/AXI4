@@ -18,12 +18,13 @@
 --        http://www.SynthWorks.com
 --
 --  Revision History:
---    Date       Version    Description
---    01/2022    2022.01    Added GotBurst transaction
---    07/2021    2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
---    06/2021    2021.06    Updated Burst FIFOs.
---    02/2021    2021.02    Added MultiDriver Detect.  Updated Generics.   
---    12/2020    2020.12    Created Virtual Transaction Interface from AxiStreamReceiver.vhd
+--    Date      Version    Description
+--    01/2022   2022.01    Moved MODEL_INSTANCE_NAME and MODEL_NAME to entity declarative region
+--                         Added GotBurst transaction Y check for BurstLen vs Expected BurstLen in CheckBurst
+--    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
+--    06/2021   2021.06    Updated Burst FIFOs.
+--    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.   
+--    12/2020   2020.12    Created Virtual Transaction Interface from AxiStreamReceiver.vhd
 --
 --
 --  This file is part of OSVVM.

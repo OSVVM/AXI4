@@ -66,6 +66,7 @@ package AxiStreamOptionsPkg is
     TRANSMIT_READY_TIME_OUT,              -- Integer
     RECEIVE_READY_BEFORE_VALID,           -- Integer
     RECEIVE_READY_DELAY_CYCLES,           -- Integer
+    RECEIVE_READY_WAIT_FOR_GET,           -- boolean
     DROP_UNDRIVEN,                        -- boolean
     DEFAULT_ID,                           -- std_logic_vector
     DEFAULT_DEST,                         -- std_logic_vector

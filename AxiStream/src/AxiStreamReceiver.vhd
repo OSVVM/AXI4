@@ -121,10 +121,10 @@ architecture behavioral of AxiStreamReceiver is
 
   signal ReceiveFifo : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
 
-  signal ReceiveCount : integer := 0 ;
+  signal WordRequestCount, BurstRequestCount : integer := 0 ; 
+  signal WordReceiveCount, BurstReceiveCount : integer := 0 ;
   signal ReceiveByteCount, TransferByteCount : integer := 0 ;
 
-  signal BurstReceiveCount     : integer := 0 ;
 
   -- Verification Component Configuration
   signal ReceiveReadyBeforeValid : boolean := TRUE ;
@@ -140,7 +140,6 @@ architecture behavioral of AxiStreamReceiver is
   signal   BurstFifoByteMode  : boolean := (DEFAULT_BURST_MODE = STREAM_BURST_BYTE_MODE) ;
   
   signal WaitForGet : boolean := FALSE ;
-  signal GetPending : boolean := FALSE ; 
 begin
 
 
@@ -170,8 +169,10 @@ begin
     variable Data,  ExpectedData,  PopData  : std_logic_vector(TData'range) ;
     variable Param, ExpectedParam, PopParam : std_logic_vector(PARAM_LENGTH-1 downto 0) ;
     variable ExpectedUser : std_logic_vector(USER_LEN-1 downto 0) ;
+    variable TryWordWaiting, TryBurstWaiting : boolean ; 
     variable DispatcherReceiveCount : integer := 0 ;
     variable BurstTransferCount     : integer := 0 ;
+    variable WordCount : integer ;
     variable FifoWordCount, CheckWordCount : integer ;
     variable BurstBoundary  : std_logic ;
     variable DropUndriven   : boolean := FALSE ;
@@ -217,7 +218,7 @@ begin
         when GET_TRANSACTION_COUNT =>
   --!! This is GetTotalTransactionCount vs. GetPendingTransactionCount
   --!!  Get Pending Get Count = GetFifoCount(ReceiveFifo)
-          TransRec.IntFromModel <= ReceiveCount ;
+          TransRec.IntFromModel <= WordReceiveCount ;
           wait for 0 ns ;
 
         when GET_ALERTLOG_ID =>
@@ -232,7 +233,11 @@ begin
           TransRec.IntFromModel <= BurstFifoMode ;
 
         when GOT_BURST =>
-          -- Required for CheckBurst with Patterns VectorOfWords, Increment, Random
+          -- Used with TryCheckBurst with Patterns VectorOfWords, Increment, Random
+          if not TryBurstWaiting then
+            increment(BurstRequestCount) ; 
+          end if ;
+          TryBurstWaiting := TRUE ; 
           if (BurstReceiveCount - BurstTransferCount) = 0 then
             TransRec.BoolFromModel  <= FALSE ;
           else
@@ -241,21 +246,27 @@ begin
 
         when GET | TRY_GET | CHECK | TRY_CHECK =>
           if Empty(ReceiveFifo) and  IsTry(Operation) then
-            GetPending <= TRUE ;
+            if not TryWordWaiting then
+              increment(WordRequestCount) ; 
+            end if ;
+            TryWordWaiting := TRUE ; 
             -- Return if no data
             TransRec.BoolFromModel  <= FALSE ;
             TransRec.DataFromModel  <= (TransRec.DataFromModel'range => '0') ;
             TransRec.ParamFromModel <= (TransRec.ParamFromModel'range => '0') ;
             wait for 0 ns ;
           else
-            GetPending <= TRUE ;
+            if not TryWordWaiting then
+              increment(WordRequestCount) ; 
+            end if ;
+            TryWordWaiting := FALSE ; 
             DispatcherReceiveCount := DispatcherReceiveCount + 1 ;
 
             -- Get data
             TransRec.BoolFromModel <= TRUE ;
             if Empty(ReceiveFifo) then
               -- Wait for data
-              WaitForToggle(ReceiveCount) ;
+              WaitForToggle(WordReceiveCount) ;
             end if ;
             -- Put Data and Parameters into record
             (Data, Param, BurstBoundary) := pop(ReceiveFifo) ;
@@ -281,7 +292,7 @@ begin
                           ParamDest  => ParamDest,
                           ParamUser  => ParamUser,
                           ParamLast  => ParamLast,
-                          Count      => ReceiveCount - LastOffsetCount
+                          Count      => WordReceiveCount - LastOffsetCount
                         ) ;
               AffirmIf( DataCheckID,
   --                (Data ?= ExpectedData and Param ?= ExpectedParam) = '1',
@@ -299,19 +310,24 @@ begin
                   INFO, TransRec.BoolToModel
                 ) ;
             end if ;
-            GetPending <= FALSE ;
           end if ;
 
         when GET_BURST | TRY_GET_BURST =>
           if (BurstReceiveCount - BurstTransferCount) = 0 and IsTry(Operation) then
-            GetPending <= TRUE ;
+            if not TryBurstWaiting then
+              increment(BurstRequestCount) ; 
+            end if ;
+            TryBurstWaiting := TRUE ; 
             -- Return if no data
             TransRec.BoolFromModel  <= FALSE ;
             TransRec.DataFromModel  <= (TransRec.DataFromModel'range => '0') ;
             TransRec.ParamFromModel <= (TransRec.ParamFromModel'range => '0') ;
             wait for 0 ns ;
           else
-            GetPending <= TRUE ;
+            if not TryBurstWaiting then
+              increment(BurstRequestCount) ; 
+            end if ;
+            TryBurstWaiting := FALSE ; 
             DispatcherReceiveCount := DispatcherReceiveCount + 1 ; -- Operation or #Words Transfered based?
 
             -- Get data
@@ -322,11 +338,13 @@ begin
             end if ;
             -- ReceiveFIFO: (TData & TID & TDest & TUser & TLast)
             FifoWordCount := 0 ;
+            WordCount := 0 ; 
             loop
               (PopData, PopParam, BurstBoundary) := pop(ReceiveFifo) ;
               -- BurstBoundary indication does not contain data for
               -- this transaction so exit
               exit when BurstBoundary = '1' ;
+              WordCount := WordCount + 1 ; 
               Data  := PopData ;
               Param := PopParam ;
               case BurstFifoMode is
@@ -348,6 +366,9 @@ begin
               exit when Param(0) = '1' ;
             end loop ;
 
+            -- Adjust WordRequestCount for the number of words consumed during the burst
+            WordRequestCount        <= Increment(WordRequestCount, WordCount) ; 
+
             BurstTransferCount      := BurstTransferCount + 1 ;
             TransRec.IntFromModel   <= FifoWordCount ;
             TransRec.DataFromModel  <= SafeResize(Data, TransRec.DataFromModel'length) ;
@@ -359,20 +380,25 @@ begin
               " Last Data: "     & to_hstring(Data) & param_to_string(Param),
               INFO, TransRec.BoolToModel or IsLogEnabled(ModelID, PASSED)
             ) ;
-            GetPending <= FALSE ;
             wait for 0 ns ;
           end if ;
 
         when CHECK_BURST | TRY_CHECK_BURST =>
           if (BurstReceiveCount - BurstTransferCount) = 0 and IsTry(Operation) then
-            GetPending <= TRUE ;
+            if not TryBurstWaiting then
+              increment(BurstRequestCount) ; 
+            end if ;
+            TryBurstWaiting := TRUE ; 
             -- Return if no data
             TransRec.BoolFromModel  <= FALSE ;
             TransRec.DataFromModel  <= (TransRec.DataFromModel'range => '0') ;
             TransRec.ParamFromModel <= (TransRec.ParamFromModel'range => '0') ;
             wait for 0 ns ;
           else
-            GetPending <= TRUE ;
+            if not TryBurstWaiting then
+              increment(BurstRequestCount) ; 
+            end if ;
+            TryBurstWaiting := FALSE ; 
             DispatcherReceiveCount := DispatcherReceiveCount + 1 ; -- Operation or #Words Transfered based?
             -- Get data
             TransRec.BoolFromModel <= TRUE ;
@@ -382,12 +408,14 @@ begin
             end if ;
             CheckWordCount := TransRec.IntToModel ;
             FifoWordCount  := 0 ;
+            WordCount := 0 ; 
             loop
              -- ReceiveFIFO: (TData & TID & TDest & TUser & TLast)
              (PopData, PopParam, BurstBoundary) := pop(ReceiveFifo) ;
               -- BurstBoundary indication does not contain data for
               -- this transaction so exit
               exit when BurstBoundary = '1' ;
+              WordCount := WordCount + 1 ; 
               Data  := PopData ;
               Param := PopParam ;
               case BurstFifoMode is
@@ -413,6 +441,14 @@ begin
               exit when Param(0) = '1' ;
               exit when FifoWordCount >= CheckWordCount ;
             end loop ;
+            
+            -- Adjust WordRequestCount for the number of words consumed during the burst
+            WordRequestCount        <= Increment(WordRequestCount, WordCount) ; 
+
+            BurstTransferCount      := BurstTransferCount + 1 ;
+            TransRec.IntFromModel   <= FifoWordCount ;
+            TransRec.DataFromModel  <= SafeResize(Data, TransRec.DataFromModel'length) ;
+            TransRec.ParamFromModel <= SafeResize(Param, TransRec.ParamFromModel'length) ;
 
             Log(ModelID,
               "Burst Check. " &
@@ -450,12 +486,6 @@ begin
             end if ;
             AffirmIfEqual(ModelID, Param(0) or BurstBoundary, ExpectedParam(0), "Last") ;
 
-            BurstTransferCount      := BurstTransferCount + 1 ;
-            TransRec.IntFromModel   <= FifoWordCount ;
-            TransRec.DataFromModel  <= SafeResize(Data, TransRec.DataFromModel'length) ;
-            TransRec.ParamFromModel <= SafeResize(Param, TransRec.ParamFromModel'length) ;
-
-            GetPending <= FALSE ;
             wait for 0 ns ;
           end if ;
 
@@ -486,7 +516,7 @@ begin
 
             when DEFAULT_LAST =>
               ParamLast       <= TransRec.IntToModel ;
-              LastOffsetCount <= ReceiveCount ;
+              LastOffsetCount <= WordReceiveCount ;
 
             when others =>
               Alert(ModelID, "SetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
@@ -562,9 +592,11 @@ begin
     ReceiveLoop : loop
 
       if WaitForGet then 
-        if not GetPending then
-          wait until GetPending ; 
-        end if ; 
+        -- if no request, wait until we have one
+--!! Limits transfer to 2 Billion words or bursts
+        if not ((BurstRequestCount > BurstReceiveCount) or (WordRequestCount > WordReceiveCount)) then 
+          wait until (BurstRequestCount > BurstReceiveCount) or (WordRequestCount > WordReceiveCount) ; 
+        end if ;
       end if ; 
 
       ---------------------
@@ -637,12 +669,12 @@ begin
         IfElse(TDest'length > 0, "  TDest: "     & to_hstring(TDest), "") &
         IfElse(TUser'length > 0, "  TUser: "     & to_hstring(TUser), "") &
         "  TLast: "     & to_string (TLast) &
-        "  Operation# " & to_string (ReceiveCount + 1),
+        "  Operation# " & to_string (WordReceiveCount + 1),
         DEBUG
       ) ;
 
       -- Signal completion
-      increment(ReceiveCount) ;
+      increment(WordReceiveCount) ;
       wait for 0 ns ;
     end loop ReceiveLoop ;
   end process ReceiveHandler ;

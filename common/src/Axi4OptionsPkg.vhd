@@ -52,7 +52,7 @@ library OSVVM_Common ;
     context OSVVM_Common.OsvvmCommonContext ;
 
 use work.Axi4InterfacePkg.all ;
-
+use work.Axi4LiteInterfacePkg.all ; 
 
 package Axi4OptionsPkg is
 
@@ -760,7 +760,7 @@ package body Axi4OptionsPkg is
   ------------------------------------------------------------
   impure function GetAxi4InterfaceDefault (
   -----------------------------------------------------------
-    constant AxiBus        : in  Axi4LiteRecType ;
+    constant AxiBus        : in  Axi4BaseRecType ;
     constant Operation     : in  Axi4OptionsType
   ) return integer is
   begin

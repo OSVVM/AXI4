@@ -184,9 +184,9 @@ begin
       alias Last : std_logic is Param(0) ;
     begin
       return
-        IfElse(ID_LEN > 0,   "  TID: "       & to_hstring(ID),   "") &
-        IfElse(DEST_LEN > 0, "  TDest: "     & to_hstring(Dest), "") &
-        IfElse(USER_LEN > 0, "  TUser: "     & to_hstring(User), "") &
+        IfElse(ID_LEN > 0,   "  TID: "       & to_hxstring(ID),   "") &
+        IfElse(DEST_LEN > 0, "  TDest: "     & to_hxstring(Dest), "") &
+        IfElse(USER_LEN > 0, "  TUser: "     & to_hxstring(User), "") &
         "  TLast: "     & to_string(Last) ;
     end function param_to_string ;
 
@@ -298,15 +298,15 @@ begin
   --                (Data ?= ExpectedData and Param ?= ExpectedParam) = '1',
                   (MetaMatch(Data, ExpectedData) and MetaMatch(Param, ExpectedParam)),
                   "Operation# " & to_string (DispatcherReceiveCount) & " " &
-                  " Received.  Data: " & to_hstring(Data) &         param_to_string(Param),
-                  " Expected.  Data: " & to_hstring(ExpectedData) & param_to_string(ExpectedParam),
+                  " Received.  Data: " & to_hxstring(Data) &         param_to_string(Param),
+                  " Expected.  Data: " & to_hxstring(ExpectedData) & param_to_string(ExpectedParam),
                   TransRec.BoolToModel or IsLogEnabled(ModelID, INFO)
                 ) ;
             else
               Log(ModelID,
                   "Word Receive. " &
                   " Operation# " & to_string (DispatcherReceiveCount) &  " " &
-                  " Data: "     & to_hstring(Data) & param_to_string(Param),
+                  " Data: "     & to_hxstring(Data) & param_to_string(Param),
                   INFO, TransRec.BoolToModel
                 ) ;
             end if ;
@@ -377,7 +377,7 @@ begin
             Log(ModelID,
               "Burst Receive. " &
               " Operation# " & to_string (DispatcherReceiveCount) &  " " &
-              " Last Data: "     & to_hstring(Data) & param_to_string(Param),
+              " Last Data: "     & to_hxstring(Data) & param_to_string(Param),
               INFO, TransRec.BoolToModel or IsLogEnabled(ModelID, PASSED)
             ) ;
             wait for 0 ns ;
@@ -453,7 +453,7 @@ begin
             Log(ModelID,
               "Burst Check. " &
               " Operation# " & to_string (DispatcherReceiveCount) &  " " &
-              " Last Data: "     & to_hstring(Data) & param_to_string(Param),
+              " Last Data: "     & to_hxstring(Data) & param_to_string(Param),
               INFO, TransRec.BoolToModel or IsLogEnabled(ModelID, PASSED)
             ) ;
             if not (BurstBoundary = '1' or Param(0) = '1') then
@@ -593,7 +593,7 @@ begin
 
       if WaitForGet then 
         -- if no request, wait until we have one
---!! Limits transfer to 2 Billion words or bursts
+        --!! Note:  > breaks when **RequestCount > 2**30 
         if not ((BurstRequestCount > BurstReceiveCount) or (WordRequestCount > WordReceiveCount)) then 
           wait until (BurstRequestCount > BurstReceiveCount) or (WordRequestCount > WordReceiveCount) ; 
         end if ;
@@ -629,14 +629,14 @@ begin
       -- For first Word in Transfer, Drop leading bytes until TKeep(i) = '1'
       if LastLast = '1' then
         for i in Keep'reverse_range loop
-          exit when Keep(i) = '1' ;
+          exit when Keep(i) /= '0' ;
           Data(i*8 + 7 downto i*8) := (others => '-') ;
         end loop ;
       end if ;
       -- For last Word in Transfer, Drop ending bytes until TKeep(i) = '1'
       if Last = '1' then
         for i in Keep'range loop
-          exit when Keep(i) = '1' ;
+          exit when Keep(i) /= '0' ;
           Data(i*8 + 7 downto i*8) := (others => '-') ;
         end loop ;
       end if ;
@@ -662,12 +662,12 @@ begin
       -- Log this operation
       Log(ModelID,
         "Axi Stream Receive." &
-        "  TData: "     & to_hstring(TData) &
+        "  TData: "     & to_hxstring(TData) &
         IfElse(TStrb'length > 0, "  TStrb: "     & to_string (TStrb), "") &
         IfElse(TKeep'length > 0, "  TKeep: "     & to_string (TKeep), "") &
-        IfElse(TID'length > 0,   "  TID: "       & to_hstring(TID),   "") &
-        IfElse(TDest'length > 0, "  TDest: "     & to_hstring(TDest), "") &
-        IfElse(TUser'length > 0, "  TUser: "     & to_hstring(TUser), "") &
+        IfElse(TID'length > 0,   "  TID: "       & to_hxstring(TID),   "") &
+        IfElse(TDest'length > 0, "  TDest: "     & to_hxstring(TDest), "") &
+        IfElse(TUser'length > 0, "  TUser: "     & to_hxstring(TUser), "") &
         "  TLast: "     & to_string (TLast) &
         "  Operation# " & to_string (WordReceiveCount + 1),
         DEBUG

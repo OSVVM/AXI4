@@ -420,12 +420,12 @@ begin
 
       Log(ModelID,
         "Axi Stream Send." &
-        "  TData: "     & to_hstring(Data) &
+        "  TData: "     & to_hxstring(Data) &
         IfElse(TStrb'length > 0, "  TStrb: "     & to_string( Strb), "") &
         IfElse(TKeep'length > 0, "  TKeep: "     & to_string( Keep), "") &
-        IfElse(TID'length > 0,   "  TID: "       & to_hstring(ID),   "") &
-        IfElse(TDest'length > 0, "  TDest: "     & to_hstring(Dest), "") &
-        IfElse(TUser'length > 0, "  TUser: "     & to_hstring(User), "") &
+        IfElse(TID'length > 0,   "  TID: "       & to_hxstring(ID),   "") &
+        IfElse(TDest'length > 0, "  TDest: "     & to_hxstring(Dest), "") &
+        IfElse(TUser'length > 0, "  TUser: "     & to_hxstring(User), "") &
         "  TLast: "     & to_string( Last) &
         -- Must be DoneCount and not RequestCount due to queuing/Async and burst operations
         "  Operation# " & to_string( TransmitDoneCount + 1),

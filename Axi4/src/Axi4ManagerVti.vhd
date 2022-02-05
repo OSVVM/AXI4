@@ -528,18 +528,18 @@ begin
   --!!9 TODO:  Change format to Transaction #, Address, Prot, Read Data
   --!! Run regressions before changing
               AffirmIf( DataCheckID, LRD.Data = ExpectedData,
-                "Read Data: " & to_hstring(LRD.Data) &
-                "  Read Address: " & to_hstring(LAR.Addr) &
-                "  Prot: " & to_hstring(ReadProt),
-                "  Expected: " & to_hstring(ExpectedData),
+                "Read Data: " & to_hxstring(LRD.Data) &
+                "  Read Address: " & to_hxstring(LAR.Addr) &
+                "  Prot: " & to_hxstring(ReadProt),
+                "  Expected: " & to_hxstring(ExpectedData),
                 TransRec.StatusMsgOn or IsLogEnabled(ModelID, INFO) ) ;
             else
   --!!9 TODO:  Change format to Transaction #, Address, Prot, Read Data
   --!! Run regressions before changing
               Log( ModelID,
-                "Read Data: " & to_hstring(LRD.Data) &
-                "  Read Address: " & to_hstring(LAR.Addr) &
-                "  Prot: " & to_hstring(ReadProt),
+                "Read Data: " & to_hxstring(LRD.Data) &
+                "  Read Address: " & to_hxstring(LAR.Addr) &
+                "  Prot: " & to_hxstring(ReadProt),
                 INFO,
                 TransRec.StatusMsgOn
               ) ;
@@ -702,7 +702,7 @@ begin
 
       Log(ModelID,
         "Write Address." &
-        "  AWAddr: "  & to_hstring(Local.Addr) &
+        "  AWAddr: "  & to_hxstring(Local.Addr) &
         "  AWProt: "  & to_string(Local.Prot) &
         "  Operation# " & to_string(WriteAddressDoneCount + 1),
         INFO
@@ -798,7 +798,7 @@ begin
 
       Log(ModelID,
         "Write Data." &
-        "  WData: "  & to_hstring(Local.Data) &
+        "  WData: "  & to_hxstring(Local.Data) &
         "  WStrb: "  & to_string( Local.Strb) &
         "  Operation# " & to_string(WriteDataDoneCount + 1),
         INFO
@@ -955,7 +955,7 @@ begin
 
       Log(ModelID,
         "Read Address." &
-        "  ARAddr: "  & to_hstring(Local.Addr) &
+        "  ARAddr: "  & to_hxstring(Local.Addr) &
         "  ARProt: "  & to_string( Local.Prot) &
         "  Operation# " & to_string(ReadAddressDoneCount + 1),
         INFO
@@ -1053,7 +1053,7 @@ begin
     AlertIf(ProtocolID, not ReadDataActive,
       "Unexpected Read Data Cycle. " &
       " RValid: " & to_string (AxiBus.ReadData.Valid) &
-      " RData: "  & to_hstring(AxiBus.ReadData.Data) &
+      " RData: "  & to_hxstring(AxiBus.ReadData.Data) &
       " RResp: "  & to_string (AxiBus.ReadData.Resp) &
       "  Operation# " & to_string(ReadDataReceiveCount + 1),
       FAILURE

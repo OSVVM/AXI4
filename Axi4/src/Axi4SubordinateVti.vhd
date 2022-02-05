@@ -377,9 +377,9 @@ begin
 --    -- Log this operation
 --    Log(ModelID,
 --      "Write Operation." &
---      "  AWAddr: "    & to_hstring(LocalAW.Addr) &
+--      "  AWAddr: "    & to_hxstring(LocalAW.Addr) &
 --      "  AWProt: "    & to_string(LocalAW.Prot) &
---      "  WData: "     & to_hstring(LocalWD.Data) &
+--      "  WData: "     & to_hxstring(LocalWD.Data) &
 --      "  WStrb: "     & to_string(LocalWD.Strb) &
 --      "  Operation# " & to_string(WriteReceiveCount),
 --      DEBUG
@@ -525,7 +525,7 @@ begin
       -- Log this operation
       Log(ModelID,
         "Write Address." &
-        "  AWAddr: "  & to_hstring(AW.Addr) &
+        "  AWAddr: "  & to_hxstring(AW.Addr) &
         "  AWProt: "  & to_string(AW.Prot) &
         "  Operation# " & to_string(WriteAddressReceiveCount + 1),
         INFO
@@ -577,7 +577,7 @@ begin
       -- Log this operation
       Log(ModelID,
         "Write Data." &
-        "  WData: "  & to_hstring(WD.Data) &
+        "  WData: "  & to_hxstring(WD.Data) &
         "  WStrb: "  & to_string(WD.Strb) &
         "  Operation# " & to_string(WriteDataReceiveCount + 1),
         INFO
@@ -628,7 +628,7 @@ begin
 
       Log(ModelID,
         "Write Response." &
-        "  BResp: "  & to_hstring(Local.Resp) &
+        "  BResp: "  & to_hxstring(Local.Resp) &
         "  Operation# " & to_string(WriteResponseDoneCount + 1),
         INFO
       ) ;
@@ -695,7 +695,7 @@ begin
 
       Log(ModelID,
         "Read Address." &
-        "  ARAddr: "  & to_hstring(AR.Addr) &
+        "  ARAddr: "  & to_hxstring(AR.Addr) &
         "  ARProt: "  & to_string(AR.Prot) &
         "  Operation# " & to_string(ReadAddressReceiveCount), -- adjusted for delay of ReadAddressReceiveCount
         INFO
@@ -750,8 +750,8 @@ begin
 
       Log(ModelID,
         "Read Data." &
-        "  RData: "  & to_hstring(Local.Data) &
-        "  RResp: "  & to_hstring(Local.Resp) &
+        "  RData: "  & to_hxstring(Local.Data) &
+        "  RResp: "  & to_hxstring(Local.Resp) &
         "  Operation# " & to_string(ReadDataDoneCount + 1),
         INFO
       ) ;

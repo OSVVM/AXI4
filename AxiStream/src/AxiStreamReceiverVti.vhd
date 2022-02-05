@@ -183,9 +183,9 @@ begin
       alias Last : std_logic is Param(0) ;
     begin
       return         
-        "  TID: "       & to_hstring(ID) &
-        "  TDest: "     & to_hstring(Dest) &
-        "  TUser: "     & to_hstring(User) & 
+        "  TID: "       & to_hxstring(ID) &
+        "  TDest: "     & to_hxstring(Dest) &
+        "  TUser: "     & to_hxstring(User) & 
         "  TLast: "     & to_string(Last) ; 
     end function param_to_string ; 
 
@@ -286,15 +286,15 @@ begin
   --                (Data ?= ExpectedData and Param ?= ExpectedParam) = '1',
                   (MetaMatch(Data, ExpectedData) and MetaMatch(Param, ExpectedParam)),
                   "Operation# " & to_string (DispatcherReceiveCount) & " " & 
-                  " Received.  Data: " & to_hstring(Data) &         param_to_string(Param),
-                  " Expected.  Data: " & to_hstring(ExpectedData) & param_to_string(ExpectedParam), 
+                  " Received.  Data: " & to_hxstring(Data) &         param_to_string(Param),
+                  " Expected.  Data: " & to_hxstring(ExpectedData) & param_to_string(ExpectedParam), 
                   TransRec.BoolToModel or IsLogEnabled(ModelID, INFO) 
                 ) ;
             else 
               Log(ModelID, 
                 "Word Receive. " &
                 " Operation# " & to_string (DispatcherReceiveCount) &  " " & 
-                " Data: "     & to_hstring(Data) & param_to_string(Param),
+                " Data: "     & to_hxstring(Data) & param_to_string(Param),
                 INFO, TransRec.BoolToModel 
               ) ;
             end if ; 
@@ -351,7 +351,7 @@ begin
             Log(ModelID, 
               "Burst Receive. " &
               " Operation# " & to_string (DispatcherReceiveCount) &  " " & 
-              " Last Data: "     & to_hstring(Data) & param_to_string(Param),
+              " Last Data: "     & to_hxstring(Data) & param_to_string(Param),
               INFO, TransRec.BoolToModel or IsLogEnabled(ModelID, PASSED) 
             ) ;
             wait for 0 ns ; 
@@ -408,7 +408,7 @@ begin
             Log(ModelID, 
               "Burst Check. " &
               " Operation# " & to_string (DispatcherReceiveCount) &  " " & 
-              " Last Data: "     & to_hstring(Data) & param_to_string(Param),
+              " Last Data: "     & to_hxstring(Data) & param_to_string(Param),
               INFO, TransRec.BoolToModel or IsLogEnabled(ModelID, PASSED) 
             ) ;
             if not (BurstBoundary = '1' or Param(0) = '1') then 
@@ -577,14 +577,14 @@ begin
       -- For first Word in Transfer, Drop leading bytes until TKeep(i) = '1'
       if LastLast = '1' then 
         for i in Keep'reverse_range loop 
-          exit when Keep(i) = '1' ; 
+          exit when Keep(i) /= '0' ;
           Data(i*8 + 7 downto i*8) := (others => '-') ;
         end loop ; 
       end if ; 
       -- For last Word in Transfer, Drop ending bytes until TKeep(i) = '1' 
       if Last = '1' then 
         for i in Keep'range loop 
-          exit when Keep(i) = '1' ; 
+          exit when Keep(i) /= '0' ;
           Data(i*8 + 7 downto i*8) := (others => '-') ;
         end loop ; 
       end if ; 
@@ -610,12 +610,12 @@ begin
       -- Log this operation
       Log(ModelID, 
         "Axi Stream Receive." &
-        "  TData: "     & to_hstring(TData) &
+        "  TData: "     & to_hxstring(TData) &
         "  TStrb: "     & to_string (TStrb) &
         "  TKeep: "     & to_string (TKeep) &
-        "  TID: "       & to_hstring(TID) &
-        "  TDest: "     & to_hstring(TDest) &
-        "  TUser: "     & to_hstring(TUser) &
+        "  TID: "       & to_hxstring(TID) &
+        "  TDest: "     & to_hxstring(TDest) &
+        "  TUser: "     & to_hxstring(TUser) &
         "  TLast: "     & to_string (TLast) &
         "  Operation# " & to_string (ReceiveCount + 1),  
         DEBUG

@@ -310,15 +310,15 @@ begin
         if IsReadCheck(TransRec.Operation) then
           ExpectedData := SafeResize(TransRec.DataToModel, ExpectedData'length) ;
           AffirmIf( DataCheckID, Data = ExpectedData,
-            "Read Address: " & to_hstring(Address) &
-            "  Data: " & to_hstring(Data) &
-            "  Expected: " & to_hstring(ExpectedData),
+            "Read Address: " & to_hxstring(Address) &
+            "  Data: " & to_hxstring(Data) &
+            "  Expected: " & to_hxstring(ExpectedData),
             IsLogEnabled(ModelID, INFO) ) ;
         else
 --!! TODO:  Change format to Address, Data Transaction #, Read Data
           Log( ModelID,
-            "Read Address: " & to_hstring(Address) &
-            "  Data: " & to_hstring(Data),
+            "Read Address: " & to_hxstring(Address) &
+            "  Data: " & to_hxstring(Data),
             INFO
           ) ;
         end if ;
@@ -413,7 +413,7 @@ begin
 --!9 Resolve Level
       Log(ModelID,
         "Write Address." &
-        "  AWAddr: "    & to_hstring(AW.Addr) &
+        "  AWAddr: "    & to_hxstring(AW.Addr) &
         "  AWProt: "    & to_string (AW.Prot) &
         "  AWLen: "     & to_string (AW.Len) &
         "  AWSize: "    & to_string (AW.Size) &
@@ -471,7 +471,7 @@ begin
 --!9 Resolve Level
       Log(ModelID,
         "Write Data." &
-        "  WData: "  & to_hstring(WD.Data) &
+        "  WData: "  & to_hxstring(WD.Data) &
         "  WStrb: "  & to_string(WD.Strb) &
         "  Operation# " & to_string(WriteDataReceiveCount + 1),
         DEBUG
@@ -544,9 +544,9 @@ begin
         if i = 1 then
           Log(ModelID,
             "Memory Write." &
-            "  AWAddr: "    & to_hstring(LAW.Addr) &
+            "  AWAddr: "    & to_hxstring(LAW.Addr) &
             "  AWProt: "    & to_string (LAW.Prot) &
-            "  WData: "     & to_hstring(LWD.Data) &
+            "  WData: "     & to_hxstring(LWD.Data) &
             "  WStrb: "     & to_string (LWD.Strb) &
             "  Operation# " & to_string (WriteReceiveCount),
             INFO
@@ -615,9 +615,9 @@ begin
 
       Log(ModelID,
         "Write Response." &
-        "  BResp: "  & to_hstring(Local.Resp) &
-        "  BID: "    & to_hstring(Local.ID) &
-        "  BUser: "  & to_hstring(Local.User) &
+        "  BResp: "  & to_hxstring(Local.Resp) &
+        "  BID: "    & to_hxstring(Local.ID) &
+        "  BUser: "  & to_hxstring(Local.User) &
         "  Operation# " & to_string(WriteResponseDoneCount + 1),
         DEBUG
       ) ;
@@ -683,7 +683,7 @@ begin
 --!9 Resolve Level
       Log(ModelID,
         "Read Address." &
-        "  ARAddr: "    & to_hstring(AR.Addr) &
+        "  ARAddr: "    & to_hxstring(AR.Addr) &
         "  ARProt: "    & to_string (AR.Prot) &
         "  ARLen: "     & to_string (AR.Len) &
         "  ARSize: "    & to_string (AR.Size) &
@@ -776,9 +776,9 @@ begin
         if i = 1 then
           Log(ModelID,
             "Memory Read." &
-            "  ARAddr: "    & to_hstring(LAR.Addr) &
+            "  ARAddr: "    & to_hxstring(LAR.Addr) &
             "  ARProt: "    & to_string (LAR.Prot) &
-            "  RData: "     & to_hstring(LRD.Data) &
+            "  RData: "     & to_hxstring(LRD.Data) &
             "  Operation# " & to_string (ReadDataRequestCount),
             INFO
           ) ;
@@ -851,10 +851,10 @@ begin
 --!9 Resolve Level
       Log(ModelID,
         "Read Data." &
-        "  RData: "     & to_hstring(Local.Data) &
-        "  RResp: "     & to_hstring(Local.Resp) &
-        "  RID: "       & to_hstring(Local.ID) &
-        "  RUser: "     & to_hstring(Local.User) &
+        "  RData: "     & to_hxstring(Local.Data) &
+        "  RResp: "     & to_hxstring(Local.Resp) &
+        "  RID: "       & to_hxstring(Local.ID) &
+        "  RUser: "     & to_hxstring(Local.User) &
         "  Operation# " & to_string(ReadDataDoneCount + 1),
         DEBUG
       ) ;

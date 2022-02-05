@@ -423,10 +423,10 @@ begin
 
       Log(ModelID,
         "Axi Stream Send." &
-        "  TID: "       & to_hstring(ID) &
-        "  TDest: "     & to_hstring(Dest) &
-        "  TData: "     & to_hstring(Data) &
-        "  TUser: "     & to_hstring(User) &
+        "  TID: "       & to_hxstring(ID) &
+        "  TDest: "     & to_hxstring(Dest) &
+        "  TData: "     & to_hxstring(Data) &
+        "  TUser: "     & to_hxstring(User) &
         "  TStrb: "     & to_string( Strb) &
         "  TKeep: "     & to_string( Keep) &
         -- Must be DoneCount and not RequestCount due to queuing/Async and burst operations

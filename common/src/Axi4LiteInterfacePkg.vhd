@@ -92,8 +92,6 @@ package Axi4LiteInterfacePkg is
 
 -- Add VHDL-2018 modes here
 
-  
-
   -- AXI Write Response Channel
   type Axi4LiteWriteResponseRecType is record
     Valid      : std_logic ; 

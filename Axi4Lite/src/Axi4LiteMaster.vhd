@@ -602,7 +602,7 @@ begin
         when SET_MODEL_OPTIONS =>
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
           if IsAxiInterface(Axi4Option) then
---            SetAxi4InterfaceDefault(AxiDefaults, Axi4Option, TransRec.IntToModel) ;
+            SetAxi4LiteInterfaceDefault(AxiDefaults, Axi4Option, TransRec.IntToModel) ;
           else
             SetAxi4Parameter(Params, Axi4Option, TransRec.IntToModel) ;
           end if ;
@@ -611,7 +611,7 @@ begin
         when GET_MODEL_OPTIONS =>
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
           if IsAxiInterface(Axi4Option) then
---            TransRec.IntFromModel <= GetAxi4InterfaceDefault(AxiDefaults, Axi4Option) ;
+            TransRec.IntFromModel <= GetAxi4LiteInterfaceDefault(AxiDefaults, Axi4Option) ;
           else
             GetAxi4Parameter(Params, Axi4Option, Axi4OptionVal) ;
             TransRec.IntToModel <= Axi4OptionVal ;

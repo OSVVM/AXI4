@@ -47,7 +47,6 @@
 ## Continuing with library set previously by the above
 ##
 
-
 ## =============================================
 ## Run Demo
 RunTest  TbStream_SendGetDemo1.vhd
@@ -114,6 +113,11 @@ RunTest  TbStream_AxiSetOptions2.vhd
 RunTest  TbStream_AxiSendGetAsync2.vhd
 RunTest  TbStream_AxiSetOptionsAsync1.vhd
 RunTest  TbStream_AxiSetOptionsAsync2.vhd
+
+
+## AxiStream - Exercise RECEIVE_READY_WAIT_FOR_GET in both single and burst transfers 
+RunTest TbStream_WaitForGet1.vhd
+RunTest TbStream_WaitForGetAsync1.vhd
 
 ## AxiStream Blocking Burst Transfers
 RunTest  TbStream_AxiSendGetBurst2.vhd

@@ -595,7 +595,7 @@ begin
         -- if no request, wait until we have one
         --!! Note:  > breaks when **RequestCount > 2**30 
         if not ((BurstRequestCount > BurstReceiveCount) or (WordRequestCount > WordReceiveCount)) then 
-          wait until (BurstRequestCount > BurstReceiveCount) or (WordRequestCount > WordReceiveCount) ; 
+          wait until (BurstRequestCount > BurstReceiveCount) or (WordRequestCount > WordReceiveCount) or not WaitForGet ; 
         end if ;
       end if ; 
 

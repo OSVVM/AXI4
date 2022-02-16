@@ -129,7 +129,8 @@ architecture MemorySubordinate of Axi4Memory is
   constant MemoryID : MemoryIDType := NewID(
       Name       => LOCAL_MEMORY_NAME, 
       AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
-      DataWidth  => 8                -- Memory is byte oriented
+      DataWidth  => 8,               -- Memory is byte oriented
+      Search     => NAME
     ) ; 
 
   signal WriteAddressFifo     : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;

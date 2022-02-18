@@ -162,7 +162,6 @@ begin
     wait ;
   end process SubordinateProc ;
 
-
 end Shared1 ;
 
 library OSVVM_AXI4 ;

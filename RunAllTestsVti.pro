@@ -38,7 +38,7 @@
 #  limitations under the License.
 #
 if {$::osvvm::ToolVendor ne "GHDL"} { 
-  include ../OsvvmLibraries/AXI4/Axi4/RunAllTestsVti.pro
-  include ../OsvvmLibraries/AXI4/AxiStream/RunAllTestsVti.pro
+  include ./Axi4/RunAllTestsVti.pro
+  include ./AxiStream/RunAllTestsVti.pro
 #  include ./Axi4Lite/RunAllTestsVti.pro
 } 

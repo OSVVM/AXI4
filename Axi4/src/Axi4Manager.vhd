@@ -481,7 +481,7 @@ begin
             -- Send Read Address to Read Address Handler and Read Data Handler
             LAR.Addr   :=  SafeResize(TransRec.Address, LAR.Addr'length) ;
             ReadByteAddr  :=  CalculateByteAddress(LAR.Addr, AXI_BYTE_ADDR_WIDTH);
-            AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Read Address length does not match", FAILURE) ;
+--             AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Read Address length does not match", FAILURE) ;
             BytesPerTransfer := 2**to_integer(LAR.Size);
 
             LAR.Len := (others => '0') ;

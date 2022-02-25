@@ -19,11 +19,12 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    09/2017   2017       Initial revision
---    04/2018   2018.04    First Release
---    01/2020   2020.01    Updated license notice
---    07/2020   2020.07    Created Axi4 FULL from Axi4Lite
+--    02/2022   2022.02    Added SET_MODEL_OPTIONS with calls to SetAxi4LiteInterfaceDefault, GetAxi4LiteInterfaceDefault
 --    12/2020   2020.12    Refactored code to remain consistent with Axi4Master (Full)
+--    07/2020   2020.07    Created Axi4 FULL from Axi4Lite
+--    01/2020   2020.01    Updated license notice
+--    04/2018   2018.04    First Release
+--    09/2017   2017       Initial revision
 --
 --
 --  This file is part of OSVVM.

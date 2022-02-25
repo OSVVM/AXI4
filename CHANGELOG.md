@@ -2,6 +2,7 @@
 
 | Revision  | Revision Date  |  Release Summary | 
 ------------|----------------|----------- 
+| 2022.02   | February 2022  |  Added test cases to support testing of AddressBus and Stream MIT burst patterns
 | 2022.01   | January 2022   |  Added test cases to support testing of AddressBus and Stream MIT burst patterns
 | 2021.09   | September 2021 |  Minor bug fix to Axi4Subordinate.  Updates to testbenches to support writing YAML files
 | 2021.08   | August 2021    |  Updated AXI4 naming.  Changed Axi4Master to Axi4Manager and Axi4Responder to Axi4Subordinate.
@@ -14,6 +15,15 @@
 | 2020.07   | July 2020      |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
 | 2020.02   | February 2020  |  Initial version of AddressBusTransactionPkg.
 | 2018.04   | April 2018     |  Initial public release
+
+## 2022.02 February 2022
+- Axi4LiteMaster - Added SET_MODEL_OPTIONS
+- Axi4Options - SetAxi4LiteInterfaceDefault, GetAxi4LiteInterfaceDefault supports Axi4LiteMaster
+- to_hxstring - Axi4Manager, Vti, Axi4Memory, Vti, Axi4Subordinate, Vti, AxiStreamReceiver, Vti, AxiStreamTransmitter, Vti
+- Axi4Memory, Vti - Added Search => NAME
+- AxiStreamOptionsPkg - RECEIVE_READY_WAIT_FOR_GET
+- AxiStreamReceiver, Vti - WaitForGet, don't send TReady until have a Get transaction
+
 
 ## 2022.01 January 2022
 - Added Test Cases to support testing of AddressBus and Stream MIT burst patterns

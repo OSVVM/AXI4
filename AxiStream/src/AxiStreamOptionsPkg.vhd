@@ -20,6 +20,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    02/2022   2022.02    Added RECEIVE_READY_WAIT_FOR_GET to so don't send TReady until have a Get transaction
 --    03/2021   2021.03    Updated for detecting multiple drivers
 --    01/2020   2020.01    Updated license notice
 --    05/2018   2018.05    Initial revision

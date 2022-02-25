@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    02/2022   2022.02    Replaced to_hstring with to_hxstring
 --    01/2022   2022.01    Moved MODEL_INSTANCE_NAME and MODEL_NAME to entity declarative region
 --    09/2021   2021.09    Minor fix to push WriteDataFifo 
 --    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 

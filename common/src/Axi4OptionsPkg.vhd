@@ -20,6 +20,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    02/2022   2022.02    Added SetAxi4LiteInterfaceDefault, GetAxi4LiteInterfaceDefault
 --    01/2020   2020.02    Refactored from Axi4MasterTransactionPkg.vhd
 --
 --

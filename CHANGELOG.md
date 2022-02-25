@@ -2,7 +2,7 @@
 
 | Revision  | Revision Date  |  Release Summary | 
 ------------|----------------|----------- 
-| 2022.02   | February 2022  |  Added test cases to support testing of AddressBus and Stream MIT burst patterns
+| 2022.02   | February 2022  |  Added to_hxstring, Axi4Memory for MemoryPkg search by NAME, <see below>.
 | 2022.01   | January 2022   |  Added test cases to support testing of AddressBus and Stream MIT burst patterns
 | 2021.09   | September 2021 |  Minor bug fix to Axi4Subordinate.  Updates to testbenches to support writing YAML files
 | 2021.08   | August 2021    |  Updated AXI4 naming.  Changed Axi4Master to Axi4Manager and Axi4Responder to Axi4Subordinate.
@@ -23,7 +23,6 @@
 - Axi4Memory, Vti - Added Search => NAME
 - AxiStreamOptionsPkg - RECEIVE_READY_WAIT_FOR_GET
 - AxiStreamReceiver, Vti - WaitForGet, don't send TReady until have a Get transaction
-
 
 ## 2022.01 January 2022
 - Added Test Cases to support testing of AddressBus and Stream MIT burst patterns

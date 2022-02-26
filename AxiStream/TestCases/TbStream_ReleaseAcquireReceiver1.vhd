@@ -99,7 +99,7 @@ begin
     Send(StreamTxRec, X"BBBB_BBBB", ID1 & DEST1 & USER1 & '0', TRUE) ;
 
     PushBurstIncrement(TxBurstFifo, 0, 8, DATA_WIDTH) ;
-    SendBurst(StreamTxRec, 8, ID1 & DEST1 & USER1 & '0', TRUE) ;
+    SendBurst(StreamTxRec, 8, ID1 & DEST1 & USER1 & '1', TRUE) ;
     
     WaitForBarrier(Sync1) ; 
         
@@ -107,7 +107,7 @@ begin
     Send(StreamTxRec, X"DDDD_DDDD", ID2 & DEST2 & USER2 & '0') ;
 
     PushBurstIncrement(TxBurstFifo, 16, 8, DATA_WIDTH) ;
-    SendBurst(StreamTxRec, 8, ID2 & DEST2 & USER2 & '0') ;
+    SendBurst(StreamTxRec, 8, ID2 & DEST2 & USER2 & '1') ;
 
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(StreamTxRec, 2) ;

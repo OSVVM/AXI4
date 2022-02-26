@@ -106,13 +106,13 @@ begin
     SendBurstAsync(StreamTxRec, 32) ;
     
     PushBurstIncrement(TxBurstFifo, 32, 32) ;
-    SendBurstAsync(StreamTxRec, 32, (USER+5) & "0") ;
+    SendBurstAsync(StreamTxRec, 32, (USER+5) & "1") ;
     
     PushBurstIncrement(TxBurstFifo, 64, 32) ;
-    SendBurstAsync(StreamTxRec, 32, (Dest+6) & (USER+5) & "0") ;
+    SendBurstAsync(StreamTxRec, 32, (Dest+6) & (USER+5) & "1") ;
     
     PushBurstIncrement(TxBurstFifo, 96, 32) ;
-    SendBurstAsync(StreamTxRec, 32, (ID+7) & (Dest+6) & (USER+5) & "0") ;
+    SendBurstAsync(StreamTxRec, 32, (ID+7) & (Dest+6) & (USER+5) & "1") ;
     
     PushBurstIncrement(TxBurstFifo, 128, 32) ;
     SendBurstAsync(StreamTxRec, 32, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;

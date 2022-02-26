@@ -170,7 +170,7 @@ begin
     AddBins(CoverID, 1, 
         GenBin(16#B000#, 16#B007#) & GenBin(16#B010#, 16#B017#) & 
         GenBin(16#B020#, 16#B027#) & GenBin(16#B030#, 16#B037#)) ; 
-    PushBurstRandom(StreamTxRec.BurstFifo, CoverID, 16, 32) ; 
+    PushBurstRandom(StreamTxRec.BurstFifo, CoverID, Count => 16, FifoWidth => 32) ; 
     SendBurst(StreamTxRec, 42) ; 
 
 -- SendBurstVector - PopBurstVector slv_vector

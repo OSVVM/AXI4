@@ -236,7 +236,8 @@ begin
                       ParamID    => ParamID,
                       ParamDest  => ParamDest,
                       ParamUser  => ParamUser,
-                      ParamLast  => ParamLast,
+--Last                      ParamLast  => ParamLast,
+                      ParamLast  => 1,
                       Count      => ((TransmitRequestCount+1) - LastOffsetCount)
                     ) ;
           if BurstFifoByteMode then
@@ -246,7 +247,7 @@ begin
             NumberTransfers := TransRec.IntToModel ;
           end if ;
           TransmitRequestCount <= TransmitRequestCount + NumberTransfers ;
-  --        Last := '0' ;
+          Last := Param(0) ;
           for i in NumberTransfers-1 downto 0 loop
             case BurstFifoMode is
               when STREAM_BURST_BYTE_MODE =>
@@ -267,8 +268,8 @@ begin
               when others =>
                 Alert(ModelID, "BurstFifoMode: Invalid Mode: " & to_string(BurstFifoMode)) ;
             end case ;
-  --          Param(0) := '1' when i = 0 else Last ;  -- TLast
-            Param(0) := '1' when i = 0 else '0' ;  -- TLast
+--Last            Param(0) := '1' when i = 0 else '0' ;  -- TLast
+            Param(0) := Last when i = 0 else '0' ;  -- TLast
             Push(TransmitFifo, '1' & Data & Param) ;
           end loop ;
 

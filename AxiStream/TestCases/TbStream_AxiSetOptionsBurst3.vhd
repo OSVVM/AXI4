@@ -117,21 +117,21 @@ begin
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurst(StreamTxRec, 32, (USER+5) & "0") ;
+    SendBurst(StreamTxRec, 32, (USER+5) & "1") ;
     
     for i in 1 to 32 loop
       Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurst(StreamTxRec, 32, (Dest+6) & (USER+5) & "0") ;
+    SendBurst(StreamTxRec, 32, (Dest+6) & (USER+5) & "1") ;
     
     for i in 1 to 32 loop
       Push(TxBurstFifo, Data & TxUser) ;
       Data   := Data + 1 ; 
       TxUser := TxUser + 1 ; 
     end loop ; 
-    SendBurst(StreamTxRec, 32, (ID+7) & (Dest+6) & (USER+5) & "0") ;
+    SendBurst(StreamTxRec, 32, (ID+7) & (Dest+6) & (USER+5) & "1") ;
     
     for i in 1 to 32 loop
       Push(TxBurstFifo, Data & TxUser) ;

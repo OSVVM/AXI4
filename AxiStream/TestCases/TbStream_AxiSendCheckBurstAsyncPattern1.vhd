@@ -100,7 +100,7 @@ begin
     User := to_slv(3, USER_LEN) ; 
 
     log("Transmit 16 bytes.  Incrementing.  Starting with X03") ;
-    SendBurstIncrementAsync(StreamTxRec, DATA_ZERO+3, 16, ID & Dest & User & '0') ;
+    SendBurstIncrementAsync(StreamTxRec, DATA_ZERO+3, 16, ID & Dest & User & '1') ;
 
     WaitForClock(StreamTxRec, 4) ; 
 
@@ -109,12 +109,12 @@ begin
       (X"01",        DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
       DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
       DATA_ZERO+21,  DATA_ZERO+23, DATA_ZERO+25),
-      (ID+1) & (Dest+1) & (User+1) & '0') ;
+      (ID+1) & (Dest+1) & (User+1) & '1') ;
 
     WaitForClock(StreamTxRec, 4) ; 
 
     log("Transmit 15 Bytes.  Random.  Starting with X01") ;
-    SendBurstRandomAsync(StreamTxRec, DATA_ZERO+1, 15, (ID+2) & (Dest+2) & (User+2) & '0') ;
+    SendBurstRandomAsync(StreamTxRec, DATA_ZERO+1, 15, (ID+2) & (Dest+2) & (User+2) & '1') ;
     
     ID   := to_slv(8, ID_LEN);
     Dest := to_slv(9, DEST_LEN) ; 
@@ -122,7 +122,7 @@ begin
 
     for i in 0 to 6 loop 
       log("Transmit " & to_string(i + 1) & " Bytes. Starting with " & to_string(i*32)) ;
-      SendBurstIncrementAsync(StreamTxRec, DATA_ZERO+i*32, 1+i, (ID+i/2) & (Dest+i/2) & (User+i/2) & '0') ;
+      SendBurstIncrementAsync(StreamTxRec, DATA_ZERO+i*32, 1+i, (ID+i/2) & (Dest+i/2) & (User+i/2) & '1') ;
     end loop ; 
 
 

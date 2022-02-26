@@ -105,18 +105,18 @@ begin
     User := to_slv(3, USER_LEN) ; 
 
     log("Transmit 16 bytes.  Cover Random") ;
-    SendBurstRandomAsync(StreamTxRec, CoverID, 16, FIFO_WIDTH, ID & Dest & User & '0') ;
+    SendBurstRandomAsync(StreamTxRec, CoverID, 16, FIFO_WIDTH, ID & Dest & User & '1') ;
     WaitForClock(StreamTxRec, 4) ; 
 
     log("Transmit 14 bytes.") ;
-    SendBurstRandomAsync(StreamTxRec, CoverID, 14, FIFO_WIDTH, (ID+1) & (Dest+1) & (User+1) & '0') ;
+    SendBurstRandomAsync(StreamTxRec, CoverID, 14, FIFO_WIDTH, (ID+1) & (Dest+1) & (User+1) & '1') ;
 
     log("Transmit 17 bytes.") ;
-    SendBurstRandomAsync(StreamTxRec, CoverID, 17, FIFO_WIDTH, (ID+2) & (Dest+2) & (User+2) & '0') ;
+    SendBurstRandomAsync(StreamTxRec, CoverID, 17, FIFO_WIDTH, (ID+2) & (Dest+2) & (User+2) & '1') ;
     WaitForClock(StreamTxRec, 7) ; 
 
     log("Transmit 13 bytes.") ;
-    SendBurstRandomAsync(StreamTxRec, CoverID, 13, FIFO_WIDTH, (ID+3) & (Dest+3) & (User+3) & '0') ;
+    SendBurstRandomAsync(StreamTxRec, CoverID, 13, FIFO_WIDTH, (ID+3) & (Dest+3) & (User+3) & '1') ;
 
 
     -- Wait for outputs to propagate and signal TestDone

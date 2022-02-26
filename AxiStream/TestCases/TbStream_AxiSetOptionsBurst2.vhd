@@ -106,13 +106,13 @@ begin
     SendBurst(StreamTxRec, 32) ;
     
     PushBurstIncrement(TxBurstFifo, 32, 32, 32) ;
-    SendBurst(StreamTxRec, 32, (USER+5) & "0") ;
+    SendBurst(StreamTxRec, 32, (USER+5) & "1") ;
     
     PushBurstIncrement(TxBurstFifo, 64, 32, 32) ;
-    SendBurst(StreamTxRec, 32, (Dest+6) & (USER+5) & "0") ;
+    SendBurst(StreamTxRec, 32, (Dest+6) & (USER+5) & "1") ;
     
     PushBurstIncrement(TxBurstFifo, 96, 32, 32) ;
-    SendBurst(StreamTxRec, 32, (ID+7) & (Dest+6) & (USER+5) & "0") ;
+    SendBurst(StreamTxRec, 32, (ID+7) & (Dest+6) & (USER+5) & "1") ;
     
     PushBurstIncrement(TxBurstFifo, 128, 32, 32) ;
     SendBurst(StreamTxRec, 32, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;

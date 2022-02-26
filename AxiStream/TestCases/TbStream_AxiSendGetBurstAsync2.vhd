@@ -99,20 +99,20 @@ begin
 
     log("Transmit 32 Bytes -- word aligned") ;
     PushBurstIncrement(TxBurstFifo, 3, 32) ;
-    SendBurstAsync(StreamTxRec, 32, ID & Dest & User & '0') ;
+    SendBurstAsync(StreamTxRec, 32, ID & Dest & User & '1') ;
 
     WaitForClock(StreamTxRec, 4) ; 
 
     log("Transmit 30 Bytes -- unaligned") ;
     PushBurst(TxBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25,27,29)) ;
     PushBurst(TxBurstFifo, (31,33,35,37,39,41,43,45,47,49,51,53,55,57,59)) ;
-    SendBurstAsync(StreamTxRec, 30, (ID+1) & (Dest+1) & (User+1) & '0') ;
+    SendBurstAsync(StreamTxRec, 30, (ID+1) & (Dest+1) & (User+1) & '1') ;
 
     WaitForClock(StreamTxRec, 4) ; 
 
     log("Transmit 34 Bytes -- unaligned") ;
     PushBurstRandom(TxBurstFifo, 7, 34) ;
-    SendBurstAsync(StreamTxRec, 34, (ID+2) & (Dest+2) & (User+2) & '0') ;
+    SendBurstAsync(StreamTxRec, 34, (ID+2) & (Dest+2) & (User+2) & '1') ;
     
     ID   := to_slv(8, ID_LEN);
     Dest := to_slv(9, DEST_LEN) ; 
@@ -121,7 +121,7 @@ begin
     for i in 0 to 6 loop 
       log("Transmit " & to_string(32+5*i) & " Bytes. Starting with " & to_string(i*32)) ;
       PushBurstIncrement(TxBurstFifo, i*32, 32 + 5*i) ;
-      SendBurstAsync(StreamTxRec, 32 + 5*i, (ID+i/2) & (Dest+i/2) & (User+i/2) & '0') ;
+      SendBurstAsync(StreamTxRec, 32 + 5*i, (ID+i/2) & (Dest+i/2) & (User+i/2) & '1') ;
     end loop ; 
 
 

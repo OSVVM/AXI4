@@ -70,4 +70,6 @@ entity TestCtrl is
 -- Not currently used in the Axi4Lite model - future use for Axi4Lite Burst Emulation modes    
 --  alias WriteBurstFifo is <<variable .TbAxi4.Master_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
 --  alias ReadBurstFifo  is <<variable .TbAxi4.Master_1.ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+    alias ManagerRec is MasterRec ; 
+    alias SubordinateRec is ResponderRec ; 
 end entity TestCtrl ;

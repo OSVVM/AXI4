@@ -52,3 +52,5 @@ RunTest TbAxi4_RandomReadWriteByte.vhd
 RunTest TbAxi4_TimeOut.vhd
 RunTest TbAxi4_WriteOptions.vhd
 RunTest TbAxi4_MemoryReadWrite1.vhd
+
+RunTest TbAxi4_AxiXResp.vhd

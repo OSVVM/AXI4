@@ -253,16 +253,16 @@ begin
     increment(TransactionCount) ;
     Addr := X"0000_0000" ; 
     ReadBurst(ManagerRec, Addr, 4) ;
-   Check(ReadBurstFifo, X"4433_2211") ;  
-   Check(ReadBurstFifo, X"8877_6655") ;  
-   Check(ReadBurstFifo, X"CCBB_AA99") ;  
-   Check(ReadBurstFifo, X"00FF_EEDD") ;  
+   CheckExpected(ReadBurstFifo, X"4433_2211") ;  
+   CheckExpected(ReadBurstFifo, X"8877_6655") ;  
+   CheckExpected(ReadBurstFifo, X"CCBB_AA99") ;  
+   CheckExpected(ReadBurstFifo, X"00FF_EEDD") ;  
     
     ReadBurst(ManagerRec, Addr+128, 4) ;
-   Check(ReadBurstFifo, X"2222_1111") ;  
-   Check(ReadBurstFifo, X"4444_3333") ;  
-   Check(ReadBurstFifo, X"6666_5555") ;  
-   Check(ReadBurstFifo, X"8888_7777") ;  
+   CheckExpected(ReadBurstFifo, X"2222_1111") ;  
+   CheckExpected(ReadBurstFifo, X"4444_3333") ;  
+   CheckExpected(ReadBurstFifo, X"6666_5555") ;  
+   CheckExpected(ReadBurstFifo, X"8888_7777") ;  
     
     WaitForClock(ManagerRec, 4) ; 
     BlankLine(2) ;
@@ -280,24 +280,24 @@ begin
     increment(TransactionCount) ;
     Addr := Addr + 256 ; 
     ReadBurst(ManagerRec, Addr, 8) ;
-   Check(ReadBurstFifo, X"----_EEFF") ;  
-   Check(ReadBurstFifo, X"CCDD_----") ;  
-   Check(ReadBurstFifo, X"----_AABB") ;  
-   Check(ReadBurstFifo, X"8899_----") ;  
-   Check(ReadBurstFifo, X"----_6677") ;  
-   Check(ReadBurstFifo, X"4455_----") ;  
-   Check(ReadBurstFifo, X"----_3344") ;  
-   Check(ReadBurstFifo, X"1122_----") ;  
+   CheckExpected(ReadBurstFifo, X"----_EEFF") ;  
+   CheckExpected(ReadBurstFifo, X"CCDD_----") ;  
+   CheckExpected(ReadBurstFifo, X"----_AABB") ;  
+   CheckExpected(ReadBurstFifo, X"8899_----") ;  
+   CheckExpected(ReadBurstFifo, X"----_6677") ;  
+   CheckExpected(ReadBurstFifo, X"4455_----") ;  
+   CheckExpected(ReadBurstFifo, X"----_3344") ;  
+   CheckExpected(ReadBurstFifo, X"1122_----") ;  
     
     ReadBurst(ManagerRec, Addr+128, 8) ;
-   Check(ReadBurstFifo, X"----_8888") ;  
-   Check(ReadBurstFifo, X"9999_8888") ;  
-   Check(ReadBurstFifo, X"----_6666") ;  
-   Check(ReadBurstFifo, X"7777_----") ;  
-   Check(ReadBurstFifo, X"----_4444") ;  
-   Check(ReadBurstFifo, X"5555_----") ;  
-   Check(ReadBurstFifo, X"----_2222") ;  
-   Check(ReadBurstFifo, X"3333_----") ;  
+   CheckExpected(ReadBurstFifo, X"----_8888") ;  
+   CheckExpected(ReadBurstFifo, X"9999_8888") ;  
+   CheckExpected(ReadBurstFifo, X"----_6666") ;  
+   CheckExpected(ReadBurstFifo, X"7777_----") ;  
+   CheckExpected(ReadBurstFifo, X"----_4444") ;  
+   CheckExpected(ReadBurstFifo, X"5555_----") ;  
+   CheckExpected(ReadBurstFifo, X"----_2222") ;  
+   CheckExpected(ReadBurstFifo, X"3333_----") ;  
     
     WaitForClock(ManagerRec, 4) ; 
     BlankLine(2) ;
@@ -317,12 +317,12 @@ begin
     log(TbManagerID, "Read with parameters setting #3") ;
     Addr := Addr + 256 ; 
     ReadBurst(ManagerRec, Addr, 2) ;
-   Check(ReadBurstFifo, X"4433_2211") ;  
-   Check(ReadBurstFifo, X"8877_6655") ;  
+   CheckExpected(ReadBurstFifo, X"4433_2211") ;  
+   CheckExpected(ReadBurstFifo, X"8877_6655") ;  
     
     ReadBurst(ManagerRec, Addr+128, 2) ;
-   Check(ReadBurstFifo, X"4422_3311") ;  
-   Check(ReadBurstFifo, X"8866_7755") ;  
+   CheckExpected(ReadBurstFifo, X"4422_3311") ;  
+   CheckExpected(ReadBurstFifo, X"8866_7755") ;  
 
     WaitForClock(ManagerRec, 4) ; 
     BlankLine(2) ;
@@ -340,24 +340,24 @@ begin
     increment(TransactionCount) ;
     Addr := Addr + 256 ; 
     ReadBurst(ManagerRec, Addr, 8) ;
-   Check(ReadBurstFifo, X"----_--FF") ;  
-   Check(ReadBurstFifo, X"----_EE--") ;  
-   Check(ReadBurstFifo, X"--DD_----") ;  
-   Check(ReadBurstFifo, X"CC--_----") ;  
-   Check(ReadBurstFifo, X"----_--BB") ;  
-   Check(ReadBurstFifo, X"----_AA--") ;  
-   Check(ReadBurstFifo, X"--99_----") ;  
-   Check(ReadBurstFifo, X"88--_----") ;  
+   CheckExpected(ReadBurstFifo, X"----_--FF") ;  
+   CheckExpected(ReadBurstFifo, X"----_EE--") ;  
+   CheckExpected(ReadBurstFifo, X"--DD_----") ;  
+   CheckExpected(ReadBurstFifo, X"CC--_----") ;  
+   CheckExpected(ReadBurstFifo, X"----_--BB") ;  
+   CheckExpected(ReadBurstFifo, X"----_AA--") ;  
+   CheckExpected(ReadBurstFifo, X"--99_----") ;  
+   CheckExpected(ReadBurstFifo, X"88--_----") ;  
     
     ReadBurst(ManagerRec, Addr+128, 8) ;
-   Check(ReadBurstFifo, X"----_--88") ;  
-   Check(ReadBurstFifo, X"----_88--") ;  
-   Check(ReadBurstFifo, X"--99_----") ;  
-   Check(ReadBurstFifo, X"99--_----") ;  
-   Check(ReadBurstFifo, X"----_--66") ;  
-   Check(ReadBurstFifo, X"----_66--") ;  
-   Check(ReadBurstFifo, X"--77_----") ;  
-   Check(ReadBurstFifo, X"77--_----") ;  
+   CheckExpected(ReadBurstFifo, X"----_--88") ;  
+   CheckExpected(ReadBurstFifo, X"----_88--") ;  
+   CheckExpected(ReadBurstFifo, X"--99_----") ;  
+   CheckExpected(ReadBurstFifo, X"99--_----") ;  
+   CheckExpected(ReadBurstFifo, X"----_--66") ;  
+   CheckExpected(ReadBurstFifo, X"----_66--") ;  
+   CheckExpected(ReadBurstFifo, X"--77_----") ;  
+   CheckExpected(ReadBurstFifo, X"77--_----") ;  
     
     WaitForClock(ManagerRec, 4) ; 
     BlankLine(2) ;

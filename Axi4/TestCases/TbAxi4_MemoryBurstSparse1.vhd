@@ -114,17 +114,17 @@ begin
 
     ReadBurst (ManagerRec, X"0000_1000", 9) ;
     
-   Check(ReadBurstFifo, X"----_--01") ;
-   Check(ReadBurstFifo, X"----_02--") ;
-   Check(ReadBurstFifo, X"--03_----") ;
-   Check(ReadBurstFifo, X"04--_----") ;
+   CheckExpected(ReadBurstFifo, X"----_--01") ;
+   CheckExpected(ReadBurstFifo, X"----_02--") ;
+   CheckExpected(ReadBurstFifo, X"--03_----") ;
+   CheckExpected(ReadBurstFifo, X"04--_----") ;
     
-   Check(ReadBurstFifo, X"----_0605") ;
-   Check(ReadBurstFifo, X"--08_07--") ;
-   Check(ReadBurstFifo, X"0A09_----") ;
+   CheckExpected(ReadBurstFifo, X"----_0605") ;
+   CheckExpected(ReadBurstFifo, X"--08_07--") ;
+   CheckExpected(ReadBurstFifo, X"0A09_----") ;
 
-   Check(ReadBurstFifo, X"--0D_0C0B") ;
-   Check(ReadBurstFifo, X"100F_0E--") ;
+   CheckExpected(ReadBurstFifo, X"--0D_0C0B") ;
+   CheckExpected(ReadBurstFifo, X"100F_0E--") ;
     
     
 ----------------------------------------  Test 2, Byte Aligned
@@ -145,19 +145,19 @@ begin
     WriteBurst(ManagerRec, X"0000_2001", 11) ;
 
     ReadBurst(ManagerRec, X"0000_2001", 11) ;
-   Check(ReadBurstFifo, X"--02_01--") ;
-   Check(ReadBurstFifo, X"05--_0403") ;
-   Check(ReadBurstFifo, X"8877_--06") ;
-   Check(ReadBurstFifo, X"BBAA_99--") ;
+   CheckExpected(ReadBurstFifo, X"--02_01--") ;
+   CheckExpected(ReadBurstFifo, X"05--_0403") ;
+   CheckExpected(ReadBurstFifo, X"8877_--06") ;
+   CheckExpected(ReadBurstFifo, X"BBAA_99--") ;
 
-   Check(ReadBurstFifo, X"----_DDCC") ;
-   Check(ReadBurstFifo, X"FF--_--EE") ;
-   Check(ReadBurstFifo, X"1110_----") ;
+   CheckExpected(ReadBurstFifo, X"----_DDCC") ;
+   CheckExpected(ReadBurstFifo, X"FF--_--EE") ;
+   CheckExpected(ReadBurstFifo, X"1110_----") ;
 
-   Check(ReadBurstFifo, X"----_--12") ;
-   Check(ReadBurstFifo, X"----_13--") ;
-   Check(ReadBurstFifo, X"--14_----") ;
-   Check(ReadBurstFifo, X"15--_----") ;
+   CheckExpected(ReadBurstFifo, X"----_--12") ;
+   CheckExpected(ReadBurstFifo, X"----_13--") ;
+   CheckExpected(ReadBurstFifo, X"--14_----") ;
+   CheckExpected(ReadBurstFifo, X"15--_----") ;
 
 
     WaitForBarrier(WriteDone) ;

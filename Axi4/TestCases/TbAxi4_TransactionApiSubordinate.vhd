@@ -164,8 +164,8 @@ begin
     wait until nReset = '1' ;  
     wait for 0 ns ; 
     -- Verify Initial values of Transaction Counts
-    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 0
-    AffirmIfEqual(TbSubordinateID, Count, 0, "GetTransactionCount") ;
+    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 1
+    AffirmIfEqual(TbSubordinateID, Count, 1, "GetTransactionCount") ;
     GetWriteTransactionCount(SubordinateRec, Count) ; -- Expect 0
     AffirmIfEqual(TbSubordinateID, Count, 0, "GetTransactionWriteCount") ;
     GetReadTransactionCount(SubordinateRec, Count) ; -- Expect 0
@@ -183,8 +183,8 @@ begin
     AffirmIf(TbSubordinateID, now > WFTStartTime, 
       "WaitForTransaction before StartTime: " & to_string(WFTStartTime)) ;
     -- Check Transaction Counts
-    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 1
-    AffirmIfEqual(TbSubordinateID, Count, 1, "GetTransactionCount") ;
+    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 6
+    AffirmIfEqual(TbSubordinateID, Count, 6, "GetTransactionCount") ;
     GetWriteTransactionCount(SubordinateRec, Count) ; -- Expect 1
     AffirmIfEqual(TbSubordinateID, Count, 1, "GetTransactionWriteCount") ;
     
@@ -204,8 +204,8 @@ begin
     -- Check that time did not pass in WFT
     AffirmIfEqual(TbSubordinateID, WFTStartTime, now, "WaitForTransaction after TryReadCheckData takes 0 time") ;
     -- Check Transaction Counts
-    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 2
-    AffirmIfEqual(TbSubordinateID, Count, 2, "GetTransactionCount") ;
+    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 11
+    AffirmIfEqual(TbSubordinateID, Count, 11, "GetTransactionCount") ;
     GetWriteTransactionCount(SubordinateRec, Count) ; -- Expect 2
     AffirmIfEqual(TbSubordinateID, Count, 2, "GetTransactionWriteCount") ;
     
@@ -225,8 +225,8 @@ begin
     AffirmIf(TbSubordinateID, now > WFTStartTime, 
       "WaitForTransaction before StartTime: " & to_string(WFTStartTime)) ;
     -- Check Transaction Counts
-    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 3
-    AffirmIfEqual(TbSubordinateID, Count, 3, "GetTransactionCount") ;
+    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 15
+    AffirmIfEqual(TbSubordinateID, Count, 15, "GetTransactionCount") ;
     GetWriteTransactionCount(SubordinateRec, Count) ; -- Expect 3
     AffirmIfEqual(TbSubordinateID, Count, 3, "GetTransactionWriteCount") ;
     
@@ -246,8 +246,8 @@ begin
     -- Check that time did not pass in WFWT
     AffirmIfEqual(TbSubordinateID, WFTStartTime, now, "WaitForTransaction after TryReadCheckData takes 0 time") ;
     -- Check Transaction Counts
-    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 4
-    AffirmIfEqual(TbSubordinateID, Count, 4, "GetTransactionCount") ;
+    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 20
+    AffirmIfEqual(TbSubordinateID, Count, 20, "GetTransactionCount") ;
     GetWriteTransactionCount(SubordinateRec, Count) ; -- Expect 4
     AffirmIfEqual(TbSubordinateID, Count, 4, "GetTransactionWriteCount") ;
 
@@ -266,8 +266,8 @@ begin
     AffirmIf(TbSubordinateID, now > WFTStartTime, 
       "WaitForTransaction before StartTime: " & to_string(WFTStartTime)) ;
     -- Check Transaction Counts
-    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 5
-    AffirmIfEqual(TbSubordinateID, Count, 5, "GetTransactionCount") ;
+    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 24
+    AffirmIfEqual(TbSubordinateID, Count, 24, "GetTransactionCount") ;
     GetReadTransactionCount(SubordinateRec, Count) ; -- Expect 1
     AffirmIfEqual(TbSubordinateID, Count, 1, "GetReadTransactionCount") ;
     
@@ -285,8 +285,8 @@ begin
     -- Check that time did not pass in WFT
     AffirmIfEqual(TbSubordinateID, WFTStartTime, now, "WaitForTransaction after TryReadCheckData takes 0 time") ;
     -- Check Transaction Counts
-    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 6
-    AffirmIfEqual(TbSubordinateID, Count, 6, "GetTransactionCount") ;
+    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 29
+    AffirmIfEqual(TbSubordinateID, Count, 29, "GetTransactionCount") ;
     GetReadTransactionCount(SubordinateRec, Count) ; -- Expect 2
     AffirmIfEqual(TbSubordinateID, Count, 2, "GetReadTransactionCount") ;
 
@@ -305,8 +305,8 @@ begin
     AffirmIf(TbSubordinateID, now > WFTStartTime, 
       "WaitForTransaction before StartTime: " & to_string(WFTStartTime)) ;
     -- Check Transaction Counts
-    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 7
-    AffirmIfEqual(TbSubordinateID, Count, 7, "GetTransactionCount") ;
+    GetTransactionCount(SubordinateRec, Count) ;  -- Expect 33
+    AffirmIfEqual(TbSubordinateID, Count, 33, "GetTransactionCount") ;
     GetReadTransactionCount(SubordinateRec, Count) ; -- Expect 3
     AffirmIfEqual(TbSubordinateID, Count, 3, "GetReadTransactionCount") ;
     
@@ -324,8 +324,8 @@ begin
     -- Check that time did not pass in WFWT
     AffirmIfEqual(TbSubordinateID, WFTStartTime, now, "WaitForTransaction after TryReadCheckData takes 0 time") ;
     -- Check Transaction Counts
-    GetTransactionCount(SubordinateRec, Count) ;     -- Expect 8
-    AffirmIfEqual(TbSubordinateID, Count, 8, "GetTransactionCount") ;
+    GetTransactionCount(SubordinateRec, Count) ;     -- Expect 38
+    AffirmIfEqual(TbSubordinateID, Count, 38, "GetTransactionCount") ;
     GetReadTransactionCount(SubordinateRec, Count) ; -- Expect 4
     AffirmIfEqual(TbSubordinateID, Count, 4, "GetReadTransactionCount") ;
 

@@ -114,7 +114,7 @@ begin
     WriteBurst(ManagerRec, X"0000_100A", 13) ;
 
     ReadBurst (ManagerRec, X"0000_100A", 13) ;
-    Check(ReadBurstFifo, X"0001_----") ; -- First Byte not aligned
+    CheckExpected(ReadBurstFifo, X"0001_----") ; -- First Byte not aligned
     CheckBurst(ReadBurstFifo, (3,5,7,9,11,13,15,17,19,21,23,25), DATA_WIDTH) ;
 
     log("Write with ByteAddr = 31, 12 Bytes -- unaligned") ;
@@ -123,7 +123,7 @@ begin
     WriteBurst(ManagerRec, X"0000_3001", 13) ;
 
     ReadBurst (ManagerRec, X"0000_3001", 13) ;
-    Check(ReadBurstFifo, X"A015_28--") ; -- First Byte not aligned
+    CheckExpected(ReadBurstFifo, X"A015_28--") ; -- First Byte not aligned
     CheckBurstRandom(ReadBurstFifo, 7, 12, DATA_WIDTH) ;
 
     log("Write with ByteAddr = 8, 12 Bytes -- word aligned") ;
@@ -164,17 +164,17 @@ begin
     ReadBurst (ManagerRec, X"0000_5090", 1) ;
     ReadBurst (ManagerRec, X"0000_50A1", 1) ;
     
-    Check(ReadBurstFifo, X"----_--01") ;
-    Check(ReadBurstFifo, X"----_02--") ;
-    Check(ReadBurstFifo, X"--03_----") ;
-    Check(ReadBurstFifo, X"04--_----") ;
+    CheckExpected(ReadBurstFifo, X"----_--01") ;
+    CheckExpected(ReadBurstFifo, X"----_02--") ;
+    CheckExpected(ReadBurstFifo, X"--03_----") ;
+    CheckExpected(ReadBurstFifo, X"04--_----") ;
 
-    Check(ReadBurstFifo, X"----_0605") ;
-    Check(ReadBurstFifo, X"--08_07--") ;
-    Check(ReadBurstFifo, X"0A09_----") ;
+    CheckExpected(ReadBurstFifo, X"----_0605") ;
+    CheckExpected(ReadBurstFifo, X"--08_07--") ;
+    CheckExpected(ReadBurstFifo, X"0A09_----") ;
 
-    Check(ReadBurstFifo, X"--0D_0C0B") ;
-    Check(ReadBurstFifo, X"100F_0E--") ;
+    CheckExpected(ReadBurstFifo, X"--0D_0C0B") ;
+    CheckExpected(ReadBurstFifo, X"100F_0E--") ;
 
     WaitForBarrier(WriteDone) ;
 

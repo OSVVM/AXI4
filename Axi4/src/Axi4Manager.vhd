@@ -340,7 +340,7 @@ begin
           TransRec.IntFromModel <= BurstFifoMode ;
 
         when GET_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= TransactionCount ; --  WriteAddressDoneCount + ReadAddressDoneCount ;
+          TransRec.IntFromModel <= integer(TransRec.Rdy) ; --  WriteAddressDoneCount + ReadAddressDoneCount ;
           wait for 0 ns ; 
 
         when GET_WRITE_TRANSACTION_COUNT =>
@@ -615,9 +615,6 @@ begin
             end loop ;
           end if ;
 
-          -- Transaction wait time
-          wait for 0 ns ;  wait for 0 ns ;
-
         -- Model Configuration Options
         when SET_MODEL_OPTIONS =>
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
@@ -626,7 +623,6 @@ begin
           else
             SetAxi4Parameter(Params, Axi4Option, TransRec.IntToModel) ;
           end if ;
-          wait for 0 ns ;  wait for 0 ns ;
 
         when GET_MODEL_OPTIONS =>
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
@@ -636,16 +632,13 @@ begin
             GetAxi4Parameter(Params, Axi4Option, Axi4OptionVal) ;
             TransRec.IntFromModel <= Axi4OptionVal ;
           end if ;
-          wait for 0 ns ;  wait for 0 ns ;
 
         when MULTIPLE_DRIVER_DETECT =>
-          Alert(ModelID, MODEL_NAME & ": Multiple Drivers on Transaction Record." & 
-                         "  Transaction # " & to_string(TransactionCount), FAILURE) ;
-          wait for 0 ns ;  wait for 0 ns ;
+          Alert(ModelID, "Multiple Drivers on Transaction Record." & 
+                         "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
 
         when others =>
-          Alert(ModelID, "Unimplemented Transaction", FAILURE) ;
-          wait for 0 ns ;  wait for 0 ns ;
+          Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
       end case ;
     end loop ;
   end process TransactionDispatcher ;

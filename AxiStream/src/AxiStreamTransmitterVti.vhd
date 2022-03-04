@@ -336,9 +336,8 @@ begin
           end case ;
 
         when MULTIPLE_DRIVER_DETECT =>
-          Alert(ModelID, MODEL_NAME & ": Multiple Drivers on Transaction Record." & 
+          Alert(ModelID, "Multiple Drivers on Transaction Record." & 
                          "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
-          wait for 0 ns ;  wait for 0 ns ;
 
         -- The End -- Done
         when others =>

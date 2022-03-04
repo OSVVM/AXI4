@@ -558,13 +558,11 @@ begin
         -- The End -- Done
 
         when MULTIPLE_DRIVER_DETECT =>
-          Alert(ModelID, MODEL_NAME & ": Multiple Drivers on Transaction Record." &
+          Alert(ModelID, "Multiple Drivers on Transaction Record." & 
                          "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
-          wait for 0 ns ;  wait for 0 ns ;
 
         when others =>
           Alert(ModelID, "Unimplemented Transaction: " & to_string(Operation), FAILURE) ;
-          wait for 0 ns ;
       end case ;
 
       -- Wait for 1 delta cycle, required if a wait is not in all case branches above

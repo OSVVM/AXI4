@@ -257,7 +257,7 @@ begin
         wait for 0 ns ;
 
       when GET_TRANSACTION_COUNT =>
-        TransRec.IntFromModel <= WriteAddressReceiveCount + ReadAddressReceiveCount ;
+        TransRec.IntFromModel <= integer(TransRec.Rdy) ;
         wait for 0 ns ;
 
       when GET_WRITE_TRANSACTION_COUNT =>
@@ -338,7 +338,8 @@ begin
             when RUSER =>                ModelRUser <= to_slv(TransRec.IntToModel, ModelRUser'length) ;
             --
             -- The End -- Done
-            when others =>               Alert(ModelID, "Unimplemented Option", FAILURE) ;
+            when others =>        
+              Alert(ModelID, "SetOptions, Unimplemented Option: " & to_string(Axi4OptionsType'val(TransRec.Options)), FAILURE) ;
           end case ;
         end if ;
 
@@ -361,18 +362,17 @@ begin
             when RUSER =>                TransRec.IntFromModel <= to_integer(ModelRUser) ;
             --
             -- The End -- Done
-            when others =>               Alert(ModelID, "Unimplemented Option", FAILURE) ;
+            when others =>              
+              Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(Axi4OptionsType'val(TransRec.Options)), FAILURE) ;
           end case ;
         end if ;
 
-      when MULTIPLE_DRIVER_DETECT =>
-          Alert(ModelID, MODEL_NAME & ": Multiple Drivers on Transaction Record." & 
-                       "  Transaction # " & to_string(TransactionCount), FAILURE) ;
-        wait for 0 ns ;  
+        when MULTIPLE_DRIVER_DETECT =>
+          Alert(ModelID, "Multiple Drivers on Transaction Record." & 
+                         "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
 
       when others =>
-        Alert(ModelID, "Unimplemented Transaction", FAILURE) ;
-        wait for 0 ns ;
+          Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
     end case ;
 
     -- Wait for 1 delta cycle, required if a wait is not in all case branches above

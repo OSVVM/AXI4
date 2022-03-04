@@ -282,19 +282,15 @@ begin
 
       when GET_ALERTLOG_ID =>
         TransRec.IntFromModel <= integer(ModelID) ;
-        wait for 0 ns ;
 
       when GET_TRANSACTION_COUNT =>
-        TransRec.IntFromModel <= WriteAddressReceiveCount + ReadAddressReceiveCount ;
-        wait for 0 ns ;
+        TransRec.IntFromModel <= integer(TransRec.Rdy) ;
 
       when GET_WRITE_TRANSACTION_COUNT =>
         TransRec.IntFromModel <= WriteAddressReceiveCount ;
-        wait for 0 ns ;
 
       when GET_READ_TRANSACTION_COUNT =>
         TransRec.IntFromModel <= ReadAddressReceiveCount ;
-        wait for 0 ns ;
 
       when WRITE_OP | WRITE_ADDRESS | WRITE_DATA |
            ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
@@ -476,13 +472,12 @@ begin
         end if ;
         wait for 0 ns ; 
 
-      when MULTIPLE_DRIVER_DETECT =>
-          Alert(ModelID, MODEL_NAME & ": Multiple Drivers on Transaction Record." & 
-                       "  Transaction # " & to_string(TransactionCount), FAILURE) ;
-        wait for 0 ns ;  
+        when MULTIPLE_DRIVER_DETECT =>
+          Alert(ModelID, "Multiple Drivers on Transaction Record." & 
+                         "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
 
       when others =>
-        Alert(ModelID, "Unimplemented Transaction", FAILURE) ;
+          Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
         wait for 0 ns ;
     end case ;
 

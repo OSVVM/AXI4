@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    03/2022   2022.03    Updated calls to NewID for AlertLogID and FIFOs
 --    02/2022   2022.02    Replaced to_hstring with to_hxstring
 --                         Added Search by NAME to NewID.
 --    01/2022   2022.01    Moved MODEL_INSTANCE_NAME and MODEL_NAME to entity declarative region

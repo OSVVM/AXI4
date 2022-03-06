@@ -189,22 +189,22 @@ begin
     InitAxiOptions(Params) ;
 
     -- Alerts
-    ID                      := GetAlertLogID(MODEL_INSTANCE_NAME) ;
+    ID                      := NewID(MODEL_INSTANCE_NAME) ;
     ModelID                 <= ID ;
-    ProtocolID              <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
-    DataCheckID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
-    BusFailedID             <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
+    ProtocolID              <= NewID("Protocol Error", ID ) ;
+    DataCheckID             <= NewID("Data Check", ID ) ;
+    BusFailedID             <= NewID("No response", ID ) ;
 
-    WriteResponseScoreboard <= NewID( MODEL_INSTANCE_NAME & ": WriteResponse Scoreboard", ID);
-    ReadResponseScoreboard  <= NewID( MODEL_INSTANCE_NAME & ": ReadResponse Scoreboard",  ID);
+    WriteResponseScoreboard <= NewID("WriteResponse Scoreboard", ID);
+    ReadResponseScoreboard  <= NewID("ReadResponse Scoreboard",  ID);
 
     -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
     --   FIFOS only generate usage type errors 
-    WriteAddressFifo           <= NewID(MODEL_INSTANCE_NAME & ": WriteAddressFIFO",             ID, DoNotReport => TRUE);
-    WriteDataFifo              <= NewID(MODEL_INSTANCE_NAME & ": WriteDataFifo",                ID, DoNotReport => TRUE);
-    ReadAddressFifo            <= NewID(MODEL_INSTANCE_NAME & ": ReadAddressFifo",              ID, DoNotReport => TRUE);
-    ReadAddressTransactionFifo <= NewID(MODEL_INSTANCE_NAME & ": ReadAddressTransactionFifo",   ID, DoNotReport => TRUE);
-    ReadDataFifo               <= NewID(MODEL_INSTANCE_NAME & ": ReadDataFifo",                 ID, DoNotReport => TRUE);
+    WriteAddressFifo           <= NewID("WriteAddressFIFO",             ID, ReportMode => DISABLED);
+    WriteDataFifo              <= NewID("WriteDataFifo",                ID, ReportMode => DISABLED);
+    ReadAddressFifo            <= NewID("ReadAddressFifo",              ID, ReportMode => DISABLED);
+    ReadAddressTransactionFifo <= NewID("ReadAddressTransactionFifo",   ID, ReportMode => DISABLED);
+    ReadDataFifo               <= NewID("ReadDataFifo",                 ID, ReportMode => DISABLED);
 
     wait ;
   end process Initialize ;
@@ -257,8 +257,8 @@ begin
     LRD.Resp    := to_Axi4RespType(OKAY) ;
     
     wait for 0 ns ; 
-    TransRec.WriteBurstFifo <= NewID(MODEL_INSTANCE_NAME & ": WriteBurstFifo", ModelID) ;
-    TransRec.ReadBurstFifo  <= NewID(MODEL_INSTANCE_NAME & ": ReadBurstFifo",  ModelID) ;
+    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo", ModelID) ;
+    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",  ModelID) ;
     
 --!! AWCache, ARCache Defaults
     loop

@@ -155,12 +155,12 @@ begin
     variable ID : AlertLogIDType ;
   begin
     -- Alerts
-    ID            := GetAlertLogID(MODEL_INSTANCE_NAME) ;
+    ID            := NewID(MODEL_INSTANCE_NAME) ;
     ModelID       <= ID ;
---    ProtocolID    <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Protocol Error", ID ) ;
-    DataCheckID   <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
-    BusFailedID   <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
-    ReceiveFifo   <= NewID(MODEL_INSTANCE_NAME & ": ReceiveFifo", ID) ;
+--    ProtocolID    <= NewID("Protocol Error", ID ) ;
+    DataCheckID   <= NewID("Data Check", ID ) ;
+    BusFailedID   <= NewID("No response", ID ) ;
+    ReceiveFifo   <= NewID("ReceiveFifo", ID) ;
     wait ;
   end process Initialize ;
 

@@ -59,22 +59,13 @@ architecture TestHarness of TbAxi4 is
   constant AXI_DATA_WIDTH : integer := 32 ;
   constant AXI_STRB_WIDTH : integer := AXI_DATA_WIDTH/8 ;
 
-
   constant tperiod_Clk : time := 10 ns ;
   constant tpd         : time := 2 ns ;
 
   signal Clk         : std_logic ;
   signal nReset      : std_logic ;
 
---  -- Testbench Transaction Interface
---  subtype LocalTransactionRecType is AddressBusRecType(
---    Address(AXI_ADDR_WIDTH-1 downto 0),
---    DataToModel(AXI_DATA_WIDTH-1 downto 0),
---    DataFromModel(AXI_DATA_WIDTH-1 downto 0)
---  ) ;
---  signal MasterRec   : LocalTransactionRecType ;
---  signal ResponderRec  : LocalTransactionRecType ;
-  signal MasterRec, ResponderRec  : AddressBusRecType(
+  signal ManagerRec, SubordinateRec  : AddressBusRecType(
           Address(AXI_ADDR_WIDTH-1 downto 0),
           DataToModel(AXI_DATA_WIDTH-1 downto 0),
           DataFromModel(AXI_DATA_WIDTH-1 downto 0)
@@ -82,42 +73,12 @@ architecture TestHarness of TbAxi4 is
 
 --  -- AXI Master Functional Interface
   signal   AxiBus : Axi4LiteRecType(
-    WriteAddress( Addr(AXI_ADDR_WIDTH-1 downto 0) ),
+    WriteAddress( Addr (AXI_ADDR_WIDTH-1 downto 0) ),
     WriteData   ( Data (AXI_DATA_WIDTH-1 downto 0),   Strb(AXI_STRB_WIDTH-1 downto 0) ),
-    ReadAddress ( Addr(AXI_ADDR_WIDTH-1 downto 0) ),
+    ReadAddress ( Addr (AXI_ADDR_WIDTH-1 downto 0) ),
     ReadData    ( Data (AXI_DATA_WIDTH-1 downto 0) )
   ) ;
 
-  -- Aliases to make access to record elements convenient
-  -- This is only needed for model use them
-  -- Write Address
-  alias  AWAddr    : std_logic_vector is AxiBus.WriteAddress.Addr ;
-  alias  AWProt    : Axi4ProtType     is AxiBus.WriteAddress.Prot ;
-  alias  AWValid   : std_logic        is AxiBus.WriteAddress.Valid ;
-  alias  AWReady   : std_logic        is AxiBus.WriteAddress.Ready ;
-
-  -- Write Data
-  alias  WData     : std_logic_vector is AxiBus.WriteData.Data ;
-  alias  WStrb     : std_logic_vector is AxiBus.WriteData.Strb ;
-  alias  WValid    : std_logic        is AxiBus.WriteData.Valid ;
-  alias  WReady    : std_logic        is AxiBus.WriteData.Ready ;
-
-  -- Write Response
-  alias  BResp     : Axi4RespType     is AxiBus.WriteResponse.Resp ;
-  alias  BValid    : std_logic        is AxiBus.WriteResponse.Valid ;
-  alias  BReady    : std_logic        is AxiBus.WriteResponse.Ready ;
-
-  -- Read Address
-  alias  ARAddr    : std_logic_vector is AxiBus.ReadAddress.Addr ;
-  alias  ARProt    : Axi4ProtType     is AxiBus.ReadAddress.Prot ;
-  alias  ARValid   : std_logic        is AxiBus.ReadAddress.Valid ;
-  alias  ARReady   : std_logic        is AxiBus.ReadAddress.Ready ;
-
-  -- Read Data
-  alias  RData     : std_logic_vector is AxiBus.ReadData.Data ;
-  alias  RResp     : Axi4RespType     is AxiBus.ReadData.Resp ;
-  alias  RValid    : std_logic        is AxiBus.ReadData.Valid ;
-  alias  RReady    : std_logic        is AxiBus.ReadData.Ready ;
 
   component TestCtrl is
     port (
@@ -126,8 +87,8 @@ architecture TestHarness of TbAxi4 is
       nReset              : In    std_logic ;
 
       -- Transaction Interfaces
-      MasterRec           : inout AddressBusRecType ;
-      ResponderRec        : inout AddressBusRecType
+      ManagerRec          : inout AddressBusRecType ;
+      SubordinateRec      : inout AddressBusRecType
     ) ;
   end component TestCtrl ;
 
@@ -150,7 +111,7 @@ begin
   ) ;
 
   -- Behavioral model.  Replaces DUT for labs
-  Responder_1 : Axi4LiteResponder
+  Subordinate_1 : Axi4LiteSubordinate
   port map (
     -- Globals
     Clk         => Clk,
@@ -158,38 +119,22 @@ begin
 
     -- AXI Master Functional Interface
     AxiBus  => AxiBus,
-    -- Mapping aliases on Left Hand Side (most similar to basic design)
---      AxiBus.WriteAddress.Addr       => AWAddr  ,
---      AxiBus.WriteAddress.Prot       => AWProt  ,
---      AxiBus.WriteAddress.Valid      => AWValid ,
---      AxiBus.WriteAddress.Ready      => AWReady ,
---  
---      -- Mapping record elements on Left Hand Side (easiest way to connect Master to Responder DUT)
---      AxiBus.WriteData.Data          => AxiBus.WriteData.Data   ,
---      AxiBus.WriteData.Strb          => AxiBus.WriteData.Strb   ,
---      AxiBus.WriteData.Valid         => AxiBus.WriteData.Valid  ,
---      AxiBus.WriteData.Ready         => AxiBus.WriteData.Ready  ,
---  
---      -- Mapping bus subrecords on left hand side (because it is easy)
---      AxiBus.WriteResponse           => AxiBus.WriteResponse ,
---      AxiBus.ReadAddress             => AxiBus.ReadAddress ,
---      AxiBus.ReadData                => AxiBus.ReadData ,
 
     -- Testbench Transaction Interface
-    TransRec    => ResponderRec
+    TransRec    => SubordinateRec
   ) ;
 
-  Master_1 : Axi4LiteMaster
+  Manager_1 : Axi4LiteManager
   port map (
     -- Globals
     Clk         => Clk,
     nReset      => nReset,
 
-    -- Testbench Transaction Interface
-    TransRec    => MasterRec,
-
     -- AXI Master Functional Interface
-    AxiBus      => AxiBus
+    AxiBus      => AxiBus,
+
+    -- Testbench Transaction Interface
+    TransRec    => ManagerRec
   ) ;
 
 
@@ -207,12 +152,12 @@ begin
   TestCtrl_1 : TestCtrl
   port map (
     -- Globals
-    Clk           => Clk,
-    nReset        => nReset,
+    Clk            => Clk,
+    nReset         => nReset,
 
     -- Testbench Transaction Interfaces
-    MasterRec     => MasterRec,
-    ResponderRec  => ResponderRec
+    ManagerRec     => ManagerRec,
+    SubordinateRec => SubordinateRec
   ) ;
 
 end architecture TestHarness ;

@@ -89,69 +89,69 @@ begin
     variable ByteData : std_logic_vector(7 downto 0) ;
   begin
     wait until nReset = '1' ;  
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     
     log("Write with ByteAddr = 8, 12 Bytes -- word aligned") ;
     PushBurstIncrement(WriteBurstFifo, 3, 12) ;
-    WriteBurst(MasterRec, X"0000_0008", 12) ;
+    WriteBurst(ManagerRec, X"0000_0008", 12) ;
 
-    ReadBurst (MasterRec, X"0000_0008", 12) ;
+    ReadBurst (ManagerRec, X"0000_0008", 12) ;
     CheckBurstIncrement(ReadBurstFifo, 3, 12) ;
     
     log("Write with ByteAddr = x1A, 13 Bytes -- unaligned") ;
     PushBurst(WriteBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25)) ;
-    WriteBurst(MasterRec, X"0000_001A", 13) ;
+    WriteBurst(ManagerRec, X"0000_001A", 13) ;
 
-    ReadBurst (MasterRec, X"0000_001A", 13) ;
+    ReadBurst (ManagerRec, X"0000_001A", 13) ;
     CheckBurst(ReadBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25)) ;
 
     log("Write with ByteAddr = 31, 12 Bytes -- unaligned") ;
     PushBurstRandom(WriteBurstFifo, 7, 12) ;
-    WriteBurst(MasterRec, X"0000_0031", 12) ;
+    WriteBurst(ManagerRec, X"0000_0031", 12) ;
 
-    ReadBurst (MasterRec, X"0000_0031", 12) ;
+    ReadBurst (ManagerRec, X"0000_0031", 12) ;
     CheckBurstRandom(ReadBurstFifo, 7, 12) ;
 
     log("Write with ByteAddr = 8, 12 Bytes -- word aligned") ;
     PushBurstIncrement(WriteBurstFifo, 1, 16) ;
-    WriteBurst(MasterRec, X"0000_0050", 1) ;
-    WriteBurst(MasterRec, X"0000_0051", 1) ;
-    WriteBurst(MasterRec, X"0000_0052", 1) ;
-    WriteBurst(MasterRec, X"0000_0053", 1) ;
+    WriteBurst(ManagerRec, X"0000_0050", 1) ;
+    WriteBurst(ManagerRec, X"0000_0051", 1) ;
+    WriteBurst(ManagerRec, X"0000_0052", 1) ;
+    WriteBurst(ManagerRec, X"0000_0053", 1) ;
     
-    WriteBurst(MasterRec, X"0000_0060", 2) ;
-    WriteBurst(MasterRec, X"0000_0062", 2) ;
-    WriteBurst(MasterRec, X"0000_0065", 2) ;
+    WriteBurst(ManagerRec, X"0000_0060", 2) ;
+    WriteBurst(ManagerRec, X"0000_0062", 2) ;
+    WriteBurst(ManagerRec, X"0000_0065", 2) ;
     
-    WriteBurst(MasterRec, X"0000_0070", 3) ;
-    WriteBurst(MasterRec, X"0000_0075", 3) ;
+    WriteBurst(ManagerRec, X"0000_0070", 3) ;
+    WriteBurst(ManagerRec, X"0000_0075", 3) ;
 
 
-    ReadBurst (MasterRec, X"0000_0050", 1) ;
+    ReadBurst (ManagerRec, X"0000_0050", 1) ;
     CheckBurst(ReadBurstFifo, (1 => 1)) ;
-    ReadBurst (MasterRec, X"0000_0051", 1) ;
+    ReadBurst (ManagerRec, X"0000_0051", 1) ;
     CheckBurst(ReadBurstFifo, (1 => 2)) ;
-    ReadBurst (MasterRec, X"0000_0052", 1) ;
+    ReadBurst (ManagerRec, X"0000_0052", 1) ;
     CheckBurst(ReadBurstFifo, (1 => 3)) ;
-    ReadBurst (MasterRec, X"0000_0053", 1) ;
+    ReadBurst (ManagerRec, X"0000_0053", 1) ;
     CheckBurst(ReadBurstFifo, (1 => 4)) ;
     
-    ReadBurst (MasterRec, X"0000_0060", 2) ;
+    ReadBurst (ManagerRec, X"0000_0060", 2) ;
     CheckBurst(ReadBurstFifo, (5, 6)) ;
-    ReadBurst (MasterRec, X"0000_0062", 2) ;
+    ReadBurst (ManagerRec, X"0000_0062", 2) ;
     CheckBurst(ReadBurstFifo, (7, 8)) ;
-    ReadBurst (MasterRec, X"0000_0065", 2) ;
+    ReadBurst (ManagerRec, X"0000_0065", 2) ;
     CheckBurst(ReadBurstFifo, (9, 10)) ;
 
-    ReadBurst (MasterRec, X"0000_0070", 3) ;
+    ReadBurst (ManagerRec, X"0000_0070", 3) ;
     CheckBurst(ReadBurstFifo, (11, 12, 13)) ;
-    ReadBurst (MasterRec, X"0000_0075", 3) ;
+    ReadBurst (ManagerRec, X"0000_0075", 3) ;
     CheckBurst(ReadBurstFifo, (14, 15, 16)) ;
 
     WaitForBarrier(WriteDone) ;
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MasterRec, 2) ;
+    WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process MasterProc ;
@@ -164,7 +164,7 @@ begin
   AxiMemoryProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ; 
-    alias AxiMemoryTransRec is ResponderRec ;        
+    alias AxiMemoryTransRec is SubordinateRec ;        
   begin
     WaitForClock(AxiMemoryTransRec, 2) ; 
     
@@ -192,7 +192,7 @@ Configuration TbAxi4_MemoryBurst1 of TbAxi4 is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(MemoryBurst1) ; 
     end for ; 
-  for Responder_1 : Axi4LiteResponder 
+  for Subordinate_1 : Axi4LiteSubordinate
       use entity osvvm_Axi4.Axi4LiteMemory ; 
     end for ; 
   end for ; 

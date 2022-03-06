@@ -90,43 +90,43 @@ begin
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
   begin
     wait until nReset = '1' ;  
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     log("Write and Read with ByteAddr = 0, 4 Bytes") ;
-    Write(MasterRec, X"0000_0000", X"5555_5555" ) ;
-    Read(MasterRec,  X"0000_0000", Data) ;
+    Write(ManagerRec, X"0000_0000", X"5555_5555" ) ;
+    Read(ManagerRec,  X"0000_0000", Data) ;
     AffirmIfEqual(Data, X"5555_5555", "Master Read Data: ") ;
     
     log("Write and Read with 1 Byte, and ByteAddr = 0, 1, 2, 3") ; 
-    Write(MasterRec, X"0000_0010", X"11" ) ;
-    Write(MasterRec, X"0000_0011", X"22" ) ;
-    Write(MasterRec, X"0000_0012", X"33" ) ;
-    Write(MasterRec, X"0000_0013", X"44" ) ;
+    Write(ManagerRec, X"0000_0010", X"11" ) ;
+    Write(ManagerRec, X"0000_0011", X"22" ) ;
+    Write(ManagerRec, X"0000_0012", X"33" ) ;
+    Write(ManagerRec, X"0000_0013", X"44" ) ;
     
-    ReadCheck(MasterRec, X"0000_0010", X"11" ) ;
-    ReadCheck(MasterRec, X"0000_0011", X"22" ) ;
-    ReadCheck(MasterRec, X"0000_0012", X"33" ) ;
-    ReadCheck(MasterRec, X"0000_0013", X"44" ) ;
+    ReadCheck(ManagerRec, X"0000_0010", X"11" ) ;
+    ReadCheck(ManagerRec, X"0000_0011", X"22" ) ;
+    ReadCheck(ManagerRec, X"0000_0012", X"33" ) ;
+    ReadCheck(ManagerRec, X"0000_0013", X"44" ) ;
     
 
     log("Write and Read with 2 Bytes, and ByteAddr = 0, 1, 2") ;
-    Write(MasterRec, X"0000_0020", X"2211"  ) ;
-    Write(MasterRec, X"0000_0031", X"44_33" ) ;
-    Write(MasterRec, X"0000_0042", X"6655"  ) ;
+    Write(ManagerRec, X"0000_0020", X"2211"  ) ;
+    Write(ManagerRec, X"0000_0031", X"44_33" ) ;
+    Write(ManagerRec, X"0000_0042", X"6655"  ) ;
     
-    ReadCheck(MasterRec, X"0000_0020", X"2211"  ) ;
-    ReadCheck(MasterRec, X"0000_0031", X"44_33" ) ;
-    ReadCheck(MasterRec, X"0000_0042", X"6655"  ) ;
+    ReadCheck(ManagerRec, X"0000_0020", X"2211"  ) ;
+    ReadCheck(ManagerRec, X"0000_0031", X"44_33" ) ;
+    ReadCheck(ManagerRec, X"0000_0042", X"6655"  ) ;
 
     log("Write and Read with 3 Bytes and ByteAddr = 0. 1") ;
-    Write(MasterRec, X"0000_0050", X"33_2211" ) ;
-    Write(MasterRec, X"0000_0061", X"6655_44" ) ;
+    Write(ManagerRec, X"0000_0050", X"33_2211" ) ;
+    Write(ManagerRec, X"0000_0061", X"6655_44" ) ;
 
-    ReadCheck(MasterRec, X"0000_0050", X"33_2211" ) ;
-    ReadCheck(MasterRec, X"0000_0061", X"6655_44" ) ;
+    ReadCheck(ManagerRec, X"0000_0050", X"33_2211" ) ;
+    ReadCheck(ManagerRec, X"0000_0061", X"6655_44" ) ;
     
     WaitForBarrier(MasterDone) ;
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MasterRec, 2) ;
+    WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process MasterProc ;
@@ -139,28 +139,27 @@ begin
   AxiMemoryProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;   
-    alias AxiMemoryTransRec is ResponderRec ;    
   begin
-    WaitForClock(AxiMemoryTransRec, 2) ;
+    WaitForClock(SubordinateRec, 2) ;
     
     -- ReadBack after Master finishes
     WaitForBarrier(MasterDone) ;
-    ReadCheck(AxiMemoryTransRec, X"0000_0000", X"5555_5555" ) ;
+    ReadCheck(SubordinateRec, X"0000_0000", X"5555_5555" ) ;
     
-    ReadCheck(AxiMemoryTransRec, X"0000_0010", X"11" ) ;
-    ReadCheck(AxiMemoryTransRec, X"0000_0011", X"22" ) ;
-    ReadCheck(AxiMemoryTransRec, X"0000_0012", X"33" ) ;
-    ReadCheck(AxiMemoryTransRec, X"0000_0013", X"44" ) ;
+    ReadCheck(SubordinateRec, X"0000_0010", X"11" ) ;
+    ReadCheck(SubordinateRec, X"0000_0011", X"22" ) ;
+    ReadCheck(SubordinateRec, X"0000_0012", X"33" ) ;
+    ReadCheck(SubordinateRec, X"0000_0013", X"44" ) ;
     
-    ReadCheck(AxiMemoryTransRec, X"0000_0020", X"2211"  ) ;
-    ReadCheck(AxiMemoryTransRec, X"0000_0031", X"44_33" ) ;
-    ReadCheck(AxiMemoryTransRec, X"0000_0042", X"6655"  ) ;
+    ReadCheck(SubordinateRec, X"0000_0020", X"2211"  ) ;
+    ReadCheck(SubordinateRec, X"0000_0031", X"44_33" ) ;
+    ReadCheck(SubordinateRec, X"0000_0042", X"6655"  ) ;
 
-    ReadCheck(AxiMemoryTransRec, X"0000_0050", X"33_2211" ) ;
-    ReadCheck(AxiMemoryTransRec, X"0000_0061", X"6655_44" ) ;
+    ReadCheck(SubordinateRec, X"0000_0050", X"33_2211" ) ;
+    ReadCheck(SubordinateRec, X"0000_0061", X"6655_44" ) ;
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(AxiMemoryTransRec, 2) ;
+    WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process AxiMemoryProc ;
@@ -175,7 +174,7 @@ Configuration TbAxi4_MemoryReadWrite1 of TbAxi4 is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(MemoryReadWrite1) ; 
     end for ; 
-  for Responder_1 : Axi4LiteResponder 
+  for Subordinate_1 : Axi4LiteSubordinate 
       use entity osvvm_Axi4.Axi4LiteMemory ; 
     end for ; 
   end for ; 

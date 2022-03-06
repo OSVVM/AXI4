@@ -60,16 +60,14 @@ entity TestCtrl is
     nReset         : In    std_logic ;
 
     -- Transaction Interfaces
-    MasterRec      : inout AddressBusRecType ;
-    ResponderRec   : inout AddressBusRecType 
+    ManagerRec     : inout AddressBusRecType ;
+    SubordinateRec : inout AddressBusRecType 
 
   ) ;
-    constant AXI_ADDR_WIDTH : integer := MasterRec.Address'length ; 
-    constant AXI_DATA_WIDTH : integer := MasterRec.DataToModel'length ;  
+    constant AXI_ADDR_WIDTH : integer := ManagerRec.Address'length ; 
+    constant AXI_DATA_WIDTH : integer := ManagerRec.DataToModel'length ;  
 
 -- Not currently used in the Axi4Lite model - future use for Axi4Lite Burst Emulation modes    
 --  alias WriteBurstFifo is <<variable .TbAxi4.Master_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
 --  alias ReadBurstFifo  is <<variable .TbAxi4.Master_1.ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
-    alias ManagerRec is MasterRec ; 
-    alias SubordinateRec is ResponderRec ; 
 end entity TestCtrl ;

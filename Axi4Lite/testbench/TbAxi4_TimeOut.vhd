@@ -102,35 +102,35 @@ begin
     variable PreviousErrorCount : AlertCountType ; 
   begin
     wait until nReset = '1' ;  
-    WaitForClock(MasterRec, 2) ; 
+    WaitForClock(ManagerRec, 2) ; 
     
     PreviousErrorCount := GetAlertCount ; 
 
 WaitForBarrier(TestPhaseStart) ;
 log(TbMasterID, "Write Address Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
-    WaitForClock(MasterRec, 2) ;  -- Allow Model Options to Set.
-    Write(MasterRec, X"0001_0010",  X"0001_0010") ;  -- Pass
-    WaitForClock(MasterRec, 10) ; 
+    WaitForClock(ManagerRec, 2) ;  -- Allow Model Options to Set.
+    Write(ManagerRec, X"0001_0010",  X"0001_0010") ;  -- Pass
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxi4Options(MasterRec, WRITE_ADDRESS_READY_TIME_OUT, 5) ;
-    Write(MasterRec, X"BAD0_0010",  X"BAD0_0010") ;  -- Write Address Fail
-    WaitForClock(MasterRec, 10) ; 
+    SetAxi4Options(ManagerRec, WRITE_ADDRESS_READY_TIME_OUT, 5) ;
+    Write(ManagerRec, X"BAD0_0010",  X"BAD0_0010") ;  -- Write Address Fail
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxi4Options(MasterRec, WRITE_ADDRESS_READY_TIME_OUT, 10) ;
-    Write(MasterRec, X"0002_0020",  X"0002_0020") ;  -- Pass
-    WaitForClock(MasterRec, 10) ; 
+    SetAxi4Options(ManagerRec, WRITE_ADDRESS_READY_TIME_OUT, 10) ;
+    Write(ManagerRec, X"0002_0020",  X"0002_0020") ;  -- Pass
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxi4Options(MasterRec, WRITE_ADDRESS_READY_TIME_OUT, 5) ;
-    Write(MasterRec, X"BAD0_0020",  X"BAD0_0020") ;  -- Write Address Fail
-    WaitForClock(MasterRec, 10) ; 
+    SetAxi4Options(ManagerRec, WRITE_ADDRESS_READY_TIME_OUT, 5) ;
+    Write(ManagerRec, X"BAD0_0020",  X"BAD0_0020") ;  -- Write Address Fail
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxi4Options(MasterRec, WRITE_ADDRESS_READY_TIME_OUT, 25) ;
-    Write(MasterRec, X"0003_0030",  X"0003_0030") ;  -- Pass
-    WaitForClock(MasterRec, 10) ; 
+    SetAxi4Options(ManagerRec, WRITE_ADDRESS_READY_TIME_OUT, 25) ;
+    Write(ManagerRec, X"0003_0030",  X"0003_0030") ;  -- Pass
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
     ErrorsInjected    := (FAILURE => 4, ERROR => 0, WARNING => 0) ;
@@ -146,29 +146,29 @@ log(TbMasterID, "Write Address Ready TimeOut test.  Trigger Ready TimeOut twice.
     
 WaitForBarrier(TestPhaseStart) ;
 log(TbMasterID, "Write DATA Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
-    WaitForClock(MasterRec, 2) ;  -- Allow model options to set.
-    Write(MasterRec, X"0001_0110",  X"0001_0110") ;  -- Pass
-    WaitForClock(MasterRec, 10) ; 
+    WaitForClock(ManagerRec, 2) ;  -- Allow model options to set.
+    Write(ManagerRec, X"0001_0110",  X"0001_0110") ;  -- Pass
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
 
-    SetAxi4Options(MasterRec, WRITE_DATA_READY_TIME_OUT, 5) ;
-    Write(MasterRec, X"BAD0_0110",  X"BAD0_0110") ;  -- Write Data Fail
-    WaitForClock(MasterRec, 10) ; 
+    SetAxi4Options(ManagerRec, WRITE_DATA_READY_TIME_OUT, 5) ;
+    Write(ManagerRec, X"BAD0_0110",  X"BAD0_0110") ;  -- Write Data Fail
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxi4Options(MasterRec, WRITE_DATA_READY_TIME_OUT, 10) ;
-    Write(MasterRec, X"0002_0120",  X"0002_0120") ;  -- Pass
-    WaitForClock(MasterRec, 10) ; 
+    SetAxi4Options(ManagerRec, WRITE_DATA_READY_TIME_OUT, 10) ;
+    Write(ManagerRec, X"0002_0120",  X"0002_0120") ;  -- Pass
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxi4Options(MasterRec, WRITE_DATA_READY_TIME_OUT, 5) ;
-    Write(MasterRec, X"BAD0_0120",  X"BAD0_0120") ;  -- Write DATA Fail
-    WaitForClock(MasterRec, 10) ; 
+    SetAxi4Options(ManagerRec, WRITE_DATA_READY_TIME_OUT, 5) ;
+    Write(ManagerRec, X"BAD0_0120",  X"BAD0_0120") ;  -- Write DATA Fail
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxi4Options(MasterRec, WRITE_DATA_READY_TIME_OUT, 25) ;
-    Write(MasterRec, X"0003_0130",  X"0003_0130") ;  -- Pass
-    WaitForClock(MasterRec, 10) ; 
+    SetAxi4Options(ManagerRec, WRITE_DATA_READY_TIME_OUT, 25) ;
+    Write(ManagerRec, X"0003_0130",  X"0003_0130") ;  -- Pass
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
 
     ErrorsInjected    := (FAILURE => 4, ERROR => 0, WARNING => 0) ;
@@ -185,32 +185,32 @@ log(TbMasterID, "Write DATA Ready TimeOut test.  Trigger Ready TimeOut twice.") 
 WaitForBarrier(TestPhaseStart) ;
 log(TbMasterID, "Write Response Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
 
-    SetAxi4Options(MasterRec, WRITE_RESPONSE_READY_DELAY_CYCLES, 7) ;
-    SetAxi4Options(MasterRec, WRITE_RESPONSE_READY_BEFORE_VALID, FALSE) ;
+    SetAxi4Options(ManagerRec, WRITE_RESPONSE_READY_DELAY_CYCLES, 7) ;
+    SetAxi4Options(ManagerRec, WRITE_RESPONSE_READY_BEFORE_VALID, FALSE) ;
 
-    WaitForClock(MasterRec, 2) ;  -- Allow model options to set.
-    Write(MasterRec, X"0001_0210",  X"0001_0210") ;  -- Pass
-    WaitForClock(MasterRec, 10) ; 
+    WaitForClock(ManagerRec, 2) ;  -- Allow model options to set.
+    Write(ManagerRec, X"0001_0210",  X"0001_0210") ;  -- Pass
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
 
-    Write(MasterRec, X"BAD0_0210",  X"BAD0_0210") ;  -- Write Data Fail
-    WaitForClock(MasterRec, 10) ; 
+    Write(ManagerRec, X"BAD0_0210",  X"BAD0_0210") ;  -- Write Data Fail
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    Write(MasterRec, X"0002_0220",  X"0002_0220") ;  -- Pass
-    WaitForClock(MasterRec, 10) ; 
+    Write(ManagerRec, X"0002_0220",  X"0002_0220") ;  -- Pass
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    Write(MasterRec, X"BAD0_0220",  X"BAD0_0220") ;  -- Write DATA Fail
-    WaitForClock(MasterRec, 10) ; 
+    Write(ManagerRec, X"BAD0_0220",  X"BAD0_0220") ;  -- Write DATA Fail
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxi4Options(MasterRec, WRITE_RESPONSE_READY_DELAY_CYCLES, 0) ;
-    SetAxi4Options(MasterRec, WRITE_RESPONSE_READY_BEFORE_VALID, FALSE) ;
+    SetAxi4Options(ManagerRec, WRITE_RESPONSE_READY_DELAY_CYCLES, 0) ;
+    SetAxi4Options(ManagerRec, WRITE_RESPONSE_READY_BEFORE_VALID, FALSE) ;
 
-    SetAxi4Options(MasterRec, WRITE_DATA_READY_TIME_OUT, 25) ;
-    Write(MasterRec, X"0003_0230",  X"0003_0230") ;  -- Pass
-    WaitForClock(MasterRec, 10) ; 
+    SetAxi4Options(ManagerRec, WRITE_DATA_READY_TIME_OUT, 25) ;
+    Write(ManagerRec, X"0003_0230",  X"0003_0230") ;  -- Pass
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
 
     ErrorsInjected    := (FAILURE => 4, ERROR => 2, WARNING => 0) ;
@@ -226,34 +226,34 @@ log(TbMasterID, "Write Response Ready TimeOut test.  Trigger Ready TimeOut twice
     
 WaitForBarrier(TestPhaseStart) ;
 log(TbMasterID, "Read Address Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
-    WaitForClock(MasterRec, 2) ;  -- Allow Model Options to Set.
-    Read(MasterRec, X"0001_0010",  ReadData) ;  -- Pass
+    WaitForClock(ManagerRec, 2) ;  -- Allow Model Options to Set.
+    Read(ManagerRec, X"0001_0010",  ReadData) ;  -- Pass
     AffirmIfEqual(TbMasterID, ReadData, X"0001_0010", "AXI Master Read Data: ") ;
-    WaitForClock(MasterRec, 10) ; 
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxi4Options(MasterRec, READ_ADDRESS_READY_TIME_OUT, 5) ;
-    Read(MasterRec, X"BAD0_0010",  ReadData) ;  -- Read Address Fail
+    SetAxi4Options(ManagerRec, READ_ADDRESS_READY_TIME_OUT, 5) ;
+    Read(ManagerRec, X"BAD0_0010",  ReadData) ;  -- Read Address Fail
     AffirmIfEqual(TbMasterID, ReadData, X"BAD0_0010", "AXI Master Read Data: ") ;
-    WaitForClock(MasterRec, 10) ; 
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxi4Options(MasterRec, READ_ADDRESS_READY_TIME_OUT, 10) ;
-    Read(MasterRec, X"0002_0020",  ReadData) ;  -- Pass
+    SetAxi4Options(ManagerRec, READ_ADDRESS_READY_TIME_OUT, 10) ;
+    Read(ManagerRec, X"0002_0020",  ReadData) ;  -- Pass
     AffirmIfEqual(TbMasterID, ReadData, X"0002_0020", "AXI Master Read Data: ") ;
-    WaitForClock(MasterRec, 10) ; 
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxi4Options(MasterRec, READ_ADDRESS_READY_TIME_OUT, 5) ;
-    Read(MasterRec, X"BAD0_0020",  ReadData) ;  -- Read Address Fail
+    SetAxi4Options(ManagerRec, READ_ADDRESS_READY_TIME_OUT, 5) ;
+    Read(ManagerRec, X"BAD0_0020",  ReadData) ;  -- Read Address Fail
     AffirmIfEqual(TbMasterID, ReadData, X"BAD0_0020", "AXI Master Read Data: ") ;
-    WaitForClock(MasterRec, 10) ; 
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxi4Options(MasterRec, READ_ADDRESS_READY_TIME_OUT, 25) ;
-    Read(MasterRec, X"0003_0030",  ReadData) ;  -- Pass
+    SetAxi4Options(ManagerRec, READ_ADDRESS_READY_TIME_OUT, 25) ;
+    Read(ManagerRec, X"0003_0030",  ReadData) ;  -- Pass
     AffirmIfEqual(TbMasterID, ReadData, X"0003_0030", "AXI Master Read Data: ") ;
-    WaitForClock(MasterRec, 10) ; 
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
     ErrorsInjected    := (FAILURE => 4, ERROR => 0, WARNING => 0) ;
@@ -270,36 +270,36 @@ log(TbMasterID, "Read Address Ready TimeOut test.  Trigger Ready TimeOut twice."
 WaitForBarrier(TestPhaseStart) ;
 log(TbMasterID, "Read Data Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
     -- Warning:  it takes one operation before these take impact
-    SetAxi4Options(MasterRec, READ_DATA_READY_DELAY_CYCLES, 7) ;
-    SetAxi4Options(MasterRec, READ_DATA_READY_BEFORE_VALID, FALSE) ;
+    SetAxi4Options(ManagerRec, READ_DATA_READY_DELAY_CYCLES, 7) ;
+    SetAxi4Options(ManagerRec, READ_DATA_READY_BEFORE_VALID, FALSE) ;
 
-    WaitForClock(MasterRec, 2) ;  -- Allow Model Options to Set.
-    Read(MasterRec, X"0001_0010",  ReadData) ;  -- Pass
+    WaitForClock(ManagerRec, 2) ;  -- Allow Model Options to Set.
+    Read(ManagerRec, X"0001_0010",  ReadData) ;  -- Pass
     AffirmIfEqual(TbMasterID, ReadData, X"0001_0010", "AXI Master Read Data: ") ;
-    WaitForClock(MasterRec, 10) ; 
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    Read(MasterRec, X"BAD0_0010",  ReadData) ;  -- Read Address Fail
+    Read(ManagerRec, X"BAD0_0010",  ReadData) ;  -- Read Address Fail
     AffirmIfEqual(TbMasterID, ReadData, not(X"BAD0_0010"), "AXI Master Read Data: ") ;
-    WaitForClock(MasterRec, 10) ; 
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    Read(MasterRec, X"0002_0020",  ReadData) ;  -- Pass
+    Read(ManagerRec, X"0002_0020",  ReadData) ;  -- Pass
     AffirmIfEqual(TbMasterID, ReadData, X"0002_0020", "AXI Master Read Data: ") ;
-    WaitForClock(MasterRec, 10) ; 
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    Read(MasterRec, X"BAD0_0020",  ReadData) ;  -- Read Address Fail
+    Read(ManagerRec, X"BAD0_0020",  ReadData) ;  -- Read Address Fail
     AffirmIfEqual(TbMasterID, ReadData, not(X"BAD0_0020"), "AXI Master Read Data: ") ;
-    WaitForClock(MasterRec, 10) ; 
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
-    SetAxi4Options(MasterRec, READ_DATA_READY_DELAY_CYCLES, 0) ;
-    SetAxi4Options(MasterRec, READ_DATA_READY_BEFORE_VALID, TRUE) ;
+    SetAxi4Options(ManagerRec, READ_DATA_READY_DELAY_CYCLES, 0) ;
+    SetAxi4Options(ManagerRec, READ_DATA_READY_BEFORE_VALID, TRUE) ;
 
-    Read(MasterRec, X"0003_0030",  ReadData) ;  -- Pass
+    Read(ManagerRec, X"0003_0030",  ReadData) ;  -- Pass
     AffirmIfEqual(TbMasterID, ReadData, X"0003_0030", "AXI Master Read Data: ") ;
-    WaitForClock(MasterRec, 10) ; 
+    WaitForClock(ManagerRec, 10) ; 
     print("") ;  print("") ;  
     
     ErrorsInjected    := (FAILURE => 4, ERROR => 2, WARNING => 0) ;
@@ -322,12 +322,12 @@ log(TbMasterID, "Read Data Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
 --       Setting all at the beginning can hide issues.
 --       There is a delay of one cycle before these are effective, so it requires
 --       One "practice cycle" before doing the test cycles  
---    SetAxi4Options(MasterRec, READ_DATA_READY_DELAY_CYCLES, 7) ;
---    SetAxi4Options(MasterRec, READ_DATA_READY_BEFORE_VALID, FALSE) ;
+--    SetAxi4Options(ManagerRec, READ_DATA_READY_DELAY_CYCLES, 7) ;
+--    SetAxi4Options(ManagerRec, READ_DATA_READY_BEFORE_VALID, FALSE) ;
 
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(MasterRec, 20) ;  
+    WaitForClock(ManagerRec, 20) ;  
     WaitForBarrier(TestDone) ;
     wait ;
   end process MasterProc ;
@@ -348,30 +348,30 @@ log(TbMasterID, "Read Data Ready TimeOut test.  Trigger Ready TimeOut twice.") ;
 -- Start test phase 1:  Write Address
 WaitForBarrier(TestPhaseStart) ;
     -- Warning:  it takes one operation before these take impact
-    SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 7) ;
-    SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, FALSE) ;
+    SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 7) ;
+    SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, FALSE) ;
 
-    GetWrite(ResponderRec, Addr, Data) ;  -- Pass.  Ready Delay still = 0.
+    GetWrite(SubordinateRec, Addr, Data) ;  -- Pass.  Ready Delay still = 0.
     AffirmIfEqual(TbResponderID, Addr, X"0001_0010", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, X"0001_0010", "Responder Write Data: ") ;
 
-    GetWrite(ResponderRec, Addr, Data) ;  -- Fail
-    AffirmIfEqual(TbResponderID, Addr, X"BAD0_0011", "Responder Write Addr: ") ;
+    GetWrite(SubordinateRec, Addr, Data) ;  -- Fail
+    AffirmIfEqual(TbResponderID, Addr, X"BAD0_0014", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, X"BAD0_0010", "Responder Write Data: ") ;
     
-    GetWrite(ResponderRec, Addr, Data) ; -- Pass
+    GetWrite(SubordinateRec, Addr, Data) ; -- Pass
     AffirmIfEqual(TbResponderID, Addr, X"0002_0020", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, X"0002_0020", "Responder Write Data: ") ;
     
-    GetWrite(ResponderRec, Addr, Data) ;  -- Fail
-    AffirmIfEqual(TbResponderID, Addr, X"BAD0_0021", "Responder Write Addr: ") ;
+    GetWrite(SubordinateRec, Addr, Data) ;  -- Fail
+    AffirmIfEqual(TbResponderID, Addr, X"BAD0_0024", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, X"BAD0_0020", "Responder Write Data: ") ;
     
     -- Warning:  it takes one operation before these take impact
-    SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 0) ;
-    SetAxi4Options(ResponderRec, WRITE_ADDRESS_READY_BEFORE_VALID, TRUE) ;
+    SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 0) ;
+    SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, TRUE) ;
 
-    GetWrite(ResponderRec, Addr, Data) ;  -- Pass
+    GetWrite(SubordinateRec, Addr, Data) ;  -- Pass
     AffirmIfEqual(TbResponderID, Addr, X"0003_0030", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, X"0003_0030", "Responder Write Data: ") ;
     
@@ -380,30 +380,30 @@ WaitForBarrier(TestPhaseStart) ;
 WaitForBarrier(TestPhaseStart) ;
 
     -- Warning:  it takes one operation before these take impact
-    SetAxi4Options(ResponderRec, WRITE_DATA_READY_DELAY_CYCLES, 7) ;
-    SetAxi4Options(ResponderRec, WRITE_DATA_READY_BEFORE_VALID, FALSE) ;
+    SetAxi4Options(SubordinateRec, WRITE_DATA_READY_DELAY_CYCLES, 7) ;
+    SetAxi4Options(SubordinateRec, WRITE_DATA_READY_BEFORE_VALID, FALSE) ;
 
-    GetWrite(ResponderRec, Addr, Data) ;  -- Pass.  Ready Delay still = 0.
+    GetWrite(SubordinateRec, Addr, Data) ;  -- Pass.  Ready Delay still = 0.
     AffirmIfEqual(TbResponderID, Addr, X"0001_0110", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, X"0001_0110", "Responder Write Data: ") ;
 
-    GetWrite(ResponderRec, Addr, Data) ;  -- Fail
+    GetWrite(SubordinateRec, Addr, Data) ;  -- Fail
     AffirmIfEqual(TbResponderID, Addr, X"BAD0_0110", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, not(X"BAD0_0110"), "Responder Write Data: ") ;
     
-    GetWrite(ResponderRec, Addr, Data) ; -- Pass
+    GetWrite(SubordinateRec, Addr, Data) ; -- Pass
     AffirmIfEqual(TbResponderID, Addr, X"0002_0120", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, X"0002_0120", "Responder Write Data: ") ;
     
-    GetWrite(ResponderRec, Addr, Data) ;  -- Fail
+    GetWrite(SubordinateRec, Addr, Data) ;  -- Fail
     AffirmIfEqual(TbResponderID, Addr, X"BAD0_0120", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, not(X"BAD0_0120"), "Responder Write Data: ") ;
     
     -- Warning:  it takes one operation before these take impact
-    SetAxi4Options(ResponderRec, WRITE_DATA_READY_DELAY_CYCLES, 0) ;
-    SetAxi4Options(ResponderRec, WRITE_DATA_READY_BEFORE_VALID, TRUE) ;
+    SetAxi4Options(SubordinateRec, WRITE_DATA_READY_DELAY_CYCLES, 0) ;
+    SetAxi4Options(SubordinateRec, WRITE_DATA_READY_BEFORE_VALID, TRUE) ;
 
-    GetWrite(ResponderRec, Addr, Data) ;  -- Pass
+    GetWrite(SubordinateRec, Addr, Data) ;  -- Pass
     AffirmIfEqual(TbResponderID, Addr, X"0003_0130", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, X"0003_0130", "Responder Write Data: ") ;
     
@@ -412,30 +412,30 @@ WaitForBarrier(TestPhaseStart) ;
 WaitForBarrier(TestPhaseStart) ;
     
     -- Warning:  it takes one operation before these take impact
-    -- SetAxi4Options(MasterRec, WRITE_RESPONSE_READY_DELAY_CYCLES, 7) ;
-    -- SetAxi4Options(MasterRec, WRITE_RESPONSE_READY_BEFORE_VALID, FALSE) ;
+    -- SetAxi4Options(ManagerRec, WRITE_RESPONSE_READY_DELAY_CYCLES, 7) ;
+    -- SetAxi4Options(ManagerRec, WRITE_RESPONSE_READY_BEFORE_VALID, FALSE) ;
 
-    GetWrite(ResponderRec, Addr, Data) ;  -- Pass.  Ready Delay still = 0.
+    GetWrite(SubordinateRec, Addr, Data) ;  -- Pass.  Ready Delay still = 0.
     AffirmIfEqual(TbResponderID, Addr, X"0001_0210", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, X"0001_0210", "Responder Write Data: ") ;
 
-    SetAxi4Options(ResponderRec, WRITE_RESPONSE_READY_TIME_OUT, 5) ;
-    GetWrite(ResponderRec, Addr, Data) ;  -- Fail
+    SetAxi4Options(SubordinateRec, WRITE_RESPONSE_READY_TIME_OUT, 5) ;
+    GetWrite(SubordinateRec, Addr, Data) ;  -- Fail
     AffirmIfEqual(TbResponderID, Addr, X"BAD0_0210", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, X"BAD0_0210", "Responder Write Data: ") ;
     
-    SetAxi4Options(ResponderRec, WRITE_RESPONSE_READY_TIME_OUT, 10) ;
-    GetWrite(ResponderRec, Addr, Data) ; -- Pass
+    SetAxi4Options(SubordinateRec, WRITE_RESPONSE_READY_TIME_OUT, 10) ;
+    GetWrite(SubordinateRec, Addr, Data) ; -- Pass
     AffirmIfEqual(TbResponderID, Addr, X"0002_0220", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, X"0002_0220", "Responder Write Data: ") ;
     
-    SetAxi4Options(ResponderRec, WRITE_RESPONSE_READY_TIME_OUT, 5) ;
-    GetWrite(ResponderRec, Addr, Data) ;  -- Fail
+    SetAxi4Options(SubordinateRec, WRITE_RESPONSE_READY_TIME_OUT, 5) ;
+    GetWrite(SubordinateRec, Addr, Data) ;  -- Fail
     AffirmIfEqual(TbResponderID, Addr, X"BAD0_0220", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, X"BAD0_0220", "Responder Write Data: ") ;
     
-    SetAxi4Options(ResponderRec, WRITE_RESPONSE_READY_TIME_OUT, 10) ;
-    GetWrite(ResponderRec, Addr, Data) ;  -- Pass
+    SetAxi4Options(SubordinateRec, WRITE_RESPONSE_READY_TIME_OUT, 10) ;
+    GetWrite(SubordinateRec, Addr, Data) ;  -- Pass
     AffirmIfEqual(TbResponderID, Addr, X"0003_0230", "Responder Write Addr: ") ;
     AffirmIfEqual(TbResponderID, Data, X"0003_0230", "Responder Write Data: ") ;
     
@@ -443,53 +443,53 @@ WaitForBarrier(TestPhaseStart) ;
 -- Start test phase 4: Read Address
 WaitForBarrier(TestPhaseStart) ;
     -- Warning:  it takes one operation before these take impact
-    SetAxi4Options(ResponderRec, READ_ADDRESS_READY_DELAY_CYCLES, 7) ;
-    SetAxi4Options(ResponderRec, READ_ADDRESS_READY_BEFORE_VALID, FALSE) ;
+    SetAxi4Options(SubordinateRec, READ_ADDRESS_READY_DELAY_CYCLES, 7) ;
+    SetAxi4Options(SubordinateRec, READ_ADDRESS_READY_BEFORE_VALID, FALSE) ;
 
-    SendRead(ResponderRec, Addr, X"0001_0010") ; 
+    SendRead(SubordinateRec, Addr, X"0001_0010") ; 
     AffirmIfEqual(TbResponderID, Addr, X"0001_0010", "Responder Read Addr: ") ;
 
-    SendRead(ResponderRec, Addr, X"BAD0_0010") ; -- Fail
-    AffirmIfEqual(TbResponderID, Addr, X"BAD0_0011", "Responder Read Addr: ") ;
+    SendRead(SubordinateRec, Addr, X"BAD0_0010") ; -- Fail
+    AffirmIfEqual(TbResponderID, Addr, X"BAD0_0014", "Responder Read Addr: ") ;
     
-    SendRead(ResponderRec, Addr, X"0002_0020") ; -- Pass
+    SendRead(SubordinateRec, Addr, X"0002_0020") ; -- Pass
     AffirmIfEqual(TbResponderID, Addr, X"0002_0020", "Responder Read Addr: ") ;
 
-    SendRead(ResponderRec, Addr, X"BAD0_0020") ; -- Fail
-    AffirmIfEqual(TbResponderID, Addr, X"BAD0_0021", "Responder Read Addr: ") ;
+    SendRead(SubordinateRec, Addr, X"BAD0_0020") ; -- Fail
+    AffirmIfEqual(TbResponderID, Addr, X"BAD0_0024", "Responder Read Addr: ") ;
     
     -- Warning:  it takes one operation before these take impact
-    SetAxi4Options(ResponderRec, READ_ADDRESS_READY_DELAY_CYCLES, 0) ;
-    SetAxi4Options(ResponderRec, READ_ADDRESS_READY_BEFORE_VALID, TRUE) ;
+    SetAxi4Options(SubordinateRec, READ_ADDRESS_READY_DELAY_CYCLES, 0) ;
+    SetAxi4Options(SubordinateRec, READ_ADDRESS_READY_BEFORE_VALID, TRUE) ;
 
-    SendRead(ResponderRec, Addr, X"0003_0030") ; -- Pass
+    SendRead(SubordinateRec, Addr, X"0003_0030") ; -- Pass
     AffirmIfEqual(TbResponderID, Addr, X"0003_0030", "Responder Read Addr: ") ;
 
 -- Start test phase 5: Read Data
 WaitForBarrier(TestPhaseStart) ;
 
-    SendRead(ResponderRec, Addr, X"0001_0010") ; 
+    SendRead(SubordinateRec, Addr, X"0001_0010") ; 
     AffirmIfEqual(TbResponderID, Addr, X"0001_0010", "Responder Read Addr: ") ;
 
-    SetAxi4Options(ResponderRec, READ_DATA_READY_TIME_OUT, 5) ;
-    SendRead(ResponderRec, Addr, X"BAD0_0010") ; -- Fail
+    SetAxi4Options(SubordinateRec, READ_DATA_READY_TIME_OUT, 5) ;
+    SendRead(SubordinateRec, Addr, X"BAD0_0010") ; -- Fail
     AffirmIfEqual(TbResponderID, Addr, X"BAD0_0010", "Responder Read Addr: ") ;
     
-    SetAxi4Options(ResponderRec, READ_DATA_READY_TIME_OUT, 10) ;
-    SendRead(ResponderRec, Addr, X"0002_0020") ; -- Pass
+    SetAxi4Options(SubordinateRec, READ_DATA_READY_TIME_OUT, 10) ;
+    SendRead(SubordinateRec, Addr, X"0002_0020") ; -- Pass
     AffirmIfEqual(TbResponderID, Addr, X"0002_0020", "Responder Read Addr: ") ;
 
-    SetAxi4Options(ResponderRec, READ_DATA_READY_TIME_OUT, 5) ;
-    SendRead(ResponderRec, Addr, X"BAD0_0020") ; -- Fail
+    SetAxi4Options(SubordinateRec, READ_DATA_READY_TIME_OUT, 5) ;
+    SendRead(SubordinateRec, Addr, X"BAD0_0020") ; -- Fail
     AffirmIfEqual(TbResponderID, Addr, X"BAD0_0020", "Responder Read Addr: ") ;
     
-    SetAxi4Options(ResponderRec, READ_DATA_READY_TIME_OUT, 25) ;
-    SendRead(ResponderRec, Addr, X"0003_0030") ; -- Pass
+    SetAxi4Options(SubordinateRec, READ_DATA_READY_TIME_OUT, 25) ;
+    SendRead(SubordinateRec, Addr, X"0003_0030") ; -- Pass
     AffirmIfEqual(Addr, X"0003_0030", "Responder Read Addr: ") ;
 
     
     -- Wait for outputs to propagate and signal TestDone
-    WaitForClock(ResponderRec, 2) ;
+    WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process ResponderProc ;

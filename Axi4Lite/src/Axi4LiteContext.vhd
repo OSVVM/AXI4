@@ -49,11 +49,7 @@ context Axi4LiteContext is
     use osvvm_Axi4.Axi4OptionsPkg.all ; 
     use osvvm_Axi4.Axi4ModelPkg.all ;
     
-    
-    use osvvm_Axi4.Axi4LiteMasterComponentPkg.all ;
-    use osvvm_Axi4.Axi4LiteResponderComponentPkg.all ;
-    use osvvm_Axi4.Axi4LiteMemoryComponentPkg.all ;
-    use osvvm_Axi4.Axi4LiteMonitorComponentPkg.all ;
+    use osvvm_Axi4.Axi4LiteComponentPkg.all ;
     
     -- Temporary inclusion of Axi4 things that become deprecated with changes
     use osvvm_Axi4.Axi4VersionCompatibilityPkg.all ;

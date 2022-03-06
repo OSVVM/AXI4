@@ -170,18 +170,18 @@ begin
     variable ID : AlertLogIDType ;
   begin
     -- Alerts
-    ID           := GetAlertLogID(MODEL_INSTANCE_NAME) ;
+    ID           := NewID(MODEL_INSTANCE_NAME) ;
     ModelID      <= ID ;
-    BusFailedID  <= GetAlertLogID(MODEL_INSTANCE_NAME & ": No response", ID ) ;
-    DataCheckID  <= GetAlertLogID(MODEL_INSTANCE_NAME & ": Data Check", ID ) ;
+    BusFailedID  <= NewID("No response", ID ) ;
+    DataCheckID  <= NewID("Data Check", ID ) ;
 
     -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
     --   FIFOS only generate usage type errors 
-    WriteAddressFifo    <= NewID(MODEL_INSTANCE_NAME & ": WriteAddressFIFO",   ID, DoNotReport => TRUE);
-    WriteDataFifo       <= NewID(MODEL_INSTANCE_NAME & ": WriteDataFifo",      ID, DoNotReport => TRUE);
-    WriteResponseFifo   <= NewID(MODEL_INSTANCE_NAME & ": WriteResponseFifo",  ID, DoNotReport => TRUE);
-    ReadAddressFifo     <= NewID(MODEL_INSTANCE_NAME & ": ReadAddressFifo",    ID, DoNotReport => TRUE);
-    ReadDataFifo        <= NewID(MODEL_INSTANCE_NAME & ": ReadDataFifo",       ID, DoNotReport => TRUE);
+    WriteAddressFifo    <= NewID("WriteAddressFIFO",   ID, ReportMode => DISABLED);
+    WriteDataFifo       <= NewID("WriteDataFifo",      ID, ReportMode => DISABLED);
+    WriteResponseFifo   <= NewID("WriteResponseFifo",  ID, ReportMode => DISABLED);
+    ReadAddressFifo     <= NewID("ReadAddressFifo",    ID, ReportMode => DISABLED);
+    ReadDataFifo        <= NewID("ReadDataFifo",       ID, ReportMode => DISABLED);
     wait ;
   end process InitalizeAlertLogIDs ;
 

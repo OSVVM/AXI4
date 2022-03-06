@@ -160,7 +160,7 @@ begin
     DataCheckID             <= NewID("Data Check",     ID ) ;
     BusFailedID             <= NewID("No response",    ID ) ;
 
-    -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
+    -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to ReportMode)
     --   FIFOS only generate usage type errors 
     WriteAddressFifo           <= NewID("WriteAddressFIFO",             ID, ReportMode => DISABLED);
     WriteDataFifo              <= NewID("WriteDataFifo",                ID, ReportMode => DISABLED);

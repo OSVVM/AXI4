@@ -246,7 +246,7 @@ begin
     variable ExpectedData    : std_logic_vector(LRD.Data'range) ;
 
     variable Operation       : AddressBusOperationType ;
-    variable TransactionCount : integer := 0 ; 
+    variable WriteDataCount   : integer := 0 ;
   begin
     AxiDefaults := InitAxi4Rec(AxiDefaults, '0') ;
     LAW.Size    := to_slv(AXI_BYTE_ADDR_WIDTH, LAW.Size'length) ;
@@ -267,7 +267,6 @@ begin
          Rdy      => TransRec.Rdy,
          Ack      => TransRec.Ack
       ) ;
-      TransactionCount := increment(TransactionCount) ; 
       Operation := TransRec.Operation ;
 
       case Operation is
@@ -376,6 +375,7 @@ begin
             Push(WriteDataFifo, '0' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
 
             Increment(WriteDataRequestCount) ;
+            WriteDataCount := WriteDataCount + 1 ; 
           end if ;
           
           -- Allow RequestCounts to update
@@ -384,7 +384,7 @@ begin
 --!! If burst emulation is added, then this will need to be a while loop since
 --!! more than one transaction will be dispatched at a time.
           if WriteAddressRequestCount /= WriteResponseExpectCount and
-             WriteDataRequestCount    /= WriteResponseExpectCount 
+             WriteDataCount           /= WriteResponseExpectCount 
           then
             -- Queue Expected Write Response
             Push(WriteResponseScoreboard, LWR.Resp) ;
@@ -451,6 +451,7 @@ begin
 
             -- Increment(WriteDataRequestCount) ;
             WriteDataRequestCount        <= Increment(WriteDataRequestCount, TransfersInBurst) ;
+            WriteDataCount := WriteDataCount + 1 ; 
           end if ;
 
           -- Allow RequestCounts to update
@@ -459,7 +460,7 @@ begin
 --!! will need to be a while loop if more than one transaction can be dispatched at a time.
 --!! only happens if bursts are emulated - ie translated from a burst cycle to a multiple individual cycles
           if WriteAddressRequestCount /= WriteResponseExpectCount and 
-             WriteDataRequestCount    /= WriteResponseExpectCount 
+             WriteDataCount           /= WriteResponseExpectCount 
           then
             -- Queue Expected Write Response
             Push(WriteResponseScoreboard, LWR.Resp) ;
@@ -741,16 +742,9 @@ begin
 
     variable Local : AxiBus.WriteData'subtype ;
     
---    variable Local : Axi4WriteDataRecType (
---                      Data(WD.Data'length-1 downto 0),
---                      Strb(WD.Strb'length-1 downto 0),
---                      User(WD.User'range),
---                      ID(WD.ID'range)
---                    );
-
-      variable WriteDataReadyTimeOut : integer ;
-      variable Burst    : std_logic ; 
-      variable NewTransfer : std_logic := '1' ; 
+    variable WriteDataReadyTimeOut : integer ;
+    variable Burst    : std_logic ; 
+    variable NewTransfer : std_logic := '1' ; 
   begin
     -- initialize
     WD.Valid <= '0' ;

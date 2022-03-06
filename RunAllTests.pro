@@ -37,9 +37,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-if {$::osvvm::ToolVendor ne "GHDL"} { 
-  # Has failures.  Keep it commented out until Axi4Lite updated
-  include ./Axi4Lite/RunAllTests.pro
-} 
+# if {$::osvvm::ToolVendor ne "GHDL"} { puts Abc } 
+
+include ./Axi4Lite/RunAllTests.pro
 include ./Axi4/RunAllTests.pro
 include ./AxiStream/RunAllTests.pro

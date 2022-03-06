@@ -216,8 +216,8 @@ begin
     LRD.Resp    := to_Axi4RespType(OKAY) ;
     
     wait for 0 ns ; 
-    TransRec.WriteBurstFifo <= NewID(MODEL_INSTANCE_NAME & ": WriteBurstFifo", ModelID) ;
-    TransRec.ReadBurstFifo  <= NewID(MODEL_INSTANCE_NAME & ": ReadBurstFifo",  ModelID) ;
+    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo", ModelID) ;
+    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",  ModelID) ;
     
 --!! AWCache, ARCache Defaults
     loop

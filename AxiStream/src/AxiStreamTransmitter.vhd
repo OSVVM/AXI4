@@ -20,6 +20,7 @@
 --  Revision History:
 --    Date      Version    Description
 --    03/2022   2022.03    Updated calls to NewID for AlertLogID and FIFOs
+--                         Updated TKeep and TStrb generation
 --    02/2022   2022.02    Replaced to_hstring to to_hxstring
 --    01/2022   2022.01    Moved MODEL_INSTANCE_NAME and MODEL_NAME to entity declarative region
 --    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
@@ -115,8 +116,6 @@ entity AxiStreamTransmitter is
     IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, 
       to_lower(PathTail(AxiStreamTransmitter'PATH_NAME))) ;
 
-  constant MODEL_NAME : string := "AxiStreamTransmitter" ;
-  
 end entity AxiStreamTransmitter ;
 architecture SimpleTransmitter of AxiStreamTransmitter is
   signal ModelID, BusFailedID : AlertLogIDType ;
@@ -392,7 +391,7 @@ begin
       -- Calculate Strb. 1 when data else 0
       -- If Strb is unused it may be null range
       for i in Strb'range loop
-        if is_x(Data(i*8)) then
+        if Data(i*8) = 'W' or Data(i*8) = 'U' then
           Strb(i) := '0' ;
         else
           Strb(i) := '1' ;
@@ -420,10 +419,10 @@ begin
 
       Log(ModelID,
         "Axi Stream Send." &
-        "  TData: "     & to_hxstring(Data) &
+        "  TData: "     & to_hxstring(to_x01(Data)) &
         IfElse(TStrb'length > 0, "  TStrb: "     & to_string( Strb), "") &
         IfElse(TKeep'length > 0, "  TKeep: "     & to_string( Keep), "") &
-        IfElse(TID'length > 0,   "  TID: "       & to_hxstring(ID),   "") &
+        IfElse(TID'length   > 0, "  TID: "       & to_hxstring(ID),   "") &
         IfElse(TDest'length > 0, "  TDest: "     & to_hxstring(Dest), "") &
         IfElse(TUser'length > 0, "  TUser: "     & to_hxstring(User), "") &
         "  TLast: "     & to_string( Last) &

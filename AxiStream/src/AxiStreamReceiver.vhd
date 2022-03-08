@@ -107,8 +107,6 @@ entity AxiStreamReceiver is
     IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME,
       to_lower(PathTail(AxiStreamReceiver'PATH_NAME))) ;
 
-  constant MODEL_NAME : string := "AxiStreamReceiver" ;
-
 end entity AxiStreamReceiver ;
 architecture behavioral of AxiStreamReceiver is
 
@@ -627,19 +625,23 @@ begin
           Data(i*8 + 7 downto i*8) := (others => 'U') ;
         end if;
       end loop ;
-      -- For first Word in Transfer, Drop leading bytes until TKeep(i) = '1'
-      if LastLast = '1' then
-        for i in Keep'reverse_range loop
-          exit when Keep(i) /= '0' ;
-          Data(i*8 + 7 downto i*8) := (others => '-') ;
-        end loop ;
-      end if ;
-      -- For last Word in Transfer, Drop ending bytes until TKeep(i) = '1'
-      if Last = '1' then
-        for i in Keep'range loop
-          exit when Keep(i) /= '0' ;
-          Data(i*8 + 7 downto i*8) := (others => '-') ;
-        end loop ;
+      
+      if BurstFifoByteMode then 
+        -- For ByteMode, we drop words with X"--"
+        -- For first Word in Transfer, Drop leading bytes until TKeep(i) = '1'
+        if LastLast = '1' then
+          for i in Keep'reverse_range loop
+            exit when Keep(i) /= '0' ;
+            Data(i*8 + 7 downto i*8) := (others => '-') ;
+          end loop ;
+        end if ;
+        -- For last Word in Transfer, Drop ending bytes until TKeep(i) = '1'
+        if Last = '1' then
+          for i in Keep'range loop
+            exit when Keep(i) /= '0' ;
+            Data(i*8 + 7 downto i*8) := (others => '-') ;
+          end loop ;
+        end if ;
       end if ;
 
       if (TID /= LastID or TDest /= LastDest) and LastLast /= '1' then

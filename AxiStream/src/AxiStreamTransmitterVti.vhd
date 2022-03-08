@@ -20,6 +20,7 @@
 --  Revision History:
 --    Date      Version    Description
 --    03/2022   2022.03    Updated calls to NewID for AlertLogID and FIFOs
+--                         Updated handling of TStrb
 --    02/2022   2022.02    Replaced to_hstring to to_hxstring
 --    01/2022   2022.01    Moved MODEL_INSTANCE_NAME and MODEL_NAME to entity declarative region
 --    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
@@ -118,8 +119,6 @@ entity AxiStreamTransmitterVti is
     IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, 
       to_lower(PathTail(AxiStreamTransmitterVti'PATH_NAME))) ;
 
-  constant MODEL_NAME : string := "AxiStreamTransmitterVti" ;
-
 end entity AxiStreamTransmitterVti ;
 architecture SimpleTransmitter of AxiStreamTransmitterVti is
   signal ModelID, BusFailedID : AlertLogIDType ;
@@ -162,8 +161,8 @@ begin
     ModelID         <= ID ;
 --    ProtocolID      <= NewID("Protocol Error", ID ) ;
 --    DataCheckID     <= NewID("Data Check", ID ) ;
-    BusFailedID     <= NewID("No response", ID ) ;
-    TransmitFifo    <= NewID("TransmitFifo", ID) ; 
+    BusFailedID     <= NewID("No response",  ID) ;
+    TransmitFifo    <= NewID("TransmitFifo", ID, ReportMode => DISABLED) ; 
     wait ;
   end process Initialize ;
 
@@ -333,7 +332,6 @@ begin
 
             when others =>
               Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
-              wait for 0 ns ;
           end case ;
 
         when MULTIPLE_DRIVER_DETECT =>
@@ -343,7 +341,6 @@ begin
         -- The End -- Done
         when others =>
           Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
-          wait for 0 ns ;
       end case ;
 
       -- Wait for 1 delta cycle, required if a wait is not in all case branches above
@@ -397,7 +394,7 @@ begin
       -- Calculate Strb. 1 when data else 0
       -- If Strb is unused it may be null range
       for i in Strb'range loop
-        if is_x(Data(i*8)) then
+        if Data(i*8) = 'W' or Data(i*8) = 'U' then
           Strb(i) := '0' ;
         else
           Strb(i) := '1' ;
@@ -425,10 +422,10 @@ begin
 
       Log(ModelID,
         "Axi Stream Send." &
-        "  TData: "     & to_hxstring(Data) &
+        "  TData: "     & to_hxstring(to_x01(Data)) &
         IfElse(TStrb'length > 0, "  TStrb: "     & to_string( Strb), "") &
         IfElse(TKeep'length > 0, "  TKeep: "     & to_string( Keep), "") &
-        IfElse(TID'length > 0,   "  TID: "       & to_hxstring(ID),   "") &
+        IfElse(TID'length   > 0, "  TID: "       & to_hxstring(ID),   "") &
         IfElse(TDest'length > 0, "  TDest: "     & to_hxstring(Dest), "") &
         IfElse(TUser'length > 0, "  TUser: "     & to_hxstring(User), "") &
         "  TLast: "     & to_string( Last) &
@@ -463,3 +460,4 @@ begin
     end loop TransmitLoop ;
   end process TransmitHandler ;
 end architecture SimpleTransmitter ;
+

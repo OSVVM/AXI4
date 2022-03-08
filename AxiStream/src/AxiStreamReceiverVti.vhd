@@ -110,8 +110,6 @@ entity AxiStreamReceiverVti is
     IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, 
       to_lower(PathTail(AxiStreamReceiverVti'PATH_NAME))) ;
 
-  constant MODEL_NAME : string := "AxiStreamReceiverVti" ;
-
 end entity AxiStreamReceiverVti ;
 architecture behavioral of AxiStreamReceiverVti is
 
@@ -161,7 +159,7 @@ begin
 --    ProtocolID    <= NewID("Protocol Error", ID ) ;
     DataCheckID   <= NewID("Data Check", ID ) ;
     BusFailedID   <= NewID("No response", ID ) ;
-    ReceiveFifo   <= NewID("ReceiveFifo", ID) ;
+    ReceiveFifo   <= NewID("ReceiveFifo", ID, ReportMode => DISABLED) ;
     wait ;
   end process Initialize ;
 
@@ -599,7 +597,7 @@ begin
         -- if no request, wait until we have one
         --!! Note:  > breaks when **RequestCount > 2**30 
         if not ((BurstRequestCount > BurstReceiveCount) or (WordRequestCount > WordReceiveCount)) then 
-          wait until (BurstRequestCount > BurstReceiveCount) or (WordRequestCount > WordReceiveCount) ; 
+          wait until (BurstRequestCount > BurstReceiveCount) or (WordRequestCount > WordReceiveCount) or not WaitForGet ; 
         end if ;
       end if ; 
 
@@ -630,19 +628,23 @@ begin
           Data(i*8 + 7 downto i*8) := (others => 'U') ;
         end if;
       end loop ;
-      -- For first Word in Transfer, Drop leading bytes until TKeep(i) = '1'
-      if LastLast = '1' then
-        for i in Keep'reverse_range loop
-          exit when Keep(i) /= '0' ;
-          Data(i*8 + 7 downto i*8) := (others => '-') ;
-        end loop ;
-      end if ;
-      -- For last Word in Transfer, Drop ending bytes until TKeep(i) = '1'
-      if Last = '1' then
-        for i in Keep'range loop
-          exit when Keep(i) /= '0' ;
-          Data(i*8 + 7 downto i*8) := (others => '-') ;
-        end loop ;
+      
+      if BurstFifoByteMode then 
+        -- For ByteMode, we drop words with X"--"
+        -- For first Word in Transfer, Drop leading bytes until TKeep(i) = '1'
+        if LastLast = '1' then
+          for i in Keep'reverse_range loop
+            exit when Keep(i) /= '0' ;
+            Data(i*8 + 7 downto i*8) := (others => '-') ;
+          end loop ;
+        end if ;
+        -- For last Word in Transfer, Drop ending bytes until TKeep(i) = '1'
+        if Last = '1' then
+          for i in Keep'range loop
+            exit when Keep(i) /= '0' ;
+            Data(i*8 + 7 downto i*8) := (others => '-') ;
+          end loop ;
+        end if ;
       end if ;
 
       if (TID /= LastID or TDest /= LastDest) and LastLast /= '1' then

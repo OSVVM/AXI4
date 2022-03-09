@@ -18,7 +18,7 @@
 --        http://www.SynthWorks.com
 --
 --  Revision History:
---    Date       Version    Description
+--    Date      Version    Description
 --    03/2022   2022.03    Updated calls to NewID for AlertLogID and FIFOs
 --    02/2022   2022.02    WaitForGet, don't send TReady until have a Get transaction
 --                         Replaced to_hstring to to_hxstring
@@ -644,7 +644,7 @@ begin
         end if ;
       end if ;
 
-      if (TID /= LastID or TDest /= LastDest) and LastLast /= '1' then
+      if (not MetaMatch(TID, LastID) or not MetaMatch(TDest, LastDest)) and LastLast /= '1' then
         -- push a burst boundary word, only the Burst Boundary value matters
         push(ReceiveFifo, Data & TID & TDest & TUser & Last & '1') ;
         BurstReceiveCount <= BurstReceiveCount + 1 ;
@@ -652,7 +652,7 @@ begin
           wait for 0 ns ;
         end if ;
       end if ;
---      BurstBoundary := '1' when (TID /= LastID or TDest /= LastDest) and LastLast /= '1' else '0' ;
+--      BurstBoundary := '1' when (not MetaMatch(TID, LastID) or not MetaMatch(TDest, LastDest)) and LastLast /= '1' else '0' ;
       LastID   := TID ;
       LastDest := TDest ;
       LastLast := Last ;

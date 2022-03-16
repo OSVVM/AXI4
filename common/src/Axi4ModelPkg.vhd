@@ -19,8 +19,9 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    09/2017   2017       Initial revision
+--    03/2022   2022.03    Removed deprecated items
 --    01/2020   2020.01    Updated license notice
+--    09/2017   2017       Initial revision
 --
 --
 --  This file is part of OSVVM.
@@ -52,6 +53,7 @@ library osvvm ;
 library osvvm_common ; 
   context osvvm_common.OsvvmCommonContext ;
     
+use work.Axi4InterfaceCommonPkg.all ;
 use work.Axi4InterfacePkg.all ; 
   
 package Axi4ModelPkg is 
@@ -98,14 +100,6 @@ package Axi4ModelPkg is
     constant Data          : In  std_logic_vector 
   ) return std_logic_vector ;
 
---!!  ------------------------------------------------------------
---!!  procedure AlignAxiWriteData (
---!!  -- Shift Data to Align it. 
---!!  ------------------------------------------------------------
---!!    variable Data          : InOut std_logic_vector ;
---!!    constant ByteAddr      : In    integer  
---!!  ) ; 
-
   ------------------------------------------------------------
   function AlignBytesToDataBus (
   -- Shift Data to Align it. 
@@ -144,56 +138,6 @@ package Axi4ModelPkg is
     constant MessagePrefix   : In    string  := "" ; 
     constant TransferNumber  : In    integer := -1
   ) ;
-
---!! deprecated
---!!  ------------------------------------------------------------
---!!  procedure CheckWriteDataWidth (
---!!  -- Check AXI Write Data Width - BYTE and < WordWidth adjusted for ByteAddr 
---!!  ------------------------------------------------------------
---!!    constant ModelID         : In    AlertLogIDType ; 
---!!    constant TransferNumber  : In    integer ; 
---!!    constant WriteDataWidth  : In    integer ; 
---!!    constant WriteByteAddr   : In    integer ;
---!!    constant MaxDataBits     : In    integer 
---!!  ) ; 
---!!
---!! deprecated
---!!  ------------------------------------------------------------
---!!  procedure AlignCheckWriteData (
---!!  -- Align Write Data and Check Widths 
---!!  ------------------------------------------------------------
---!!    constant ModelID         : In    AlertLogIDType ; 
---!!    variable WriteData       : InOut std_logic_vector ;
---!!    variable WriteStrb       : InOut std_logic_vector ;
---!!    constant WriteDataWidth  : In    integer ; 
---!!    constant WriteByteAddr   : In    integer 
---!!  ) ;
---!!
---!! deprecated
---!!  ------------------------------------------------------------
---!!  procedure GetWriteBurstData (
---!!  ------------------------------------------------------------
---!!    variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
---!!    variable WriteData       : InOut std_logic_vector ;
---!!    variable WriteStrb       : InOut std_logic_vector ;
---!!    constant BytesInTransfer : In    integer ; 
---!!    constant ByteAddr        : In    Integer := 0 
---!!  ) ;
---!!
-
---!! Local Only??
---!!  ------------------------------------------------------------
---!!  procedure PopWriteBurstByteData (
---!!  -- Get Byte Data from Burst Data.   
---!!  -- Fill in WriteData and WriteStrb based on ByteAddress and BytesToSend
---!!  -- WriteData must have WriteStrb'length bytes
---!!  ------------------------------------------------------------
---!!    variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
---!!    variable WriteData       : Out   std_logic_vector ;
---!!    variable WriteStrb       : Out   std_logic_vector ;
---!!    variable BytesToSend     : InOut integer ; 
---!!    constant ByteAddress     : In    Integer := 0 
---!!  ) ;
 
   ------------------------------------------------------------
   procedure PopWriteBurstData (
@@ -241,17 +185,6 @@ package Axi4ModelPkg is
     constant ByteAddress    : In    integer := 0 
   ) ;
   
---!! Local Only??
---!!  ------------------------------------------------------------
---!!  procedure PushReadBurstByteData (
---!!  -- Push Burst Data into Byte Burst FIFO.   
---!!  ------------------------------------------------------------
---!!    variable ReadBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
---!!    variable ReadData       : InOut std_logic_vector ;
---!!    variable BytesToReceive : InOut integer ; 
---!!    constant ByteAddress    : In    integer := 0 
---!!  ) ;
-
   ------------------------------------------------------------
   function AlignDataBusToBytes (
   -- Shift Data Right and MASK unused bytes. 
@@ -261,28 +194,6 @@ package Axi4ModelPkg is
     constant ByteAddr      : In    integer 
   ) return std_logic_vector ;
   
---!! Deprecated
---!!  ------------------------------------------------------------
---!!  procedure AlignAxiReadData (
---!!  -- Shift Data Right and MASK unused bytes. 
---!!  ------------------------------------------------------------
---!!    variable Data          : InOut std_logic_vector ;
---!!    constant ByteAddr      : In    integer ; 
---!!    constant DataBytes     : In    integer  
---!!  ) ;
---!!
---!!  ------------------------------------------------------------
---!!  procedure AxiReadDataAlignCheck (
---!!  -- Align Read Data and Check Widths 
---!!  ------------------------------------------------------------
---!!    constant ModelID         : In    AlertLogIDType ; 
---!!    variable ReadData        : InOut std_logic_vector ;
---!!    constant ReadDataWidth   : In    integer ; 
---!!    constant ReadAddress     : In    std_logic_vector ;
---!!    constant MaxDataBytes    : In    integer ;
---!!    constant MaxAddrBits     : In    integer     
---!!  ) ;
-
 end package Axi4ModelPkg ;
 
 -- /////////////////////////////////////////////////////////////////////////////////////////
@@ -318,7 +229,7 @@ package body Axi4ModelPkg is
     ) ;
   function to_Axi4RespType (a: Axi4RespEnumType) return Axi4RespType is
   begin
-    return TB_TO_RESP_TYPE_TABLE(a) ; -- replace with lookup table
+    return TB_TO_RESP_TYPE_TABLE(a) ; 
   end function to_Axi4RespType ;
 
    
@@ -386,19 +297,6 @@ package body Axi4ModelPkg is
     return WriteStrobe ;
   end function CalculateWriteStrobe ; 
   
---!!  Deprecated
---!!  ------------------------------------------------------------
---!!  procedure AlignAxiWriteData (
---!!  ------------------------------------------------------------
---!!    variable Data          : InOut std_logic_vector ;
---!!    constant ByteAddr      : In    integer  
---!!  ) is
---!!    alias aData : std_logic_vector(Data'length-1 downto 0) is Data ; 
---!!  begin    
---!!  -- Deprecate this and Use "Data sll ByteAddr * 8" instead of calling this?
---!!      Data := aData(Data'length - ByteAddr*8 - 1 downto 0) & (ByteAddr*8 downto 1 => '0') ; 
---!!  end procedure AlignAxiWriteData ; 
-
   ------------------------------------------------------------
   function AlignBytesToDataBus (
   ------------------------------------------------------------
@@ -510,94 +408,6 @@ package body Axi4ModelPkg is
           FAILURE) ;
       end if ; 
     end procedure CheckDataWidth ; 
-    
---!! Deprecated  
---!!  ------------------------------------------------------------
---!!  procedure CheckWriteDataWidth (
---!!  -- Check AXI Write Data Width - BYTE and < WordWidth adjusted for ByteAddr 
---!!  ------------------------------------------------------------
---!!    constant ModelID         : In    AlertLogIDType ; 
---!!    constant TransferNumber  : In    integer ; 
---!!    constant WriteDataWidth  : In    integer ; 
---!!    constant WriteByteAddr   : In    integer ;
---!!    constant MaxDataBits     : In    integer 
---!!  ) is
---!!  begin
---!!    -- Check:  Byte Oriented 
---!!    AlertIf(ModelID, WriteDataWidth mod 8 /= 0, 
---!!      "Master Write, Data not on a byte boundary." & 
---!!      "  DataWidth: " & to_string(WriteDataWidth) & 
---!!      "  TransferNumber: " & to_string(TransferNumber), 
---!!      FAILURE) ;
---!!      
---!!    -- Check: WriteDataWidth + WriteByteAddr*8 <= MaxDataBits
---!!    AlertIf(ModelID, WriteDataWidth + WriteByteAddr*8 > MaxDataBits, 
---!!      "Master Write, Data length too large." & 
---!!      "  WriteByteAddr: " & to_string(WriteByteAddr) & " * 8" & 
---!!      "  + WriteDataWidth: " & to_string(WriteDataWidth) & 
---!!      "  > MaxDataBits: " & to_string(MaxDataBits) & 
---!!      "  TransferNumber: " & to_string(TransferNumber),
---!!      FAILURE) ;
---!!  end procedure CheckWriteDataWidth ; 
---!!  -- Deprecated
---!!  ------------------------------------------------------------
---!!  procedure AlignCheckWriteData (
---!!  -- Align Write Data and Check Widths 
---!!  ------------------------------------------------------------
---!!    constant ModelID         : In    AlertLogIDType ; 
---!!    variable WriteData       : InOut std_logic_vector ;
---!!    variable WriteStrb       : InOut std_logic_vector ;
---!!    constant WriteDataWidth  : In    integer ; 
---!!    constant WriteByteAddr   : In    integer 
---!!  ) is
---!!    constant MAX_DATA_BYTES : integer := WriteStrb'length ; 
---!!    variable BytesInTransfer : integer ; 
---!!  begin
---!!    -- Calculate BytesInTransfer
---!!    BytesInTransfer := WriteDataWidth / 8 ;
---!!
---!!    -- Check:  Byte Oriented 
---!!    AlertIf(ModelID, WriteDataWidth mod 8 /= 0, 
---!!      "Master Write, Data not on a byte boundary." & 
---!!      "  DataWidth: " & to_string(WriteDataWidth), 
---!!      FAILURE) ;
---!!    -- Check:  BytesInTransfer <= MAX_DATA_BYTES - WriteByteAddr
---!!    AlertIf(ModelID, BytesInTransfer > MAX_DATA_BYTES - WriteByteAddr, 
---!!      "Master Write, Data length too large." & 
---!!      "  Data: " & to_hstring(WriteData) & 
---!!      "  ByteAddr: " & to_string(WriteByteAddr) & 
---!!      "  BytesInTransfer: " & to_string(BytesInTransfer), 
---!!      FAILURE) ;
---!!
---!!    -- Calculate WStrb and Align WData
---!!    WriteStrb  := CalculateWriteStrobe(WriteByteAddr, BytesInTransfer, MAX_DATA_BYTES) ; 
---!!    if WriteByteAddr /= 0 then 
---!!      AlignAxiWriteData(WriteData, WriteByteAddr) ; 
---!!    end if ; 
---!!  end procedure AlignCheckWriteData ; 
---!!  -- Deprecated
---!!  ------------------------------------------------------------
---!!  procedure GetWriteBurstData (
---!!  ------------------------------------------------------------
---!!    variable WriteBurstFifo  : InOut osvvm.ScoreboardPkg_slv.ScoreboardPType ;
---!!    variable WriteData       : InOut std_logic_vector ;
---!!    variable WriteStrb       : InOut std_logic_vector ;
---!!    constant BytesInTransfer : In    integer ; 
---!!    constant ByteAddr        : In    Integer := 0 
---!!  ) is
---!!    alias aWriteData : std_logic_vector(WriteData'length-1 downto 0) is WriteData ; 
---!!    alias aWriteStrb : std_logic_vector(WriteStrb'length-1 downto 0) is WriteStrb ;
---!!    variable DataBitOffset : integer := ByteAddr * 8 ; 
---!!  begin
---!!    aWriteData := (others => '0') ;
---!!    aWriteStrb := (others => '0') ;
---!!    -- First Byte is put in right side of word
---!!    for i in 0 to BytesInTransfer - 1 loop
---!!       aWriteData(DataBitOffset+7 downto DataBitOffset) := WriteBurstFifo.Pop ; 
---!!       aWriteStrb(i+ByteAddr) := '1' ; 
---!!       DataBitOffset := DataBitOffset + 8 ; 
---!!    end loop ; 
---!!  end procedure GetWriteBurstData ; 
 
   ------------------------------------------------------------
   -- Local
@@ -865,54 +675,5 @@ package body Axi4ModelPkg is
         Alert("PushReadBurstData: BurstFifoMode Invalid Mode: " & to_string(BurstFifoMode), FAILURE) ;
     end case ; 
   end procedure PushReadBurstData ; 
-  
-  
-
---!!  Deprecated
---!!  ------------------------------------------------------------
---!!  procedure AlignAxiReadData (
---!!  -- Shift Data Right and MASK unused bytes. 
---!!  ------------------------------------------------------------
---!!    variable Data          : InOut std_logic_vector ;
---!!    constant ByteAddr      : In    integer ; 
---!!    constant DataBytes     : In    integer  
---!!  ) is
---!!    alias    aData   : std_logic_vector(Data'length-1 downto 0) is Data ; 
---!!    variable Mask    : std_logic_vector(Data'length-1 downto 0) ;
---!!  begin    
---!!      Data := (ByteAddr*8 downto 1 => '0') & aData(Data'length - 1 downto ByteAddr*8) ; 
---!!      Mask := (Data'length-1 downto DataBytes*8 => '0') & (DataBytes*8 - 1 downto 0 => '1') ;
---!!      Data := Mask and Data ; 
---!!  end procedure AlignAxiReadData ; 
---!!  
---!!  ------------------------------------------------------------
---!!  procedure AxiReadDataAlignCheck (
---!!  -- Align Read Data and Check Widths 
---!!  ------------------------------------------------------------
---!!    constant ModelID         : In    AlertLogIDType ; 
---!!    variable ReadData        : InOut std_logic_vector ;
---!!    constant ReadDataWidth   : In    integer ; 
---!!    constant ReadAddress     : In    std_logic_vector ;
---!!    constant MaxDataBytes    : In    integer ;
---!!    constant MaxAddrBits     : In    integer     
---!!  ) is
---!!    variable ReadByteCount : integer ; 
---!!    variable ReadByteAddr  : integer ; 
---!!  begin
---!!    ReadByteAddr  :=  CalculateByteAddress(ReadAddress, MaxAddrBits);
---!!    ReadByteCount := ReadDataWidth / 8 ;
---!!    -- Check Transaction Data Size
---!!    AlertIf(ModelID, ReadDataWidth mod 8 /= 0, "Master Read, Data not on a byte boundary", FAILURE) ;
---!!    -- Validate Bytes written not more than MaxDataBytes
---!!    AlertIf(ModelID, ReadByteCount > MaxDataBytes, "Master Read, Data length too large", FAILURE) ;
---!!    
---!!    if ReadByteCount /= MaxDataBytes then 
---!!      AlertIf(ModelID, MaxDataBytes - ReadByteAddr < ReadByteCount, 
---!!        "Master Read, Byte Address (" & to_string(ReadByteAddr) & ") " & 
---!!        "not consistent with number of bytes expected (" & to_string(ReadByteCount) & " )", 
---!!        FAILURE) ; 
---!!      AlignAxiReadData(ReadData, ReadByteAddr, ReadByteCount) ; 
---!!    end if ; 
---!!  end procedure AxiReadDataAlignCheck ; 
 
 end package body Axi4ModelPkg ; 

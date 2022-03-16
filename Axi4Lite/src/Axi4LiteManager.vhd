@@ -53,6 +53,7 @@ library osvvm_common ;
 
   use work.Axi4OptionsPkg.all ;
   use work.Axi4ModelPkg.all ;
+  use work.Axi4InterfaceCommonPkg.all ;
   use work.Axi4LiteInterfacePkg.all ;
   use work.Axi4CommonPkg.all ;
 

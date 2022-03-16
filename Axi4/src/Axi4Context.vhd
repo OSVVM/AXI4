@@ -45,6 +45,7 @@ context Axi4Context is
     library osvvm_axi4 ;
 
     use osvvm_axi4.Axi4CommonPkg.all ;        -- AXI handshaking
+    use osvvm_axi4.Axi4InterfaceCommonPkg.all ;
     use osvvm_axi4.Axi4InterfacePkg.all ;     -- Interface definition
 
     use osvvm_axi4.Axi4OptionsPkg.all ;       -- Model parameters

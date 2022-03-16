@@ -52,6 +52,7 @@ library osvvm ;
 library OSVVM_Common ;
     context OSVVM_Common.OsvvmCommonContext ;
 
+use work.Axi4InterfaceCommonPkg.all ;
 use work.Axi4InterfacePkg.all ;
 use work.Axi4LiteInterfacePkg.all ; 
 
@@ -339,12 +340,12 @@ package Axi4OptionsPkg is
   --
   -- Remove after updating Axi4Lite VC
   --
-  alias SetAxiOption is SetAxi4Parameter[ModelParametersPType, Axi4OptionsType, boolean];
-  alias SetAxiOption is SetAxi4Parameter[ModelParametersPType, Axi4OptionsType, integer];
-  alias SetAxiOption is SetAxi4Parameter[ModelParametersPType, Axi4OptionsType, std_logic_vector];
-  alias GetAxiOption is GetAxi4Parameter[ModelParametersPType, Axi4OptionsType, boolean];
-  alias GetAxiOption is GetAxi4Parameter[ModelParametersPType, Axi4OptionsType, integer];
-  alias GetAxiOption is GetAxi4Parameter[ModelParametersPType, Axi4OptionsType, std_logic_vector];
+--!!  alias SetAxiOption is SetAxi4Parameter[ModelParametersPType, Axi4OptionsType, boolean];
+--!!  alias SetAxiOption is SetAxi4Parameter[ModelParametersPType, Axi4OptionsType, integer];
+--!!  alias SetAxiOption is SetAxi4Parameter[ModelParametersPType, Axi4OptionsType, std_logic_vector];
+--!!  alias GetAxiOption is GetAxi4Parameter[ModelParametersPType, Axi4OptionsType, boolean];
+--!!  alias GetAxiOption is GetAxi4Parameter[ModelParametersPType, Axi4OptionsType, integer];
+--!!  alias GetAxiOption is GetAxi4Parameter[ModelParametersPType, Axi4OptionsType, std_logic_vector];
 
   ------------------------------------------------------------
   procedure InitAxiOptions (

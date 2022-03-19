@@ -43,4 +43,5 @@
 #   include ./Axi4Lite/RunDemoTests.pro
 # } 
 include ./Axi4/RunDemoTests.pro
+include ./Axi4Lite/RunDemoTests.pro
 include ./AxiStream/RunDemoTests.pro

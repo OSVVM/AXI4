@@ -18,6 +18,12 @@
 | 2020.02   | February 2020  |  Initial version of AddressBusTransactionPkg.
 | 2018.04   | April 2018     |  Initial public release
 
+## 2022.03 March 2022
+- Axi4Lite - Rebaselined against Axi4 FULL - now works with GHDL.
+- All - Updated calls to NewID for AlertLogID and FIFOs.
+- AxiStream - SendBurst without TLast - SendBurst(XXX, "0"). Suitable for sending packets with TestCtrl idles.
+- AxiStream - Update TxSTrb and TxKeep at start and end. 
+
 ## 2022.02 February 2022
 - Axi4LiteMaster - Added SET_MODEL_OPTIONS
 - Axi4Options - SetAxi4LiteInterfaceDefault, GetAxi4LiteInterfaceDefault supports Axi4LiteMaster

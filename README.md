@@ -1,19 +1,25 @@
 # AXI4 Verification Component Library
 The AXI Verification Component Library implements
 verification components for:  
- - [AXI4](https://github.com/osvvm/AXI4)
-   - Master with bursting
-   - Memory Responder with bursting
-   - Transaction Responder - no bursting
- - [AXI4 Lite](https://github.com/osvvm/AXI4)
-   - Master
-   - Memory Responder
-   - Transaction Responder 
- - [AXI Stream](https://github.com/osvvm/AXI4)
-   - Transmitter
-   - Receiver
+  - [AXI4](https://github.com/osvvm/AXI4#readme)
+    - Manager with bursting
+    - Memory Subordinate with bursting
+    - Transaction Subordinate - no bursting
+  - [AXI4 Lite](https://github.com/osvvm/AXI4#readme)
+    - Manager
+    - Memory Subordinate
+    - Transaction Subordinate 
+  - [AXI Stream](https://github.com/osvvm/AXI4#readme)
+    - Transmitter
+    - Receiver
 
-  [Documentation for the OSVVM Verification Component libraries can be found here](https://github.com/OSVVM/Documentation)
+
+## Learning OSVVM
+You can find an overview of OSVVM at [osvvm.github.io](https://osvvm.github.io).
+Alternately you can find our pdf documentation at 
+[OSVVM Documentation Repository](https://github.com/OSVVM/Documentation#readme).
+
+You can also learn OSVVM by taking the class, [Advanced VHDL Verification and Testbenches - OSVVM&trade; BootCamp](https://synthworks.com/vhdl_testbench_verification.htm)
 
 ## Testbenches are Included 
 
@@ -37,10 +43,10 @@ of how to use the models.
          
 ### Building Depencencies
 Before building this project, you must build the following libraries in order
-   * [OSVVM utility library](https://github.com/osvvm/osvvm) 
-   * [OSVVM Common Library](https://github.com/osvvm/OSVVM-Common)   
+   * [OSVVM utility library](https://github.com/osvvm/osvvm#readme) 
+   * [OSVVM Common Library](https://github.com/osvvm/OSVVM-Common#readme)   
 
-See the [OSVVM Verification Script Library](https://github.com/osvvm/OSVVM-Scripts) 
+See the [OSVVM Verification Script Library](https://github.com/osvvm/OSVVM-Scripts#readme) 
 for a simple way to build the OSVVM libraries.
 
 ### AXI4/common/src
@@ -49,6 +55,8 @@ Contains packages shared by Axi4, Axi4Lite, and AxiStream.
       * Defines Axi4Lite Interface record
    * Axi4InterfacePkg.vhd
       * Defines Axi4 Full Interface record
+   * Axi4InterfaceCommonPkg.vhd
+      * Defines RESP and PROT values for Axi4 Full and Lite
    * Axi4CommonPkg.vhd
       * Used by Axi4, Axi4Lite, and AxiStream
       * Defines procedures to handle ready and valid signaling 
@@ -67,7 +75,7 @@ For current compile order see AXI4/common/common.pro.
 
 ### AXI4/Axi4/src
 AXI4 Full verification components.
-Uses OSVVM Model Independent Transactions for AddressBusses.
+Uses OSVVM Model Independent Transactions for Address Busses.
 See OSVVM-Common repository, files
 Common/src/AddressBusTransactionpkg.vhd and 
 Common/src/AddressBusResponderTransactionPkg.vhd
@@ -77,14 +85,14 @@ Common/src/AddressBusResponderTransactionPkg.vhd
       * Axi4ComponentVtiPkg.vhd - All AXI4 VTI Components
    * Axi4Context.vhd
       * References all packages required to use the AXI4 verification components
-   * Axi4Master.vhd and Axi4MasterVti.vhd
-      * AXI4 Master verification component with bursting
+   * Axi4Manager.vhd and Axi4ManagerVti.vhd
+      * AXI4 Manager verification component with bursting
    * Axi4Monitor_dummy.vhd
-   * Axi4Responder_Transactor.vhd and Axi4ResponderVti_Transactor.vhd
-      * AXI4 Responder verification component
+   * Axi4Subordinate.vhd and Axi4SubordinateVti_Transactor.vhd
+      * AXI4 Subordinate verification component
       * Currently does not support bursting
    * Axi4Memory.vhd and Axi4MemoryVti.vhd
-      * AXI4 Memory verification component with bursting
+      * AXI4 Memory Subordinate verification component with bursting
 
 For current compile order see AXI4/Axi4/Axi4.pro.
 
@@ -99,7 +107,7 @@ See OSVVM-Common repository, files Common/src/AddressBusTransactionpkg.vhd and
 Common/src/AddressBusResponderTransactionPkg.vhd
 
    * Packages with component declarations for verification components
-      * Axi4LiteMasterComponentPkg.vhd
+      * Axi4LiteManagerComponentPkg.vhd
       * Axi4LiteResponderComponentPkg.vhd
       * Axi4LiteMemoryComponentPkg.vhd
       * Axi4LiteMonitorComponentPkg.vhd

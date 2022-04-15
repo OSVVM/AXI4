@@ -47,7 +47,8 @@ Before building this project, you must build the following libraries in order
    * [OSVVM Common Library](https://github.com/osvvm/OSVVM-Common#readme)   
 
 See the [OSVVM Verification Script Library](https://github.com/osvvm/OSVVM-Scripts#readme) 
-for a simple way to build the OSVVM libraries.
+for directions to build the OSVVM libraries and
+run simulations.
 
 ### AXI4/common/src
 Contains packages shared by Axi4, Axi4Lite, and AxiStream.
@@ -63,7 +64,7 @@ Contains packages shared by Axi4, Axi4Lite, and AxiStream.
    * Axi4ModelPkg.vhd
       * Used by Axi4 and Axi4Lite
       * Defines handling for Axi4 Bus interface
-   * Axi4OptionsTypePkg.vhd
+   * Axi4OptionsPkg.vhd
       * Used by Axi4 and Axi4Lite
       * Transaction extensions for AXI4 bus interface
       * Used in conjunction with AddressBusTransactionpkg 
@@ -88,7 +89,7 @@ Common/src/AddressBusResponderTransactionPkg.vhd
    * Axi4Manager.vhd and Axi4ManagerVti.vhd
       * AXI4 Manager verification component with bursting
    * Axi4Monitor_dummy.vhd
-   * Axi4Subordinate.vhd and Axi4SubordinateVti_Transactor.vhd
+   * Axi4Subordinate.vhd and Axi4SubordinateVti.vhd
       * AXI4 Subordinate verification component
       * Currently does not support bursting
    * Axi4Memory.vhd and Axi4MemoryVti.vhd
@@ -98,35 +99,30 @@ For current compile order see AXI4/Axi4/Axi4.pro.
 
 ### AXI4/Axi4Lite/src 
 AXI4 Lite verification components.
-For current compile order see AXI4/Axi4/Axi4.pro.
-Note that the long term plan is that the AXI4 Full models
-will be able to run in an Axi4Lite mode.   
-
 Uses OSVVM Model Independent Transactions for AddressBusses.
 See OSVVM-Common repository, files Common/src/AddressBusTransactionpkg.vhd and 
 Common/src/AddressBusResponderTransactionPkg.vhd
 
-   * Packages with component declarations for verification components
-      * Axi4LiteManagerComponentPkg.vhd
-      * Axi4LiteResponderComponentPkg.vhd
-      * Axi4LiteMemoryComponentPkg.vhd
-      * Axi4LiteMonitorComponentPkg.vhd
+   * Axi4LiteComponentPkg.vhd 
+      * Packages with component declarations for verification components
    * Axi4LiteContext.vhd
       * References all packages required to use the AXI4Lite verification components
-   * Axi4LiteMaster.vhd
-      * AXI4 Master verification component
+   * Axi4LiteManager.vhd
+      * AXI4 Manager verification component
    * Axi4LiteMonitor_dummy.vhd
-   * Axi4LiteResponder_Transactor.vhd
-      * AXI4 Responder verification component
+   * Axi4LiteSubordinate.vhd
+      * AXI4 Subordinate verification component
    * Axi4LiteMemory.vhd
       * AXI4 Memory verification component
 
+For current compile order see AXI4/Axi4Lite/Axi4Lite.pro.
+
 ### AXI4/AxiStream/src 
 AxiStream Transmitter and Receiver verification components. 
-Uses OSVVM Model Independent Transactions for Streaming,
+Uses OSVVM Model Independent Transactions for Streaming.
 See OSVVM-Common repository, file Common/src/StreamTransactionPkg.vhd
 
-   * AxiStreamOptionsTypePkg.vhd
+   * AxiStreamOptionsPkg.vhd
       * Transaction extensions for AxiStream interface
       * Used in conjunction with StreamTransactionpkg 
    * AxiStreamTransmitter.vhd and AxiStreamTransmitterVti.vhd

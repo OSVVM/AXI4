@@ -41,14 +41,19 @@ of how to use the models.
          * src
          * testbench
          
-### Building Depencencies
-Before building this project, you must build the following libraries in order
-   * [OSVVM utility library](https://github.com/osvvm/osvvm#readme) 
-   * [OSVVM Common Library](https://github.com/osvvm/OSVVM-Common#readme)   
+## Download OSVVM Libraries
+OSVVM is available as either a git repository 
+[OsvvmLibraries](https://github.com/osvvm/OsvvmLibraries) 
+or zip file from [osvvm.org Downloads Page](https://osvvm.org/downloads).
 
-See the [OSVVM Verification Script Library](https://github.com/osvvm/OSVVM-Scripts#readme) 
-for directions to build the OSVVM libraries and
-run simulations.
+On GitHub, all OSVVM libraries are a submodule of the repository OsvvmLibraries. Download all OSVVM libraries using git clone with the “–recursive” flag: 
+```    
+  $ git clone --recursive https://github.com/osvvm/OsvvmLibraries
+```
+        
+## Run The Demos
+A great way to get oriented with OSVVM is to run the demos.
+For directions on running the demos, see [OSVVM Scripts](https://github.com/osvvm/OSVVM-Scripts#readme).
 
 ### AXI4/common/src
 Contains packages shared by Axi4, Axi4Lite, and AxiStream.

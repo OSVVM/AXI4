@@ -14,15 +14,7 @@ verification components for:
     - Receiver
 
 
-## Learning OSVVM
-You can find an overview of OSVVM at [osvvm.github.io](https://osvvm.github.io).
-Alternately you can find our pdf documentation at 
-[OSVVM Documentation Repository](https://github.com/OSVVM/Documentation#readme).
-
-You can also learn OSVVM by taking the class, [Advanced VHDL Verification and Testbenches - OSVVM&trade; BootCamp](https://synthworks.com/vhdl_testbench_verification.htm)
-
 ## Testbenches are Included 
-
 Testbenches are in the Git repository, so you can 
 run a simulation and see a live example 
 of how to use the models.
@@ -41,6 +33,16 @@ of how to use the models.
          * src
          * testbench
          
+## Release History
+For the release history see, [CHANGELOG.md](CHANGELOG.md)
+
+## Learning OSVVM
+You can find an overview of OSVVM at [osvvm.github.io](https://osvvm.github.io).
+Alternately you can find our pdf documentation at 
+[OSVVM Documentation Repository](https://github.com/OSVVM/Documentation#readme).
+
+You can also learn OSVVM by taking the class, [Advanced VHDL Verification and Testbenches - OSVVM&trade; BootCamp](https://synthworks.com/vhdl_testbench_verification.htm)
+
 ## Download OSVVM Libraries
 OSVVM is available as either a git repository 
 [OsvvmLibraries](https://github.com/osvvm/OsvvmLibraries) 
@@ -54,6 +56,13 @@ On GitHub, all OSVVM libraries are a submodule of the repository OsvvmLibraries.
 ## Run The Demos
 A great way to get oriented with OSVVM is to run the demos.
 For directions on running the demos, see [OSVVM Scripts](https://github.com/osvvm/OSVVM-Scripts#readme).
+
+## Participating and Project Organization 
+The OSVVM project welcomes your participation with either 
+issue reports or pull requests.
+
+You can find the project [Authors here](AUTHORS.md) and
+[Contributors here](CONTRIBUTORS.md).
 
 ### AXI4/common/src
 Contains packages shared by Axi4, Axi4Lite, and AxiStream.
@@ -140,25 +149,6 @@ See OSVVM-Common repository, file Common/src/StreamTransactionPkg.vhd
       * References all packages required to use the AxiStream verification components
 
 For current compile order see AXI4/AxiStream/AxiStream.pro.
-
-## Release History
-For the release history see, [CHANGELOG.md](CHANGELOG.md)
-
-## Downloading the libraries
-
-The library [OSVVM-Libraries](https://github.com/osvvm/OsvvmLibraries) 
-contains all of the OSVVM libraries as submodules.
-Download the entire OSVVM model library using git clone with the "--recursive" flag:  
-        `$ git clone --recursive https://github.com/osvvm/OsvvmLibraries`
-
-## Participating and Project Organization 
-
-The OSVVM project welcomes your participation with either 
-issue reports or pull requests.
-For details on [how to participate see](https://opensource.ieee.org/osvvm/OsvvmLibraries/-/blob/master/CONTRIBUTING.md)
-
-You can find the project [Authors here](AUTHORS.md) and
-[Contributors here](CONTRIBUTORS.md).
 
 ## More Information on OSVVM
 

@@ -153,13 +153,13 @@ For current compile order see AXI4/AxiStream/AxiStream.pro.
 ## More Information on OSVVM
 
 **OSVVM Forums and Blog:**     [http://www.osvvm.org/](http://www.osvvm.org/)   
-**SynthWorks OSVVM Blog:** [http://www.synthworks.com/blog/osvvm/](http://www.synthworks.com/blog/osvvm/)    
 **Gitter:** [https://gitter.im/OSVVM/Lobby](https://gitter.im/OSVVM/Lobby)  
-**Documentation:** [Documentation for the OSVVM libraries can be found here](https://github.com/OSVVM/Documentation)
+**Documentation:** [osvvm.github.io](https://osvvm.github.io)
+**Documentation:** [PDF Documentation](https://github.com/OSVVM/Documentation)
 
 ## Copyright and License
-Copyright (C) 2006-2020 by [SynthWorks Design Inc.](http://www.synthworks.com/)   
-Copyright (C) 2020 by [OSVVM contributors](CONTRIBUTOR.md)   
+Copyright (C) 2006-2022 by [SynthWorks Design Inc.](http://www.synthworks.com/)  
+Copyright (C) 2022 by [OSVVM Authors](AUTHORS.md)   
 
 This file is part of OSVVM.
 

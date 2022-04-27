@@ -799,8 +799,11 @@ begin
         end if ;
         push(ReadDataFifo, LRD.Data & LRD.Last & ModelRResp & LAR.ID & LAR.User) ;
         increment(ReadDataRequestCount) ;
-        wait for 0 ns ;
-
+        if i /= BurstLen then 
+          wait until Rising_Edge(Clk) ; -- read memory location per clock
+        else
+          wait for 0 ns ;
+        end if ; 
       end loop BurstLoop ;
     end loop ReadHandlerLoop ;
   end process ReadHandler ;

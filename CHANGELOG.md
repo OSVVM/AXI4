@@ -2,6 +2,7 @@
 
 | Revision  | Revision Date  |  Release Summary | 
 ------------|----------------|----------- 
+| 2022.04   | April 2022     |  Updated AxiMemory Burst Reads - see details below
 | 2022.03   | March 2022     |  Updated calls to NewID for AlertLogID and FIFOs
 |           |                |  Rebuilt Axi4Lite for Axi4 FULL so it will run on GHDL
 | 2022.02   | February 2022  |  Added to_hxstring, Axi4Memory for MemoryPkg search by NAME, <see below>.
@@ -17,6 +18,10 @@
 | 2020.07   | July 2020      |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
 | 2020.02   | February 2020  |  Initial version of AddressBusTransactionPkg.
 | 2018.04   | April 2018     |  Initial public release
+
+## 2022.04 April 2022
+- AxiMemory(Vti) - Updated Burst Reads s.t. there is one clock (was one delta) between data accesses.
+- Fixes AXI Read Burst starting when Write Burst to same location has started but not completed.
 
 ## 2022.03 March 2022
 - Axi4Lite - Rebaselined against Axi4 FULL - now works with GHDL.

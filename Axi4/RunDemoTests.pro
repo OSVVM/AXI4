@@ -54,4 +54,5 @@ RunTest  ./TestCases/TbAxi4_MemoryReadWriteDemo1.vhd
 # RunTest  ./TestCases/TbAxi4_MemoryBurstPattern2.vhd
 # RunTest  ./TestCases/TbAxi4_MemoryBurstBytePattern1.vhd
 # RunTest  ./TestCases/TbAxi4_MemoryBurstAsyncPattern1.vhd
+# RunTest  ./TestCases/TbAxi4_MemoryBurstAsyncPattern2.vhd
 

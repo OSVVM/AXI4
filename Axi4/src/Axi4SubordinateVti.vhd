@@ -190,14 +190,14 @@ begin
 
     -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to ReportMode)
     --   FIFOS only generate usage type errors 
-    WriteAddressFifo           <= NewID("WriteAddressFIFO",             ID, ReportMode => DISABLED);
-    WriteDataFifo              <= NewID("WriteDataFifo",                ID, ReportMode => DISABLED);
-    WriteTransactionFifo       <= NewID("WriteTransactionFifo",         ID, ReportMode => DISABLED);
-    WriteResponseFifo          <= NewID("WriteResponseFifo",            ID, ReportMode => DISABLED);
+    WriteAddressFifo           <= NewID("WriteAddressFIFO",             ID, ReportMode => DISABLED, Search => PRIVATE);
+    WriteDataFifo              <= NewID("WriteDataFifo",                ID, ReportMode => DISABLED, Search => PRIVATE);
+    WriteTransactionFifo       <= NewID("WriteTransactionFifo",         ID, ReportMode => DISABLED, Search => PRIVATE);
+    WriteResponseFifo          <= NewID("WriteResponseFifo",            ID, ReportMode => DISABLED, Search => PRIVATE);
 
-    ReadAddressFifo            <= NewID("ReadAddressFifo",              ID, ReportMode => DISABLED);
-    ReadAddressTransactionFifo <= NewID("ReadAddressTransactionFifo",   ID, ReportMode => DISABLED);
-    ReadDataFifo               <= NewID("ReadDataFifo",                 ID, ReportMode => DISABLED);
+    ReadAddressFifo            <= NewID("ReadAddressFifo",              ID, ReportMode => DISABLED, Search => PRIVATE);
+    ReadAddressTransactionFifo <= NewID("ReadAddressTransactionFifo",   ID, ReportMode => DISABLED, Search => PRIVATE);
+    ReadDataFifo               <= NewID("ReadDataFifo",                 ID, ReportMode => DISABLED, Search => PRIVATE);
 
     wait ;
   end process Initalize ;

@@ -156,7 +156,7 @@ begin
 --    ProtocolID    <= NewID("Protocol Error", ID ) ;
     DataCheckID   <= NewID("Data Check", ID ) ;
     BusFailedID   <= NewID("No response", ID ) ;
-    ReceiveFifo   <= NewID("ReceiveFifo", ID, ReportMode => DISABLED) ;
+    ReceiveFifo   <= NewID("ReceiveFifo", ID, ReportMode => DISABLED, Search => PRIVATE) ;
     wait ;
   end process Initialize ;
 
@@ -193,7 +193,7 @@ begin
 
   begin
     wait for 0 ns ;
-    TransRec.BurstFifo <= NewID("RxBurstFifo", ModelID) ;
+    TransRec.BurstFifo <= NewID("RxBurstFifo", ModelID, Search => PRIVATE) ;
     wait for 0 ns ;
 --    SetAlertLogID(TransRec.BurstFifo, MODEL_INSTANCE_NAME & ": BurstFifo", ModelID) ;
     BurstFifoID        <= GetAlertLogID(TransRec.BurstFifo) ;

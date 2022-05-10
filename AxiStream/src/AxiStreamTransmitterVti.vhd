@@ -162,7 +162,7 @@ begin
 --    ProtocolID      <= NewID("Protocol Error", ID ) ;
 --    DataCheckID     <= NewID("Data Check", ID ) ;
     BusFailedID     <= NewID("No response",  ID) ;
-    TransmitFifo    <= NewID("TransmitFifo", ID, ReportMode => DISABLED) ; 
+    TransmitFifo    <= NewID("TransmitFifo", ID, ReportMode => DISABLED, Search => PRIVATE) ; 
     wait ;
   end process Initialize ;
 
@@ -180,7 +180,7 @@ begin
     variable User : std_logic_vector(TUser'range) ;
   begin
     wait for 0 ns ; 
-    TransRec.BurstFifo <= NewID("TxBurstFifo", ModelID) ;
+    TransRec.BurstFifo <= NewID("TxBurstFifo", ModelID, Search => PRIVATE) ;
     
     DispatchLoop : loop 
       WaitForTransaction(

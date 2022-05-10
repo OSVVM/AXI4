@@ -197,16 +197,16 @@ begin
     DataCheckID             <= NewID("Data Check", ID ) ;
     BusFailedID             <= NewID("No response", ID ) ;
 
-    WriteResponseScoreboard <= NewID("WriteResponse Scoreboard", ID);
-    ReadResponseScoreboard  <= NewID("ReadResponse Scoreboard",  ID);
+    WriteResponseScoreboard <= NewID("WriteResponse Scoreboard", ID, Search => PRIVATE);
+    ReadResponseScoreboard  <= NewID("ReadResponse Scoreboard",  ID, Search => PRIVATE);
 
     -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
     --   FIFOS only generate usage type errors 
-    WriteAddressFifo           <= NewID("WriteAddressFIFO",             ID, ReportMode => DISABLED);
-    WriteDataFifo              <= NewID("WriteDataFifo",                ID, ReportMode => DISABLED);
-    ReadAddressFifo            <= NewID("ReadAddressFifo",              ID, ReportMode => DISABLED);
-    ReadAddressTransactionFifo <= NewID("ReadAddressTransactionFifo",   ID, ReportMode => DISABLED);
-    ReadDataFifo               <= NewID("ReadDataFifo",                 ID, ReportMode => DISABLED);
+    WriteAddressFifo           <= NewID("WriteAddressFIFO",             ID, ReportMode => DISABLED, Search => PRIVATE);
+    WriteDataFifo              <= NewID("WriteDataFifo",                ID, ReportMode => DISABLED, Search => PRIVATE);
+    ReadAddressFifo            <= NewID("ReadAddressFifo",              ID, ReportMode => DISABLED, Search => PRIVATE);
+    ReadAddressTransactionFifo <= NewID("ReadAddressTransactionFifo",   ID, ReportMode => DISABLED, Search => PRIVATE);
+    ReadDataFifo               <= NewID("ReadDataFifo",                 ID, ReportMode => DISABLED, Search => PRIVATE);
 
     wait ;
   end process Initialize ;
@@ -259,8 +259,8 @@ begin
     LRD.Resp    := to_Axi4RespType(OKAY) ;
     
     wait for 0 ns ; 
-    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo", ModelID) ;
-    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",  ModelID) ;
+    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo", ModelID, Search => PRIVATE) ;
+    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",  ModelID, Search => PRIVATE) ;
     
 --!! AWCache, ARCache Defaults
     loop

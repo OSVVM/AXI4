@@ -58,7 +58,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbStream_AxiTiming1.txt") ;
+    TranscriptOpen(OSVVM_RESULTS_DIR & "TbStream_AxiTiming1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset

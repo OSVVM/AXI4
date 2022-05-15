@@ -66,7 +66,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_ReadyTimingManager.txt") ;
+    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_ReadyTimingManager.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset

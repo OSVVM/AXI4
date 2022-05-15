@@ -51,6 +51,8 @@ library OSVVM ;
 library osvvm_AXI4 ;
     context osvvm_AXI4.AxiStreamContext ;
 
+use work.OsvvmTestCommonPkg.all ;
+
 entity TestCtrl is
   generic ( 
     ID_LEN       : integer ;

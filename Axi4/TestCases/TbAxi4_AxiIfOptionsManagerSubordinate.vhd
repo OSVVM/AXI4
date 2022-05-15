@@ -72,7 +72,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_AxiIfOptionsManagerSubordinate.txt") ;
+    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_AxiIfOptionsManagerSubordinate.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset

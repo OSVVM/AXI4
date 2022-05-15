@@ -38,6 +38,9 @@
 #  limitations under the License.
 #  
 library osvvm_TbAxiStream_ghdl
+
+analyze ../TestCases/OsvvmTestCommonPkg.vhd
+
 analyze TestCtrl_e.vhd
 analyze TbStream.vhd
 

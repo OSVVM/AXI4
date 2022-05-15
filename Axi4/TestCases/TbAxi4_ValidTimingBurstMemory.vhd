@@ -70,7 +70,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_ValidTimingBurstMemory.txt") ;
+    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_ValidTimingBurstMemory.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset

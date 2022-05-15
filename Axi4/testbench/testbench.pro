@@ -39,6 +39,8 @@
 #  
 library osvvm_TbAxi4
 
+analyze ../TestCases/OsvvmTestCommonPkg.vhd
+
 analyze TestCtrl_e.vhd
 analyze TbAxi4.vhd
 analyze TbAxi4Memory.vhd

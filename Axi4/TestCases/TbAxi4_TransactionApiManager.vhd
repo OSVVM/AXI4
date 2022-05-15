@@ -63,7 +63,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_TransactionApiManager.txt") ;
+    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_TransactionApiManager.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset

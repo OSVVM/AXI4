@@ -59,7 +59,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_MultipleDriversMemory.txt") ;
+    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_MultipleDriversMemory.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset

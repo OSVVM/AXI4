@@ -39,6 +39,8 @@
 #  
 library osvvm_TbAxi4_MultipleMemory
 
+analyze ../TestCases/OsvvmTestCommonPkg.vhd
+
 analyze TestCtrl_e.vhd
 analyze TbAxi4_MultipleMemory_Generate.vhd
 

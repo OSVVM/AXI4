@@ -60,7 +60,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_Separate1.txt") ;
+    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_Separate1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -75,7 +75,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_Separate1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_Separate1.txt", "") ; 
+    -- AlertIfDiff(OSVVM_RESULTS_DIR & "TbAxi4_Separate1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_Separate1.txt", "") ; 
 
     EndOfTestReports(ExternalErrors => (0, -12, 0)) ; 
     std.env.stop(GetAlertCount - 12) ; 

@@ -534,7 +534,7 @@ begin
               TransRec.IntFromModel <= ReceiveReadyDelayCycles ;
 
             when RECEIVE_READY_WAIT_FOR_GET =>
-              TransRec.BoolToModel <= WaitForGet ;
+              TransRec.BoolFromModel <= WaitForGet ;
 
             when DROP_UNDRIVEN =>
               TransRec.BoolFromModel <= DropUndriven ;

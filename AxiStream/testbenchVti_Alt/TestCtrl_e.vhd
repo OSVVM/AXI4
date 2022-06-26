@@ -70,6 +70,7 @@ entity TestCtrl is
   constant DATA_WIDTH : integer := StreamTxRec.DataToModel'length ; 
   constant DATA_BYTES : integer := DATA_WIDTH/8 ; 
   
-  alias TxBurstFifo is <<variable .TbStream.Transmitter_1.BurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
-  alias RxBurstFifo is <<variable .TbStream.Receiver_1.BurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+  -- Simplifying access to Burst FIFOs using aliases
+  alias TxBurstFifo : ScoreboardIdType is StreamTxRec.BurstFifo ; 
+  alias RxBurstFifo : ScoreboardIdType is StreamRxRec.BurstFifo ;
 end entity TestCtrl ;

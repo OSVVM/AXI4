@@ -71,9 +71,11 @@ entity AxiStreamReceiverVti is
     INIT_DEST      : std_logic_vector := "" ; 
     INIT_USER      : std_logic_vector := "" ; 
     INIT_LAST      : natural := 0 ; 
-    
     tperiod_Clk    : time := 10 ns ;
-    tpd_Clk_TReady : time := 1 ns  
+    
+    DEFAULT_DELAY  : time := 1 ns ;
+
+    tpd_Clk_TReady : time := DEFAULT_DELAY
   ) ;
   port (
     -- Globals

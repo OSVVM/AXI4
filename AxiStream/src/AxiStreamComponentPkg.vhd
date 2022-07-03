@@ -146,7 +146,9 @@ package AxiStreamComponentPkg is
       INIT_LAST      : natural := 0 ; 
       tperiod_Clk    : time := 10 ns ;
     
-      tpd_Clk_TReady : time := 1 ns  
+      DEFAULT_DELAY  : time := 1 ns ;
+
+      tpd_Clk_TReady : time := DEFAULT_DELAY
     ) ;
     port (
       -- Globals
@@ -178,7 +180,9 @@ package AxiStreamComponentPkg is
       INIT_LAST      : natural := 0 ; 
       tperiod_Clk    : time := 10 ns ;
     
-      tpd_Clk_TReady : time := 1 ns  
+      DEFAULT_DELAY  : time := 1 ns ;
+
+      tpd_Clk_TReady : time := DEFAULT_DELAY
     ) ;
     port (
       -- Globals

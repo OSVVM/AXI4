@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Simple AXI Lite Master Model
+--      Simple AXI Lite Manager Model
 --
 --
 --  Developed by:
@@ -71,7 +71,7 @@ architecture TestHarness of TbAxi4 is
           DataFromModel(AXI_DATA_WIDTH-1 downto 0)
         ) ;
 
---  -- AXI Master Functional Interface
+--  -- AXI Manager Functional Interface
   signal   AxiBus : Axi4LiteRecType(
     WriteAddress( Addr (AXI_ADDR_WIDTH-1 downto 0) ),
     WriteData   ( Data (AXI_DATA_WIDTH-1 downto 0),   Strb(AXI_STRB_WIDTH-1 downto 0) ),
@@ -117,7 +117,7 @@ begin
     Clk         => Clk,
     nReset      => nReset,
 
-    -- AXI Master Functional Interface
+    -- AXI Manager Functional Interface
     AxiBus  => AxiBus,
 
     -- Testbench Transaction Interface
@@ -130,7 +130,7 @@ begin
     Clk         => Clk,
     nReset      => nReset,
 
-    -- AXI Master Functional Interface
+    -- AXI Manager Functional Interface
     AxiBus      => AxiBus,
 
     -- Testbench Transaction Interface
@@ -144,7 +144,7 @@ begin
     Clk         => Clk,
     nReset      => nReset,
 
-    -- AXI Master Functional Interface
+    -- AXI Manager Functional Interface
     AxiBus      => AxiBus
   ) ;
 

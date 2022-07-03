@@ -82,10 +82,10 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable ByteData : std_logic_vector(7 downto 0) ;
   begin
     wait until nReset = '1' ;  
@@ -154,12 +154,12 @@ begin
     WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
 
   ------------------------------------------------------------
   -- AxiMemoryProc
-  --   Generate transactions for AxiResponder
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
   AxiMemoryProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;

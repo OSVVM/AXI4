@@ -70,6 +70,6 @@ entity TestCtrl is
     constant AXI_DATA_WIDTH : integer := ManagerRec.DataToModel'length ;  
 
 -- Not currently used in the Axi4Lite model - future use for Axi4Lite Burst Emulation modes    
---  alias WriteBurstFifo is <<variable .TbAxi4.Master_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
---  alias ReadBurstFifo  is <<variable .TbAxi4.Master_1.ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+--  alias WriteBurstFifo is <<variable .TbAxi4.Manager_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+--  alias ReadBurstFifo  is <<variable .TbAxi4.Manager_1.ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
 end entity TestCtrl ;

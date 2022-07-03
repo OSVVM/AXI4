@@ -43,7 +43,7 @@
 
 architecture MemoryReadWrite1 of TestCtrl is
 
-  signal TestDone, MasterDone : integer_barrier := 1 ;
+  signal TestDone, ManagerDone : integer_barrier := 1 ;
  
 begin
 
@@ -83,10 +83,10 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
   begin
     wait until nReset = '1' ;  
@@ -94,7 +94,7 @@ begin
     log("Write and Read with ByteAddr = 0, 4 Bytes") ;
     Write(ManagerRec, X"0000_0000", X"5555_5555" ) ;
     Read(ManagerRec,  X"0000_0000", Data) ;
-    AffirmIfEqual(Data, X"5555_5555", "Master Read Data: ") ;
+    AffirmIfEqual(Data, X"5555_5555", "Manager Read Data: ") ;
     
     log("Write and Read with 1 Byte, and ByteAddr = 0, 1, 2, 3") ; 
     Write(ManagerRec, X"0000_0010", X"11" ) ;
@@ -124,12 +124,12 @@ begin
     ReadCheck(ManagerRec, X"0000_0050", X"33_2211" ) ;
     ReadCheck(ManagerRec, X"0000_0061", X"6655_44" ) ;
     
-    WaitForBarrier(MasterDone) ;
+    WaitForBarrier(ManagerDone) ;
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
 
   ------------------------------------------------------------
@@ -142,8 +142,8 @@ begin
   begin
     WaitForClock(SubordinateRec, 2) ;
     
-    -- ReadBack after Master finishes
-    WaitForBarrier(MasterDone) ;
+    -- ReadBack after Manager finishes
+    WaitForBarrier(ManagerDone) ;
     ReadCheck(SubordinateRec, X"0000_0000", X"5555_5555" ) ;
     
     ReadCheck(SubordinateRec, X"0000_0010", X"11" ) ;

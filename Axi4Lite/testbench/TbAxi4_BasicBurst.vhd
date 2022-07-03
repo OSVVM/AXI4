@@ -44,7 +44,7 @@ architecture BasicBurst of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
   
---  alias WriteBurstFifo is <<variable .TbAxi4.Axi4Master_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+--  alias WriteBurstFifo is <<variable .TbAxi4.Axi4Manager_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
 
 --  alias AxiLiteBus is <<signal .TbAxi4.AxiLiteBus : Axi4RecType>> ;
 
@@ -87,10 +87,10 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
 
   begin
@@ -108,14 +108,14 @@ begin
     WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
 
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  ResponderProc : process
+  SubordinateProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;  
 --    alias  WReady    : std_logic        is AxiLiteBus.WriteData.WReady ;
@@ -125,15 +125,15 @@ begin
     WaitForClock(SubordinateRec, 2) ; 
     -- Write and Read with ByteAddr = 0, 4 Bytes
     GetWrite(SubordinateRec, Addr, Data) ;
-    AffirmIfEqual(Addr, X"0000_1002", "Responder Write Addr: ") ;
-    AffirmIfEqual(Data, X"0403_0000", "Responder Write Data: ") ;
+    AffirmIfEqual(Addr, X"0000_1002", "Subordinate Write Addr: ") ;
+    AffirmIfEqual(Data, X"0403_0000", "Subordinate Write Data: ") ;
     GetWriteData(SubordinateRec, Data) ;
-    AffirmIfEqual(Data, X"0807_0605", "Responder Write Data: ") ;
+    AffirmIfEqual(Data, X"0807_0605", "Subordinate Write Data: ") ;
     GetWriteData(SubordinateRec, Data) ;
-    AffirmIfEqual(Data, X"0000_0A09", "Responder Write Data: ") ;
+    AffirmIfEqual(Data, X"0000_0A09", "Subordinate Write Data: ") ;
 
     
-    -- Force the Responder to allow the bus to transfer the write burst
+    -- Force the Subordinate to allow the bus to transfer the write burst
 --    WReady <= force '1' ; 
     
 --    WaitForClock(SubordinateRec, 18) ; 
@@ -142,7 +142,7 @@ begin
 --    WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process SubordinateProc ;
 
 
 end BasicBurst ;

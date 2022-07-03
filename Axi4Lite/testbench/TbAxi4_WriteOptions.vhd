@@ -44,8 +44,8 @@
 architecture WriteOptions of TestCtrl is
 
   signal TestDone : integer_barrier := 1 ;
-  signal TbMasterID : AlertLogIDType ; 
-  signal TbResponderID  : AlertLogIDType ; 
+  signal TbManagerID : AlertLogIDType ; 
+  signal TbSubordinateID  : AlertLogIDType ; 
 
 begin
 
@@ -57,8 +57,8 @@ begin
   begin
     -- Initialization of test
     SetAlertLogName("TbAxi4_WriteOptions") ;
-    TbMasterID <= GetAlertLogID("TB Master Proc") ;
-    TbResponderID <= GetAlertLogID("TB Responder Proc") ;
+    TbManagerID <= GetAlertLogID("TB Manager Proc") ;
+    TbSubordinateID <= GetAlertLogID("TB Subordinate Proc") ;
     SetLogEnable(PASSED, TRUE) ;  -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 
@@ -88,10 +88,10 @@ begin
   end process ControlProc ; 
 
   ------------------------------------------------------------
-  -- MasterProc
-  --   Generate transactions for AxiMaster
+  -- ManagerProc
+  --   Generate transactions for AxiManager
   ------------------------------------------------------------
-  MasterProc : process
+  ManagerProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
   begin
@@ -101,7 +101,7 @@ begin
     for j in 0 to 5 loop 
       Addr := X"0000_0000" + j*16 ; 
       Data := X"0000_0000" + j*16 ; 
-      log(TbMasterID, "ManagerRec, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
+      log(TbManagerID, "ManagerRec, Addr: " & to_hstring(Addr) & ",  Data: " & to_hstring(Data)) ; 
       Write(ManagerRec, Addr,    Data) ;
       if j = 4 then WaitForClock(ManagerRec, 6) ;  end if ; 
       Write(ManagerRec, Addr+4,  Data+1) ;
@@ -117,56 +117,56 @@ begin
     WaitForClock(ManagerRec, 4) ;  
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MasterProc ;
+  end process ManagerProc ;
 
 
   ------------------------------------------------------------
-  -- ResponderProc
-  --   Generate transactions for AxiResponder
+  -- SubordinateProc
+  --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  ResponderProc : process
+  SubordinateProc : process
     variable Addr, ExpAddr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data, ExpData : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;    
   begin
-    -- Must set Responder options before start otherwise, ready will be active on first cycle.
+    -- Must set Subordinate options before start otherwise, ready will be active on first cycle.
     wait for 0 ns ; 
     WaitForClock(SubordinateRec, 2) ; 
 
     for j in 0 to 5 loop 
       case j is 
         when 0 => 
-          log(TbResponderID, "Write Address:  Valid Before Ready, Delay Cycles 0") ;
+          log(TbSubordinateID, "Write Address:  Valid Before Ready, Delay Cycles 0") ;
           SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 0) ;
           SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, FALSE) ;
         when 1 => 
-          log(TbResponderID, "Write Address:  Valid Before Ready, Delay Cycles 2") ;
+          log(TbSubordinateID, "Write Address:  Valid Before Ready, Delay Cycles 2") ;
           SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 2) ;
           SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, FALSE) ;
         when 2 => 
-          log(TbResponderID, "Write Address:  Valid Before Ready, Delay Cycles 4") ;
+          log(TbSubordinateID, "Write Address:  Valid Before Ready, Delay Cycles 4") ;
           SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 4) ;
           SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, FALSE) ;
         when 3 => 
-          log(TbResponderID, "Write Address:  Ready Before Valid, Delay Cycles 4") ;
+          log(TbSubordinateID, "Write Address:  Ready Before Valid, Delay Cycles 4") ;
           SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 4) ;
           SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, TRUE) ;
         when 4 => 
-          log(TbResponderID, "Write Address:  Ready Before Valid, Delay Cycles 4") ;
+          log(TbSubordinateID, "Write Address:  Ready Before Valid, Delay Cycles 4") ;
           SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 4) ;
           SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, TRUE) ;
         when 5 => 
-          log(TbResponderID, "Write Address:  Ready Before Valid, Delay Cycles 0") ;
+          log(TbSubordinateID, "Write Address:  Ready Before Valid, Delay Cycles 0") ;
           SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_DELAY_CYCLES, 0) ;
           SetAxi4Options(SubordinateRec, WRITE_ADDRESS_READY_BEFORE_VALID, TRUE) ;
-        when others => Alert(TbResponderID, "Unimplemented test case", FAILURE)  ; 
+        when others => Alert(TbSubordinateID, "Unimplemented test case", FAILURE)  ; 
       end case ; 
       -- Check Set of 4 Data items      
       for i in 0 to 3 loop 
         ExpAddr := X"0000_0000" + j*16 + i*4; 
         ExpData := X"0000_0000" + j*16 + i ; 
         GetWrite(SubordinateRec, Addr, Data) ;
-        AffirmIfEqual(TbResponderID, Addr, ExpAddr, "Responder Write Addr: ") ;
-        AffirmIfEqual(TbResponderID, Data, ExpData, "Responder Write Data: ") ;
+        AffirmIfEqual(TbSubordinateID, Addr, ExpAddr, "Subordinate Write Addr: ") ;
+        AffirmIfEqual(TbSubordinateID, Data, ExpData, "Subordinate Write Data: ") ;
       end loop ; 
       WaitForClock(SubordinateRec, 8) ;  
       print("") ; print("") ;
@@ -177,7 +177,7 @@ begin
     WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process ResponderProc ;
+  end process SubordinateProc ;
 
 
 end WriteOptions ;

@@ -56,3 +56,4 @@ RunTest TbAxi4_WriteOptions.vhd
 RunTest TbAxi4_MemoryReadWrite1.vhd
 
 RunTest TbAxi4_AxiXResp.vhd
+RunTest TbAxi4_AxiXResp2_Enum.vhd

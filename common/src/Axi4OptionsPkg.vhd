@@ -176,6 +176,19 @@ package Axi4OptionsPkg is
 
   subtype Axi4OptionsType is resolved_max Axi4UnresolvedOptionsType ;
 
+  --                                     00    01      10      11
+  type  Axi4RespEnumType is (OKAY, EXOKAY, SLVERR, DECERR) ;
+--  type  Axi4UnresolvedRespEnumType is (OKAY, EXOKAY, SLVERR, DECERR) ;
+--  type Axi4UnresolvedRespVectorEnumType is array (natural range <>) of Axi4UnresolvedRespEnumType ;
+--  -- alias resolved_max is maximum[ Axi4UnresolvedRespVectorEnumType return Axi4UnresolvedRespEnumType] ;
+--  -- Maximum is implicitly defined for any array type in VHDL-2008.   Function resolved_max is a fall back.
+--  function resolved_max ( s : Axi4UnresolvedRespVectorEnumType) return Axi4UnresolvedRespEnumType ;
+--  subtype Axi4RespEnumType is resolved_max Axi4UnresolvedRespEnumType ;
+
+  function from_Axi4RespType (a: Axi4RespType) return Axi4RespEnumType ;
+  function to_Axi4RespType (a: Axi4RespEnumType) return Axi4RespType ;
+  
+
 --!  type AxiParamsType is array (Axi4OptionsType range <>) of integer ;
 --! Need init Parms for default values - many parms all init with ignore values &
 --! call via named association
@@ -216,6 +229,14 @@ package Axi4OptionsPkg is
   ) ;
 
   ------------------------------------------------------------
+  procedure SetAxi4Options (
+  ------------------------------------------------------------
+    signal   TransactionRec : InOut AddressBusRecType ;
+    constant Option         : In    Axi4OptionsType ;
+    constant OptVal         : In    Axi4RespEnumType
+  ) ;
+
+  ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
     signal   TransactionRec : InOut AddressBusRecType ;
@@ -245,6 +266,14 @@ package Axi4OptionsPkg is
     signal   TransactionRec : InOut AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   std_logic_vector
+  ) ;
+  
+  ------------------------------------------------------------
+  procedure GetAxi4Options (
+  ------------------------------------------------------------
+    signal   TransactionRec : InOut AddressBusRecType ;
+    constant Option         : In    Axi4OptionsType ;
+    variable OptVal         : Out   Axi4RespEnumType
   ) ;
 
 
@@ -398,6 +427,38 @@ package body Axi4OptionsPkg is
     return maximum(A) ;
   end function resolved_max ;
 
+--   function resolved_max ( s : Axi4UnresolvedRespVectorEnumType) return Axi4UnresolvedRespEnumType is
+--   begin
+--     return maximum(s) ;
+--   end function resolved_max ; 
+
+  ------------------------------------------------------------
+  type TbRespType_indexby_Integer is array (integer range <>) of Axi4RespEnumType;
+  constant RESP_TYPE_TB_TABLE : TbRespType_indexby_Integer := (
+      0   => OKAY,
+      1   => EXOKAY,
+      2   => SLVERR,
+      3   => DECERR
+    ) ;
+  function from_Axi4RespType (a: Axi4RespType) return Axi4RespEnumType is
+  begin
+    return RESP_TYPE_TB_TABLE(to_integer(a)) ;
+  end function from_Axi4RespType ;
+  
+  ------------------------------------------------------------
+  type RespType_indexby_TbRespType is array (Axi4RespEnumType) of Axi4RespType;
+  constant TB_TO_RESP_TYPE_TABLE : RespType_indexby_TbRespType := (
+      OKAY     => "00",
+      EXOKAY   => "01",
+      SLVERR   => "10",
+      DECERR   => "11"
+    ) ;
+  function to_Axi4RespType (a: Axi4RespEnumType) return Axi4RespType is
+  begin
+    return TB_TO_RESP_TYPE_TABLE(a) ; 
+  end function to_Axi4RespType ;
+
+   
   --
   --  Abstraction Layer to support SetModelOptions using enumerated values
   --
@@ -446,6 +507,17 @@ package body Axi4OptionsPkg is
   end procedure SetAxi4Options ;
 
   ------------------------------------------------------------
+  procedure SetAxi4Options (
+  ------------------------------------------------------------
+    signal   TransactionRec : InOut AddressBusRecType ;
+    constant Option         : In    Axi4OptionsType ;
+    constant OptVal         : In    Axi4RespEnumType
+  ) is
+  begin
+    SetModelOptions(TransactionRec, Axi4OptionsType'POS(Option), Axi4RespEnumType'pos(OptVal)) ;
+  end procedure SetAxi4Options ;
+
+  ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
     signal   TransactionRec : InOut AddressBusRecType ;
@@ -491,6 +563,19 @@ package body Axi4OptionsPkg is
   ) is
   begin
     GetModelOptions(TransactionRec, Axi4OptionsType'POS(Option), OptVal) ;
+  end procedure GetAxi4Options ;
+
+  ------------------------------------------------------------
+  procedure GetAxi4Options (
+  ------------------------------------------------------------
+    signal   TransactionRec : InOut AddressBusRecType ;
+    constant Option         : In    Axi4OptionsType ;
+    variable OptVal         : Out   Axi4RespEnumType
+  ) is
+    variable IntOptVal : integer ;
+  begin
+    GetModelOptions(TransactionRec, Axi4OptionsType'POS(Option), IntOptVal) ;
+    OptVal := Axi4RespEnumType'val(IntOptVal) ;
   end procedure GetAxi4Options ;
 
   --

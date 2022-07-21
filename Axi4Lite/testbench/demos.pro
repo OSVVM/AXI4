@@ -44,6 +44,7 @@ analyze TestCtrl_e.vhd
 analyze TbAxi4.vhd
 
 RunTest TbAxi4_RandomReadWrite.vhd
+RunTest TbAxi4_AxiXResp2_Enum.vhd
 
 # RunTest TbAxi4_BasicReadWrite.vhd
 # RunTest TbAxi4_ReadWriteAsync1.vhd
@@ -55,3 +56,4 @@ RunTest TbAxi4_RandomReadWrite.vhd
 # RunTest TbAxi4_MemoryReadWrite1.vhd
 
 # RunTest TbAxi4_AxiXResp.vhd
+# RunTest TbAxi4_AxiXResp2_Enum.vhd

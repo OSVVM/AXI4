@@ -58,17 +58,6 @@ use work.Axi4InterfacePkg.all ;
   
 package Axi4ModelPkg is 
 
-  --                                     00    01      10      11
-  type  Axi4UnresolvedRespEnumType is (OKAY, EXOKAY, SLVERR, DECERR) ;
-  type Axi4UnresolvedRespVectorEnumType is array (natural range <>) of Axi4UnresolvedRespEnumType ;
-  -- alias resolved_max is maximum[ Axi4UnresolvedRespVectorEnumType return Axi4UnresolvedRespEnumType] ;
-  -- Maximum is implicitly defined for any array type in VHDL-2008.   Function resolved_max is a fall back.
-  function resolved_max ( s : Axi4UnresolvedRespVectorEnumType) return Axi4UnresolvedRespEnumType ;
-  subtype Axi4RespEnumType is resolved_max Axi4UnresolvedRespEnumType ;
-
-  function from_Axi4RespType (a: Axi4RespType) return Axi4RespEnumType ;
-  function to_Axi4RespType (a: Axi4RespEnumType) return Axi4RespType ;
-  
   ------------------------------------------------------------
   function CalculateByteAddress (
   -- Fetch the address and data the slave sees for a write 
@@ -201,38 +190,6 @@ end package Axi4ModelPkg ;
 
 package body Axi4ModelPkg is
  
-  function resolved_max ( s : Axi4UnresolvedRespVectorEnumType) return Axi4UnresolvedRespEnumType is
-  begin
-    return maximum(s) ;
-  end function resolved_max ; 
-
-  ------------------------------------------------------------
-  type TbRespType_indexby_Integer is array (integer range <>) of Axi4RespEnumType;
-  constant RESP_TYPE_TB_TABLE : TbRespType_indexby_Integer := (
-      0   => OKAY,
-      1   => EXOKAY,
-      2   => SLVERR,
-      3   => DECERR
-    ) ;
-  function from_Axi4RespType (a: Axi4RespType) return Axi4RespEnumType is
-  begin
-    return RESP_TYPE_TB_TABLE(to_integer(a)) ;
-  end function from_Axi4RespType ;
-  
-  ------------------------------------------------------------
-  type RespType_indexby_TbRespType is array (Axi4RespEnumType) of Axi4RespType;
-  constant TB_TO_RESP_TYPE_TABLE : RespType_indexby_TbRespType := (
-      OKAY     => "00",
-      EXOKAY   => "01",
-      SLVERR   => "10",
-      DECERR   => "11"
-    ) ;
-  function to_Axi4RespType (a: Axi4RespEnumType) return Axi4RespType is
-  begin
-    return TB_TO_RESP_TYPE_TABLE(a) ; 
-  end function to_Axi4RespType ;
-
-   
   ------------------------------------------------------------
   function CalculateByteAddress (
   ------------------------------------------------------------

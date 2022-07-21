@@ -79,6 +79,7 @@ RunTest  TbAxi4_ReadyTimingSubordinate.vhd
 RunTest  TbAxi4_AxiIfOptionsManagerSubordinate.vhd
 RunTest  TbAxi4_AxiXResp.vhd
 RunTest  TbAxi4_AxiXResp2_Enum.vhd
+RunTest  TbAxi4_AxiXResp3_slv.vhd
 
 RunTest  TbAxi4_TimeOutManager.vhd
 RunTest  TbAxi4_TimeOutSubordinate.vhd

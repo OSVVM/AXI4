@@ -44,7 +44,7 @@ library osvvm_TbAxi4
 include ./testbench
 
 RunTest  ./TestCases/TbAxi4_MemoryReadWriteDemo1.vhd
-RunTest  ./TestCases/TbAxi4_AxiXResp2_Enum.vhd
+RunTest  ./TestCases/TbAxi4_AxiXResp3_slv.vhd
 
 # RunTest  ./TestCases/TbAxi4_TransactionApiMemoryBurst.vhd
 

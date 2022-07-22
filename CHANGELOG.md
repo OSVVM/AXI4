@@ -23,6 +23,7 @@
 
 ## 2022.06 June 2022
 Updated AxiStreamReceiver and AxiStreamReceiverVti to fix an issue with reading the RECEIVE_READY_WAIT_FOR_GET parameter.
+Updated SetAxi4Options s.t. it allows parameter of type Axi4RespEnumType
 
 ## 2022.05 May 2022
 - Updated FIFOs so they are Search => PRIVATE.  Was only problematic in generate loops.

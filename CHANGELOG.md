@@ -2,6 +2,7 @@
 
 | Revision  | Revision Date  |  Release Summary | 
 ------------|----------------|----------- 
+| 2022.06   | June 2022      |  AxiStreamReceiver and AxiStreamReceiverVti to fix an issue with reading the RECEIVE_READY_WAIT_FOR_GET parameter.
 | 2022.05   | May 2022       |  Updated FIFOs so they are Search => PRIVATE
 | 2022.04   | April 2022     |  Updated AxiMemory Burst Reads - see details below
 | 2022.03   | March 2022     |  Updated calls to NewID for AlertLogID and FIFOs
@@ -19,6 +20,9 @@
 | 2020.07   | July 2020      |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
 | 2020.02   | February 2020  |  Initial version of AddressBusTransactionPkg.
 | 2018.04   | April 2018     |  Initial public release
+
+## 2022.06 June 2022
+Updated AxiStreamReceiver and AxiStreamReceiverVti to fix an issue with reading the RECEIVE_READY_WAIT_FOR_GET parameter.
 
 ## 2022.05 May 2022
 - Updated FIFOs so they are Search => PRIVATE.  Was only problematic in generate loops.

@@ -176,7 +176,7 @@ package Axi4OptionsPkg is
 
   subtype Axi4OptionsType is resolved_max Axi4UnresolvedOptionsType ;
 
-  --                                     00    01      10      11
+  --                         00    01      10      11
   type  Axi4RespEnumType is (OKAY, EXOKAY, SLVERR, DECERR) ;
 --  type  Axi4UnresolvedRespEnumType is (OKAY, EXOKAY, SLVERR, DECERR) ;
 --  type Axi4UnresolvedRespVectorEnumType is array (natural range <>) of Axi4UnresolvedRespEnumType ;

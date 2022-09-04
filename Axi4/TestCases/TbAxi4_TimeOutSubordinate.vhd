@@ -87,7 +87,7 @@ begin
     -- AlertIfDiff("./results/TbAxi4_TimeOutSubordinate.txt", "../sim_shared/validated_results/TbAxi4_TimeOutSubordinate.txt", "") ; 
     
     EndOfTestReports(ExternalErrors => -ExpectedErrors) ; 
-    std.env.stop(SumAlertCount(GetAlertCount - ExpectedErrors)) ;
+    std.env.stop ;
     wait ; 
   end process ControlProc ; 
 

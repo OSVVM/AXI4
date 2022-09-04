@@ -84,7 +84,7 @@ begin
     -- AlertIfDiff("./results/TbAxi4_ReadyTimingSubordinate.txt", "../sim_shared/validated_results/TbAxi4_ReadyTimingSubordinate.txt", "") ; 
 
     EndOfTestReports ; 
-    std.env.stop(GetAlertCount) ; 
+    std.env.stop ; 
     wait ; 
   end process ControlProc ; 
 

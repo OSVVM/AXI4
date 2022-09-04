@@ -74,7 +74,7 @@ begin
 --    AlertIfDiff("./results/TbStream_AxiSendGetAsync2.txt", "../sim_shared/validated_results/TbStream_AxiSendGetAsync2.txt", "") ; 
     
     EndOfTestReports(ExternalErrors => (0, -5, 0)) ; 
-    std.env.stop(SumAlertCount(GetAlertCount + (0, -5, 0))) ;
+    std.env.stop ;
     wait ; 
   end process ControlProc ; 
 

@@ -77,7 +77,7 @@ begin
     
     -- Expecting two check errors at 128 and 256
     EndOfTestReports(ExternalErrors => (0, -2, 0)) ; 
-    std.env.stop(SumAlertCount(GetAlertCount + (0, -2, 0))) ;
+    std.env.stop ;
     wait ; 
   end process ControlProc ; 
 

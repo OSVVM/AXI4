@@ -85,7 +85,7 @@ begin
     
 
     EndOfTestReports ; 
-    std.env.stop(GetAlertCount) ; 
+    std.env.stop ; 
     wait ; 
   end process ControlProc ; 
 

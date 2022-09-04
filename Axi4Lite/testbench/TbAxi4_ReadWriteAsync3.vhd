@@ -84,7 +84,7 @@ begin
     -- AlertIfDiff("./results/TbAxi4_ReadWriteAsync3.txt", "../sim_shared/validated_results/TbAxi4_ReadWriteAsync3.txt", "") ; 
 
     EndOfTestReports ; 
-    std.env.stop(GetAlertCount) ; 
+    std.env.stop ; 
     wait ; 
   end process ControlProc ; 
 
@@ -218,7 +218,7 @@ begin
 
 
 --    EndOfTestReports ; 
---    std.env.stop(GetAlertCount) ; 
+--    std.env.stop ; 
 
 
     -- Wait for outputs to propagate and signal TestDone

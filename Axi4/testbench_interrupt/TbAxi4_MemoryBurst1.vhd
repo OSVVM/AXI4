@@ -80,7 +80,7 @@ begin
     -- AlertIfDiff("./results/TbAxi4_MemoryBurst1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MemoryBurst1.txt", "") ; 
 
     EndOfTestReports ; 
-    std.env.stop(GetAlertCount) ; 
+    std.env.stop ; 
     wait ; 
   end process ControlProc ; 
 

@@ -78,7 +78,7 @@ begin
     -- AlertIfDiff(OSVVM_RESULTS_DIR & "TbAxi4_Separate1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_Separate1.txt", "") ; 
 
     EndOfTestReports(ExternalErrors => (0, -12, 0)) ; 
-    std.env.stop(GetAlertCount - 12) ; 
+    std.env.stop ; 
     wait ; 
   end process ControlProc ; 
 

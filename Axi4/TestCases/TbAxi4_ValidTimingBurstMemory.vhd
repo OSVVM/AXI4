@@ -89,7 +89,7 @@ begin
     -- AlertIfDiff("./results/TbAxi4_ValidTimingBurstMemory.txt", "../sim_shared/validated_results/TbAxi4_ValidTimingBurstMemory.txt", "") ; 
 
     EndOfTestReports ; 
-    std.env.stop(GetAlertCount) ; 
+    std.env.stop ; 
     wait ; 
   end process ControlProc ; 
 

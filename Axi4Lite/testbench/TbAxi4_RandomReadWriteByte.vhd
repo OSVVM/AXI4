@@ -90,7 +90,7 @@ begin
     -- AlertIfDiff("./results/TbAxi4_RandomReadWriteByte.txt", "../sim_shared/validated_results/TbAxi4_RandomReadWriteByte.txt", "") ; 
 
     EndOfTestReports ; 
-    std.env.stop(GetAlertCount) ; 
+    std.env.stop ; 
     wait ; 
   end process ControlProc ; 
 

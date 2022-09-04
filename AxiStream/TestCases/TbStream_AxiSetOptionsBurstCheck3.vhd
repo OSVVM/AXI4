@@ -76,7 +76,7 @@ begin
 --    AlertIfDiff("./results/TbStream_AxiSetOptionsBurstCheck3.txt", "../sim_shared/validated_results/TbStream_AxiSetOptionsBurstCheck3.txt", "") ; 
     
     EndOfTestReports ; 
-    std.env.stop(GetAlertCount) ; 
+    std.env.stop ; 
     wait ; 
   end process ControlProc ; 
 

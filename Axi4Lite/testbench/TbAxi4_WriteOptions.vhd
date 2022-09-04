@@ -83,7 +83,7 @@ begin
     -- AlertIfDiff("./results/TbAxi4_WriteOptions.txt", "../sim_shared/validated_results/TbAxi4_WriteOptions.txt", "") ; 
 
     EndOfTestReports ; 
-    std.env.stop(GetAlertCount) ; 
+    std.env.stop ; 
     wait ; 
   end process ControlProc ; 
 

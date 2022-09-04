@@ -81,7 +81,7 @@ begin
     -- AlertIfDiff("./results/TbAxi4_TransactionApiSubordinate.txt", "../../sim_results/Axi4/TbAxi4_TransactionApiSubordinate.txt", "") ; 
 
     EndOfTestReports ; 
-    std.env.stop(GetAlertCount) ; 
+    std.env.stop ; 
     wait ; 
   end process ControlProc ; 
 

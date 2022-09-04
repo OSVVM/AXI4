@@ -77,7 +77,7 @@ begin
     -- AlertIfDiff("./results/TbAxi4_MultipleDriversManager.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MultipleDriversManager.txt", "") ; 
 
     EndOfTestReports(ExternalErrors => (FAILURE => -1, ERROR => 0, WARNING => 0)) ; 
-    std.env.stop(SumAlertCount(GetAlertCount + (FAILURE => -1, ERROR => 0, WARNING => 0))) ;
+    std.env.stop ;
     wait ; 
   end process ControlProc ; 
 

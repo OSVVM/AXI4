@@ -74,7 +74,7 @@ begin
 --    AlertIfDiff("./results/TbStream_AxiTxValidDelay1.txt", "../sim_shared/validated_results/TbStream_AxiTxValidDelay1.txt", "") ; 
     
     EndOfTestReports ; 
-    std.env.stop(GetAlertCount) ; 
+    std.env.stop ; 
     wait ; 
   end process ControlProc ; 
 

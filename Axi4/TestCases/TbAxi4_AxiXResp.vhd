@@ -76,7 +76,7 @@ begin
     -- AlertIfDiff("./results/TbAxi4_AxiXResp.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_AxiXResp.txt", "") ; 
 
     EndOfTestReports ; 
-    std.env.stop(GetAlertCount) ; 
+    std.env.stop ; 
     wait ; 
   end process ControlProc ; 
 

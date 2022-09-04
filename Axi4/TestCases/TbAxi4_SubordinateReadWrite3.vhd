@@ -76,7 +76,7 @@ begin
     -- AlertIfDiff("./results/TbAxi4_SubordinateReadWrite3.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_SubordinateReadWrite3.txt", "") ; 
 
     EndOfTestReports ; 
-    std.env.stop(GetAlertCount) ; 
+    std.env.stop ; 
     wait ; 
   end process ControlProc ; 
 

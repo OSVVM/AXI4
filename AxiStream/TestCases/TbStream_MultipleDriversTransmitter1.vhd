@@ -74,7 +74,7 @@ begin
 --    AlertIfDiff("./results/TbStream_MultipleDriversTransmitter1.txt", "../sim_shared/validated_results/TbStream_MultipleDriversTransmitter1.txt", "") ; 
     
     EndOfTestReports(ExternalErrors => (FAILURE => -1, ERROR => 0, WARNING => 0)) ; 
-    std.env.stop(SumAlertCount(GetAlertCount + (FAILURE => -1, ERROR => 0, WARNING => 0))) ;
+    std.env.stop ;
     wait ; 
   end process ControlProc ; 
 

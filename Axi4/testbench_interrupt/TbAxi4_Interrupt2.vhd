@@ -19,12 +19,13 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    04/202`   202`.04    Initial revision
+--    10/2022   2022.10    Updated for new interrupt handler
+--    04/2021   2021.04    Initial revision
 --
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2021 by SynthWorks Design Inc.  
+--  Copyright (c) 2021-2022 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -99,6 +100,7 @@ begin
       Write(ManagerRec, X"1000_0008", Data + 2 ) ;
       Write(ManagerRec, X"1000_000C", Data + 3 ) ;
       
+      -- Do Write and Read Cycles mixed with Interrupt Handling
       IntReq <= '1' after i * 10 ns + 5 ns, '0' after i * 10 ns + 50 ns ;  
       wait for 9 ns ; 
       Write(ManagerRec, X"1000_0010", Data + 4 ) ;
@@ -153,6 +155,7 @@ begin
     log("Interrupt Handler Done") ; 
     blankline(2) ; 
     InterruptReturn(InterruptRec) ;
+    wait for 0 ns ; 
   end process InterruptProc ;
 
   ------------------------------------------------------------

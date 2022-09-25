@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_Interrupt1.vhd
+--  File Name:         TbAxi4_InterruptNoHandler1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -40,7 +40,7 @@
 --  limitations under the License.
 --  
 
-architecture Interrupt1 of TestCtrl is
+architecture InterruptNoHandler1 of TestCtrl is
 
   signal ManagerSync1, MemorySync1, TestDone : integer_barrier := 1 ;
  
@@ -53,14 +53,14 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_Interrupt1") ;
+    SetAlertLogName("TbAxi4_InterruptNoHandler1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
     SetLogEnable(GetAlertLogID("Memory_1"), INFO, FALSE) ;   
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_Interrupt1.txt") ;
+    TranscriptOpen("./results/TbAxi4_InterruptNoHandler1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -75,7 +75,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_Interrupt1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_Interrupt1.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_InterruptNoHandler1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_InterruptNoHandler1.txt", "") ; 
 
     EndOfTestReports ; 
     std.env.stop ; 
@@ -99,6 +99,16 @@ begin
       Write(ManagerRec, X"1000_0004", Data + 1 ) ;
       Write(ManagerRec, X"1000_0008", Data + 2 ) ;
       Write(ManagerRec, X"1000_000C", Data + 3 ) ;
+      
+      ReadCheck(ManagerRec, X"1000_0000", Data ) ;
+      ReadCheck(ManagerRec, X"1000_0004", Data + 1 ) ;
+      ReadCheck(ManagerRec, X"1000_0008", Data + 2 ) ;
+      ReadCheck(ManagerRec, X"1000_000C", Data + 3 ) ;
+      
+      Write(ManagerRec, X"A000_2000", Data ) ;
+      Write(ManagerRec, X"A000_2004", Data + 1 ) ;
+      Write(ManagerRec, X"A000_2008", Data + 2 ) ;
+      Write(ManagerRec, X"A000_200C", Data + 3 ) ;
       
       -- Do WaitForClock Cycles mixed with Interrupt Handling
       IntReq <= '1' after i * 10 ns + 5 ns, '0' after i * 10 ns + 50 ns ;  
@@ -137,25 +147,27 @@ begin
   InterruptProc : process
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) := (others => '0') ;    
   begin
-    WaitForClock(InterruptRec, 1) ; 
-    blankline(2) ; 
-    log("Interrupt Handler Started") ; 
-    ReadCheck(InterruptRec, X"1000_0000", Data ) ;
-    ReadCheck(InterruptRec, X"1000_0004", Data + 1 ) ;
-    ReadCheck(InterruptRec, X"1000_0008", Data + 2 ) ;
-    ReadCheck(InterruptRec, X"1000_000C", Data + 3 ) ;
+    wait ; 
     
-    Write(InterruptRec, X"A000_2000", Data ) ;
-    Write(InterruptRec, X"A000_2004", Data + 1 ) ;
-    Write(InterruptRec, X"A000_2008", Data + 2 ) ;
-    Write(InterruptRec, X"A000_200C", Data + 3 ) ;
-    
-    Data := Data + X"10" ;
-
-    log("Interrupt Handler Done") ; 
-    blankline(2) ; 
-    InterruptReturn(InterruptRec) ;
-    wait for 0 ns ; 
+--    WaitForClock(InterruptRec, 1) ; 
+--    blankline(2) ; 
+--    log("Interrupt Handler Started") ; 
+--    ReadCheck(InterruptRec, X"1000_0000", Data ) ;
+--    ReadCheck(InterruptRec, X"1000_0004", Data + 1 ) ;
+--    ReadCheck(InterruptRec, X"1000_0008", Data + 2 ) ;
+--    ReadCheck(InterruptRec, X"1000_000C", Data + 3 ) ;
+--    
+--    Write(InterruptRec, X"A000_2000", Data ) ;
+--    Write(InterruptRec, X"A000_2004", Data + 1 ) ;
+--    Write(InterruptRec, X"A000_2008", Data + 2 ) ;
+--    Write(InterruptRec, X"A000_200C", Data + 3 ) ;
+--    
+--    Data := Data + X"10" ;
+--
+--    log("Interrupt Handler Done") ; 
+--    blankline(2) ; 
+--    InterruptReturn(InterruptRec) ;
+--    wait for 0 ns ; 
   end process InterruptProc ;
 
   ------------------------------------------------------------
@@ -174,15 +186,15 @@ begin
   end process SubordinateProc ;
 
 
-end Interrupt1 ;
+end InterruptNoHandler1 ;
 
-Configuration TbAxi4_Interrupt1 of TbAxi4Memory is
+Configuration TbAxi4_InterruptNoHandler1 of TbAxi4Memory is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(Interrupt1) ; 
+      use entity work.TestCtrl(InterruptNoHandler1) ; 
     end for ; 
 --!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 
-end TbAxi4_Interrupt1 ; 
+end TbAxi4_InterruptNoHandler1 ; 

@@ -94,15 +94,15 @@ begin
     for i in 0 to 7 loop 
       blankline(2) ; 
       log("Main Starting Writes.  Loop #" & to_string(i)) ;
-      PushBurstIncrement(WriteBurstFifo, Data, 4, AXI_DATA_WIDTH) ;
+      PushBurstIncrement(ManagerRec.WriteBurstFifo, Data, 4, AXI_DATA_WIDTH) ;
       WriteBurst(ManagerRec, X"1000_0000", 4) ;
       
       IntReq <= '1' after i * 10 ns + 5 ns, '0' after i * 10 ns + 80 ns ;  
       wait for 9 ns ; 
-      PushBurstIncrement(WriteBurstFifo, Data+4, 4, AXI_DATA_WIDTH) ;
+      PushBurstIncrement(ManagerRec.WriteBurstFifo, Data+4, 4, AXI_DATA_WIDTH) ;
       WriteBurst(ManagerRec, X"2000_0000", 4) ;
       ReadBurst(ManagerRec,  X"2000_0000", 4) ;
-      CheckBurstIncrement(ReadBurstFifo, Data+4, 4, AXI_DATA_WIDTH) ; 
+      CheckBurstIncrement(ManagerRec.ReadBurstFifo, Data+4, 4, AXI_DATA_WIDTH) ; 
 
       WaitForClock(ManagerRec, 1) ; 
       log("WaitForClock #1 finished") ;
@@ -112,7 +112,7 @@ begin
       blankline(2) ; 
       log("Main Starting Reads.  Loop #" & to_string(i)) ;
       ReadBurst(ManagerRec, X"A000_2000", 4) ;
-      CheckBurstIncrement(ReadBurstFifo, Data+16, 4, AXI_DATA_WIDTH) ; 
+      CheckBurstIncrement(ManagerRec.ReadBurstFifo, Data+16, 4, AXI_DATA_WIDTH) ; 
 
       Data := Data + 16#10# ;
     end loop ; 
@@ -136,16 +136,11 @@ begin
     blankline(2) ; 
     log("Interrupt Handler Started") ; 
     ReadBurst(InterruptRec, X"1000_0000", 4) ;
-    CheckBurstIncrement(ReadBurstFifo, Data, 4, AXI_DATA_WIDTH) ;
+    CheckBurstIncrement(InterruptRec.ReadBurstFifo, Data, 4, AXI_DATA_WIDTH) ;
     
---    PushBurstIncrement(WriteBurstFifo, Data+16, 4, AXI_DATA_WIDTH) ;
---    WriteBurst(InterruptRec, X"A000_2000", 4) ;
-    
-    Write(InterruptRec, X"A000_2000", to_slv(Data+16, AXI_DATA_WIDTH)) ;
-    Write(InterruptRec, X"A000_2004", to_slv(Data+16+1, AXI_DATA_WIDTH)) ;
-    Write(InterruptRec, X"A000_2008", to_slv(Data+16+2, AXI_DATA_WIDTH)) ;
-    Write(InterruptRec, X"A000_200C", to_slv(Data+16+3, AXI_DATA_WIDTH)) ;
-    
+    PushBurstIncrement(InterruptRec.WriteBurstFifo, Data+16, 4, AXI_DATA_WIDTH) ;
+    WriteBurst(InterruptRec, X"A000_2000", 4) ;
+
     Data := Data + 16#10# ;
 
     log("Interrupt Handler Done") ; 

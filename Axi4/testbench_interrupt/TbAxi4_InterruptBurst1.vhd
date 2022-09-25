@@ -94,7 +94,7 @@ begin
     for i in 0 to 3 loop 
       blankline(2) ; 
       log("Main Starting Writes.  Loop #" & to_string(i)) ;
-      PushBurstIncrement(WriteBurstFifo, Data, 4, AXI_DATA_WIDTH) ;
+      PushBurstIncrement(ManagerRec.WriteBurstFifo, Data, 4, AXI_DATA_WIDTH) ;
       WriteBurst(ManagerRec, X"1000_0000", 4) ;
       
       IntReq <= '1' after i * 10 ns + 5 ns, '0' after i * 10 ns + 50 ns ;  
@@ -111,7 +111,7 @@ begin
       blankline(2) ; 
       log("Main Starting Reads.  Loop #" & to_string(i)) ;
       ReadBurst(ManagerRec, X"A000_2000", 4) ;
-      CheckBurstIncrement(ReadBurstFifo, Data+16, 4, AXI_DATA_WIDTH) ; 
+      CheckBurstIncrement(ManagerRec.ReadBurstFifo, Data+16, 4, AXI_DATA_WIDTH) ; 
 
       Data := Data + 16#10# ;
     end loop ; 
@@ -135,9 +135,9 @@ begin
     blankline(2) ; 
     log("Interrupt Handler Started") ; 
     ReadBurst(InterruptRec, X"1000_0000", 4) ;
-    CheckBurstIncrement(ReadBurstFifo, Data, 4, AXI_DATA_WIDTH) ;
+    CheckBurstIncrement(InterruptRec.ReadBurstFifo, Data, 4, AXI_DATA_WIDTH) ;
     
-    PushBurstIncrement(WriteBurstFifo, Data+16, 4, AXI_DATA_WIDTH) ;
+    PushBurstIncrement(InterruptRec.WriteBurstFifo, Data+16, 4, AXI_DATA_WIDTH) ;
     WriteBurst(InterruptRec, X"A000_2000", 4) ;
     
     Data := Data + 16#10# ;
@@ -145,6 +145,7 @@ begin
     log("Interrupt Handler Done") ; 
     blankline(2) ; 
     InterruptReturn(InterruptRec) ;
+    wait for 0 ns ; 
   end process InterruptProc ;
 
   ------------------------------------------------------------

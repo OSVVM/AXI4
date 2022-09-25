@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_InterruptBurst2.vhd
+--  File Name:         TbAxi4_InterruptNoHandler2.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -19,12 +19,13 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    04/202`   202`.04    Initial revision
+--    10/2022   2022.10    Updated for new interrupt handler
+--    04/2021   2021.04    Initial revision
 --
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2021 by SynthWorks Design Inc.  
+--  Copyright (c) 2021-2022 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -39,7 +40,7 @@
 --  limitations under the License.
 --  
 
-architecture InterruptBurst2 of TestCtrl is
+architecture InterruptNoHandler2 of TestCtrl is
 
   signal ManagerSync1, MemorySync1, TestDone : integer_barrier := 1 ;
  
@@ -52,14 +53,14 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_InterruptBurst2") ;
+    SetAlertLogName("TbAxi4_InterruptNoHandler2") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
     SetLogEnable(GetAlertLogID("Memory_1"), INFO, FALSE) ;   
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("./results/TbAxi4_InterruptBurst2.txt") ;
+    TranscriptOpen("./results/TbAxi4_InterruptNoHandler2.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -74,7 +75,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_InterruptBurst2.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_InterruptBurst2.txt", "") ; 
+    -- AlertIfDiff("./results/TbAxi4_InterruptNoHandler2.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_InterruptNoHandler2.txt", "") ; 
 
     EndOfTestReports ; 
     std.env.stop ; 
@@ -86,7 +87,7 @@ begin
   --   Generate transactions for AxiManager
   ------------------------------------------------------------
   ManagerProc : process
-    variable Data : integer := 0 ;    
+    variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) := (others => '0') ;    
   begin
     wait until nReset = '1' ;  
     WaitForClock(ManagerRec, 2) ; 
@@ -94,16 +95,28 @@ begin
     for i in 0 to 7 loop 
       blankline(2) ; 
       log("Main Starting Writes.  Loop #" & to_string(i)) ;
-      PushBurstIncrement(WriteBurstFifo, Data, 4, AXI_DATA_WIDTH) ;
-      WriteBurst(ManagerRec, X"1000_0000", 4) ;
+      Write(ManagerRec, X"1000_0000", Data ) ;
+      Write(ManagerRec, X"1000_0004", Data + 1 ) ;
+      Write(ManagerRec, X"1000_0008", Data + 2 ) ;
+      Write(ManagerRec, X"1000_000C", Data + 3 ) ;
       
-      IntReq <= '1' after i * 10 ns + 5 ns, '0' after i * 10 ns + 80 ns ;  
-      wait for 9 ns ; 
-      PushBurstIncrement(WriteBurstFifo, Data+4, 4, AXI_DATA_WIDTH) ;
-      WriteBurst(ManagerRec, X"2000_0000", 4) ;
-      ReadBurst(ManagerRec,  X"2000_0000", 4) ;
-      CheckBurstIncrement(ReadBurstFifo, Data+4, 4, AXI_DATA_WIDTH) ; 
+      ReadCheck(ManagerRec, X"1000_0000", Data ) ;
+      ReadCheck(ManagerRec, X"1000_0004", Data + 1 ) ;
+      ReadCheck(ManagerRec, X"1000_0008", Data + 2 ) ;
+      ReadCheck(ManagerRec, X"1000_000C", Data + 3 ) ;
+      
+      Write(ManagerRec, X"A000_2000", Data ) ;
+      Write(ManagerRec, X"A000_2004", Data + 1 ) ;
+      Write(ManagerRec, X"A000_2008", Data + 2 ) ;
+      Write(ManagerRec, X"A000_200C", Data + 3 ) ;
 
+      -- Do Write and Read Cycles mixed with Interrupt Handling
+      IntReq <= '1' after i * 10 ns + 5 ns, '0' after i * 10 ns + 50 ns ;  
+      wait for 9 ns ; 
+      Write(ManagerRec, X"1000_0010", Data + 4 ) ;
+      ReadCheck(ManagerRec, X"1000_0010", Data + 4 ) ;
+      Write(ManagerRec, X"1000_0014", Data + 5 ) ;
+      ReadCheck(ManagerRec, X"1000_0014", Data + 5 ) ;
       WaitForClock(ManagerRec, 1) ; 
       log("WaitForClock #1 finished") ;
       WaitForClock(ManagerRec, 1) ; 
@@ -111,10 +124,12 @@ begin
 
       blankline(2) ; 
       log("Main Starting Reads.  Loop #" & to_string(i)) ;
-      ReadBurst(ManagerRec, X"A000_2000", 4) ;
-      CheckBurstIncrement(ReadBurstFifo, Data+16, 4, AXI_DATA_WIDTH) ; 
+      ReadCheck(ManagerRec, X"A000_2000", Data ) ;
+      ReadCheck(ManagerRec, X"A000_2004", Data + 1 ) ;
+      ReadCheck(ManagerRec, X"A000_2008", Data + 2 ) ;
+      ReadCheck(ManagerRec, X"A000_200C", Data + 3 ) ;
 
-      Data := Data + 16#10# ;
+      Data := Data + X"10" ;
     end loop ; 
 
     
@@ -130,23 +145,28 @@ begin
   --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
   InterruptProc : process
-    variable Data : integer := 0 ;    
+    variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) := (others => '0') ;    
   begin
-    WaitForClock(InterruptRec, 1) ; 
-    blankline(2) ; 
-    log("Interrupt Handler Started") ; 
-    ReadBurst(InterruptRec, X"1000_0000", 4) ;
-    CheckBurstIncrement(ReadBurstFifo, Data, 4, AXI_DATA_WIDTH) ;
-    
--- Does not currently work due to timing with PushBurstIncrement in ManagerProc    
-    PushBurstIncrement(WriteBurstFifo, Data+16, 4, AXI_DATA_WIDTH) ;
-    WriteBurst(InterruptRec, X"A000_2000", 4) ;
-        
-    Data := Data + 16#10# ;
-
-    log("Interrupt Handler Done") ; 
-    blankline(2) ; 
-    InterruptReturn(InterruptRec) ;
+    wait ; 
+--    WaitForClock(InterruptRec, 1) ; 
+--    blankline(2) ; 
+--    log("Interrupt Handler Started") ; 
+--    ReadCheck(InterruptRec, X"1000_0000", Data ) ;
+--    ReadCheck(InterruptRec, X"1000_0004", Data + 1 ) ;
+--    ReadCheck(InterruptRec, X"1000_0008", Data + 2 ) ;
+--    ReadCheck(InterruptRec, X"1000_000C", Data + 3 ) ;
+--    
+--    Write(InterruptRec, X"A000_2000", Data ) ;
+--    Write(InterruptRec, X"A000_2004", Data + 1 ) ;
+--    Write(InterruptRec, X"A000_2008", Data + 2 ) ;
+--    Write(InterruptRec, X"A000_200C", Data + 3 ) ;
+--    
+--    Data := Data + X"10" ;
+--
+--    log("Interrupt Handler Done") ; 
+--    blankline(2) ; 
+--    InterruptReturn(InterruptRec) ;
+--    wait for 0 ns ; 
   end process InterruptProc ;
 
   ------------------------------------------------------------
@@ -165,15 +185,15 @@ begin
   end process SubordinateProc ;
 
 
-end InterruptBurst2 ;
+end InterruptNoHandler2 ;
 
-Configuration TbAxi4_InterruptBurst2 of TbAxi4Memory is
+Configuration TbAxi4_InterruptNoHandler2 of TbAxi4Memory is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(InterruptBurst2) ; 
+      use entity work.TestCtrl(InterruptNoHandler2) ; 
     end for ; 
 --!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 
 --!!    end for ; 
   end for ; 
-end TbAxi4_InterruptBurst2 ; 
+end TbAxi4_InterruptNoHandler2 ; 

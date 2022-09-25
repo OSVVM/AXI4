@@ -193,7 +193,7 @@ begin
     AxiBus      => AxiBus,
 
     -- Testbench Transaction Interface
-    TransRec    => ManagerRec
+    TransRec    => VCRec
   ) ;
 
 
@@ -218,8 +218,8 @@ begin
     nReset        => nReset,
 
     -- Transaction Interfaces
-    ManagerRec     => ManagerRec,
-    InterruptRec  => InterruptRec,
+    ManagerRec      => ManagerRec,
+    InterruptRec    => InterruptRec,
     SubordinateRec  => SubordinateRec
   ) ;
 

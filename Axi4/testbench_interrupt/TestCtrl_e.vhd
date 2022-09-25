@@ -53,17 +53,18 @@ library OSVVM ;
 
 library OSVVM_AXI4 ;
   context OSVVM_AXI4.Axi4Context ; 
+  use osvvm.ScoreboardPkg_slv.all ;
 
 use work.OsvvmTestCommonPkg.all ;
 
 entity TestCtrl is
   port (
     -- Global Signal Interface
-    nReset         : In    std_logic ;
+    nReset           : In    std_logic ;
 
     -- Transaction Interfaces
-    ManagerRec      : inout AddressBusRecType ;
-    InterruptRec   : inout AddressBusRecType ;
+    ManagerRec       : inout AddressBusRecType ;
+    InterruptRec     : inout AddressBusRecType ;
     SubordinateRec   : inout AddressBusRecType 
   ) ;
   
@@ -73,9 +74,9 @@ entity TestCtrl is
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
     
-  -- Access Burst FIFOs in Axi4Manager using external names
-  alias WriteBurstFifo is <<variable ^.Manager_1.WriteBurstFifo : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
-  alias ReadBurstFifo  is <<variable ^.Manager_1.ReadBurstFifo  : osvvm.ScoreboardPkg_slv.ScoreboardPType>> ;
+  -- Simplifying access to Burst FIFOs using aliases
+  alias WriteBurstFifo : ScoreboardIdType is ManagerRec.WriteBurstFifo ;
+  alias ReadBurstFifo  : ScoreboardIdType is ManagerRec.ReadBurstFifo ;
 
   alias IntReq  is <<signal ^.IntReq  : std_logic>> ;
 end entity TestCtrl ;

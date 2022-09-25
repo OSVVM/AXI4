@@ -38,16 +38,18 @@
 #  limitations under the License.
 #  
 TestSuite Axi4Full_Interrupt
-library   osvvm_TbAxi4_Interrupt
+library   Axi4Full_Interrupt
 
 analyze ../TestCases/OsvvmTestCommonPkg.vhd
 
 analyze TestCtrl_e.vhd
-analyze TbAxi4.vhd
+# analyze TbAxi4.vhd
 analyze TbAxi4Memory.vhd
 
-# RunTest TbAxi4_Interrupt1.vhd
-# RunTest TbAxi4_Interrupt2.vhd
-# RunTest TbAxi4_InterruptBurst1.vhd
+RunTest TbAxi4_Interrupt1.vhd
+RunTest TbAxi4_Interrupt2.vhd
+RunTest TbAxi4_InterruptBurst1.vhd
 RunTest TbAxi4_InterruptBurst2.vhd
+RunTest TbAxi4_InterruptNoHandler1.vhd
+RunTest TbAxi4_InterruptNoHandler2.vhd
 

@@ -118,6 +118,9 @@ architecture TestHarness of TbAxi4Memory is
       -- Global Signal Interface
       nReset           : In    std_logic ;
 
+      -- Drive IntReq
+      IntReq           : Out   std_logic := '0' ;
+
       -- Transaction Interfaces
       ManagerRec       : inout AddressBusRecType ;
       InterruptRec     : inout AddressBusRecType ;
@@ -214,6 +217,9 @@ begin
   port map (
     -- Global Signal Interface
     nReset          => nReset,
+
+    -- Drive IntReq
+    IntReq          => IntReq, 
 
     -- Transaction Interfaces
     ManagerRec      => ManagerRec,

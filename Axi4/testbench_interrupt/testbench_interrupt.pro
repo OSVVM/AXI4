@@ -1,4 +1,4 @@
-#  File Name:         testbench.pro
+#  File Name:         testbench_interrupt.pro
 #  Revision:          STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -50,6 +50,7 @@ RunTest TbAxi4_Interrupt1.vhd
 RunTest TbAxi4_Interrupt2.vhd
 RunTest TbAxi4_InterruptBurst1.vhd
 RunTest TbAxi4_InterruptBurst2.vhd
+
 RunTest TbAxi4_InterruptNoHandler1.vhd
-RunTest TbAxi4_InterruptNoHandler2.vhd
+#RunTest TbAxi4_InterruptNoHandler2.vhd
 

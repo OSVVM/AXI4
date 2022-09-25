@@ -43,17 +43,22 @@ library osvvm_TbAxi4
 
 include ./testbench
 
-RunTest  ./TestCases/TbAxi4_MemoryReadWriteDemo1.vhd
-RunTest  ./TestCases/TbAxi4_AxiXResp3_slv.vhd
+# Make TestCases the frame of reference
+set ::osvvm::CurrentWorkingDirectory [file join $::osvvm::CurrentWorkingDirectory TestCases]
 
-# RunTest  ./TestCases/TbAxi4_TransactionApiMemoryBurst.vhd
+# RunTest  TbAxi4_MemoryReadWriteDebug1.vhd
 
-# RunTest  ./TestCases/TbAxi4_MemoryBurst1.vhd
-# RunTest  ./TestCases/TbAxi4_MemoryBurstAsync1.vhd
+RunTest  TbAxi4_MemoryReadWriteDemo1.vhd
+# RunTest  TbAxi4_AxiXResp3_slv.vhd
+
+# RunTest  TbAxi4_TransactionApiMemoryBurst.vhd
+
+# RunTest  TbAxi4_MemoryBurst1.vhd
+# RunTest  TbAxi4_MemoryBurstAsync1.vhd
 # 
-# RunTest  ./TestCases/TbAxi4_MemoryBurstPattern1.vhd
-# RunTest  ./TestCases/TbAxi4_MemoryBurstPattern2.vhd
-# RunTest  ./TestCases/TbAxi4_MemoryBurstBytePattern1.vhd
-# RunTest  ./TestCases/TbAxi4_MemoryBurstAsyncPattern1.vhd
-# RunTest  ./TestCases/TbAxi4_MemoryBurstAsyncPattern2.vhd
+# RunTest  TbAxi4_MemoryBurstPattern1.vhd
+# RunTest  TbAxi4_MemoryBurstPattern2.vhd
+# RunTest  TbAxi4_MemoryBurstBytePattern1.vhd
+# RunTest  TbAxi4_MemoryBurstAsyncPattern1.vhd
+# RunTest  TbAxi4_MemoryBurstAsyncPattern2.vhd
 

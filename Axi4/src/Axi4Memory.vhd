@@ -19,7 +19,8 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE_NAME
+--    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   
+--    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
 --    03/2022   2022.03    Updated calls to NewID for AlertLogID and FIFOs
 --    02/2022   2022.02    Replaced to_hstring with to_hxstring
 --                         Added Search by NAME to NewID.

@@ -55,7 +55,7 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbStream_AxiSendCheckBurstPattern1") ;
+    SetTestName("TbStream_AxiSendCheckBurstPattern1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 

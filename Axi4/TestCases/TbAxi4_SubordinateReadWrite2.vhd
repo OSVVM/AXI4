@@ -52,7 +52,7 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_SubordinateReadWrite2") ;
+    SetTestName("TbAxi4_SubordinateReadWrite2") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 

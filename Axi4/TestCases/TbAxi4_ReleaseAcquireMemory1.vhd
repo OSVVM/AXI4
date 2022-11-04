@@ -53,7 +53,7 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_ReleaseAcquireMemory1") ;
+    SetTestName("TbAxi4_ReleaseAcquireMemory1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
     TbID <= GetAlertLogID("Testbench") ;

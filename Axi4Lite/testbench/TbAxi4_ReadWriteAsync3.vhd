@@ -57,7 +57,7 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_ReadWriteAsync3") ;
+    SetTestName("TbAxi4_ReadWriteAsync3") ;
     TbManagerID <= GetAlertLogID("TestCtrl: AxiManager") ;
     TbSubordinateID <= GetAlertLogID("TestCtrl: AxiSubordinate") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs

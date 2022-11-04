@@ -51,7 +51,7 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbStream_MultipleDriversReceiver1") ;
+    SetTestName("TbStream_MultipleDriversReceiver1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
     SetAlertStopCount(FAILURE, 2) ;    -- Allow 2 FAILURE Alerts

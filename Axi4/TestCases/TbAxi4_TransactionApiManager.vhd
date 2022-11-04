@@ -55,7 +55,7 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_TransactionApiManager") ;
+    SetTestName("TbAxi4_TransactionApiManager") ;
     TbManagerID <= GetAlertLogID("TB Manager Proc") ;
     TbSubordinateID <= GetAlertLogID("TB Subordinate Proc") ;
     SetLogEnable(PASSED, TRUE) ;  -- Enable PASSED logs

@@ -52,7 +52,7 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbStream_AxiBurstAsyncNoLast1") ;
+    SetTestName("TbStream_AxiBurstAsyncNoLast1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
 

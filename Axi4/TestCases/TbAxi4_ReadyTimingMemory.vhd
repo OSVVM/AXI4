@@ -58,7 +58,7 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_ReadyTimingMemory") ;
+    SetTestName("TbAxi4_ReadyTimingMemory") ;
     TbManagerID <= GetAlertLogID("TB Manager Proc") ;
     TbSubordinateID <= GetAlertLogID("TB Subordinate Proc") ;
     SetLogEnable(PASSED, TRUE) ;  -- Enable PASSED logs

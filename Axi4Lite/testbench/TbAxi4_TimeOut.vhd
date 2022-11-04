@@ -59,7 +59,7 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_TimeOut") ;
+    SetTestName("TbAxi4_TimeOut") ;
     TbManagerID <= GetAlertLogID("TB Manager Proc") ;
     TbSubordinateID  <= GetAlertLogID("TB Subordinate Proc") ;
     SetLogEnable(PASSED, TRUE) ;      -- Enable PASSED logs

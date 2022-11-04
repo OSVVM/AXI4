@@ -62,7 +62,7 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_ValidTimingBurstManager") ;
+    SetTestName("TbAxi4_ValidTimingBurstManager") ;
     TbManagerID <= GetAlertLogID("TB Manager Proc") ;
     TbSubordinateID <= GetAlertLogID("TB Subordinate Proc") ;
     SetLogEnable(PASSED, TRUE) ;  -- Enable PASSED logs

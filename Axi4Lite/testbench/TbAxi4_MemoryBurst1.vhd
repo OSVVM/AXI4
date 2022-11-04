@@ -53,7 +53,7 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_MemoryBurst1") ;
+    SetTestName("TbAxi4_MemoryBurst1") ;
     SetLogEnable(PASSED, TRUE) ;   -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;     -- Enable INFO logs
     SetLogEnable(DEBUG, TRUE) ;    -- Enable INFO logs

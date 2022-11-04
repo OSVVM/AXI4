@@ -53,7 +53,7 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetAlertLogName("TbAxi4_AlertLogIDSubordinate") ;
+    SetTestName("TbAxi4_AlertLogIDSubordinate") ;
     TbManagerID     <= GetAlertLogID("Manager") ;
     TbSubordinateID  <= GetAlertLogID("Subordinate") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs

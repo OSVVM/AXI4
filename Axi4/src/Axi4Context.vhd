@@ -16,9 +16,10 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    03/2019   2019.03    Initial Revision
---    01/2020   2020.01    Updated license notice
+--    11/2022   2022.11    Added Axi4OptionsArrayPkg
 --    12/2020   2020.12    Restructured Component Packages
+--    01/2020   2020.01    Updated license notice
+--    03/2019   2019.03    Initial Revision
 --
 --
 --  This file is part of OSVVM.
@@ -49,6 +50,7 @@ context Axi4Context is
     use osvvm_axi4.Axi4InterfacePkg.all ;     -- Interface definition
 
     use osvvm_axi4.Axi4OptionsPkg.all ;       -- Model parameters
+    use osvvm_axi4.Axi4OptionsArrayPkg.all ;  -- Model parameters - for Array parameters
     use osvvm_axi4.Axi4ModelPkg.all ;         -- Model support
 
     use osvvm_axi4.Axi4ComponentPkg.all ;     -- Connected Transaction Interface

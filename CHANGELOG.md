@@ -2,6 +2,7 @@
 
 | Revision  |  Release Summary | 
 ------------|----------- 
+| 2022.11   |  Added AxiStreamOptionsArrayPkg and Axi4OptionsArrayPkg
 | 2022.10   |  Changed PRIVATE to PRIVATE_NAME
 |           |  Added testbench_interrupt to test InterruptHandler from OsvvmLibraries/common/src
 | 2022.06   |  AxiStreamReceiver and AxiStreamReceiverVti to fix an issue with reading the RECEIVE_READY_WAIT_FOR_GET parameter.
@@ -23,7 +24,12 @@
 | 2020.02   |  Initial version of AddressBusTransactionPkg.
 | 2018.04   |  Initial public release
 
-## 2022.10 May 2022
+## 2022.11 October 2022
+- Added AxiStreamOptionsArrayPkg and Axi4OptionsArrayPkg
+- Fixed GET_BURST_MODE in AxiStreamTransmitter[Vti]
+- Note OsvvmLibraries/AXI4/Axi4/testbench_interrupt will move to OsvvmLibraries/Common/TbInterrupt
+
+## 2022.10 October 2022
 - Changed PRIVATE to PRIVATE_NAME
 - Added testbench_interrupt to test InterruptHandler from OsvvmLibraries/common/src
 

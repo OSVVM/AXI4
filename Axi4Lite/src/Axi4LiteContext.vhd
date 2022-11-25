@@ -16,8 +16,9 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    03/2019   2019.03    Initial Revision
+--    11/2022   2022.11    Added Axi4OptionsArrayPkg
 --    01/2020   2020.01    Updated license notice
+--    03/2019   2019.03    Initial Revision
 --
 --
 --  This file is part of OSVVM.
@@ -48,6 +49,7 @@ context Axi4LiteContext is
     use osvvm_Axi4.Axi4LiteInterfacePkg.all ;
 
     use osvvm_Axi4.Axi4OptionsPkg.all ; 
+    use osvvm_Axi4.Axi4OptionsArrayPkg.all ; 
     use osvvm_Axi4.Axi4ModelPkg.all ;
     
     use osvvm_Axi4.Axi4LiteComponentPkg.all ;

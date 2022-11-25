@@ -213,7 +213,7 @@ begin
           BurstFifoByteMode   <= (TransRec.IntToModel = STREAM_BURST_BYTE_MODE) ;
 
         when GET_BURST_MODE =>
-          TransRec.IntToModel <= BurstFifoMode ;
+          TransRec.IntFromModel <= BurstFifoMode ;
 
         when SEND | SEND_ASYNC =>
           Data   := SafeResize(TransRec.DataToModel, Data'length) ;

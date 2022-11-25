@@ -17,8 +17,9 @@
 #
 #  Revision History:
 #    Date      Version    Description
-#     1/2019   2019.01    Compile Script for OSVVM
+#    11/2022   2022.11    Added Axi4OptionsArrayPkg
 #     1/2020   2020.01    Updated Licenses to Apache
+#     1/2019   2019.01    Compile Script for OSVVM
 #
 #
 #  This file is part of OSVVM.
@@ -38,10 +39,12 @@
 #  limitations under the License.
 #
 library osvvm_axi4
-analyze ./src/Axi4InterfaceCommonPkg.vhd
-analyze ./src/Axi4LiteInterfacePkg.vhd
-analyze ./src/Axi4InterfacePkg.vhd
-analyze ./src/Axi4CommonPkg.vhd
-analyze ./src/Axi4ModelPkg.vhd
-analyze ./src/Axi4OptionsPkg.vhd
-analyze ./src/Axi4VersionCompatibilityPkg.vhd
+ChangeWorkingDirectory ./src
+analyze Axi4InterfaceCommonPkg.vhd
+analyze Axi4LiteInterfacePkg.vhd
+analyze Axi4InterfacePkg.vhd
+analyze Axi4CommonPkg.vhd
+analyze Axi4ModelPkg.vhd
+analyze Axi4OptionsPkg.vhd
+analyze Axi4OptionsArrayPkg.vhd
+analyze Axi4VersionCompatibilityPkg.vhd

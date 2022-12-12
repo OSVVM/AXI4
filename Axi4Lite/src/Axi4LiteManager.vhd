@@ -483,7 +483,7 @@ begin
               ExpectedData := SafeResize(TransRec.DataToModel, ExpectedData'length) ;
   --!!9 TODO:  Change format to Transaction #, Address, Prot, Read Data
   --!! Run regressions before changing
-              AffirmIf( DataCheckID, LRD.Data = ExpectedData,
+              AffirmIf( DataCheckID, MetaMatch(LRD.Data, ExpectedData),
                 "Read Data: " & to_hxstring(LRD.Data) &
                 "  Read Address: " & to_hxstring(LAR.Addr) &
                 "  Prot: " & to_hxstring(ReadProt),

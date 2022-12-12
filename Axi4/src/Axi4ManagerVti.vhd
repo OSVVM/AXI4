@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    12/2022   2022.12    Updated read check to use MetaMatch.   
 --    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
 --    03/2022   2022.03    Updated calls to NewID for AlertLogID and FIFOs
@@ -532,7 +533,7 @@ begin
               ExpectedData := SafeResize(TransRec.DataToModel, ExpectedData'length) ;
   --!!9 TODO:  Change format to Transaction #, Address, Prot, Read Data
   --!! Run regressions before changing
-              AffirmIf( DataCheckID, LRD.Data = ExpectedData,
+              AffirmIf( DataCheckID, MetaMatch(LRD.Data, ExpectedData),
                 "Read Data: " & to_hxstring(LRD.Data) &
                 "  Read Address: " & to_hxstring(LAR.Addr) &
                 "  Prot: " & to_hxstring(ReadProt),

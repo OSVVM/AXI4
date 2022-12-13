@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    12/2022   2022.12    Updated read check to use MetaMatch.   
 --    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
 --    03/2022   2022.03    Rederived from the 2022.02 version of Axi4 Full Manager

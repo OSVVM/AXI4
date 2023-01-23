@@ -87,7 +87,7 @@ entity AxiStreamReceiver is
     Clk       : in  std_logic ;
     nReset    : in  std_logic ;
 
-    -- AXI Master Functional Interface
+    -- AXI Receiver Functional Interface
     TValid    : in  std_logic ;
     TReady    : out std_logic ;
     TID       : in  std_logic_vector ;

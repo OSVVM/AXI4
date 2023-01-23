@@ -19,9 +19,10 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2018   2018.05    Initial revision
---    01/2020   2020.01    Updated license notice
+--    01/2023   2023.01    Added DUT (pass thru)
 --    10/2020   2020.10    Updated name to be TbStream.vhd in conjunction with Model Indepenedent Transactions
+--    01/2020   2020.01    Updated license notice
+--    05/2018   2018.05    Initial revision
 --
 --
 --  This file is part of OSVVM.
@@ -71,15 +72,15 @@ architecture TestHarness of TbStream is
   constant INIT_DEST   : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) := (others => '0') ; 
   constant INIT_USER   : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) := (others => '0') ; 
   
-  signal TValid    : std_logic ;
-  signal TReady    : std_logic ; 
-  signal TID       : std_logic_vector(TID_MAX_WIDTH-1 downto 0) ; 
-  signal TDest     : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) ; 
-  signal TUser     : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) ; 
-  signal TData     : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ; 
-  signal TStrb     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
-  signal TKeep     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
-  signal TLast     : std_logic ; 
+  signal TxTValid, RxTValid    : std_logic ;
+  signal TxTReady, RxTReady    : std_logic ; 
+  signal TxTID   , RxTID       : std_logic_vector(TID_MAX_WIDTH-1 downto 0) ; 
+  signal TxTDest , RxTDest     : std_logic_vector(TDEST_MAX_WIDTH-1 downto 0) ; 
+  signal TxTUser , RxTUser     : std_logic_vector(TUSER_MAX_WIDTH-1 downto 0) ; 
+  signal TxTData , RxTData     : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ; 
+  signal TxTStrb , RxTStrb     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
+  signal TxTKeep , RxTKeep     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
+  signal TxTLast , RxTLast     : std_logic ; 
   
   constant AXI_PARAM_WIDTH : integer := TID_MAX_WIDTH + TDEST_MAX_WIDTH + TUSER_MAX_WIDTH + 1 ;
 
@@ -109,6 +110,31 @@ architecture TestHarness of TbStream is
 
   
 begin
+
+  DUT : entity work.AxiStreamDut 
+    port map (
+      -- AXI Transmitter Functional Interface
+      TxTValid    =>   TxTValid,
+      TxTReady    =>   TxTReady,
+      TxTID       =>   TxTID   ,
+      TxTDest     =>   TxTDest ,
+      TxTUser     =>   TxTUser ,
+      TxTData     =>   TxTData ,
+      TxTStrb     =>   TxTStrb ,
+      TxTKeep     =>   TxTKeep ,
+      TxTLast     =>   TxTLast ,
+
+      -- AXI Receiver Functional Interface
+      RxTValid    =>   RxTValid,
+      RxTReady    =>   RxTReady,
+      RxTID       =>   RxTID   ,
+      RxTDest     =>   RxTDest ,
+      RxTUser     =>   RxTUser ,
+      RxTData     =>   RxTData ,
+      RxTStrb     =>   RxTStrb ,
+      RxTKeep     =>   RxTKeep ,
+      RxTLast     =>   RxTLast 
+    ) ;
 
   -- create Clock 
   Osvvm.TbUtilPkg.CreateClock ( 
@@ -149,15 +175,16 @@ begin
       nReset    => nReset,
       
       -- AXI Stream Interface
-      TValid    => TValid,
-      TReady    => TReady,
-      TID       => TID   ,
-      TDest     => TDest ,
-      TUser     => TUser ,
-      TData     => TData ,
-      TStrb     => TStrb ,
-      TKeep     => TKeep ,
-      TLast     => TLast ,
+      -- From TB Transmitter to DUT Receiver
+      TValid    => RxTValid,
+      TReady    => RxTReady,
+      TID       => RxTID   ,
+      TDest     => RxTDest ,
+      TUser     => RxTUser ,
+      TData     => RxTData ,
+      TStrb     => RxTStrb ,
+      TKeep     => RxTKeep ,
+      TLast     => RxTLast ,
 
       -- Testbench Transaction Interface
       TransRec  => StreamTxRec
@@ -179,15 +206,16 @@ begin
       nReset    => nReset,
       
       -- AXI Stream Interface
-      TValid    => TValid,
-      TReady    => TReady,
-      TID       => TID   ,
-      TDest     => TDest ,
-      TUser     => TUser ,
-      TData     => TData ,
-      TStrb     => TStrb ,
-      TKeep     => TKeep ,
-      TLast     => TLast ,
+      -- From TB Receiver to DUT Transmitter
+      TValid    => TxTValid,
+      TReady    => TxTReady,
+      TID       => TxTID   ,
+      TDest     => TxTDest ,
+      TUser     => TxTUser ,
+      TData     => TxTData ,
+      TStrb     => TxTStrb ,
+      TKeep     => TxTKeep ,
+      TLast     => TxTLast ,
 
       -- Testbench Transaction Interface
       TransRec  => StreamRxRec
@@ -196,9 +224,9 @@ begin
   
   TestCtrl_1 : TestCtrl
   generic map ( 
-    ID_LEN       => TID'length,
-    DEST_LEN     => TDest'length,
-    USER_LEN     => TUser'length
+    ID_LEN       => TxTID'length,
+    DEST_LEN     => TxTDest'length,
+    USER_LEN     => TxTUser'length
   ) 
   port map ( 
     -- Globals

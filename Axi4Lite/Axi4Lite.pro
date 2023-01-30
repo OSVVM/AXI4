@@ -44,4 +44,5 @@ analyze ./src/Axi4LiteManager.vhd
 analyze ./src/Axi4LiteMonitor_dummy.vhd
 analyze ./src/Axi4LiteSubordinate.vhd
 analyze ./src/Axi4LiteMemory.vhd
+analyze ./src/Axi4LitePassThru.vhd
 

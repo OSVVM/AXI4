@@ -48,3 +48,4 @@ analyze ./src/Axi4Subordinate.vhd
 analyze ./src/Axi4SubordinateVti.vhd
 analyze ./src/Axi4Memory.vhd
 analyze ./src/Axi4MemoryVti.vhd
+analyze ./src/Axi4PassThru.vhd

@@ -166,5 +166,71 @@ package Axi4LiteComponentPkg is
     ) ;
   end component Axi4LiteMonitor ;
   
+  component Axi4LitePassThru is
+    port (
+    -- AXI Manager Interface 
+      -- AXI Write Address Channel
+      mAwAddr       : out   std_logic_vector ; 
+      mAwProt       : out   Axi4ProtType ;
+      mAwValid      : out   std_logic ; 
+      mAwReady      : in    std_logic ; 
+
+      -- AXI Write Data Channel
+      mWData        : out   std_logic_vector ; 
+      mWStrb        : out   std_logic_vector ; 
+      mWValid       : out   std_logic ; 
+      mWReady       : in    std_logic ; 
+
+      -- AXI Write Response Channel
+      mBValid       : in    std_logic ; 
+      mBReady       : out   std_logic ; 
+      mBResp        : in    Axi4RespType ; 
+    
+      -- AXI Read Address Channel
+      mArAddr       : out   std_logic_vector ; 
+      mArProt       : out   Axi4ProtType ;
+      mArValid      : out   std_logic ; 
+      mArReady      : in    std_logic ; 
+
+      -- AXI Read Data Channel
+      mRData        : in    std_logic_vector ; 
+      mRResp        : in    Axi4RespType ;
+      mRValid       : in    std_logic ; 
+      mRReady       : out   std_logic ; 
+
+
+    -- AXI Subordinate Interface 
+      -- AXI Write Address Channel
+      sAwAddr       : in    std_logic_vector ; 
+      sAwProt       : in    Axi4ProtType ;
+      sAwValid      : in    std_logic ; 
+      sAwReady      : out   std_logic ; 
+
+      -- AXI Write Data Channel
+      sWData        : in    std_logic_vector ; 
+      sWStrb        : in    std_logic_vector ; 
+      sWValid       : in    std_logic ; 
+      sWReady       : out   std_logic ; 
+
+      -- AXI Write Response Channel
+      sBValid       : out   std_logic ; 
+      sBReady       : in    std_logic ; 
+      sBResp        : out   Axi4RespType ; 
+    
+    
+      -- AXI Read Address Channel
+      sArAddr       : in    std_logic_vector ; 
+      sArProt       : in    Axi4ProtType ;
+      sArValid      : in    std_logic ; 
+      sArReady      : out   std_logic ; 
+
+      -- AXI Read Data Channel
+      sRData        : out   std_logic_vector ; 
+      sRResp        : out   Axi4RespType ;
+      sRValid       : out   std_logic ; 
+      sRReady       : in    std_logic  
+    ) ;
+  end component Axi4LitePassThru ;
+
 end package Axi4LiteComponentPkg ;
 

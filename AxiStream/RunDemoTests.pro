@@ -44,7 +44,10 @@ library   osvvm_TbAxiStream
 
 include ./testbench
 
-RunTest ./TestCases/TbStream_SendGetDemo1.vhd
+RunTest ./TestCases/TbStream_SendGetRandom1.vhd
+# RunTest ./TestCases/TbStream_SendGetDemo1.vhd
+# RunTest ./TestCases/TbStream_AxiTiming2.vhd
+#RunTest ./TestCases/TbStream_AxiTimingBurst2.vhd
 
 # RunTest  ./TestCases/TbStream_SendCheckBurstByte1.vhd
 # RunTest  ./TestCases/TbStream_SendGetBurstByte1.vhd

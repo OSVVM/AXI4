@@ -58,7 +58,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen(OSVVM_RESULTS_DIR & "TbStream_AxiTiming1.txt") ;
+    TranscriptOpen ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -71,7 +71,7 @@ begin
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
---    AlertIfDiff("./results/TbStream_AxiTiming1.txt", "../sim_shared/validated_results/TbStream_AxiTiming1.txt", "") ; 
+    AffirmIfNotDiff(GetTranscriptName, OSVVM_VALIDATED_RESULTS_DIR & GetTranscriptName, "") ;   
     
     EndOfTestReports(ExternalErrors => (FAILURE => -4, ERROR => -2, WARNING => 0)) ; 
     std.env.stop ;

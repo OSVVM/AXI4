@@ -60,7 +60,7 @@ begin
 
     -- Wait for simulation elaboration/initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen(OSVVM_RESULTS_DIR & "TbStream_SendGetDemo1.txt") ;
+    TranscriptOpen ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -73,7 +73,7 @@ begin
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
---    AlertIfDiff("./results/TbStream_SendGetDemo1.txt", "../sim_shared/validated_results/TbStream_SendGetDemo1.txt", "") ; 
+    AffirmIfNotDiff(GetTranscriptName, OSVVM_VALIDATED_RESULTS_DIR & GetTranscriptName, "") ;   
     
     -- Expecting two check errors at 128 and 256
     EndOfTestReports(ExternalErrors => (0, 0, 0)) ; 

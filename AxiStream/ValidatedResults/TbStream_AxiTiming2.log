@@ -1,0 +1,66 @@
+%% Log    ALWAYS    in Default,   Ready before Valid Tests. at 110 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000000  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 1 at 160 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 1  Received.  Data: 00000000  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 170 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00001000  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 2 at 220 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 2  Received.  Data: 00001000  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 230 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00001001  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 3 at 230 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 3  Received.  Data: 00001001  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 240 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00001002  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 4 at 240 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 4  Received.  Data: 00001002  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 250 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00001100  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 5 at 300 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 5  Received.  Data: 00001100  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 310 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00001101  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 6 at 310 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 6  Received.  Data: 00001101  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 330 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00001102  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 7 at 330 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 7  Received.  Data: 00001102  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 350 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00001200  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 8 at 400 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 8  Received.  Data: 00001200  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 410 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00001201  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 9 at 410 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 9  Received.  Data: 00001201  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 440 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00001202  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 10 at 440 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 10  Received.  Data: 00001202  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 470 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00001300  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 11 at 520 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 11  Received.  Data: 00001300  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 530 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00001301  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 12 at 530 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 12  Received.  Data: 00001301  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 570 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00001302  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 13 at 570 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 13  Received.  Data: 00001302  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 610 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00001400  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 14 at 660 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 14  Received.  Data: 00001400  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 670 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00001401  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 15 at 670 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 15  Received.  Data: 00001401  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 720 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00001402  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 16 at 720 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 16  Received.  Data: 00001402  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 770 ns
+%% Log    ALWAYS    in Default,   Ready after Valid Tests. at 770 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000000  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 17 at 820 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 17  Received.  Data: 00000000  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 830 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00002000  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 18 at 880 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 18  Received.  Data: 00002000  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 900 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00002001  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 19 at 900 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 19  Received.  Data: 00002001  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 920 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00002002  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 20 at 920 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 20  Received.  Data: 00002002  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 940 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00002100  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 21 at 990 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 21  Received.  Data: 00002100  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1010 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00002101  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 22 at 1010 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 22  Received.  Data: 00002101  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1040 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00002102  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 23 at 1040 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 23  Received.  Data: 00002102  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1070 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00002200  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 24 at 1120 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 24  Received.  Data: 00002200  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1150 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00002201  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 25 at 1150 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 25  Received.  Data: 00002201  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1190 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00002202  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 26 at 1190 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 26  Received.  Data: 00002202  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1230 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00002300  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 27 at 1280 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 27  Received.  Data: 00002300  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1320 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00002301  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 28 at 1320 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 28  Received.  Data: 00002301  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1370 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00002302  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 29 at 1370 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 29  Received.  Data: 00002302  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1420 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00002400  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 30 at 1470 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 30  Received.  Data: 00002400  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1520 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00002401  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 31 at 1520 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 31  Received.  Data: 00002401  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1580 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00002402  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 32 at 1580 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 32  Received.  Data: 00002402  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1640 ns

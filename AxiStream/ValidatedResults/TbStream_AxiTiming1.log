@@ -1,0 +1,30 @@
+%% Log    ALWAYS    in Default,   Transmit Ready TimeOut test.  Trigger Ready TimeOut twice. at 110 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00010010  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 1 at 130 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 1  Data: 00010010  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 140 ns
+%% Log    PASSED    in Default,   Get Data:  Received : 00010010 at 140 ns
+
+
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: BAD00010  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 2 at 240 ns
+%% Alert  FAILURE   in transmitter_1: No response,   AXI Stream Send Operation # 2.  Ready: 0  Expected: 1 at 290 ns
+%% Alert  FAILURE   in receiver_1,    Valid (0) deasserted before Ready asserted (0)  at 300 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 2  Data: 452FFFEF  TID: 01  TDest: 1  TUser: F  TLast: 0 at 310 ns
+%% Alert  ERROR     in Default,   Get Data:  Received : 452FFFEF ?= Expected : BAD00010 at 310 ns
+
+
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00020020  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 3 at 400 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 3  Data: 00020020  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 490 ns
+%% Log    PASSED    in Default,   Get Data:  Received : 00020020 at 490 ns
+
+
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: BAD00020  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 4 at 590 ns
+%% Alert  FAILURE   in transmitter_1: No response,   AXI Stream Send Operation # 4.  Ready: 0  Expected: 1 at 640 ns
+%% Alert  FAILURE   in receiver_1,    Valid (0) deasserted before Ready asserted (0)  at 650 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 4  Data: 452FFFDF  TID: 01  TDest: 1  TUser: F  TLast: 0 at 660 ns
+%% Alert  ERROR     in Default,   Get Data:  Received : 452FFFDF ?= Expected : BAD00020 at 660 ns
+
+
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00030030  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 5 at 750 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 5  Data: 00030030  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 840 ns
+%% Log    PASSED    in Default,   Get Data:  Received : 00030030 at 840 ns
+
+

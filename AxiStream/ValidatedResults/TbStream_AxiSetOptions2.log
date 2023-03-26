@@ -1,0 +1,70 @@
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000000  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 2  TUser: 1  TLast: 0  Operation# 1 at 110 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 1  Data: 00000000  TID: 03  TDest: 2  TUser: 1  TLast: 0 at 120 ns
+%% Log    PASSED    in Default,   Data  Received : 00000000 at 120 ns
+%% Log    PASSED    in Default,   Param ID & Dest & User  Received : 00642 at 120 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000001  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 2  TUser: 1  TLast: 0  Operation# 2 at 120 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 2  Received.  Data: 00000001  TID: 03  TDest: 2  TUser: 1  TLast: 0 at 130 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000002  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 2  TUser: 1  TLast: 0  Operation# 3 at 130 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 3  Received.  Data: 00000002  TID: 03  TDest: 2  TUser: 1  TLast: 0 at 140 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000003  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 2  TUser: 1  TLast: 0  Operation# 4 at 140 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 4  Received.  Data: 00000003  TID: 03  TDest: 2  TUser: 1  TLast: 0 at 150 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000004  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 2  TUser: 5  TLast: 0  Operation# 5 at 150 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 5  Data: 00000004  TID: 03  TDest: 2  TUser: 5  TLast: 0 at 160 ns
+%% Log    PASSED    in Default,   Data  Received : 00000004 at 160 ns
+%% Log    PASSED    in Default,   Param ID & Dest & User  Received : 0064A at 160 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000005  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 2  TUser: 5  TLast: 0  Operation# 6 at 160 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 6  Received.  Data: 00000005  TID: 03  TDest: 2  TUser: 5  TLast: 0 at 170 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000006  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 2  TUser: 5  TLast: 0  Operation# 7 at 170 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 7  Received.  Data: 00000006  TID: 03  TDest: 2  TUser: 5  TLast: 0 at 180 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000007  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 2  TUser: 5  TLast: 0  Operation# 8 at 180 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 8  Received.  Data: 00000007  TID: 03  TDest: 2  TUser: 5  TLast: 0 at 190 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000008  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 6  TUser: 5  TLast: 0  Operation# 9 at 190 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 9  Data: 00000008  TID: 03  TDest: 6  TUser: 5  TLast: 0 at 200 ns
+%% Log    PASSED    in Default,   Data  Received : 00000008 at 200 ns
+%% Log    PASSED    in Default,   Param ID & Dest & User  Received : 006CA at 200 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000009  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 6  TUser: 5  TLast: 0  Operation# 10 at 200 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 10  Received.  Data: 00000009  TID: 03  TDest: 6  TUser: 5  TLast: 0 at 210 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0000000A  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 6  TUser: 5  TLast: 0  Operation# 11 at 210 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 11  Received.  Data: 0000000A  TID: 03  TDest: 6  TUser: 5  TLast: 0 at 220 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0000000B  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 6  TUser: 5  TLast: 0  Operation# 12 at 220 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 12  Received.  Data: 0000000B  TID: 03  TDest: 6  TUser: 5  TLast: 0 at 230 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0000000C  TStrb: 1111  TKeep: 1111  TID: 07  TDest: 6  TUser: 5  TLast: 0  Operation# 13 at 230 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 13  Data: 0000000C  TID: 07  TDest: 6  TUser: 5  TLast: 0 at 240 ns
+%% Log    PASSED    in Default,   Data  Received : 0000000C at 240 ns
+%% Log    PASSED    in Default,   Param ID & Dest & User  Received : 00ECA at 240 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0000000D  TStrb: 1111  TKeep: 1111  TID: 07  TDest: 6  TUser: 5  TLast: 0  Operation# 14 at 240 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 14  Received.  Data: 0000000D  TID: 07  TDest: 6  TUser: 5  TLast: 0 at 250 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0000000E  TStrb: 1111  TKeep: 1111  TID: 07  TDest: 6  TUser: 5  TLast: 0  Operation# 15 at 250 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 15  Received.  Data: 0000000E  TID: 07  TDest: 6  TUser: 5  TLast: 0 at 260 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0000000F  TStrb: 1111  TKeep: 1111  TID: 07  TDest: 6  TUser: 5  TLast: 0  Operation# 16 at 260 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 16  Received.  Data: 0000000F  TID: 07  TDest: 6  TUser: 5  TLast: 0 at 270 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000010  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 2  TUser: 5  TLast: 0  Operation# 17 at 270 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 17  Data: 00000010  TID: 03  TDest: 2  TUser: 5  TLast: 0 at 280 ns
+%% Log    PASSED    in Default,   Data  Received : 00000010 at 280 ns
+%% Log    PASSED    in Default,   Param ID & Dest & User  Received : 0064A at 280 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000011  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 2  TUser: 5  TLast: 0  Operation# 18 at 280 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 18  Received.  Data: 00000011  TID: 03  TDest: 2  TUser: 5  TLast: 0 at 290 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000012  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 2  TUser: 5  TLast: 0  Operation# 19 at 290 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 19  Received.  Data: 00000012  TID: 03  TDest: 2  TUser: 5  TLast: 0 at 300 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000013  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 2  TUser: 5  TLast: 0  Operation# 20 at 300 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 20  Received.  Data: 00000013  TID: 03  TDest: 2  TUser: 5  TLast: 0 at 310 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000014  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 6  TUser: 1  TLast: 0  Operation# 21 at 310 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 21  Data: 00000014  TID: 03  TDest: 6  TUser: 1  TLast: 0 at 320 ns
+%% Log    PASSED    in Default,   Data  Received : 00000014 at 320 ns
+%% Log    PASSED    in Default,   Param ID & Dest & User  Received : 006C2 at 320 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000015  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 6  TUser: 1  TLast: 0  Operation# 22 at 320 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 22  Received.  Data: 00000015  TID: 03  TDest: 6  TUser: 1  TLast: 0 at 330 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000016  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 6  TUser: 1  TLast: 0  Operation# 23 at 330 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 23  Received.  Data: 00000016  TID: 03  TDest: 6  TUser: 1  TLast: 0 at 340 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000017  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 6  TUser: 1  TLast: 0  Operation# 24 at 340 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 24  Received.  Data: 00000017  TID: 03  TDest: 6  TUser: 1  TLast: 0 at 350 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000018  TStrb: 1111  TKeep: 1111  TID: 07  TDest: 2  TUser: 1  TLast: 0  Operation# 25 at 350 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 25  Data: 00000018  TID: 07  TDest: 2  TUser: 1  TLast: 0 at 360 ns
+%% Log    PASSED    in Default,   Data  Received : 00000018 at 360 ns
+%% Log    PASSED    in Default,   Param ID & Dest & User  Received : 00E42 at 360 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000019  TStrb: 1111  TKeep: 1111  TID: 07  TDest: 2  TUser: 1  TLast: 0  Operation# 26 at 360 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 26  Received.  Data: 00000019  TID: 07  TDest: 2  TUser: 1  TLast: 0 at 370 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0000001A  TStrb: 1111  TKeep: 1111  TID: 07  TDest: 2  TUser: 1  TLast: 0  Operation# 27 at 370 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 27  Received.  Data: 0000001A  TID: 07  TDest: 2  TUser: 1  TLast: 0 at 380 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0000001B  TStrb: 1111  TKeep: 1111  TID: 07  TDest: 2  TUser: 1  TLast: 0  Operation# 28 at 380 ns
+%% Log    PASSED    in receiver_1: Data Check,   Operation# 28  Received.  Data: 0000001B  TID: 07  TDest: 2  TUser: 1  TLast: 0 at 390 ns

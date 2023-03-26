@@ -1,0 +1,74 @@
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000001  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 1 at 110 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XXXXXX01  TStrb: 0001  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 2 at 120 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000002  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 3 at 130 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XXXX01XX  TStrb: 0010  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 4 at 140 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000003  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 5 at 150 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XX01XXXX  TStrb: 0100  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 6 at 160 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000004  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 7 at 170 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 01XXXXXX  TStrb: 1000  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 8 at 180 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000005  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 9 at 190 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XXXX0302  TStrb: 0011  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 10 at 200 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000006  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 11 at 210 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XX0302XX  TStrb: 0110  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 12 at 220 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000007  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 13 at 230 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0302XXXX  TStrb: 1100  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 14 at 240 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000008  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 15 at 250 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XX060504  TStrb: 0111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 16 at 260 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000009  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 17 at 270 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 060504XX  TStrb: 1110  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 1  Operation# 18 at 280 ns
+%% Log    INFO      in receiver_1,   Burst Receive.  Operation# 1  Last Data: 060504WW  TID: 00  TDest: 0  TUser: 0  TLast: 1 at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 00000001 at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : WWWWWW01 at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 00000002 at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : WWWW01WW at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 00000003 at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : WW01WWWW at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 00000004 at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 01WWWWWW at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 00000005 at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : WWWW0302 at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 00000006 at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : WW0302WW at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 00000007 at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 0302WWWW at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 00000008 at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : WW060504 at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 00000009 at 290 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 060504WW at 290 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0000000A  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 19 at 290 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XXXXXX01  TStrb: 0001  TKeep: 0001  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 20 at 300 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0000000B  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 21 at 310 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XXXX01XX  TStrb: 0010  TKeep: 0010  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 22 at 320 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0000000C  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 23 at 330 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XX01XXXX  TStrb: 0100  TKeep: 0100  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 24 at 340 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0000000D  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 25 at 350 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 01XXXXXX  TStrb: 1000  TKeep: 1000  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 26 at 360 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0000000E  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 27 at 370 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XXXX0302  TStrb: 0011  TKeep: 0011  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 28 at 380 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0000000F  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 29 at 390 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XX0302XX  TStrb: 0110  TKeep: 0110  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 30 at 400 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000010  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 31 at 410 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0302XXXX  TStrb: 1100  TKeep: 1100  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 32 at 420 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000011  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 33 at 430 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XX060504  TStrb: 0111  TKeep: 0111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 34 at 440 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00000012  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 35 at 450 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 060504XX  TStrb: 1110  TKeep: 1110  TID: 00  TDest: 0  TUser: 0  TLast: 1  Operation# 36 at 460 ns
+%% Log    INFO      in receiver_1,   Burst Receive.  Operation# 2  Last Data: 060504UU  TID: 00  TDest: 0  TUser: 0  TLast: 1 at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 0000000A at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : UUUUUU01 at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 0000000B at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : UUUU01UU at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 0000000C at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : UU01UUUU at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 0000000D at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 01UUUUUU at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 0000000E at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : UUUU0302 at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 0000000F at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : UU0302UU at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 00000010 at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 0302UUUU at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 00000011 at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : UU060504 at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 00000012 at 470 ns
+%% Log    PASSED    in Default,   GetBurst:  Received : 060504UU at 470 ns

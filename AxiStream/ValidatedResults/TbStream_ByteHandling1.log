@@ -1,0 +1,54 @@
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XXXXXX01  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 1 at 110 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 1  Data: XXXXXX01  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 120 ns
+%% Log    PASSED    in Default,   Get One Byte:  Received : XXXXXX01 at 120 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XXXX01XX  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 2 at 120 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 2  Data: XXXX01XX  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 130 ns
+%% Log    PASSED    in Default,   Get One Byte:  Received : XXXX01XX at 130 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XX01XXXX  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 3 at 130 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 3  Data: XX01XXXX  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 140 ns
+%% Log    PASSED    in Default,   Get One Byte:  Received : XX01XXXX at 140 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 01XXXXXX  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 4 at 140 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 4  Data: 01XXXXXX  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 150 ns
+%% Log    PASSED    in Default,   Get One Byte:  Received : 01XXXXXX at 150 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XXXX0302  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 5 at 150 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 5  Data: XXXX0302  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 160 ns
+%% Log    PASSED    in Default,   Get Two Bytes:  Received : XXXX0302 at 160 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XX0302XX  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 6 at 160 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 6  Data: XX0302XX  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 170 ns
+%% Log    PASSED    in Default,   Get Two Bytes:  Received : XX0302XX at 170 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0302XXXX  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 7 at 170 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 7  Data: 0302XXXX  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 180 ns
+%% Log    PASSED    in Default,   Get Two Bytes:  Received : 0302XXXX at 180 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XX060504  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 8 at 180 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 8  Data: XX060504  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 190 ns
+%% Log    PASSED    in Default,   Get Three Bytes:  Received : XX060504 at 190 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 060504XX  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 9 at 190 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 9  Data: 060504XX  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 200 ns
+%% Log    PASSED    in Default,   Get Three Bytes:  Received : 060504XX at 200 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XXXXXX01  TStrb: 0001  TKeep: 0001  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 10 at 200 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 10  Data: UUUUUU01  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 210 ns
+%% Log    PASSED    in Default,   Get One Byte:  Received : UUUUUU01 at 210 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XXXX01XX  TStrb: 0010  TKeep: 0010  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 11 at 210 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 11  Data: UUUU01UU  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 220 ns
+%% Log    PASSED    in Default,   Get One Byte:  Received : UUUU01UU at 220 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XX01XXXX  TStrb: 0100  TKeep: 0100  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 12 at 220 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 12  Data: UU01UUUU  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 230 ns
+%% Log    PASSED    in Default,   Get One Byte:  Received : UU01UUUU at 230 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 01XXXXXX  TStrb: 1000  TKeep: 1000  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 13 at 230 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 13  Data: 01UUUUUU  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 240 ns
+%% Log    PASSED    in Default,   Get One Byte:  Received : 01UUUUUU at 240 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XXXX0302  TStrb: 0011  TKeep: 0011  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 14 at 240 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 14  Data: UUUU0302  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 250 ns
+%% Log    PASSED    in Default,   Get Two Bytes:  Received : UUUU0302 at 250 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XX0302XX  TStrb: 0110  TKeep: 0110  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 15 at 250 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 15  Data: UU0302UU  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 260 ns
+%% Log    PASSED    in Default,   Get Two Bytes:  Received : UU0302UU at 260 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0302XXXX  TStrb: 1100  TKeep: 1100  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 16 at 260 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 16  Data: 0302UUUU  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 270 ns
+%% Log    PASSED    in Default,   Get Two Bytes:  Received : 0302UUUU at 270 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XX060504  TStrb: 0111  TKeep: 0111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 17 at 270 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 17  Data: UU060504  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 280 ns
+%% Log    PASSED    in Default,   Get Three Bytes:  Received : UU060504 at 280 ns
+%% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 060504XX  TStrb: 1110  TKeep: 1110  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 18 at 280 ns
+%% Log    INFO      in receiver_1,   Word Receive.  Operation# 18  Data: 060504UU  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 290 ns
+%% Log    PASSED    in Default,   Get Three Bytes:  Received : 060504UU at 290 ns

@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    03/2023   2023.03    Update delays on TValid to be randomized
 --    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
 --    03/2022   2022.03    Updated calls to NewID for AlertLogID and FIFOs
@@ -133,15 +134,17 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
 
 
   -- Verification Component Configuration
-  signal TransmitReadyTimeOut : integer := integer'right ;
+  signal TransmitReadyTimeOut : integer := 0 ;  -- No timeout
 
-  signal ParamID           : std_logic_vector(TID'range)   := IfElse(INIT_ID'length > 0,   INIT_ID,   (TID'range => '0')) ;
-  signal ParamDest         : std_logic_vector(TDest'range) := IfElse(INIT_DEST'length > 0, INIT_DEST, (TDest'range => '0')) ;
-  signal ParamUser         : std_logic_vector(TUser'range) := IfElse(INIT_USER'length > 0, INIT_USER, (TUser'range => '0')) ;
-  signal ParamLast         : natural := INIT_LAST ;
-  signal LastOffsetCount   : integer := 0 ;
-  signal ValidDelayCycles  : integer := 0 ;
-  signal ValidBurstDelayCycles  : integer := 0 ;
+  signal ParamID               : std_logic_vector(TID'range)   := IfElse(INIT_ID'length > 0,   INIT_ID,   (TID'range => '0')) ;
+  signal ParamDest             : std_logic_vector(TDest'range) := IfElse(INIT_DEST'length > 0, INIT_DEST, (TDest'range => '0')) ;
+  signal ParamUser             : std_logic_vector(TUser'range) := IfElse(INIT_USER'length > 0, INIT_USER, (TUser'range => '0')) ;
+  signal ParamLast             : natural := INIT_LAST ;
+  signal LastOffsetCount       : integer := 0 ;
+  signal ValidDelayCycles      : integer := 0 ;
+  signal ValidBurstDelayCycles : integer := 0 ;
+  signal ValidDelayCov       : CoverageIDType ; 
+  signal ValidBurstDelayCov  : CoverageIDType ; 
 
   constant DEFAULT_BURST_MODE : StreamFifoBurstModeType := STREAM_BURST_WORD_MODE ;
   signal   BurstFifoMode      : StreamFifoBurstModeType := DEFAULT_BURST_MODE ;
@@ -162,6 +165,8 @@ begin
 --    DataCheckID     <= NewID("Data Check", ID ) ;
     BusFailedID     <= NewID("No response",  ID) ;
     TransmitFifo    <= NewID("TransmitFifo", ID, ReportMode => DISABLED, Search => PRIVATE_NAME) ; 
+    ValidDelayCov      <= NewID("ValidDelayCov", ID) ; 
+    ValidBurstDelayCov <= NewID("ValidBurstDelayCov", ID) ;
     wait ;
   end process Initialize ;
 
@@ -180,6 +185,8 @@ begin
   begin
     wait for 0 ns ; 
     TransRec.BurstFifo <= NewID("TxBurstFifo", ModelID, Search => PRIVATE_NAME) ;
+    AddBins(ValidDelayCov,      GenBin(ValidDelayCycles)) ;
+    AddBins(ValidBurstDelayCov, GenBin(ValidBurstDelayCycles)) ;
     
     DispatchLoop : loop 
       WaitForTransaction(
@@ -281,9 +288,15 @@ begin
           case AxiStreamOptionsType'val(TransRec.Options) is
             when TRANSMIT_VALID_DELAY_CYCLES =>
               ValidDelayCycles <= TransRec.IntToModel ;
+              -- rebuild coverage model with new values for backward compatibility
+              DeallocateBins(ValidDelayCov) ; 
+              AddBins(ValidDelayCov, GenBin(TransRec.IntToModel)) ;
 
             when TRANSMIT_VALID_BURST_DELAY_CYCLES =>
               ValidBurstDelayCycles <= TransRec.IntToModel ;
+              -- rebuild coverage model with new values for backward compatibility
+              DeallocateBins(ValidBurstDelayCov) ; 
+              AddBins(ValidBurstDelayCov, GenBin(TransRec.IntToModel)) ;
 
             when TRANSMIT_READY_TIME_OUT =>
               TransmitReadyTimeOut      <= TransRec.IntToModel ;
@@ -313,7 +326,13 @@ begin
 
             when TRANSMIT_VALID_BURST_DELAY_CYCLES =>
               TransRec.IntFromModel   <= ValidBurstDelayCycles ;
+              
+            when TRANSMIT_VALID_DELAY_COV =>
+              TransRec.IntFromModel   <= ValidDelayCov.ID ;
 
+            when TRANSMIT_VALID_BURST_DELAY_COV =>
+              TransRec.IntFromModel   <= ValidBurstDelayCov.ID ;
+              
             when TRANSMIT_READY_TIME_OUT =>
               TransRec.IntFromModel   <=  TransmitReadyTimeOut ;
 
@@ -362,6 +381,7 @@ begin
     variable Last  : std_logic ;
     variable NewTransfer : std_logic := '1' ;
     variable Burst : std_logic ;
+    variable DelayCycles : integer ; 
   begin
     -- Initialize
     TValid  <= '0' ;
@@ -384,9 +404,15 @@ begin
       (Burst, Data, ID, Dest, User, Last) := Pop(TransmitFifo) ;
 
       if NewTransfer or not Burst then
-        WaitForClock(Clk, ValidDelayCycles) ;
+        -- ValidDelayCycles
+        DelayCycles := GetRandPoint(ValidDelayCov) ;
+        ICoverLast(ValidDelayCov) ;
+        WaitForClock(Clk, DelayCycles) ;
       else
-        WaitForClock(Clk, ValidBurstDelayCycles) ;
+        -- ValidDelayCycles
+        DelayCycles := GetRandPoint(ValidBurstDelayCov) ;
+        ICoverLast(ValidBurstDelayCov) ;
+        WaitForClock(Clk, DelayCycles) ;
       end if ;
       NewTransfer := Last or not Burst ;
 

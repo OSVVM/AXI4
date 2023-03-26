@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    03/2023   2023.03    Update delays on TReady to be randomized
 --    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
 --    03/2022   2022.03    Updated calls to NewID for AlertLogID and FIFOs
@@ -134,6 +135,7 @@ architecture behavioral of AxiStreamReceiver is
   -- Verification Component Configuration
   signal ReceiveReadyBeforeValid : boolean := TRUE ;
   signal ReceiveReadyDelayCycles : integer := 0 ;
+  signal ReceiveReadyCov : CoverageIDType ;
 
   signal ParamID           : std_logic_vector(TID'range)   := IfElse(INIT_ID'length > 0,   INIT_ID,   (TID'range => '0')) ;
   signal ParamDest         : std_logic_vector(TDest'range) := IfElse(INIT_DEST'length > 0, INIT_DEST, (TDest'range => '0')) ;
@@ -161,6 +163,7 @@ begin
     DataCheckID   <= NewID("Data Check", ID ) ;
     BusFailedID   <= NewID("No response", ID ) ;
     ReceiveFifo   <= NewID("ReceiveFifo", ID, ReportMode => DISABLED, Search => PRIVATE_NAME) ;
+    ReceiveReadyCov  <= NewID("ReceiveReadyCov", ID) ; 
     wait ;
   end process Initialize ;
 
@@ -201,6 +204,7 @@ begin
     wait for 0 ns ;
 --    SetAlertLogID(TransRec.BurstFifo, MODEL_INSTANCE_NAME & ": BurstFifo", ModelID) ;
     BurstFifoID        <= GetAlertLogID(TransRec.BurstFifo) ;
+    AddCross(ReceiveReadyCov, GenBin(to_integer(ReceiveReadyBeforeValid)), GenBin(ReceiveReadyDelayCycles)) ;
 
     DispatchLoop : loop
       WaitForTransaction(
@@ -500,9 +504,15 @@ begin
 
             when RECEIVE_READY_BEFORE_VALID =>
               ReceiveReadyBeforeValid <= TransRec.BoolToModel ;
+              -- rebuild coverage model with new values for backward compatibility
+              DeallocateBins(ReceiveReadyCov) ; 
+              AddCross(ReceiveReadyCov, GenBin(to_integer(TransRec.BoolToModel)), GenBin(ReceiveReadyDelayCycles)) ;
 
             when RECEIVE_READY_DELAY_CYCLES =>
               ReceiveReadyDelayCycles <= TransRec.IntToModel ;
+              -- rebuild coverage model with new values for backward compatibility
+              DeallocateBins(ReceiveReadyCov) ; 
+              AddCross(ReceiveReadyCov, GenBin(to_integer(ReceiveReadyBeforeValid)), GenBin(TransRec.IntToModel)) ;
 
             when RECEIVE_READY_WAIT_FOR_GET =>
               WaitForGet      <= TransRec.BoolToModel ;
@@ -535,6 +545,9 @@ begin
 
             when RECEIVE_READY_DELAY_CYCLES =>
               TransRec.IntFromModel <= ReceiveReadyDelayCycles ;
+
+            when RECEIVE_READY_COV =>
+              TransRec.IntFromModel <= ReceiveReadyCov.ID ;
 
             when RECEIVE_READY_WAIT_FOR_GET =>
               TransRec.BoolFromModel <= WaitForGet ;
@@ -587,9 +600,11 @@ begin
     variable LastLast       : std_logic := '1' ;
     alias Strb : std_logic_vector(TStrb'length-1 downto 0) is TStrb ;
     alias Keep : std_logic_vector(TKeep'length-1 downto 0) is TKeep ;
+    variable ReadyBeforeValid, ReadyDelayCycles : integer ; 
   begin
     -- Initialize
     TReady  <= '0' ;
+    wait for 0 ns ; -- Allow ReceiveFifo to initialize
     wait for 0 ns ; -- Allow ReceiveFifo to initialize
 
     ReceiveLoop : loop
@@ -601,6 +616,8 @@ begin
           wait until (BurstRequestCount > BurstReceiveCount) or (WordRequestCount > WordReceiveCount) or not WaitForGet ; 
         end if ;
       end if ; 
+      (ReadyBeforeValid, ReadyDelayCycles) := RandCovPoint(ReceiveReadyCov) ; 
+      ICoverLast(ReceiveReadyCov) ;
 
       ---------------------
       DoAxiReadyHandshake (
@@ -608,8 +625,8 @@ begin
         Clk                     => Clk,
         Valid                   => TValid,
         Ready                   => TReady,
-        ReadyBeforeValid        => ReceiveReadyBeforeValid,
-        ReadyDelayCycles        => ReceiveReadyDelayCycles * tperiod_Clk,
+        ReadyBeforeValid        => ReadyBeforeValid = 1,
+        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_TReady,
         AlertLogID              => ModelID
       ) ;

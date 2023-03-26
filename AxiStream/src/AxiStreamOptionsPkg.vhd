@@ -64,9 +64,12 @@ package AxiStreamOptionsPkg is
   type AxiStreamOptionsType is (          -- OptVal
     TRANSMIT_VALID_DELAY_CYCLES,          -- Integer
     TRANSMIT_VALID_BURST_DELAY_CYCLES,    -- Integer
+    TRANSMIT_VALID_DELAY_COV,             -- CoverageIDType
+    TRANSMIT_VALID_BURST_DELAY_COV,       -- CoverageIDType
     TRANSMIT_READY_TIME_OUT,              -- Integer
     RECEIVE_READY_BEFORE_VALID,           -- Integer
     RECEIVE_READY_DELAY_CYCLES,           -- Integer
+    RECEIVE_READY_COV,                    -- CoverageIDType
     RECEIVE_READY_WAIT_FOR_GET,           -- boolean
     DROP_UNDRIVEN,                        -- boolean
     DEFAULT_ID,                           -- std_logic_vector
@@ -117,6 +120,14 @@ package AxiStreamOptionsPkg is
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
     variable OptVal      : Out   integer
+  ) ;
+
+  ------------------------------------------------------------
+  procedure GetAxiStreamOptions (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut StreamRecType ;
+    constant Option      : In    AxiStreamOptionsType ;
+    variable OptVal      : Out   CoverageIDType
   ) ;
 
   ------------------------------------------------------------
@@ -193,6 +204,20 @@ package body AxiStreamOptionsPkg is
   begin
     GetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), OptVal) ;
   end procedure GetAxiStreamOptions ;
+
+  ------------------------------------------------------------
+  procedure GetAxiStreamOptions (
+  ------------------------------------------------------------
+    signal   TransRec    : InOut StreamRecType ;
+    constant Option      : In    AxiStreamOptionsType ;
+    variable OptVal      : Out   CoverageIDType
+  ) is
+    variable IntVal : integer ; 
+  begin
+    GetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), IntVal) ;
+    OptVal := CoverageIDType'(ID => IntVal) ; 
+  end procedure GetAxiStreamOptions ;
+
 
   ------------------------------------------------------------
   procedure GetAxiStreamOptions (

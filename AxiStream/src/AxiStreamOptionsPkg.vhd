@@ -64,18 +64,18 @@ package AxiStreamOptionsPkg is
   type AxiStreamOptionsType is (          -- OptVal
     TRANSMIT_VALID_DELAY_CYCLES,          -- Integer
     TRANSMIT_VALID_BURST_DELAY_CYCLES,    -- Integer
-    TRANSMIT_VALID_DELAY_COV,             -- CoverageIDType
-    TRANSMIT_VALID_BURST_DELAY_COV,       -- CoverageIDType
     TRANSMIT_READY_TIME_OUT,              -- Integer
     RECEIVE_READY_BEFORE_VALID,           -- Integer
     RECEIVE_READY_DELAY_CYCLES,           -- Integer
-    RECEIVE_READY_COV,                    -- CoverageIDType
     RECEIVE_READY_WAIT_FOR_GET,           -- boolean
     DROP_UNDRIVEN,                        -- boolean
     DEFAULT_ID,                           -- std_logic_vector
     DEFAULT_DEST,                         -- std_logic_vector
     DEFAULT_USER,                         -- std_logic_vector
     DEFAULT_LAST,                         -- integer
+    BURST_LENGTH_COV,                     -- CoverageIDType
+    BURST_DELAY_COV,                      -- CoverageIDType
+    BEAT_DELAY_COV,                       -- CoverageIDType
     THE_END
   ) ;
 

@@ -123,6 +123,9 @@ end entity AxiStreamTransmitter ;
 architecture SimpleTransmitter of AxiStreamTransmitter is
   signal ModelID, BusFailedID : AlertLogIDType ;
 --  signal ProtocolID, DataCheckID : AlertLogIDType ;
+  signal BurstLengthCov, BurstDelayCov, BeatDelayCov : CoverageIDType ;
+  
+  signal UseCoverageDelays : Boolean := FALSE ;
 
   constant AXI_STREAM_DATA_BYTE_WIDTH  : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
   constant AXI_ID_WIDTH   : integer    := TID'length ;
@@ -131,7 +134,6 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
   signal TransmitFifo : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
 
   signal TransmitRequestCount, TransmitDoneCount      : integer := 0 ;
-
 
   -- Verification Component Configuration
   signal TransmitReadyTimeOut : integer := 0 ;  -- No timeout
@@ -143,8 +145,6 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
   signal LastOffsetCount       : integer := 0 ;
   signal ValidDelayCycles      : integer := 0 ;
   signal ValidBurstDelayCycles : integer := 0 ;
-  signal ValidDelayCov       : CoverageIDType ; 
-  signal ValidBurstDelayCov  : CoverageIDType ; 
 
   constant DEFAULT_BURST_MODE : StreamFifoBurstModeType := STREAM_BURST_WORD_MODE ;
   signal   BurstFifoMode      : StreamFifoBurstModeType := DEFAULT_BURST_MODE ;
@@ -159,14 +159,12 @@ begin
     variable ID : AlertLogIDType ;
   begin
     -- Alerts
-    ID              := NewID(MODEL_INSTANCE_NAME) ;
-    ModelID         <= ID ;
---    ProtocolID      <= NewID("Protocol Error", ID ) ;
---    DataCheckID     <= NewID("Data Check", ID ) ;
-    BusFailedID     <= NewID("No response",  ID) ;
-    TransmitFifo    <= NewID("TransmitFifo", ID, ReportMode => DISABLED, Search => PRIVATE_NAME) ; 
-    ValidDelayCov      <= NewID("ValidDelayCov", ID) ; 
-    ValidBurstDelayCov <= NewID("ValidBurstDelayCov", ID) ;
+    ID               := NewID(MODEL_INSTANCE_NAME) ;
+    ModelID          <= ID ;
+--    ProtocolID       <= NewID("Protocol Error", ID ) ;
+--    DataCheckID      <= NewID("Data Check", ID ) ;
+    BusFailedID      <= NewID("No response",  ID) ;
+    TransmitFifo     <= NewID("TransmitFifo", ID, ReportMode => DISABLED, Search => PRIVATE_NAME) ; 
     wait ;
   end process Initialize ;
 
@@ -185,8 +183,9 @@ begin
   begin
     wait for 0 ns ; 
     TransRec.BurstFifo <= NewID("TxBurstFifo", ModelID, Search => PRIVATE_NAME) ;
-    AddBins(ValidDelayCov,      GenBin(ValidDelayCycles)) ;
-    AddBins(ValidBurstDelayCov, GenBin(ValidBurstDelayCycles)) ;
+    BurstLengthCov     <= NewID("BurstLengthCov", ModelID) ;
+    BurstDelayCov      <= NewID("BurstDelayCov",  ModelID) ;
+    BeatDelayCov       <= NewID("BeatDelayCov",   ModelID) ;
     
     DispatchLoop : loop 
       WaitForTransaction(
@@ -288,15 +287,11 @@ begin
           case AxiStreamOptionsType'val(TransRec.Options) is
             when TRANSMIT_VALID_DELAY_CYCLES =>
               ValidDelayCycles <= TransRec.IntToModel ;
-              -- rebuild coverage model with new values for backward compatibility
-              DeallocateBins(ValidDelayCov) ; 
-              AddBins(ValidDelayCov, GenBin(TransRec.IntToModel)) ;
+              UseCoverageDelays <= FALSE ; 
 
             when TRANSMIT_VALID_BURST_DELAY_CYCLES =>
               ValidBurstDelayCycles <= TransRec.IntToModel ;
-              -- rebuild coverage model with new values for backward compatibility
-              DeallocateBins(ValidBurstDelayCov) ; 
-              AddBins(ValidBurstDelayCov, GenBin(TransRec.IntToModel)) ;
+              UseCoverageDelays <= FALSE ; 
 
             when TRANSMIT_READY_TIME_OUT =>
               TransmitReadyTimeOut      <= TransRec.IntToModel ;
@@ -314,6 +309,18 @@ begin
               ParamLast       <= TransRec.IntToModel ;
               LastOffsetCount <= TransmitRequestCount ;
 
+            when BURST_LENGTH_COV =>
+              BurstLengthCov.ID <= TransRec.IntToModel ;
+              UseCoverageDelays <= TRUE ; 
+
+            when BURST_DELAY_COV =>
+              BurstDelayCov.ID  <= TransRec.IntToModel ;
+              UseCoverageDelays <= TRUE ; 
+
+            when BEAT_DELAY_COV =>
+              BeatDelayCov.ID   <= TransRec.IntToModel ;
+              UseCoverageDelays <= TRUE ; 
+
             when others =>
               Alert(ModelID, "SetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
               wait for 0 ns ;
@@ -326,12 +333,6 @@ begin
 
             when TRANSMIT_VALID_BURST_DELAY_CYCLES =>
               TransRec.IntFromModel   <= ValidBurstDelayCycles ;
-              
-            when TRANSMIT_VALID_DELAY_COV =>
-              TransRec.IntFromModel   <= ValidDelayCov.ID ;
-
-            when TRANSMIT_VALID_BURST_DELAY_COV =>
-              TransRec.IntFromModel   <= ValidBurstDelayCov.ID ;
               
             when TRANSMIT_READY_TIME_OUT =>
               TransRec.IntFromModel   <=  TransmitReadyTimeOut ;
@@ -347,6 +348,18 @@ begin
 
             when DEFAULT_LAST =>
               TransRec.IntFromModel   <= ParamLast ;
+
+            when BURST_LENGTH_COV =>
+              TransRec.IntFromModel <= BurstLengthCov.ID ;
+              UseCoverageDelays <= TRUE ; 
+
+            when BURST_DELAY_COV =>
+              TransRec.IntFromModel <= BurstDelayCov.ID ;
+              UseCoverageDelays <= TRUE ; 
+
+            when BEAT_DELAY_COV =>
+              TransRec.IntFromModel <= BeatDelayCov.ID ;
+              UseCoverageDelays <= TRUE ; 
 
             when others =>
               Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
@@ -382,6 +395,7 @@ begin
     variable NewTransfer : std_logic := '1' ;
     variable Burst : std_logic ;
     variable DelayCycles : integer ; 
+    variable BurstLength : integer := 0 ; 
   begin
     -- Initialize
     TValid  <= '0' ;
@@ -392,7 +406,12 @@ begin
     TStrb   <= (TStrb'range => 'X') ;
     TKeep   <= (TKeep'range => 'X') ;
     TLast   <= 'X' ;
-    wait for 0 ns ; -- Allow TransmitFifo to initialize 
+    wait for 0 ns ; -- Allow Cov models to initialize 
+    wait for 0 ns ; -- Allow Cov models to initialize 
+    -- Default settings for Burst Coverage
+    AddBins (BurstLengthCov,  GenBin(2,10,1)) ;
+    AddCross(BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
+    AddCross(BeatDelayCov,    GenBin(0,1,1), GenBin(0,1,1)) ;
 
     TransmitLoop : loop
       -- Find Transaction
@@ -403,18 +422,35 @@ begin
       -- Get Transaction
       (Burst, Data, ID, Dest, User, Last) := Pop(TransmitFifo) ;
 
-      if NewTransfer or not Burst then
-        -- ValidDelayCycles
-        DelayCycles := GetRandPoint(ValidDelayCov) ;
-        ICoverLast(ValidDelayCov) ;
-        WaitForClock(Clk, DelayCycles) ;
+      -- Delay between consecutive signaling of Valid
+      if UseCoverageDelays then 
+        -- Coverage Delays
+        --   Randomize a delay based on breaking interface traffic into bursts and delays
+        --   Burst length is determined by BurstLengthCov
+        --   Between Bursts, use a larger BurstDelay
+        --   Within a burst/between beats of a burst, use a smaller BeatDelayCov
+        --   
+        if BurstLength < 1 then 
+          DelayCycles := GetRandPoint(BurstDelayCov) ;
+          WaitForClock(Clk, DelayCycles) ;
+          ICoverLast(BurstDelayCov) ;
+          BurstLength := GetRandPoint(BurstLengthCov) ; 
+          ICoverLast(BurstLengthCov) ; 
+        else
+          DelayCycles := GetRandPoint(BeatDelayCov) ;
+          WaitForClock(Clk, DelayCycles) ;
+          ICoverLast(BeatDelayCov) ;
+        end if ; 
+        BurstLength := BurstLength - 1; 
       else
-        -- ValidDelayCycles
-        DelayCycles := GetRandPoint(ValidBurstDelayCov) ;
-        ICoverLast(ValidBurstDelayCov) ;
-        WaitForClock(Clk, DelayCycles) ;
-      end if ;
-      NewTransfer := Last or not Burst ;
+        -- Deprecated static settings
+        if NewTransfer or not Burst then
+          WaitForClock(Clk, ValidDelayCycles) ; -- delay cycles
+        else
+          WaitForClock(Clk, ValidBurstDelayCycles) ;  -- beat delays
+        end if ;
+        NewTransfer := Last or not Burst ;
+      end if ; 
 
       -- Calculate Strb. 1 when data else 0
       -- If Strb is unused it may be null range

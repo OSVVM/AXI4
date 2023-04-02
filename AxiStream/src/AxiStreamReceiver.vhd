@@ -116,6 +116,9 @@ end entity AxiStreamReceiver ;
 architecture behavioral of AxiStreamReceiver is
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID, BurstFifoID : AlertLogIDType ;
+  signal BurstLengthCov, BurstDelayCov, BeatDelayCov : CoverageIDType ;
+  
+  signal UseCoverageDelays : Boolean := FALSE ;
 
   constant ID_LEN       : integer := TID'length ;
   constant DEST_LEN     : integer := TDest'length ;
@@ -131,11 +134,9 @@ architecture behavioral of AxiStreamReceiver is
   signal WordReceiveCount, BurstReceiveCount : integer := 0 ;
   signal ReceiveByteCount, TransferByteCount : integer := 0 ;
 
-
   -- Verification Component Configuration
   signal ReceiveReadyBeforeValid : boolean := TRUE ;
   signal ReceiveReadyDelayCycles : integer := 0 ;
-  signal ReceiveReadyCov : CoverageIDType ;
 
   signal ParamID           : std_logic_vector(TID'range)   := IfElse(INIT_ID'length > 0,   INIT_ID,   (TID'range => '0')) ;
   signal ParamDest         : std_logic_vector(TDest'range) := IfElse(INIT_DEST'length > 0, INIT_DEST, (TDest'range => '0')) ;
@@ -163,7 +164,6 @@ begin
     DataCheckID   <= NewID("Data Check", ID ) ;
     BusFailedID   <= NewID("No response", ID ) ;
     ReceiveFifo   <= NewID("ReceiveFifo", ID, ReportMode => DISABLED, Search => PRIVATE_NAME) ;
-    ReceiveReadyCov  <= NewID("ReceiveReadyCov", ID) ; 
     wait ;
   end process Initialize ;
 
@@ -199,12 +199,13 @@ begin
     end function param_to_string ;
 
   begin
-    wait for 0 ns ;
+    wait for 0 ns ;  -- Allow ModelID to initialize
     TransRec.BurstFifo <= NewID("RxBurstFifo", ModelID, Search => PRIVATE_NAME) ;
-    wait for 0 ns ;
---    SetAlertLogID(TransRec.BurstFifo, MODEL_INSTANCE_NAME & ": BurstFifo", ModelID) ;
+    BurstLengthCov     <= NewID("BurstLengthCov", ModelID) ;
+    BurstDelayCov      <= NewID("BurstDelayCov",  ModelID) ;
+    BeatDelayCov       <= NewID("BeatDelayCov",   ModelID) ;
+    wait for 0 ns ;  -- Allow TransRec.BurstFifo to update.
     BurstFifoID        <= GetAlertLogID(TransRec.BurstFifo) ;
-    AddCross(ReceiveReadyCov, GenBin(to_integer(ReceiveReadyBeforeValid)), GenBin(ReceiveReadyDelayCycles)) ;
 
     DispatchLoop : loop
       WaitForTransaction(
@@ -504,15 +505,11 @@ begin
 
             when RECEIVE_READY_BEFORE_VALID =>
               ReceiveReadyBeforeValid <= TransRec.BoolToModel ;
-              -- rebuild coverage model with new values for backward compatibility
-              DeallocateBins(ReceiveReadyCov) ; 
-              AddCross(ReceiveReadyCov, GenBin(to_integer(TransRec.BoolToModel)), GenBin(ReceiveReadyDelayCycles)) ;
+              UseCoverageDelays <= FALSE ; 
 
             when RECEIVE_READY_DELAY_CYCLES =>
               ReceiveReadyDelayCycles <= TransRec.IntToModel ;
-              -- rebuild coverage model with new values for backward compatibility
-              DeallocateBins(ReceiveReadyCov) ; 
-              AddCross(ReceiveReadyCov, GenBin(to_integer(ReceiveReadyBeforeValid)), GenBin(TransRec.IntToModel)) ;
+              UseCoverageDelays <= FALSE ; 
 
             when RECEIVE_READY_WAIT_FOR_GET =>
               WaitForGet      <= TransRec.BoolToModel ;
@@ -533,6 +530,18 @@ begin
               ParamLast       <= TransRec.IntToModel ;
               LastOffsetCount <= WordReceiveCount ;
 
+            when BURST_LENGTH_COV =>
+              BurstLengthCov.ID <= TransRec.IntToModel ;
+              UseCoverageDelays <= TRUE ; 
+
+            when BURST_DELAY_COV =>
+              BurstDelayCov.ID  <= TransRec.IntToModel ;
+              UseCoverageDelays <= TRUE ; 
+
+            when BEAT_DELAY_COV =>
+              BeatDelayCov.ID   <= TransRec.IntToModel ;
+              UseCoverageDelays <= TRUE ; 
+
             when others =>
               Alert(ModelID, "SetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
               wait for 0 ns ;
@@ -545,9 +554,6 @@ begin
 
             when RECEIVE_READY_DELAY_CYCLES =>
               TransRec.IntFromModel <= ReceiveReadyDelayCycles ;
-
-            when RECEIVE_READY_COV =>
-              TransRec.IntFromModel <= ReceiveReadyCov.ID ;
 
             when RECEIVE_READY_WAIT_FOR_GET =>
               TransRec.BoolFromModel <= WaitForGet ;
@@ -566,6 +572,18 @@ begin
 
             when DEFAULT_LAST =>
               TransRec.IntFromModel   <= ParamLast ;
+
+            when BURST_LENGTH_COV =>
+              TransRec.IntFromModel <= BurstLengthCov.ID ;
+              UseCoverageDelays <= TRUE ; 
+
+            when BURST_DELAY_COV =>
+              TransRec.IntFromModel <= BurstDelayCov.ID ;
+              UseCoverageDelays <= TRUE ; 
+
+            when BEAT_DELAY_COV =>
+              TransRec.IntFromModel <= BeatDelayCov.ID ;
+              UseCoverageDelays <= TRUE ; 
 
             when others =>
               Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
@@ -601,11 +619,16 @@ begin
     alias Strb : std_logic_vector(TStrb'length-1 downto 0) is TStrb ;
     alias Keep : std_logic_vector(TKeep'length-1 downto 0) is TKeep ;
     variable ReadyBeforeValid, ReadyDelayCycles : integer ; 
+    variable BurstLength : integer := 0 ; 
   begin
     -- Initialize
     TReady  <= '0' ;
-    wait for 0 ns ; -- Allow ReceiveFifo to initialize
-    wait for 0 ns ; -- Allow ReceiveFifo to initialize
+    wait for 0 ns ; -- Allow Cov models to initialize 
+    wait for 0 ns ; -- Allow Cov models to initialize 
+    -- Default settings for Burst Coverage
+    AddBins (BurstLengthCov,  GenBin(2,10,1)) ;
+    AddCross(BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
+    AddCross(BeatDelayCov,    GenBin(0,1,1), GenBin(0,1,1)) ;
 
     ReceiveLoop : loop
 
@@ -616,8 +639,24 @@ begin
           wait until (BurstRequestCount > BurstReceiveCount) or (WordRequestCount > WordReceiveCount) or not WaitForGet ; 
         end if ;
       end if ; 
-      (ReadyBeforeValid, ReadyDelayCycles) := RandCovPoint(ReceiveReadyCov) ; 
-      ICoverLast(ReceiveReadyCov) ;
+      
+      -- Delay between consecutive signaling of Ready
+      if UseCoverageDelays then 
+        if BurstLength < 1 then 
+          (ReadyBeforeValid, ReadyDelayCycles) := integer_vector'(GetRandPoint(BurstDelayCov)) ; 
+          ICoverLast(BurstDelayCov) ;
+          BurstLength := GetRandPoint(BurstLengthCov) ; 
+          ICoverLast(BurstLengthCov) ; 
+        else
+          (ReadyBeforeValid, ReadyDelayCycles) := integer_vector'(GetRandPoint(BeatDelayCov)) ; 
+          ICoverLast(BeatDelayCov) ;
+        end if ; 
+        BurstLength := BurstLength - 1; 
+      else
+        -- Deprecated static settings
+        ReadyBeforeValid := to_integer(not ReceiveReadyBeforeValid) ; 
+        ReadyDelayCycles := ReceiveReadyDelayCycles ; 
+      end if ; 
 
       ---------------------
       DoAxiReadyHandshake (
@@ -625,7 +664,7 @@ begin
         Clk                     => Clk,
         Valid                   => TValid,
         Ready                   => TReady,
-        ReadyBeforeValid        => ReadyBeforeValid = 1,
+        ReadyBeforeValid        => ReadyBeforeValid = 0,
         ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_TReady,
         AlertLogID              => ModelID

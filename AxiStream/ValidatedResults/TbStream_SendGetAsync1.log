@@ -236,8 +236,8 @@
 %% Log    PASSED    in Default,   Get:  Received : 7F7E7D7C at 420 ns
 %% Log    PASSED    in Default,   TryCount 1 at 420 ns
 %% Log    PASSED    in Default,   Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0 Received : 0 at 420 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 110 ns  finished at: 430 ns at 430 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 32  Received.  Data: 83828180  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 430 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 110 ns  finished at: 430 ns at 430 ns
 %% Log    PASSED    in Default,   Receive TranasctionCount: Received : 32 at 430 ns
 %% Log    PASSED    in Default,   TryCount 1 at 430 ns
 %% Log    PASSED    in Default,   Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 0 at 430 ns
@@ -478,8 +478,8 @@
 %% Log    PASSED    in Default,   Get:  Received : FFFEFDFC at 780 ns
 %% Log    PASSED    in Default,   TryCount 1 at 780 ns
 %% Log    PASSED    in Default,   Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0 Received : 0 at 780 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 470 ns  finished at: 790 ns at 790 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 64  Received.  Data: 03020100  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 790 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 470 ns  finished at: 790 ns at 790 ns
 %% Log    PASSED    in Default,   Receive TranasctionCount: Received : 64 at 790 ns
 %% Log    PASSED    in Default,   TryCount 1 at 790 ns
 %% Log    PASSED    in Default,   Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 0 at 790 ns
@@ -720,8 +720,8 @@
 %% Log    PASSED    in Default,   Get:  Received : 7F7E7D7C at 1140 ns
 %% Log    PASSED    in Default,   TryCount 1 at 1140 ns
 %% Log    PASSED    in Default,   Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0 Received : 0 at 1140 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 830 ns  finished at: 1150 ns at 1150 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 96  Received.  Data: 83828180  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1150 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 830 ns  finished at: 1150 ns at 1150 ns
 %% Log    PASSED    in Default,   Receive TranasctionCount: Received : 96 at 1150 ns
 %% Log    PASSED    in Default,   TryCount 1 at 1150 ns
 %% Log    PASSED    in Default,   Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 0 at 1150 ns
@@ -962,8 +962,8 @@
 %% Log    PASSED    in Default,   Get:  Received : FFFEFDFC at 1500 ns
 %% Log    PASSED    in Default,   TryCount 1 at 1500 ns
 %% Log    PASSED    in Default,   Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0 Received : 0 at 1500 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 1190 ns  finished at: 1510 ns at 1510 ns
 %% Alert  ERROR     in receiver_1: Data Check,   Operation# 128  Received.  Data: 03020100  TID: 00  TDest: 0  TUser: 0  TLast: 0  Expected.  Data: 03020101  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1510 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 1190 ns  finished at: 1510 ns at 1510 ns
 %% Log    PASSED    in Default,   Receive TranasctionCount: Received : 128 at 1510 ns
 %% Log    PASSED    in Default,   TryCount 1 at 1510 ns
 %% Log    PASSED    in Default,   Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 1 at 1510 ns
@@ -1204,8 +1204,8 @@
 %% Log    PASSED    in Default,   Get:  Received : 7F7E7D7C at 1860 ns
 %% Log    PASSED    in Default,   TryCount 1 at 1860 ns
 %% Log    PASSED    in Default,   Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0 Received : 1 at 1860 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 1550 ns  finished at: 1870 ns at 1870 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 160  Received.  Data: 83828180  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1870 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 1550 ns  finished at: 1870 ns at 1870 ns
 %% Log    PASSED    in Default,   Receive TranasctionCount: Received : 160 at 1870 ns
 %% Log    PASSED    in Default,   TryCount 1 at 1870 ns
 %% Log    PASSED    in Default,   Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 1 at 1870 ns
@@ -1446,8 +1446,8 @@
 %% Log    PASSED    in Default,   Get:  Received : FFFEFDFC at 2220 ns
 %% Log    PASSED    in Default,   TryCount 1 at 2220 ns
 %% Log    PASSED    in Default,   Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0 Received : 1 at 2220 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 1910 ns  finished at: 2230 ns at 2230 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 192  Received.  Data: 03020100  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 2230 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 1910 ns  finished at: 2230 ns at 2230 ns
 %% Log    PASSED    in Default,   Receive TranasctionCount: Received : 192 at 2230 ns
 %% Log    PASSED    in Default,   TryCount 1 at 2230 ns
 %% Log    PASSED    in Default,   Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 1 at 2230 ns
@@ -1688,8 +1688,8 @@
 %% Log    PASSED    in Default,   Get:  Received : 7F7E7D7C at 2580 ns
 %% Log    PASSED    in Default,   TryCount 1 at 2580 ns
 %% Log    PASSED    in Default,   Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0 Received : 1 at 2580 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 2270 ns  finished at: 2590 ns at 2590 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 224  Received.  Data: 83828180  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 2590 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 2270 ns  finished at: 2590 ns at 2590 ns
 %% Log    PASSED    in Default,   Receive TranasctionCount: Received : 224 at 2590 ns
 %% Log    PASSED    in Default,   TryCount 1 at 2590 ns
 %% Log    PASSED    in Default,   Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 1 at 2590 ns
@@ -1930,8 +1930,8 @@
 %% Log    PASSED    in Default,   Get:  Received : FFFEFDFC at 2940 ns
 %% Log    PASSED    in Default,   TryCount 1 at 2940 ns
 %% Log    PASSED    in Default,   Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0 Received : 1 at 2940 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 2630 ns  finished at: 2950 ns at 2950 ns
 %% Alert  ERROR     in receiver_1: Data Check,   Operation# 256  Received.  Data: 03020100  TID: 00  TDest: 0  TUser: 0  TLast: 0  Expected.  Data: 03020101  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 2950 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 2630 ns  finished at: 2950 ns at 2950 ns
 %% Log    PASSED    in Default,   Receive TranasctionCount: Received : 256 at 2950 ns
 %% Log    PASSED    in Default,   TryCount 1 at 2950 ns
 %% Log    PASSED    in Default,   Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 2 at 2950 ns

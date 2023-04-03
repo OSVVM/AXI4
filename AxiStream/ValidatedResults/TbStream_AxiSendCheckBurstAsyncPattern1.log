@@ -33,7 +33,6 @@
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: XXXXXX19  TStrb: 0001  TKeep: 0001  TID: 02  TDest: 3  TUser: 4  TLast: 1  Operation# 8 at 180 ns
 %% Log    ALWAYS    in Default,   Transmit 15 Bytes.  Random.  Starting with X01 at 190 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 1F424101  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 4  TUser: 5  TLast: 0  Operation# 9 at 190 ns
-%% Log    ALWAYS    in Default,   Transmit 1 Bytes. Starting with 0 at 190 ns
 %% Log    PASSED    in receiver_1: RxBurstFifo,      Received: 01   Item Number: 17 at 190 ns
 %% Log    PASSED    in receiver_1: RxBurstFifo,      Received: 03   Item Number: 18 at 190 ns
 %% Log    PASSED    in receiver_1: RxBurstFifo,      Received: 05   Item Number: 19 at 190 ns
@@ -53,6 +52,7 @@
 %% Log    PASSED    in receiver_1,   DEST Received : 3 at 190 ns
 %% Log    PASSED    in receiver_1,   USER Received : 4 at 190 ns
 %% Log    PASSED    in receiver_1,   Last Received : 1 at 190 ns
+%% Log    ALWAYS    in Default,   Transmit 1 Bytes. Starting with 0 at 190 ns
 %% Log    PASSED    in Default,   TryCount 4 at 190 ns
 %% Log    ALWAYS    in Default,   Transmit 2 Bytes. Starting with 32 at 190 ns
 %% Log    ALWAYS    in Default,   Transmit 3 Bytes. Starting with 64 at 190 ns

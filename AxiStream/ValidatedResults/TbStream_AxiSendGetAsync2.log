@@ -126,8 +126,8 @@
 %% Log    PASSED    in Default,   Get, Data:  Received : 7F7E7D7C at 420 ns
 %% Log    PASSED    in Default,   Get, Param:  Received : 001C2 at 420 ns
 %% Log    PASSED    in Default,   TryCount 1 at 420 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 110 ns  finished at: 430 ns at 430 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 32  Received.  Data: 83828180  TID: 00  TDest: E  TUser: 1  TLast: 0 at 430 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 110 ns  finished at: 430 ns at 430 ns
 %% Log    PASSED    in Default,   TryCount 1 at 430 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 87868584  TStrb: 1111  TKeep: 1111  TID: 01  TDest: D  TUser: 2  TLast: 0  Operation# 33 at 470 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 8B8A8988  TStrb: 1111  TKeep: 1111  TID: 01  TDest: D  TUser: 2  TLast: 0  Operation# 34 at 480 ns
@@ -255,8 +255,8 @@
 %% Log    PASSED    in Default,   Get, Data:  Received : FFFEFDFC at 780 ns
 %% Log    PASSED    in Default,   Get, Param:  Received : 00386 at 780 ns
 %% Log    PASSED    in Default,   TryCount 1 at 780 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 470 ns  finished at: 790 ns at 790 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 64  Received.  Data: 03020100  TID: 01  TDest: C  TUser: 3  TLast: 0 at 790 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 470 ns  finished at: 790 ns at 790 ns
 %% Log    PASSED    in Default,   TryCount 1 at 790 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 07060504  TStrb: 1111  TKeep: 1111  TID: 02  TDest: B  TUser: 4  TLast: 0  Operation# 65 at 830 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0B0A0908  TStrb: 1111  TKeep: 1111  TID: 02  TDest: B  TUser: 4  TLast: 0  Operation# 66 at 840 ns
@@ -384,8 +384,8 @@
 %% Log    PASSED    in Default,   Get, Data:  Received : 7F7E7D7C at 1140 ns
 %% Log    PASSED    in Default,   Get, Param:  Received : 0054A at 1140 ns
 %% Log    PASSED    in Default,   TryCount 1 at 1140 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 830 ns  finished at: 1150 ns at 1150 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 96  Received.  Data: 83828180  TID: 02  TDest: A  TUser: 5  TLast: 0 at 1150 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 830 ns  finished at: 1150 ns at 1150 ns
 %% Log    PASSED    in Default,   TryCount 1 at 1150 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 87868584  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 9  TUser: 6  TLast: 0  Operation# 97 at 1190 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 8B8A8988  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 9  TUser: 6  TLast: 0  Operation# 98 at 1200 ns
@@ -513,8 +513,8 @@
 %% Log    PASSED    in Default,   Get, Data:  Received : FFFEFDFC at 1500 ns
 %% Log    PASSED    in Default,   Get, Param:  Received : 0070E at 1500 ns
 %% Log    PASSED    in Default,   TryCount 1 at 1500 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 1190 ns  finished at: 1510 ns at 1510 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 128  Received.  Data: 03020100  TID: 03  TDest: 8  TUser: 7  TLast: 0 at 1510 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 1190 ns  finished at: 1510 ns at 1510 ns
 %% Log    PASSED    in Default,   TryCount 1 at 1510 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 07060504  TStrb: 1111  TKeep: 1111  TID: 04  TDest: 7  TUser: 8  TLast: 0  Operation# 129 at 1550 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0B0A0908  TStrb: 1111  TKeep: 1111  TID: 04  TDest: 7  TUser: 8  TLast: 0  Operation# 130 at 1560 ns
@@ -642,8 +642,8 @@
 %% Log    PASSED    in Default,   Get, Data:  Received : 7F7E7D7C at 1860 ns
 %% Log    PASSED    in Default,   Get, Param:  Received : 008D2 at 1860 ns
 %% Log    PASSED    in Default,   TryCount 1 at 1860 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 1550 ns  finished at: 1870 ns at 1870 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 160  Received.  Data: 83828180  TID: 04  TDest: 6  TUser: 9  TLast: 0 at 1870 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 1550 ns  finished at: 1870 ns at 1870 ns
 %% Log    PASSED    in Default,   TryCount 1 at 1870 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 87868584  TStrb: 1111  TKeep: 1111  TID: 05  TDest: 5  TUser: A  TLast: 0  Operation# 161 at 1910 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 8B8A8988  TStrb: 1111  TKeep: 1111  TID: 05  TDest: 5  TUser: A  TLast: 0  Operation# 162 at 1920 ns
@@ -771,8 +771,8 @@
 %% Log    PASSED    in Default,   Get, Data:  Received : FFFEFDFC at 2220 ns
 %% Log    PASSED    in Default,   Get, Param:  Received : 00A96 at 2220 ns
 %% Log    PASSED    in Default,   TryCount 1 at 2220 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 1910 ns  finished at: 2230 ns at 2230 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 192  Received.  Data: 03020100  TID: 05  TDest: 4  TUser: B  TLast: 0 at 2230 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 1910 ns  finished at: 2230 ns at 2230 ns
 %% Log    PASSED    in Default,   TryCount 1 at 2230 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 07060504  TStrb: 1111  TKeep: 1111  TID: 06  TDest: 3  TUser: C  TLast: 0  Operation# 193 at 2270 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 0B0A0908  TStrb: 1111  TKeep: 1111  TID: 06  TDest: 3  TUser: C  TLast: 0  Operation# 194 at 2280 ns
@@ -900,8 +900,8 @@
 %% Log    PASSED    in Default,   Get, Data:  Received : 7F7E7D7C at 2580 ns
 %% Log    PASSED    in Default,   Get, Param:  Received : 00C5A at 2580 ns
 %% Log    PASSED    in Default,   TryCount 1 at 2580 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 2270 ns  finished at: 2590 ns at 2590 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 224  Received.  Data: 83828180  TID: 06  TDest: 2  TUser: D  TLast: 0 at 2590 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 2270 ns  finished at: 2590 ns at 2590 ns
 %% Log    PASSED    in Default,   TryCount 1 at 2590 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 87868584  TStrb: 1111  TKeep: 1111  TID: 07  TDest: 1  TUser: E  TLast: 0  Operation# 225 at 2630 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 8B8A8988  TStrb: 1111  TKeep: 1111  TID: 07  TDest: 1  TUser: E  TLast: 0  Operation# 226 at 2640 ns
@@ -1025,6 +1025,6 @@
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 03020100  TStrb: 1111  TKeep: 1111  TID: 07  TDest: 0  TUser: F  TLast: 0  Operation# 256 at 2940 ns
 %% Alert  ERROR     in receiver_1: Data Check,   Operation# 255  Received.  Data: FFFEFDFC  TID: 07  TDest: 0  TUser: F  TLast: 0  Expected.  Data: FFFEFDFC  TID: 07  TDest: 1  TUser: F  TLast: 0 at 2940 ns
 %% Log    PASSED    in Default,   TryCount 1 at 2940 ns
-%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 2630 ns  finished at: 2950 ns at 2950 ns
 %% Alert  ERROR     in receiver_1: Data Check,   Operation# 256  Received.  Data: 03020100  TID: 07  TDest: 0  TUser: F  TLast: 0  Expected.  Data: 03020100  TID: 08  TDest: 0  TUser: F  TLast: 0 at 2950 ns
+%% Log    PASSED    in Default,   Transmitter: WaitForTransaction started at: 2630 ns  finished at: 2950 ns at 2950 ns
 %% Log    PASSED    in Default,   TryCount 1 at 2950 ns

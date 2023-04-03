@@ -5,7 +5,6 @@
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00276162  TStrb: 1111  TKeep: 1111  TID: 01  TDest: 2  TUser: 3  TLast: 1  Operation# 4 at 140 ns
 %% Log    ALWAYS    in Default,   Transmit 14 bytes. at 150 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 04230664  TStrb: 1111  TKeep: 1111  TID: 02  TDest: 3  TUser: 4  TLast: 0  Operation# 5 at 150 ns
-%% Log    ALWAYS    in Default,   Transmit 17 bytes. at 150 ns
 %% Log    PASSED    in receiver_1: RxBurstFifo,      Received: 24   Item Number: 1 at 150 ns
 %% Log    PASSED    in receiver_1: RxBurstFifo,      Received: 01   Item Number: 2 at 150 ns
 %% Log    PASSED    in receiver_1: RxBurstFifo,      Received: 20   Item Number: 3 at 150 ns
@@ -28,6 +27,7 @@
 %% Log    PASSED    in receiver_1,   DEST Received : 2 at 150 ns
 %% Log    PASSED    in receiver_1,   USER Received : 3 at 150 ns
 %% Log    PASSED    in receiver_1,   Last Received : 1 at 150 ns
+%% Log    ALWAYS    in Default,   Transmit 17 bytes. at 150 ns
 %% Log    PASSED    in Default,   TryCount 12 at 150 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 67604742  TStrb: 1111  TKeep: 1111  TID: 02  TDest: 3  TUser: 4  TLast: 0  Operation# 6 at 160 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 45034465  TStrb: 1111  TKeep: 1111  TID: 02  TDest: 3  TUser: 4  TLast: 0  Operation# 7 at 170 ns

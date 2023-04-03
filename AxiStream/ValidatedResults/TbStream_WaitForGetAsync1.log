@@ -92,11 +92,11 @@
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 26  Received.  Data: 00012002  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 620 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00012004  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 28 at 620 ns
 %% Log    PASSED    in Default,   Get Start: 620 ns = Finish: 620 ns at 620 ns
-%% Log    ALWAYS    in Default,   SendBurstIncrement and GetBurst + CheckBurstIncrement: 6 x 4 word bursts at 630 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 27  Received.  Data: 00012003  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 630 ns
 %% Log    PASSED    in Default,   Get Start: 630 ns = Finish: 630 ns at 630 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 28  Received.  Data: 00012004  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 640 ns
 %% Log    PASSED    in Default,   Get Start: 640 ns = Finish: 640 ns at 640 ns
+%% Log    ALWAYS    in Default,   SendBurstIncrement and GetBurst + CheckBurstIncrement: 6 x 4 word bursts at 640 ns
 
 
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00020000  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 29 at 660 ns
@@ -151,7 +151,6 @@
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00025001  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 52 at 1010 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00025002  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 53 at 1020 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00025003  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 1  Operation# 54 at 1030 ns
-%% Log    ALWAYS    in Default,   SendBurstIncrement and CheckBurstIncrement: Send 6 x 4 word bursts at 1040 ns
 %% Log    INFO      in receiver_1,   Burst Receive.  Operation# 35  Last Data: 00024003  TID: 00  TDest: 0  TUser: 0  TLast: 1 at 1050 ns
 %% Log    PASSED    in Default,   NumWords Received : 4 at 1050 ns
 %% Log    PASSED    in receiver_1: RxBurstFifo,      Received: 00024000   Item Number: 17 at 1050 ns
@@ -164,6 +163,7 @@
 %% Log    PASSED    in receiver_1: RxBurstFifo,      Received: 00025001   Item Number: 22 at 1050 ns
 %% Log    PASSED    in receiver_1: RxBurstFifo,      Received: 00025002   Item Number: 23 at 1050 ns
 %% Log    PASSED    in receiver_1: RxBurstFifo,      Received: 00025003   Item Number: 24 at 1050 ns
+%% Log    ALWAYS    in Default,   SendBurstIncrement and CheckBurstIncrement: Send 6 x 4 word bursts at 1050 ns
 
 
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 00030000  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 55 at 1070 ns

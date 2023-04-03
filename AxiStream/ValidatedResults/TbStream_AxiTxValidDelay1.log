@@ -1,4 +1,3 @@
-%% Log    ALWAYS    in Default,   Send 16 words with each byte incrementing at 30 ns
 %% Log    PASSED    in Default,   TRANSMIT_VALID_DELAY_CYCLES Received : 0 at 110 ns
 %% Log    ALWAYS    in Default,   Valid Delay Cycles Default 0 at 110 ns
 %% Log    ALWAYS    in Default,   Send 16 words with each byte incrementing at 110 ns
@@ -36,7 +35,6 @@
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 16  Received.  Data: 3F3E3D3C  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 270 ns
 %% Log    ALWAYS    in Default,   Valid Delay Cycles 2 at 270 ns
 %% Log    ALWAYS    in Default,   Send 16 words with each byte incrementing at 270 ns
-%% Log    ALWAYS    in Default,   Send 16 words with each byte incrementing at 270 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 43424140  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 17 at 290 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 17  Received.  Data: 43424140  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 300 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 47464544  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 18 at 320 ns
@@ -71,7 +69,6 @@
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 32  Received.  Data: 7F7E7D7C  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 750 ns
 %% Log    ALWAYS    in Default,   Valid Delay Cycles 4 at 750 ns
 %% Log    ALWAYS    in Default,   Send 16 words with each byte incrementing at 750 ns
-%% Log    ALWAYS    in Default,   Send 16 words with each byte incrementing at 750 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 83828180  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 33 at 790 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 33  Received.  Data: 83828180  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 800 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: 87868584  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 34 at 840 ns
@@ -105,7 +102,6 @@
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: BFBEBDBC  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 48 at 1540 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 48  Received.  Data: BFBEBDBC  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1550 ns
 %% Log    ALWAYS    in Default,   Valid Delay Cycles 0 at 1550 ns
-%% Log    ALWAYS    in Default,   Send 16 words with each byte incrementing at 1550 ns
 %% Log    ALWAYS    in Default,   Send 16 words with each byte incrementing at 1550 ns
 %% Log    INFO      in transmitter_1,   Axi Stream Send.  TData: C3C2C1C0  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 49 at 1550 ns
 %% Log    PASSED    in receiver_1: Data Check,   Operation# 49  Received.  Data: C3C2C1C0  TID: 00  TDest: 0  TUser: 0  TLast: 0 at 1560 ns

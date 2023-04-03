@@ -111,6 +111,7 @@ begin
       if (i mod 32) = 0 then
         CurTime := now ; 
         WaitForTransaction(StreamTxRec) ;
+        wait for 0 ns ; 
         AffirmIf(now > CurTime, 
            "Transmitter: WaitForTransaction started at: " & to_string(CurTime, 1 ns) & 
            "  finished at: " & to_string(now, 1 ns)) ;

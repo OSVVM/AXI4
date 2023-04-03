@@ -110,19 +110,23 @@ begin
       Send(StreamTxRec, Data) ;
       
       GetTransactionCount(StreamTxRec, TransactionCount) ;
+      wait for 0 ns ;       wait for 0 ns ; 
       AffirmIfEqual(TransactionCount, i, "Transmit TransactionCount:") ;
       if i mod 2 = 0 then 
         GetErrorCount(StreamTxRec, ErrorCount) ;
+        wait for 0 ns ;       wait for 0 ns ; 
         AffirmIfEqual(ErrorCount, 0, "Transmitter, GetErrorCount: Verify that ErrorCount is 0") ;
       else
         GetAlertLogID(StreamTxRec, TxAlertLogID) ;
         ErrorCount := GetAlertCount(TxAlertLogID) ; 
+        wait for 0 ns ;       wait for 0 ns ; 
         AffirmIfEqual(ErrorCount, 0, "Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0") ;
       end if ; 
       if (i mod 32) = 0 then
         -- Verify that no transactions are pending
         CurTime := now ; 
         WaitForTransaction(StreamTxRec) ;
+        wait for 0 ns ;       wait for 0 ns ; 
         AffirmIfEqual(now, CurTime, "Transmitter: WaitForTransaction executes in 0 time when using blocking transactions") ;
       end if ; 
     end loop ;
@@ -161,6 +165,7 @@ begin
         Get(StreamRxRec, RxData) ; 
         
         GetTransactionCount(StreamRxRec, TransactionCount) ;
+        wait for 0 ns ; 
         AffirmIfEqual(TransactionCount, i, "Receive TranasctionCount:") ;
         AffirmIfEqual(RxData, ExpData, "Get: ") ;
       else 
@@ -176,20 +181,24 @@ begin
           
         end if ; 
         GetTransactionCount(StreamRxRec, TransactionCount) ;
+        wait for 0 ns ; 
         AffirmIfEqual(TransactionCount, i, "Receive TranasctionCount:") ;
       end if ; 
       if i mod 2 = 0 then 
         GetErrorCount(StreamRxRec, ErrorCount) ;
-        AffirmIfEqual(ErrorCount, i/128, "Transmitter, GetErrorCount: Verify that ErrorCount is 0") ;
+        wait for 0 ns ; 
+        AffirmIfEqual(ErrorCount, i/128, "Receiver, GetErrorCount: Verify that ErrorCount is 0") ;
       else
         GetAlertLogID(StreamRxRec, TxAlertLogID) ;
         ErrorCount := GetAlertCount(TxAlertLogID) ; 
-        AffirmIfEqual(ErrorCount, i/128, "Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0") ;
+        wait for 0 ns ; 
+        AffirmIfEqual(ErrorCount, i/128, "Receiver, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0") ;
       end if ; 
       if (i mod 32) = 0 then
         -- Verify that no transactions are pending
         CurTime := now ; 
         WaitForTransaction(StreamRxRec) ;
+        wait for 0 ns ; 
         AffirmIfEqual(now, CurTime, "Receiver: WaitForTransaction executes in 0 time when using blocking transactions") ;
       end if ; 
      end loop ;

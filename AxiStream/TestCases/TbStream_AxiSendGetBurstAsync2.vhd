@@ -164,6 +164,7 @@ begin
       WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
+    wait for 0 ns ; 
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     AffirmIfEqual(NumBytes, 32, "Receiver: NumBytes Received") ;
     AffirmIfEqual(RxID,   ID,   "Receiver, ID: ") ; 
@@ -179,6 +180,7 @@ begin
       WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
+    wait for 0 ns ; 
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     AffirmIfEqual(NumBytes, 30, "Receiver: NumBytes Received") ;
     AffirmIfEqual(RxID,   (ID  +1), "Receiver, ID: ") ; 
@@ -195,6 +197,7 @@ begin
       WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
+    wait for 0 ns ; 
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     AffirmIfEqual(NumBytes, 34, "Receiver: NumBytes Received") ;
     AffirmIfEqual(RxID,   (ID  +2), "Receiver, ID: ") ; 
@@ -215,6 +218,7 @@ begin
         WaitForClock(StreamRxRec, 1) ; 
         TryCount := TryCount + 1 ;
       end loop ;
+      wait for 0 ns ; 
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       AffirmIfEqual(NumBytes, 32 + 5*i, "Receiver: NumBytes Received") ;
       AffirmIfEqual(RxID,   (ID  +i/2), "Receiver, ID: ") ; 

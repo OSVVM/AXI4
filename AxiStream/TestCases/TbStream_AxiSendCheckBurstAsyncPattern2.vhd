@@ -110,7 +110,8 @@ begin
 
     log("Transmit 14 bytes.") ;
     SendBurstRandomAsync(StreamTxRec, CoverID, 14, FIFO_WIDTH, (ID+1) & (Dest+1) & (User+1) & '1') ;
-
+    
+    wait for 0 ns ; 
     log("Transmit 17 bytes.") ;
     SendBurstRandomAsync(StreamTxRec, CoverID, 17, FIFO_WIDTH, (ID+2) & (Dest+2) & (User+2) & '1') ;
     WaitForClock(StreamTxRec, 7) ; 

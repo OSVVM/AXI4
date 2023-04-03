@@ -99,12 +99,15 @@ begin
       Send( StreamTxRec, X"0000_0000" + I ) ; 
     end loop ; 
 
+    WaitForClock(StreamTxRec, 1) ; 
+
 -- Send and Check    
     log("Transmit 32 words") ;
     for I in 1 to 32 loop 
       Send( StreamTxRec, X"0000_1000" + I ) ; 
     end loop ; 
 
+    WaitForClock(StreamTxRec, 1) ; 
 -- SendBurst and GetBurst    
     log("Send 32 word burst") ;
     for I in 1 to 32 loop 
@@ -112,6 +115,7 @@ begin
     end loop ; 
     SendBurst(StreamTxRec, 32) ;
 
+    WaitForClock(StreamTxRec, 1) ; 
 -- SendBurst and CheckBurst    
     log("Send 32 word burst") ;
     for I in 1 to 32 loop 
@@ -119,6 +123,7 @@ begin
     end loop ; 
     SendBurst(StreamTxRec, 32) ;
 
+    WaitForClock(StreamTxRec, 1) ; 
 -- SendBurst and CheckBurst    
     log("SendBurstVector 13 word burst") ;
     SendBurstVector(StreamTxRec, 
@@ -128,10 +133,12 @@ begin
    
 
 -- SendBurstIncrement and CheckBurstIncrement    
+    WaitForClock(StreamTxRec, 1) ; 
     log("SendBurstIncrement 16 word burst") ;
     SendBurstIncrement(StreamTxRec, X"0000_5000", 16) ; 
 
 -- SendBurstRandom and CheckBurstRandom    
+    WaitForClock(StreamTxRec, 1) ; 
     log("SendBurstRandom 24 word burst") ;
     SendBurstRandom   (StreamTxRec, X"0000_6000", 24) ; 
     
@@ -140,10 +147,12 @@ begin
     InitSeed(CoverID, 5) ; -- Get a common seed in both processes
     AddBins(CoverID, 1, GenBin(16#7000#, 16#7007#) & GenBin(16#7010#, 16#7017#) & GenBin(16#7020#, 16#7027#) & GenBin(16#7030#, 16#7037#)) ; 
 
+    WaitForClock(StreamTxRec, 1) ; 
     log("SendBurstRandom 42 word burst") ;
     SendBurstRandom   (StreamTxRec, CoverID, 42, 32) ; 
     
 -- Burst Combining Patterns - Send Get
+    WaitForClock(StreamTxRec, 1) ; 
     log("Combining Patterns:  Vector, Increment, Random, Intelligent Coverage") ;
     PushBurstVector(StreamTxRec.BurstFifo, 
         (X"0000_A001", X"0000_A003", X"0000_A005", X"0000_A007", X"0000_A009",
@@ -159,6 +168,7 @@ begin
     SendBurst(StreamTxRec, 42) ; 
          
 -- Burst Combining Patterns
+    WaitForClock(StreamTxRec, 1) ; 
     log("Combining Patterns:  Vector, Increment, Random, Intelligent Coverage") ;
     PushBurstVector(StreamTxRec.BurstFifo, 
         (X"0000_B001", X"0000_B003", X"0000_B005", X"0000_B007", X"0000_B009",
@@ -174,11 +184,13 @@ begin
     SendBurst(StreamTxRec, 42) ; 
 
 -- SendBurstVector - PopBurstVector slv_vector
+    WaitForClock(StreamTxRec, 1) ; 
     log("SendBurstVector 5 word burst") ;
     SendBurstVector(StreamTxRec, 
         (X"0000_C001", X"0000_C003", X"0000_C005", X"0000_C007", X"0000_C009") ) ;
    
 -- SendBurstVector - PopBurstVector integer_vector
+    WaitForClock(StreamTxRec, 1) ; 
     log("SendBurstVector 5 word burst") ;
     PushBurstVector(StreamTxRec.BurstFifo, 
         (16#D001#, 16#D003#, 16#D005#, 16#D007#, 16#D009#), 32 ) ;
@@ -208,6 +220,7 @@ begin
 --    log("Transmit 32 words") ;
     for I in 1 to 32 loop 
       Get(StreamRxRec, RxData) ;      
+      wait for 0 ns ; 
       AffirmIfEqual(RxData, X"0000_0000" + I, "RxData") ;
     end loop ; 
 
@@ -218,6 +231,7 @@ begin
 
 --    log("Send 32 word burst") ;
     GetBurst(StreamRxRec, NumBytes) ;
+    wait for 0 ns ; 
     AffirmIfEqual(NumBytes, 32, "Receiver: 32 Received") ;
     for I in 1 to 32 loop 
       RxData := Pop( StreamRxRec.BurstFifo ) ;      

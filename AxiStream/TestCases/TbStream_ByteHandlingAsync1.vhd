@@ -173,6 +173,7 @@ begin
           WaitForClock(StreamRxRec, 1) ; 
           TryCount := TryCount + 1 ;
         end loop ; 
+        wait for 0 ns ; 
         AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
         AffirmIfEqual(RxData, Data, "Get One Byte: ") ;
         Data := Data(DATA_WIDTH-8-1 downto 0) & X"--" ;
@@ -189,6 +190,7 @@ begin
             WaitForClock(StreamRxRec, 1) ; 
             TryCount := TryCount + 1 ;
           end loop ; 
+          wait for 0 ns ; 
           AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
           AffirmIfEqual(RxData, Data, "Get Two Bytes: ") ;
           Data := Data(DATA_WIDTH-8-1 downto 0) & X"--" ;
@@ -206,6 +208,7 @@ begin
             WaitForClock(StreamRxRec, 1) ; 
             TryCount := TryCount + 1 ;
           end loop ; 
+          wait for 0 ns ; 
           AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
           AffirmIfEqual(RxData, Data, "Get Three Bytes: ") ;
           Data := Data(DATA_WIDTH-8-1 downto 0) & X"--" ;

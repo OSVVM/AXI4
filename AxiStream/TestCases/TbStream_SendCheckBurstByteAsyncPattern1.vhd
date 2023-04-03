@@ -109,6 +109,7 @@ begin
     log("Transmit 8 bytes.  Random.  Starting with XAA") ;
     SendBurstRandomAsync(StreamTxRec, DATA_ZERO+16#AA#, 8) ;
     
+    wait for 0 ns ; 
     for i in 0 to 6 loop 
       log("Transmit " & to_string(8 + 3*i) & " bytes. Starting with " & to_string(i*32)) ;
       SendBurstIncrementAsync(StreamTxRec, DATA_ZERO+i*32, 8 + 3*i) ;

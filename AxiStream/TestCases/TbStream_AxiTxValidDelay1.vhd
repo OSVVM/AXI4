@@ -142,7 +142,7 @@ begin
     
     for h in 0 to 3 loop 
       -- Get and check the 16 words
-      log("Send 16 words with each byte incrementing") ;
+      -- log("Send 16 words with each byte incrementing") ;
       for i in 1 to 16 loop 
         -- Create words one byte at a time
         for j in 0 to DATA_BYTES-1 loop 

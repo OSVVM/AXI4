@@ -141,6 +141,7 @@ begin
       WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
+    wait for 0 ns ; 
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
 
     WaitForClock(StreamRxRec, 4) ; 
@@ -155,6 +156,7 @@ begin
       WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
+    wait for 0 ns ; 
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
 
     WaitForClock(StreamRxRec, 4) ; 
@@ -168,6 +170,7 @@ begin
       WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
+    wait for 0 ns ; 
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     
     for i in 0 to 6 loop 
@@ -180,6 +183,7 @@ begin
         WaitForClock(StreamRxRec, 1) ; 
         TryCount := TryCount + 1 ;
       end loop ;
+      wait for 0 ns ; 
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     end loop ; 
      

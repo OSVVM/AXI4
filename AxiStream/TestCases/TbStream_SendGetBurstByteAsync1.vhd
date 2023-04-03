@@ -140,6 +140,7 @@ begin
       WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
+    wait for 0 ns ; 
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     AffirmIfEqual(NumBytes, 32, "Receiver: NumBytes Received") ;
     CheckBurstIncrement(RxBurstFifo, 3, NumBytes) ;
@@ -152,6 +153,7 @@ begin
       WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
+    wait for 0 ns ; 
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     AffirmIfEqual(NumBytes, 30, "Receiver: NumBytes Received") ;
     CheckBurst(RxBurstFifo, (1,3,5,7,9,11,13,15,17,19,21,23,25,27,29)) ;
@@ -165,6 +167,7 @@ begin
       WaitForClock(StreamRxRec, 1) ; 
       TryCount := TryCount + 1 ;
     end loop ;
+    wait for 0 ns ; 
     AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
     AffirmIfEqual(NumBytes, 34, "Receiver: NumBytes Received") ;
     CheckBurstRandom(RxBurstFifo, 7, NumBytes) ;
@@ -178,6 +181,7 @@ begin
         WaitForClock(StreamRxRec, 1) ; 
         TryCount := TryCount + 1 ;
       end loop ;
+      wait for 0 ns ; 
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       AffirmIfEqual(NumBytes, 32 + 5*i, "Receiver: NumBytes Received") ;
       CheckBurstIncrement(RxBurstFifo, i*32, NumBytes) ;

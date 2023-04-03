@@ -120,6 +120,7 @@ begin
     Dest := to_slv(9, DEST_LEN) ; 
     User := to_slv(10, USER_LEN) ; 
 
+    wait for 0 ns ; 
     for i in 0 to 6 loop 
       log("Transmit " & to_string(i + 1) & " Bytes. Starting with " & to_string(i*32)) ;
       SendBurstIncrementAsync(StreamTxRec, DATA_ZERO+i*32, 1+i, (ID+i/2) & (Dest+i/2) & (User+i/2) & '1') ;

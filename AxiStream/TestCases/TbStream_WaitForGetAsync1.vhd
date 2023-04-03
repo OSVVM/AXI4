@@ -147,8 +147,8 @@ begin
 
 
 -- SendBurstIncrement and GetBurst + CheckBurstIncrement
-    log("SendBurstIncrement and GetBurst + CheckBurstIncrement: 6 x 4 word bursts") ;
     WaitForBarrier(Sync) ;
+    log("SendBurstIncrement and GetBurst + CheckBurstIncrement: 6 x 4 word bursts") ;
     BlankLine(2) ; 
     WaitForClock(StreamTxRec, 2) ;
     SendBurstIncrement(StreamTxRec, X"0002_0000", 4) ;
@@ -160,6 +160,7 @@ begin
     Send( StreamTxRec, X"0002_0000" + 5 ) ;
 
     SendBurstIncrement(StreamTxRec, X"0002_2000", 4) ;
+    wait for 0 ns ; 
     SendBurstIncrement(StreamTxRec, X"0002_3000", 4) ;
 
     WaitForBarrier(Sync) ;
@@ -172,8 +173,8 @@ begin
     SendBurstIncrement(StreamTxRec, X"0002_5000", 4) ;
 
 -- SendBurstIncrement and CheckBurstIncrement
-    log("SendBurstIncrement and CheckBurstIncrement: Send 6 x 4 word bursts") ;
     WaitForBarrier(Sync) ;
+    log("SendBurstIncrement and CheckBurstIncrement: Send 6 x 4 word bursts") ;
     BlankLine(2) ; 
     WaitForClock(StreamTxRec, 2) ;
     SendBurstIncrement(StreamTxRec, X"0003_0000", 4) ;
@@ -230,6 +231,7 @@ begin
         exit when Available ; 
         WaitForClock(StreamRxRec, 1) ; 
       end loop ; 
+      wait for 0 ns ; 
       AffirmIfEqual(RxData, X"0000_0000" + I, "RxData") ;
       AffirmIf(GetStartTime = Now, "Get Start: " & to_string(GetStartTime, 1 ns) &
           " = Finish: "  & to_string(Now, 1 ns) ) ;
@@ -250,6 +252,7 @@ begin
         exit when Available ; 
         WaitForClock(StreamRxRec, 1) ; 
       end loop ; 
+      wait for 0 ns ; 
       AffirmIfEqual(RxData, X"0000_1000" + I, "RxData") ;
       AffirmIf(GetStartTime + 10 ns = Now, "Get Start + 10 ns: " & to_string(GetStartTime, 1 ns) &
           " = Finish: "  & to_string(Now, 1 ns) ) ;
@@ -271,6 +274,7 @@ begin
         exit when Available ; 
         WaitForClock(StreamRxRec, 1) ; 
       end loop ; 
+      wait for 0 ns ; 
       AffirmIfEqual(RxData, X"0000_2000" + I, "RxData") ;
       AffirmIf(GetStartTime = Now, "Get Start: " & to_string(GetStartTime, 1 ns) &
           " = Finish: "  & to_string(Now, 1 ns) ) ;
@@ -289,6 +293,7 @@ begin
         exit when Available ; 
         WaitForClock(StreamRxRec, 1) ; 
       end loop ; 
+      wait for 0 ns ; 
       AffirmIf(GetStartTime = Now, "Get Start: " & to_string(GetStartTime, 1 ns) &
           " = Finish: "  & to_string(Now, 1 ns) ) ;
     end loop ;
@@ -308,6 +313,7 @@ begin
         exit when Available ; 
         WaitForClock(StreamRxRec, 1) ; 
       end loop ; 
+      wait for 0 ns ; 
       AffirmIf(GetStartTime + 10 ns = Now, "Get Start + 10 ns: " & to_string(GetStartTime, 1 ns) &
           " = Finish: "  & to_string(Now, 1 ns) ) ;
     end loop ;
@@ -328,6 +334,7 @@ begin
         exit when Available ; 
         WaitForClock(StreamRxRec, 1) ; 
       end loop ; 
+      wait for 0 ns ; 
       AffirmIf(GetStartTime = Now, "Get Start: " & to_string(GetStartTime, 1 ns) &
           " = Finish: "  & to_string(Now, 1 ns) ) ;
     end loop ;
@@ -343,6 +350,7 @@ begin
       exit when Available ; 
       WaitForClock(StreamRxRec, 1) ; 
     end loop ;
+    wait for 0 ns ; 
     AffirmIfEqual(NumWords, 4, "NumWords") ;
     CheckBurstIncrement(StreamRxRec.BurstFifo, X"0002_0000", 4) ;
 --    GetBurst(StreamRxRec, NumWords) ;
@@ -351,6 +359,7 @@ begin
       exit when Available ; 
       WaitForClock(StreamRxRec, 1) ; 
     end loop ;
+    wait for 0 ns ; 
     AffirmIfEqual(NumWords, 4, "NumWords") ;
     CheckBurstIncrement(StreamRxRec.BurstFifo, X"0002_1000", 4) ;
 
@@ -369,6 +378,7 @@ begin
       exit when Available ; 
       WaitForClock(StreamRxRec, 1) ; 
     end loop ;
+    wait for 0 ns ; 
     AffirmIfEqual(NumWords, 4, "NumWords") ;
     CheckBurstIncrement(StreamRxRec.BurstFifo, X"0002_2000", 4) ;
     WaitForClock( StreamRxRec, 2) ;
@@ -378,6 +388,7 @@ begin
       exit when Available ; 
       WaitForClock(StreamRxRec, 1) ; 
     end loop ;
+    wait for 0 ns ; 
     AffirmIfEqual(NumWords, 4, "NumWords") ;
     CheckBurstIncrement(StreamRxRec.BurstFifo, X"0002_3000", 4) ;
 
@@ -395,6 +406,7 @@ begin
       exit when Available ; 
       WaitForClock(StreamRxRec, 1) ; 
     end loop ;
+    wait for 0 ns ; 
     AffirmIfEqual(NumWords, 4, "NumWords") ;
     CheckBurstIncrement(StreamRxRec.BurstFifo, X"0002_4000", 4) ;
 --    GetBurst(StreamRxRec, NumWords) ;
@@ -403,6 +415,7 @@ begin
       exit when Available ; 
       WaitForClock(StreamRxRec, 1) ; 
     end loop ;
+    wait for 0 ns ; 
     AffirmIfEqual(NumWords, 4, "NumWords") ;
     CheckBurstIncrement(StreamRxRec.BurstFifo, X"0002_5000", 4) ;
 

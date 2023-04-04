@@ -9,10 +9,7 @@
 --
 --
 --  Description:
---      Validates Stream Model Independent Transactions
---      Send, Get, Check, 
---      WaitForTransaction, GetTransactionCount
---      GetAlertLogID, GetErrorCount, 
+--      Validates AxiStream usage of delay randomization for TReady and TValid
 --
 --
 --  Developed by:
@@ -22,12 +19,12 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    01/2022   2022.01    Initial revision
+--    04/2023   2023.04    Initial.   Tests delay randomization
 --
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2022 by SynthWorks Design Inc.  
+--  Copyright (c) 2023 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.

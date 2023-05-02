@@ -84,15 +84,17 @@ begin
   --   Generate transactions for AxiTransmitter
   ------------------------------------------------------------
   TransmitterProc : process
+    variable BurstCovID : BurstCoverageIdType ; 
     variable BurstLengthCovID, BurstDelayCovID, BeatDelayCovID : CoverageIdType ; 
     variable BaseWord : std_logic_vector(31 downto 0) := X"0000_0000" ;
   begin
 
     wait until nReset = '1' ;  
     WaitForClock(StreamTxRec, 2) ; 
-    GetAxiStreamOptions(StreamTxRec, BURST_LENGTH_COV, BurstLengthCovID) ; 
-    GetAxiStreamOptions(StreamTxRec, BURST_DELAY_COV,  BurstDelayCovID) ; 
-    GetAxiStreamOptions(StreamTxRec, BEAT_DELAY_COV,   BeatDelayCovID) ; 
+    GetAxiStreamOptions(StreamTxRec, BURST_COV, BurstCovID) ; 
+    BurstLengthCovID := BurstCovID.BurstLengthCov ; 
+    BurstDelayCovID  := BurstCovID.BurstDelayCov ; 
+    BeatDelayCovID   := BurstCovID.BeatDelayCov ; 
     
     DeallocateBins(BurstLengthCovID) ;  -- Remove old coverage model
     AddBins(BurstLengthCovID, 90000, GenBin(16,32,1)) ; 
@@ -160,13 +162,15 @@ begin
   --   Generate transactions for AxiReceiver
   ------------------------------------------------------------
   ReceiverProc : process
+    variable BurstCovID : BurstCoverageIdType ; 
     variable BurstLengthCovID, BurstDelayCovID, BeatDelayCovID : CoverageIdType ; 
     variable BaseWord : std_logic_vector(31 downto 0) := X"0000_0000" ;
   begin
     WaitForClock(StreamRxRec, 1) ; 
-    GetAxiStreamOptions(StreamRxRec, BURST_LENGTH_COV, BurstLengthCovID) ; 
-    GetAxiStreamOptions(StreamRxRec, BURST_DELAY_COV,  BurstDelayCovID) ; 
-    GetAxiStreamOptions(StreamRxRec, BEAT_DELAY_COV,   BeatDelayCovID) ; 
+    GetAxiStreamOptions(StreamRxRec, BURST_COV, BurstCovID) ; 
+    BurstLengthCovID := BurstCovID.BurstLengthCov ; 
+    BurstDelayCovID  := BurstCovID.BurstDelayCov ; 
+    BeatDelayCovID   := BurstCovID.BeatDelayCov ; 
     SetAxiStreamOptions(StreamRxRec, RECEIVE_READY_WAIT_FOR_GET, TRUE) ;
     
     -- Quiet

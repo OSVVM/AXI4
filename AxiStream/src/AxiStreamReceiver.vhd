@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    05/2023   2023.05    Updated methods for Randomized delays 
 --    04/2023   2023.04    Update delays on TReady to be randomized
 --    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
@@ -39,7 +40,7 @@
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2018 - 2022 by SynthWorks Design Inc.
+--  Copyright (c) 2018 - 2023 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -109,14 +110,14 @@ entity AxiStreamReceiver is
   -- Use MODEL_ID_NAME Generic if set, otherwise,
   -- use model instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
-    IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME,
+    ifelse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME,
       to_lower(PathTail(AxiStreamReceiver'PATH_NAME))) ;
 
 end entity AxiStreamReceiver ;
 architecture behavioral of AxiStreamReceiver is
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID, BurstFifoID : AlertLogIDType ;
-  signal BurstLengthCov, BurstDelayCov, BeatDelayCov : CoverageIDType ;
+  signal BurstCov : BurstCoverageIDType ;
   
   signal UseCoverageDelays : Boolean := FALSE ;
 
@@ -138,9 +139,9 @@ architecture behavioral of AxiStreamReceiver is
   signal ReceiveReadyBeforeValid : boolean := TRUE ;
   signal ReceiveReadyDelayCycles : integer := 0 ;
 
-  signal ParamID           : std_logic_vector(TID'range)   := IfElse(INIT_ID'length > 0,   INIT_ID,   (TID'range => '0')) ;
-  signal ParamDest         : std_logic_vector(TDest'range) := IfElse(INIT_DEST'length > 0, INIT_DEST, (TDest'range => '0')) ;
-  signal ParamUser         : std_logic_vector(TUser'range) := IfElse(INIT_USER'length > 0, INIT_USER, (TUser'range => '0')) ;
+  signal ParamID           : std_logic_vector(TID'range)   := ifelse(INIT_ID'length > 0,   INIT_ID,   (TID'range => '0')) ;
+  signal ParamDest         : std_logic_vector(TDest'range) := ifelse(INIT_DEST'length > 0, INIT_DEST, (TDest'range => '0')) ;
+  signal ParamUser         : std_logic_vector(TUser'range) := ifelse(INIT_USER'length > 0, INIT_USER, (TUser'range => '0')) ;
   signal ParamLast         : natural := INIT_LAST ;
   signal LastOffsetCount   : integer := 0 ;
   constant DEFAULT_BURST_MODE : StreamFifoBurstModeType := STREAM_BURST_WORD_MODE ;
@@ -192,18 +193,16 @@ begin
       alias Last : std_logic is Param(0) ;
     begin
       return
-        IfElse(ID_LEN > 0,   "  TID: "       & to_hxstring(ID),   "") &
-        IfElse(DEST_LEN > 0, "  TDest: "     & to_hxstring(Dest), "") &
-        IfElse(USER_LEN > 0, "  TUser: "     & to_hxstring(User), "") &
+        ifelse(ID_LEN > 0,   "  TID: "       & to_hxstring(ID),   "") &
+        ifelse(DEST_LEN > 0, "  TDest: "     & to_hxstring(Dest), "") &
+        ifelse(USER_LEN > 0, "  TUser: "     & to_hxstring(User), "") &
         "  TLast: "     & to_string(Last) ;
     end function param_to_string ;
 
   begin
     wait for 0 ns ;  -- Allow ModelID to initialize
     TransRec.BurstFifo <= NewID("RxBurstFifo", ModelID, Search => PRIVATE_NAME) ;
-    BurstLengthCov     <= NewID("BurstLengthCov", ModelID) ;
-    BurstDelayCov      <= NewID("BurstDelayCov",  ModelID) ;
-    BeatDelayCov       <= NewID("BeatDelayCov",   ModelID) ;
+    BurstCov           <= NewID("", ModelID) ;
     wait for 0 ns ;  -- Allow TransRec.BurstFifo to update.
     BurstFifoID        <= GetAlertLogID(TransRec.BurstFifo) ;
 
@@ -530,16 +529,8 @@ begin
               ParamLast       <= TransRec.IntToModel ;
               LastOffsetCount <= WordReceiveCount ;
 
-            when BURST_LENGTH_COV =>
-              BurstLengthCov.ID <= TransRec.IntToModel ;
-              UseCoverageDelays <= TRUE ; 
-
-            when BURST_DELAY_COV =>
-              BurstDelayCov.ID  <= TransRec.IntToModel ;
-              UseCoverageDelays <= TRUE ; 
-
-            when BEAT_DELAY_COV =>
-              BeatDelayCov.ID   <= TransRec.IntToModel ;
+            when BURST_COV =>
+              BurstCov          <= GetBurstCoverage(TransRec.IntToModel) ;
               UseCoverageDelays <= TRUE ; 
 
             when others =>
@@ -573,16 +564,8 @@ begin
             when DEFAULT_LAST =>
               TransRec.IntFromModel   <= ParamLast ;
 
-            when BURST_LENGTH_COV =>
-              TransRec.IntFromModel <= BurstLengthCov.ID ;
-              UseCoverageDelays <= TRUE ; 
-
-            when BURST_DELAY_COV =>
-              TransRec.IntFromModel <= BurstDelayCov.ID ;
-              UseCoverageDelays <= TRUE ; 
-
-            when BEAT_DELAY_COV =>
-              TransRec.IntFromModel <= BeatDelayCov.ID ;
+            when BURST_COV =>
+              TransRec.IntFromModel <= BurstCov.ID ;
               UseCoverageDelays <= TRUE ; 
 
             when others =>
@@ -616,8 +599,11 @@ begin
     variable LastID         : std_logic_vector(TID'range)   := (TID'range   => '-') ;
     variable LastDest       : std_logic_vector(TDest'range) := (TDest'range => '-') ;
     variable LastLast       : std_logic := '1' ;
-    alias Strb : std_logic_vector(TStrb'length-1 downto 0) is TStrb ;
-    alias Keep : std_logic_vector(TKeep'length-1 downto 0) is TKeep ;
+--    alias Strb : std_logic_vector(TStrb'length-1 downto 0) is TStrb ;
+--    alias Keep : std_logic_vector(TKeep'length-1 downto 0) is TKeep ;
+    variable Strb : std_logic_vector(TStrb'length-1 downto 0) ;
+    variable Keep : std_logic_vector(TKeep'length-1 downto 0) ;
+
     variable ReadyBeforeValid, ReadyDelayCycles : integer ; 
     variable BurstLength : integer := 0 ; 
   begin
@@ -626,9 +612,9 @@ begin
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
     -- Default settings for Burst Coverage
-    AddBins (BurstLengthCov,  GenBin(2,10,1)) ;
-    AddCross(BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
-    AddCross(BeatDelayCov,    GenBin(0,1,1), GenBin(0,1,1)) ;
+    AddBins (BurstCov.BurstLengthCov,  GenBin(2,10,1)) ;
+    AddCross(BurstCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
+    AddCross(BurstCov.BeatDelayCov,    GenBin(0,1,1), GenBin(0,1,1)) ;
 
     ReceiveLoop : loop
 
@@ -642,16 +628,8 @@ begin
       
       -- Delay between consecutive signaling of Ready
       if UseCoverageDelays then 
-        if BurstLength < 1 then 
-          (ReadyBeforeValid, ReadyDelayCycles) := integer_vector'(GetRandPoint(BurstDelayCov)) ; 
-          ICoverLast(BurstDelayCov) ;
-          BurstLength := GetRandPoint(BurstLengthCov) ; 
-          ICoverLast(BurstLengthCov) ; 
-        else
-          (ReadyBeforeValid, ReadyDelayCycles) := integer_vector'(GetRandPoint(BeatDelayCov)) ; 
-          ICoverLast(BeatDelayCov) ;
-        end if ; 
-        BurstLength := BurstLength - 1; 
+        -- BurstCoverage Delays
+        (ReadyBeforeValid, ReadyDelayCycles)  := GetRandBurstDelay(BurstCov) ; 
       else
         -- Deprecated static settings
         ReadyBeforeValid := to_integer(not ReceiveReadyBeforeValid) ; 
@@ -672,6 +650,8 @@ begin
 
       Data := to_x01(TData) ;
       Last := to_01(TLast) ;
+      Strb := to_x01(TStrb) ;
+      Keep := to_x01(TKeep) ;
       -- Either Strb or Keep can have a null range
       -- Make Data a Z if Strb(i) is position byte
       for i in Strb'range loop
@@ -726,11 +706,11 @@ begin
       Log(ModelID,
         "Axi Stream Receive." &
         "  TData: "     & to_hxstring(TData) &
-        IfElse(TStrb'length > 0, "  TStrb: "     & to_string (TStrb), "") &
-        IfElse(TKeep'length > 0, "  TKeep: "     & to_string (TKeep), "") &
-        IfElse(TID'length > 0,   "  TID: "       & to_hxstring(TID),   "") &
-        IfElse(TDest'length > 0, "  TDest: "     & to_hxstring(TDest), "") &
-        IfElse(TUser'length > 0, "  TUser: "     & to_hxstring(TUser), "") &
+        ifelse(TStrb'length > 0, "  TStrb: "     & to_string (TStrb), "") &
+        ifelse(TKeep'length > 0, "  TKeep: "     & to_string (TKeep), "") &
+        ifelse(TID'length > 0,   "  TID: "       & to_hxstring(TID),   "") &
+        ifelse(TDest'length > 0, "  TDest: "     & to_hxstring(TDest), "") &
+        ifelse(TUser'length > 0, "  TUser: "     & to_hxstring(TUser), "") &
         "  TLast: "     & to_string (TLast) &
         "  Operation# " & to_string (WordReceiveCount + 1),
         DEBUG

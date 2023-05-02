@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    05/2023   2023.05    Updated methods for Randomized delays 
 --    04/2023   2023.04    Update delays on TValid to be randomized
 --    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
@@ -37,7 +38,7 @@
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2018 - 2021 by SynthWorks Design Inc.
+--  Copyright (c) 2018 - 2023 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -116,14 +117,14 @@ entity AxiStreamTransmitter is
   -- Use MODEL_ID_NAME Generic if set, otherwise,
   -- use model instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
-    IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, 
+    ifelse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, 
       to_lower(PathTail(AxiStreamTransmitter'PATH_NAME))) ;
 
 end entity AxiStreamTransmitter ;
 architecture SimpleTransmitter of AxiStreamTransmitter is
   signal ModelID, BusFailedID : AlertLogIDType ;
 --  signal ProtocolID, DataCheckID : AlertLogIDType ;
-  signal BurstLengthCov, BurstDelayCov, BeatDelayCov : CoverageIDType ;
+  signal BurstCov : BurstCoverageIDType ;
   
   signal UseCoverageDelays : Boolean := FALSE ;
 
@@ -138,9 +139,9 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
   -- Verification Component Configuration
   signal TransmitReadyTimeOut : integer := 0 ;  -- No timeout
 
-  signal ParamID               : std_logic_vector(TID'range)   := IfElse(INIT_ID'length > 0,   INIT_ID,   (TID'range => '0')) ;
-  signal ParamDest             : std_logic_vector(TDest'range) := IfElse(INIT_DEST'length > 0, INIT_DEST, (TDest'range => '0')) ;
-  signal ParamUser             : std_logic_vector(TUser'range) := IfElse(INIT_USER'length > 0, INIT_USER, (TUser'range => '0')) ;
+  signal ParamID               : std_logic_vector(TID'range)   := ifelse(INIT_ID'length > 0,   INIT_ID,   (TID'range => '0')) ;
+  signal ParamDest             : std_logic_vector(TDest'range) := ifelse(INIT_DEST'length > 0, INIT_DEST, (TDest'range => '0')) ;
+  signal ParamUser             : std_logic_vector(TUser'range) := ifelse(INIT_USER'length > 0, INIT_USER, (TUser'range => '0')) ;
   signal ParamLast             : natural := INIT_LAST ;
   signal LastOffsetCount       : integer := 0 ;
   signal ValidDelayCycles      : integer := 0 ;
@@ -183,9 +184,7 @@ begin
   begin
     wait for 0 ns ; 
     TransRec.BurstFifo <= NewID("TxBurstFifo", ModelID, Search => PRIVATE_NAME) ;
-    BurstLengthCov     <= NewID("BurstLengthCov", ModelID) ;
-    BurstDelayCov      <= NewID("BurstDelayCov",  ModelID) ;
-    BeatDelayCov       <= NewID("BeatDelayCov",   ModelID) ;
+    BurstCov           <= NewID("", ModelID) ;
     
     DispatchLoop : loop 
       WaitForTransaction(
@@ -309,16 +308,8 @@ begin
               ParamLast       <= TransRec.IntToModel ;
               LastOffsetCount <= TransmitRequestCount ;
 
-            when BURST_LENGTH_COV =>
-              BurstLengthCov.ID <= TransRec.IntToModel ;
-              UseCoverageDelays <= TRUE ; 
-
-            when BURST_DELAY_COV =>
-              BurstDelayCov.ID  <= TransRec.IntToModel ;
-              UseCoverageDelays <= TRUE ; 
-
-            when BEAT_DELAY_COV =>
-              BeatDelayCov.ID   <= TransRec.IntToModel ;
+            when BURST_COV =>
+              BurstCov          <= GetBurstCoverage(TransRec.IntToModel) ;
               UseCoverageDelays <= TRUE ; 
 
             when others =>
@@ -349,16 +340,8 @@ begin
             when DEFAULT_LAST =>
               TransRec.IntFromModel   <= ParamLast ;
 
-            when BURST_LENGTH_COV =>
-              TransRec.IntFromModel <= BurstLengthCov.ID ;
-              UseCoverageDelays <= TRUE ; 
-
-            when BURST_DELAY_COV =>
-              TransRec.IntFromModel <= BurstDelayCov.ID ;
-              UseCoverageDelays <= TRUE ; 
-
-            when BEAT_DELAY_COV =>
-              TransRec.IntFromModel <= BeatDelayCov.ID ;
+            when BURST_COV =>
+              TransRec.IntFromModel <= BurstCov.ID ;
               UseCoverageDelays <= TRUE ; 
 
             when others =>
@@ -409,9 +392,9 @@ begin
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
     -- Default settings for Burst Coverage
-    AddBins (BurstLengthCov,  GenBin(2,10,1)) ;
-    AddCross(BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
-    AddCross(BeatDelayCov,    GenBin(0,1,1), GenBin(0,1,1)) ;
+    AddBins (BurstCov.BurstLengthCov,  GenBin(2,10,1)) ;
+    AddBins (BurstCov.BurstDelayCov,   GenBin(2,5,1)) ;
+    AddBins (BurstCov.BeatDelayCov,    GenBin(0,1,1)) ;
 
     TransmitLoop : loop
       -- Find Transaction
@@ -424,24 +407,9 @@ begin
 
       -- Delay between consecutive signaling of Valid
       if UseCoverageDelays then 
-        -- Coverage Delays
-        --   Randomize a delay based on breaking interface traffic into bursts and delays
-        --   Burst length is determined by BurstLengthCov
-        --   Between Bursts, use a larger BurstDelay
-        --   Within a burst/between beats of a burst, use a smaller BeatDelayCov
-        --   
-        if BurstLength < 1 then 
-          DelayCycles := GetRandPoint(BurstDelayCov) ;
-          WaitForClock(Clk, DelayCycles) ;
-          ICoverLast(BurstDelayCov) ;
-          BurstLength := GetRandPoint(BurstLengthCov) ; 
-          ICoverLast(BurstLengthCov) ; 
-        else
-          DelayCycles := GetRandPoint(BeatDelayCov) ;
-          WaitForClock(Clk, DelayCycles) ;
-          ICoverLast(BeatDelayCov) ;
-        end if ; 
-        BurstLength := BurstLength - 1; 
+        -- BurstCoverage Delays
+        DelayCycles := GetRandBurstDelay(BurstCov) ; 
+        WaitForClock(Clk, DelayCycles) ;
       else
         -- Deprecated static settings
         if NewTransfer or not Burst then
@@ -484,11 +452,11 @@ begin
       Log(ModelID,
         "Axi Stream Send." &
         "  TData: "     & to_hxstring(to_x01(Data)) &
-        IfElse(TStrb'length > 0, "  TStrb: "     & to_string( Strb), "") &
-        IfElse(TKeep'length > 0, "  TKeep: "     & to_string( Keep), "") &
-        IfElse(TID'length   > 0, "  TID: "       & to_hxstring(ID),   "") &
-        IfElse(TDest'length > 0, "  TDest: "     & to_hxstring(Dest), "") &
-        IfElse(TUser'length > 0, "  TUser: "     & to_hxstring(User), "") &
+        ifelse(TStrb'length > 0, "  TStrb: "     & to_string( Strb), "") &
+        ifelse(TKeep'length > 0, "  TKeep: "     & to_string( Keep), "") &
+        ifelse(TID'length   > 0, "  TID: "       & to_hxstring(ID),   "") &
+        ifelse(TDest'length > 0, "  TDest: "     & to_hxstring(Dest), "") &
+        ifelse(TUser'length > 0, "  TUser: "     & to_hxstring(User), "") &
         "  TLast: "     & to_string( Last) &
         -- Must be DoneCount and not RequestCount due to queuing/Async and burst operations
         "  Operation# " & to_string( TransmitDoneCount + 1),

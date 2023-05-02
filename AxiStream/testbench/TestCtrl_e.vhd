@@ -76,5 +76,4 @@ entity TestCtrl is
   -- Simplifying access to Burst FIFOs using aliases
   alias TxBurstFifo : ScoreboardIdType is StreamTxRec.BurstFifo ; 
   alias RxBurstFifo : ScoreboardIdType is StreamRxRec.BurstFifo ;
-
 end entity TestCtrl ;

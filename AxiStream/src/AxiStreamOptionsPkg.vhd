@@ -74,9 +74,7 @@ package AxiStreamOptionsPkg is
     DEFAULT_DEST,                         -- std_logic_vector
     DEFAULT_USER,                         -- std_logic_vector
     DEFAULT_LAST,                         -- integer
-    BURST_LENGTH_COV,                     -- CoverageIDType
-    BURST_DELAY_COV,                      -- CoverageIDType
-    BEAT_DELAY_COV,                       -- CoverageIDType
+    BURST_COV,                            -- BurstCoverageIDType
     THE_END
   ) ;
 
@@ -104,7 +102,7 @@ package AxiStreamOptionsPkg is
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
-    constant OptVal      : In    CoverageIDType
+    constant OptVal      : In    BurstCoverageIDType
   ) ;
 
   ------------------------------------------------------------
@@ -136,7 +134,7 @@ package AxiStreamOptionsPkg is
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
-    variable OptVal      : Out   CoverageIDType
+    variable OptVal      : Out   BurstCoverageIDType
   ) ;
 
   ------------------------------------------------------------
@@ -185,7 +183,7 @@ package body AxiStreamOptionsPkg is
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
-    constant OptVal      : In    CoverageIDType
+    constant OptVal      : In    BurstCoverageIDType
   ) is
   begin
     SetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), OptVal.ID) ;
@@ -230,12 +228,12 @@ package body AxiStreamOptionsPkg is
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
-    variable OptVal      : Out   CoverageIDType
+    variable OptVal      : Out   BurstCoverageIDType
   ) is
     variable IntVal : integer ; 
   begin
     GetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), IntVal) ;
-    OptVal := CoverageIDType'(ID => IntVal) ; 
+    OptVal := GetBurstCoverage(IntVal) ;  
   end procedure GetAxiStreamOptions ;
 
 

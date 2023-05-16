@@ -184,7 +184,7 @@ begin
   begin
     wait for 0 ns ; 
     TransRec.BurstFifo <= NewID("TxBurstFifo", ModelID, Search => PRIVATE_NAME) ;
-    BurstCov           <= NewID("", ModelID) ;
+    BurstCov           <= NewID("AxiStreamTx", ModelID, Search => NAME_AND_PARENT) ;
     
     DispatchLoop : loop 
       WaitForTransaction(

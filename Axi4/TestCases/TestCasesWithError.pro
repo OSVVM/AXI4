@@ -1,4 +1,4 @@
-#  File Name:         RunAllTests.pro
+#  File Name:         testbench.pro
 #  Revision:          STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to run all Axi4 tests  
+#        Script to run one Axi Stream test  
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -17,13 +17,13 @@
 #
 #  Revision History:
 #    Date      Version    Description
-#     1/2019   2019.01    Compile Script for OSVVM
+#     1/2022   2022.01    Added Tests
 #     1/2020   2020.01    Updated Licenses to Apache
 #
 #
 #  This file is part of OSVVM.
 #  
-#  Copyright (c) 2019 - 2020 by SynthWorks Design Inc.  
+#  Copyright (c) 2019 - 2022 by SynthWorks Design Inc.  
 #  
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -38,28 +38,20 @@
 #  limitations under the License.
 #  
 
-TestSuite Axi4Full
-library osvvm_TbAxi4
+##
+## runs in conjunction with either 
+## Testbench/Testbench.pro or TestbenchVTI/TestbenchVTI.pro
+## Continuing with library set previously by the above
+##
+##
+RunTest  TbAxi4_DemoMemoryReadWrite1.vhd
 
-include ./testbench
-
-# Make TestCases the frame of reference
-set ::osvvm::CurrentWorkingDirectory [file join $::osvvm::CurrentWorkingDirectory TestCases]
-
-# RunTest  TbAxi4_MemoryReadWriteDebug1.vhd
-
-# RunTest  TbAxi4_DemoMemoryReadWrite1.vhd
 RunTest  TbAxi4_DemoErrorMemoryReadWrite1.vhd
-# RunTest  TbAxi4_AxiXResp3_slv.vhd
 
-# RunTest  TbAxi4_TransactionApiMemoryBurst.vhd
+include TestCases_NoBurst.pro
 
-# RunTest  TbAxi4_MemoryBurst1.vhd
-# RunTest  TbAxi4_MemoryBurstAsync1.vhd
-# 
-# RunTest  TbAxi4_MemoryBurstPattern1.vhd
-# RunTest  TbAxi4_MemoryBurstPattern2.vhd
-# RunTest  TbAxi4_MemoryBurstBytePattern1.vhd
-# RunTest  TbAxi4_MemoryBurstAsyncPattern1.vhd
-# RunTest  TbAxi4_MemoryBurstAsyncPattern2.vhd
+RunTest  TbAxi4_DemoErrorMemoryReadWrite1.vhd
+include TestCases_Burst.pro
+
+RunTest  TbAxi4_DemoErrorMemoryReadWrite1.vhd
 

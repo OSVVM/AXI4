@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_MemoryReadWriteDemo1.vhd
+--  File Name:         TbAxi4_DemoMemoryReadWrite1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -39,7 +39,7 @@
 --  limitations under the License.
 --
 
-architecture MemoryReadWriteDemo1 of TestCtrl is
+architecture DemoMemoryReadWrite1 of TestCtrl is
 
   signal TestDone, WriteDone : integer_barrier := 1 ;
   constant BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;
@@ -55,15 +55,18 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetTestName("TbAxi4_MemoryReadWriteDemo1") ;
+    SetTestName("TbAxi4_DemoMemoryReadWrite1") ;
     SetLogEnable(PASSED, TRUE) ;   -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;     -- Enable INFO logs
     -- SetLogEnable(DEBUG, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_MemoryReadWriteDemo1.txt") ;
+    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_DemoMemoryReadWrite1.txt") ;
     SetTranscriptMirror(TRUE) ;
+    SetAlertLogOptions(WriteTimeLast => FALSE) ; 
+    SetAlertLogOptions(TimeJustifyAmount => 15) ; 
+    SetAlertLogJustify ; 
 
     -- Wait for Design Reset
     wait until nReset = '1' ;
@@ -76,7 +79,7 @@ begin
 
     TranscriptClose ;
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_MemoryReadWriteDemo1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MemoryReadWriteDemo1.txt", "") ;
+    -- AlertIfDiff("./results/TbAxi4_DemoMemoryReadWrite1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_DemoMemoryReadWrite1.txt", "") ;
 
     EndOfTestReports ;
     std.env.stop ;
@@ -249,15 +252,15 @@ begin
   end process MemoryProc ;
 
 
-end MemoryReadWriteDemo1 ;
+end DemoMemoryReadWrite1 ;
 
-Configuration TbAxi4_MemoryReadWriteDemo1 of TbAxi4Memory is
+Configuration TbAxi4_DemoMemoryReadWrite1 of TbAxi4Memory is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(MemoryReadWriteDemo1) ;
+      use entity work.TestCtrl(DemoMemoryReadWrite1) ;
     end for ;
 --!!    for Subordinate_1 : Axi4Subordinate
 --!!      use entity OSVVM_AXI4.Axi4Memory ;
 --!!    end for ;
   end for ;
-end TbAxi4_MemoryReadWriteDemo1 ;
+end TbAxi4_DemoMemoryReadWrite1 ;

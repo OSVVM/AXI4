@@ -44,7 +44,7 @@
 ## Continuing with library set previously by the above
 ##
 ##
-RunTest  TbAxi4_MemoryReadWriteDemo1.vhd
+RunTest  TbAxi4_DemoMemoryReadWrite1.vhd
 
 include TestCases_NoBurst.pro
 include TestCases_Burst.pro

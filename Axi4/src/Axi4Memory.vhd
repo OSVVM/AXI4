@@ -120,7 +120,8 @@ port (
 
   -- Memory Data Structure, Access via MemoryName
   constant LOCAL_MEMORY_NAME : string := 
-    IfElse(MEMORY_NAME /= "", MEMORY_NAME, to_lower(Axi4Memory'PATH_NAME) & ":memory") ;
+    IfElse(MEMORY_NAME /= "", MEMORY_NAME, MODEL_INSTANCE_NAME & ":memory") ;
+--    IfElse(MEMORY_NAME /= "", MEMORY_NAME, to_lower(Axi4Memory'PATH_NAME) & ":memory") ;
     
   constant MODEL_NAME : string := "Axi4Memory" ;
 
@@ -131,13 +132,15 @@ architecture MemorySubordinate of Axi4Memory is
   constant AXI_BYTE_ADDR_WIDTH  : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 
   signal ModelID, BusFailedID, DataCheckID : AlertLogIDType ;
+  
+  signal MemoryID : MemoryIDType ; 
 
-  constant MemoryID : MemoryIDType := NewID(
-      Name       => LOCAL_MEMORY_NAME, 
-      AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
-      DataWidth  => 8,               -- Memory is byte oriented
-      Search     => NAME
-    ) ; 
+--  constant MemoryID : MemoryIDType := NewID(
+--      Name       => LOCAL_MEMORY_NAME, 
+--      AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
+--      DataWidth  => 8,               -- Memory is byte oriented
+--      Search     => NAME
+--    ) ; 
 
   signal WriteAddressFifo     : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
   signal WriteDataFifo        : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
@@ -190,6 +193,16 @@ begin
     ModelID      <= ID ;
     BusFailedID  <= NewID("No response", ID ) ;
     DataCheckID  <= NewID("Data Check", ID ) ;
+    
+    -- MEMORY_NAME
+    MemoryID <= NewID(
+      Name       => LOCAL_MEMORY_NAME, 
+      AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
+      DataWidth  => 8,               -- Memory is byte oriented
+      ParentID   => ID, 
+      Search     => NAME
+    ) ; 
+
 
     -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
     --   FIFOS only generate usage type errors 
@@ -667,6 +680,7 @@ begin
     WaitForClock(Clk, 2) ;  -- Initialize
 
     ReadAddressOperation : loop
+--!! ToDo Add Delay calculation here that is f(ReadAddressBurstCov) 
       GetAxi4Parameter(Params, READ_ADDRESS_READY_BEFORE_VALID, ReadAddressReadyBeforeValid) ;
       GetAxi4Parameter(Params, READ_ADDRESS_READY_DELAY_CYCLES, ReadAddressReadyDelayCycles) ;
   
@@ -837,6 +851,7 @@ begin
       end if ;
       (Local.Data, Local.Last, Local.Resp, Local.ID, Local.User) := pop(ReadDataFifo) ;
 
+--?6 Add delay that is a function of the access: Single Word, First Burst, Burst, Last Burst
       if NewTransfer then
         WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_DELAY_CYCLES)))) ; 
 --      elsif Burst then 

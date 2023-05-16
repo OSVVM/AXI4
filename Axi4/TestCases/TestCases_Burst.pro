@@ -50,8 +50,6 @@ RunTest  TbAxi4_MemoryBurst1.vhd
 RunTest  TbAxi4_MemoryBurstAsync1.vhd
 RunTest  TbAxi4_MemoryBurstByte1.vhd
 
-RunTest  TbAxi4_MemoryReadWriteDemo1.vhd
-
 RunTest  TbAxi4_MemoryBurstPattern1.vhd
 RunTest  TbAxi4_MemoryBurstPattern2.vhd
 RunTest  TbAxi4_MemoryBurstBytePattern1.vhd

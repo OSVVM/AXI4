@@ -43,7 +43,7 @@ library osvvm_TbAxi4Vti
 
 include ./testbenchVti
 
-RunTest  ./TestCases/TbAxi4_MemoryReadWriteDemo1.vhd
+RunTest  ./TestCases/TbAxi4_DemoMemoryReadWrite1.vhd
 
 # RunTest  ./TestCases/TbAxi4_MemoryBurst1.vhd
 # RunTest  ./TestCases/TbAxi4_MemoryBurstAsync1.vhd

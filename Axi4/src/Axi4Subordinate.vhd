@@ -325,15 +325,19 @@ begin
             WaitForToggle(WriteDataReceiveCount) ;
           end if ;
 
+          (LocalWD.Data, LocalWD.Strb, LocalWD.Last, LocalWD.User, LocalWD.ID) := pop(WriteDataFifo) ;
+
           if IsWriteAddress(TransRec.Operation) then
             WriteByteAddr := CalculateByteAddress(LocalAW.Addr, AXI_BYTE_ADDR_WIDTH) ;
           else 
-            -- Cannot save LocalAW.Addr from above since Data may arrive before Addr
-            -- Could hold the Data until Addr is available.
-            WriteByteAddr := TransRec.AddrWidth mod AXI_DATA_BYTE_WIDTH ;
+            -- Calculate byte address based on strobes
+            WriteByteAddr := 0 ; 
+            for i in LocalWD.Strb'reverse_range loop 
+              exit when LocalWD.Strb(i) = '1' ; 
+              WriteByteAddr := WriteByteAddr + 1 ; 
+            end loop ; 
           end if ; 
           
-          (LocalWD.Data, LocalWD.Strb, LocalWD.Last, LocalWD.User, LocalWD.ID) := pop(WriteDataFifo) ;
           GetAxi4Parameter(Params, WRITE_DATA_FILTER_UNDRIVEN, FilterUndrivenWriteData) ;
           GetAxi4Parameter(Params, WRITE_DATA_UNDRIVEN_VALUE,  UndrivenWriteDataValue) ;
           if FilterUndrivenWriteData then

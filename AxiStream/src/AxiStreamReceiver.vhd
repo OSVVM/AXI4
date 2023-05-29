@@ -117,7 +117,7 @@ end entity AxiStreamReceiver ;
 architecture behavioral of AxiStreamReceiver is
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID, BurstFifoID : AlertLogIDType ;
-  signal BurstCov : BurstCoverageIDType ;
+  signal BurstCov : DelayCoverageIDType ;
   
   signal UseCoverageDelays : Boolean := FALSE ;
 
@@ -233,6 +233,14 @@ begin
         when GET_ALERTLOG_ID =>
           TransRec.IntFromModel <= integer(ModelID) ;
           wait for 0 ns ;
+
+        when SET_DELAYCOV_ID =>
+          BurstCov          <= GetDelayCoverage(TransRec.IntToModel) ;
+          UseCoverageDelays <= TRUE ; 
+
+        when GET_DELAYCOV_ID =>
+          TransRec.IntFromModel <= BurstCov.ID ;
+          UseCoverageDelays <= TRUE ; 
 
         when SET_BURST_MODE =>
           BurstFifoMode       <= TransRec.IntToModel ;
@@ -530,7 +538,7 @@ begin
               LastOffsetCount <= WordReceiveCount ;
 
             when BURST_COV =>
-              BurstCov          <= GetBurstCoverage(TransRec.IntToModel) ;
+              BurstCov          <= GetDelayCoverage(TransRec.IntToModel) ;
               UseCoverageDelays <= TRUE ; 
 
             when others =>
@@ -629,7 +637,7 @@ begin
       -- Delay between consecutive signaling of Ready
       if UseCoverageDelays then 
         -- BurstCoverage Delays
-        (ReadyBeforeValid, ReadyDelayCycles)  := GetRandBurstDelay(BurstCov) ; 
+        (ReadyBeforeValid, ReadyDelayCycles)  := GetRandDelay(BurstCov) ; 
       else
         -- Deprecated static settings
         ReadyBeforeValid := to_integer(not ReceiveReadyBeforeValid) ; 

@@ -124,7 +124,7 @@ end entity AxiStreamTransmitter ;
 architecture SimpleTransmitter of AxiStreamTransmitter is
   signal ModelID, BusFailedID : AlertLogIDType ;
 --  signal ProtocolID, DataCheckID : AlertLogIDType ;
-  signal BurstCov : BurstCoverageIDType ;
+  signal BurstCov : DelayCoverageIDType ;
   
   signal UseCoverageDelays : Boolean := FALSE ;
 
@@ -209,6 +209,14 @@ begin
         when GET_ALERTLOG_ID =>
           TransRec.IntFromModel <= integer(ModelID) ;
           wait for 0 ns ;
+
+        when SET_DELAYCOV_ID =>
+          BurstCov          <= GetDelayCoverage(TransRec.IntToModel) ;
+          UseCoverageDelays <= TRUE ; 
+
+        when GET_DELAYCOV_ID =>
+          TransRec.IntFromModel <= BurstCov.ID ;
+          UseCoverageDelays <= TRUE ; 
 
         when SET_BURST_MODE =>
           BurstFifoMode       <= TransRec.IntToModel ;
@@ -309,7 +317,7 @@ begin
               LastOffsetCount <= TransmitRequestCount ;
 
             when BURST_COV =>
-              BurstCov          <= GetBurstCoverage(TransRec.IntToModel) ;
+              BurstCov          <= GetDelayCoverage(TransRec.IntToModel) ;
               UseCoverageDelays <= TRUE ; 
 
             when others =>
@@ -408,7 +416,7 @@ begin
       -- Delay between consecutive signaling of Valid
       if UseCoverageDelays then 
         -- BurstCoverage Delays
-        DelayCycles := GetRandBurstDelay(BurstCov) ; 
+        DelayCycles := GetRandDelay(BurstCov) ; 
         WaitForClock(Clk, DelayCycles) ;
       else
         -- Deprecated static settings

@@ -58,6 +58,14 @@ use work.Axi4InterfacePkg.all ;
   
 package Axi4ModelPkg is 
 
+  constant WRITE_ADDRESS_ID  : integer := 1 ; 
+  constant WRITE_DATA_ID     : integer := 2 ; 
+  constant WRITE_RESPONSE_ID : integer := 3 ; 
+  constant READ_ADDRESS_ID   : integer := 4 ; 
+  constant READ_DATA_ID      : integer := 5 ; 
+  
+  subtype AxiDelayCoverageIDArrayType is DelayCoverageIDArrayType(WRITE_ADDRESS_ID to READ_DATA_ID) ;
+
   ------------------------------------------------------------
   function CalculateByteAddress (
   -- Fetch the address and data the slave sees for a write 

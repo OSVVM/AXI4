@@ -48,3 +48,8 @@ RunTest  TbAxi4_DemoMemoryReadWrite1.vhd
 
 include TestCases_NoBurst.pro
 include TestCases_Burst.pro
+
+# Both NoBurst and Burst
+RunTest TbAxi4_ManagerRandomTiming1.vhd 
+RunTest TbAxi4_ManagerRandomTimingAsync1.vhd 
+

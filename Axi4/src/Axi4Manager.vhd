@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    05/2023   2023.05    Adding Randomization of Valid and Ready timing   
 --    12/2022   2022.12    Updated read check to use MetaMatch.   
 --    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
@@ -37,7 +38,7 @@
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2017 - 2022 by SynthWorks Design Inc.
+--  Copyright (c) 2017 - 2023 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -150,6 +151,9 @@ architecture AxiFull of Axi4Manager is
 
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
+  signal WriteAddressDelayCov, WriteDataDelayCov, WriteResponseDelayCov : DelayCoverageIDType ;
+  signal ReadAddressDelayCov,  ReadDataDelayCov : DelayCoverageIDType ;
+  signal UseCoverageDelays : boolean := FALSE ; 
 
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
@@ -261,9 +265,14 @@ begin
     LAR.Burst   := "01" ;  -- INCR
     LRD.Resp    := to_Axi4RespType(OKAY) ;
     
-    wait for 0 ns ; 
-    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo", ModelID, Search => PRIVATE_NAME) ;
-    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",  ModelID, Search => PRIVATE_NAME) ;
+    wait for 0 ns ; -- Allow ModelID to become valid
+    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo",         ModelID, Search => PRIVATE_NAME) ;
+    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",          ModelID, Search => PRIVATE_NAME) ;
+    WriteAddressDelayCov    <= NewID("WriteAddressDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    WriteDataDelayCov       <= NewID("WriteDataDelayCov",      ModelID, ReportMode => DISABLED) ; 
+    WriteResponseDelayCov   <= NewID("WriteResponseDelayCov",  ModelID, ReportMode => DISABLED) ; 
+    ReadAddressDelayCov     <= NewID("ReadAddressDelayCov",    ModelID, ReportMode => DISABLED) ; 
+    ReadDataDelayCov        <= NewID("ReadDataDelayCov",       ModelID, ReportMode => DISABLED) ; 
     
 --!! AWCache, ARCache Defaults
     loop
@@ -332,6 +341,28 @@ begin
         when GET_ALERTLOG_ID =>
           TransRec.IntFromModel <= integer(ModelID) ;
           wait for 0 ns ; 
+
+        when SET_DELAYCOV_ID =>
+          case TransRec.Options is
+            when WRITE_ADDRESS_ID  =>  WriteAddressDelayCov  <= GetDelayCoverage(TransRec.IntToModel) ;
+            when WRITE_DATA_ID     =>  WriteDataDelayCov     <= GetDelayCoverage(TransRec.IntToModel) ;
+            when WRITE_RESPONSE_ID =>  WriteResponseDelayCov <= GetDelayCoverage(TransRec.IntToModel) ;
+            when READ_ADDRESS_ID   =>  ReadAddressDelayCov   <= GetDelayCoverage(TransRec.IntToModel) ;
+            when READ_DATA_ID      =>  ReadDataDelayCov      <= GetDelayCoverage(TransRec.IntToModel) ;
+            when others =>  Alert(ModelID, "SetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
+          end case ; 
+          UseCoverageDelays <= TRUE ; 
+
+        when GET_DELAYCOV_ID =>
+          case TransRec.Options is
+            when WRITE_ADDRESS_ID  =>  TransRec.IntFromModel <= WriteAddressDelayCov.ID  ;
+            when WRITE_DATA_ID     =>  TransRec.IntFromModel <= WriteDataDelayCov.ID     ;
+            when WRITE_RESPONSE_ID =>  TransRec.IntFromModel <= WriteResponseDelayCov.ID ;
+            when READ_ADDRESS_ID   =>  TransRec.IntFromModel <= ReadAddressDelayCov.ID   ;
+            when READ_DATA_ID      =>  TransRec.IntFromModel <= ReadDataDelayCov.ID      ;
+            when others =>  Alert(ModelID, "GetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
+          end case ; 
+          UseCoverageDelays <= TRUE ; 
 
         when SET_BURST_MODE =>                      
           BurstFifoMode       <= TransRec.IntToModel ;
@@ -657,6 +688,7 @@ begin
     alias    AW    : AxiBus.WriteAddress'subtype is AxiBus.WriteAddress ;
     variable Local : AxiBus.WriteAddress'subtype ;
     variable WriteAddressReadyTimeOut : integer ;
+    variable DelayCycles : integer ; 
   begin
     -- AXI4 Lite Signaling
     AW.Valid  <= '0' ;
@@ -673,6 +705,10 @@ begin
     AW.Region <= (Local.Region'range => '0') ;
     AW.User   <= (Local.User'range   => '0') ;
     wait for 0 ns ; -- Allow WriteAddressFifo to initialize
+    wait for 0 ns ; -- Allow Cov models to initialize 
+    AddBins (WriteAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
+    AddBins (WriteAddressDelayCov.BurstDelayCov,   GenBin(2,5,1)) ;
+    AddBins (WriteAddressDelayCov.BeatDelayCov,    GenBin(0)) ;
 
     WriteAddressLoop : loop
       -- Find Transaction
@@ -681,7 +717,13 @@ begin
       end if ;
       (Local.Addr, Local.Len, Local.Prot, Local.ID, Local.Size, Local.Burst, Local.Lock, Local.Cache, Local.QOS, Local.Region, Local.User) := Pop(WriteAddressFifo) ;
 
-      WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_ADDRESS_VALID_DELAY_CYCLES)))) ; 
+      if UseCoverageDelays then 
+        -- BurstCoverage Delays
+        DelayCycles := GetRandDelay(WriteAddressDelayCov) ; 
+        WaitForClock(Clk, DelayCycles) ;
+      else
+        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_ADDRESS_VALID_DELAY_CYCLES)))) ; 
+      end if ; 
 
       -- Do Transaction
       AW.Addr   <= Local.Addr      after tpd_Clk_AWAddr   ;
@@ -750,6 +792,7 @@ begin
     variable WriteDataReadyTimeOut : integer ;
     variable Burst    : std_logic ; 
     variable NewTransfer : std_logic := '1' ; 
+    variable DelayCycles : integer ; 
   begin
     -- initialize
     WD.Valid <= '0' ;
@@ -761,6 +804,10 @@ begin
     -- AXI3
     WD.ID    <= (Local.ID'range   => '0') ;
     wait for 0 ns ; -- Allow WriteDataFifo to initialize
+    wait for 0 ns ; -- Allow Cov models to initialize 
+    AddBins (WriteDataDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
+    AddBins (WriteDataDelayCov.BurstDelayCov,   GenBin(2,5,1)) ;
+    AddBins (WriteDataDelayCov.BeatDelayCov,    GenBin(0)) ;
 
     WriteDataLoop : loop
       -- Find Transaction
@@ -769,10 +816,16 @@ begin
       end if ;
       (Burst, Local.Last, Local.Data, Local.Strb, Local.User, Local.ID) := Pop(WriteDataFifo) ;
             
-      if NewTransfer then
-        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_DATA_VALID_DELAY_CYCLES)))) ; 
-      elsif Burst then 
-        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_DATA_VALID_BURST_DELAY_CYCLES)))) ; 
+      if UseCoverageDelays then 
+        -- BurstCoverage Delays
+        DelayCycles := GetRandDelay(WriteDataDelayCov) ; 
+        WaitForClock(Clk, DelayCycles) ;
+      else
+        if NewTransfer then
+          WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_DATA_VALID_DELAY_CYCLES)))) ; 
+        elsif Burst then 
+          WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_DATA_VALID_BURST_DELAY_CYCLES)))) ; 
+        end if ; 
       end if ; 
       
       NewTransfer := Local.Last ; -- Last is '1' for burst end and single word transfers
@@ -828,14 +881,18 @@ begin
   --   Receive and Check Write Responses
   ------------------------------------------------------------
   WriteResponseHandler : process
-    variable WriteResponseReadyBeforeValid  : boolean ;
-    variable WriteResponseReadyDelayCycles  : integer ;
-    variable WriteResponseValidTimeOut : integer ;
-    variable WriteResponseTimeOut : boolean ; 
+    variable intReadyBeforeValid  : integer ;
+    variable ReadyBeforeValid  : boolean ;
+    variable ReadyDelayCycles  : integer ;
+    variable ValidTimeOut : integer ;
   begin
     -- initialize
     AxiBus.WriteResponse.Ready <= '0' ;
     wait for 0 ns ; -- Allow WriteResponseScoreboard to initialize
+    wait for 0 ns ; -- Allow Cov models to initialize 
+    AddBins (WriteResponseDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
+    AddCross(WriteResponseDelayCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
+    AddCross(WriteResponseDelayCov.BeatDelayCov,    GenBin(0), GenBin(0)) ;
 
     WriteResponseOperation : loop
       -- Find Expected Transaction
@@ -847,10 +904,17 @@ begin
 
       Log(ModelID, "Waiting for Write Response.", DEBUG) ;
 
-
-      GetAxi4Parameter(Params, WRITE_RESPONSE_READY_BEFORE_VALID, WriteResponseReadyBeforeValid) ;
-      GetAxi4Parameter(Params, WRITE_RESPONSE_READY_DELAY_CYCLES, WriteResponseReadyDelayCycles) ;
-      GetAxi4Parameter(Params, WRITE_RESPONSE_VALID_TIME_OUT,     WriteResponseValidTimeOut) ;
+      if UseCoverageDelays then 
+        -- BurstCoverage Delays
+        (intReadyBeforeValid, ReadyDelayCycles)  := GetRandDelay(ReadDataDelayCov) ; 
+        ReadyBeforeValid := intReadyBeforeValid = 0 ; 
+      else
+        -- Deprecated static settings
+        GetAxi4Parameter(Params, WRITE_RESPONSE_READY_BEFORE_VALID, ReadyBeforeValid) ;
+        GetAxi4Parameter(Params, WRITE_RESPONSE_READY_DELAY_CYCLES, ReadyDelayCycles) ;
+      end if ; 
+      
+      GetAxi4Parameter(Params, WRITE_RESPONSE_VALID_TIME_OUT,     ValidTimeOut) ;
 
       ---------------------
       DoAxiReadyHandshake (
@@ -858,12 +922,12 @@ begin
         Clk                     => Clk,
         Valid                   => AxiBus.WriteResponse.Valid,
         Ready                   => AxiBus.WriteResponse.Ready,
-        ReadyBeforeValid        => WriteResponseReadyBeforeValid,
-        ReadyDelayCycles        => WriteResponseReadyDelayCycles * tperiod_Clk,
+        ReadyBeforeValid        => ReadyBeforeValid,
+        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_BReady,
         AlertLogID              => BusFailedID,
         TimeOutMessage          => "Write Response # " & to_string(WriteResponseReceiveCount + 1),
-        TimeOutPeriod           => WriteResponseValidTimeOut * tperiod_Clk
+        TimeOutPeriod           => ValidTimeOut * tperiod_Clk
       ) ;
 
       -- Check Write Response
@@ -898,10 +962,9 @@ begin
   ------------------------------------------------------------
   ReadAddressHandler : process
     alias    AR : AxiBus.ReadAddress'subtype is AxiBus.ReadAddress ;
-
     variable Local : AxiBus.ReadAddress'subtype ;
-
     variable ReadAddressReadyTimeOut : integer ;
+    variable DelayCycles : integer ; 
   begin
     -- AXI4 Lite Signaling
     AR.Valid  <= '0' ;
@@ -918,6 +981,10 @@ begin
     AR.Region <= (Local.Region'range => '0') ;
     AR.User   <= (Local.User'range   => '0') ;
     wait for 0 ns ; -- Allow ReadAddressFifo to initialize
+    wait for 0 ns ; -- Allow Cov models to initialize 
+    AddBins (ReadAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
+    AddBins (ReadAddressDelayCov.BurstDelayCov,   GenBin(2,5,1)) ;
+    AddBins (ReadAddressDelayCov.BeatDelayCov,    GenBin(0)) ;
 
 
     AddressReadLoop : loop
@@ -927,7 +994,13 @@ begin
       end if ;
       (Local.Addr, Local.Len, Local.Prot, Local.ID, Local.Size, Local.Burst, Local.Lock, Local.Cache, Local.QOS, Local.Region, Local.User) := Pop(ReadAddressFifo) ;
 
-      WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_ADDRESS_VALID_DELAY_CYCLES)))) ; 
+      if UseCoverageDelays then 
+        -- BurstCoverage Delays
+        DelayCycles := GetRandDelay(ReadAddressDelayCov) ; 
+        WaitForClock(Clk, DelayCycles) ;
+      else
+        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_ADDRESS_VALID_DELAY_CYCLES)))) ; 
+      end if ; 
 
       -- Do Transaction
       AR.Addr   <= Local.Addr   after tpd_Clk_ARAddr   ;
@@ -991,11 +1064,17 @@ begin
   --    Receive Read Data Transactions
   ------------------------------------------------------------
   ReadDataHandler : process
-    variable ReadDataReadyBeforeValid : boolean ;
-    variable ReadDataReadyDelayCycles : integer ;
+    variable ReadyBeforeValid : boolean ;
+    variable intReadyBeforeValid : integer ;
+    variable ReadyDelayCycles : integer ;
     variable ReadDataValidTimeOut     : integer ;
   begin
     AxiBus.ReadData.Ready <= '0' ;
+    wait for 0 ns ; -- Allow Cov models to initialize 
+    wait for 0 ns ; -- Allow Cov models to initialize 
+    AddBins (ReadDataDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
+    AddCross(ReadDataDelayCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
+    AddCross(ReadDataDelayCov.BeatDelayCov,    GenBin(0), GenBin(0)) ;
     WaitForClock(Clk, 2) ;  -- Initialize
 
     ReadDataOperation : loop
@@ -1006,8 +1085,16 @@ begin
       end if ;
       ReadDataActive <= TRUE ;
 
-      GetAxi4Parameter(Params, READ_DATA_READY_BEFORE_VALID, ReadDataReadyBeforeValid) ;
-      GetAxi4Parameter(Params, READ_DATA_READY_DELAY_CYCLES, ReadDataReadyDelayCycles) ;
+      -- Delay between consecutive signaling of Ready
+      if UseCoverageDelays then 
+        -- BurstCoverage Delays
+        (intReadyBeforeValid, ReadyDelayCycles)  := GetRandDelay(ReadDataDelayCov) ; 
+        ReadyBeforeValid := intReadyBeforeValid = 0 ; 
+      else
+        -- Deprecated static settings
+        GetAxi4Parameter(Params, READ_DATA_READY_BEFORE_VALID, ReadyBeforeValid) ;
+        GetAxi4Parameter(Params, READ_DATA_READY_DELAY_CYCLES, ReadyDelayCycles) ;
+      end if ; 
       GetAxi4Parameter(Params, READ_DATA_VALID_TIME_OUT,     ReadDataValidTimeOut) ;
 
       ---------------------
@@ -1016,8 +1103,8 @@ begin
         Clk                     => Clk,
         Valid                   => AxiBus.ReadData.Valid,
         Ready                   => AxiBus.ReadData.Ready,
-        ReadyBeforeValid        => ReadDataReadyBeforeValid,
-        ReadyDelayCycles        => ReadDataReadyDelayCycles * tperiod_Clk,
+        ReadyBeforeValid        => ReadyBeforeValid,
+        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
         tpd_Clk_Ready           => tpd_Clk_RReady,
         AlertLogID              => BusFailedID,
         TimeOutMessage          => "Read Data # " & to_string(ReadDataReceiveCount + 1),

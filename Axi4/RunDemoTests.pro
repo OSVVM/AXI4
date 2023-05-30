@@ -46,10 +46,12 @@ include ./testbench
 # Make TestCases the frame of reference
 set ::osvvm::CurrentWorkingDirectory [file join $::osvvm::CurrentWorkingDirectory TestCases]
 
+RunTest TbAxi4_ManagerRandomTiming1.vhd 
+RunTest TbAxi4_ManagerRandomTimingAsync1.vhd 
 # RunTest  TbAxi4_MemoryReadWriteDebug1.vhd
 
 # RunTest  TbAxi4_DemoMemoryReadWrite1.vhd
-RunTest  TbAxi4_DemoErrorMemoryReadWrite1.vhd
+# RunTest  TbAxi4_DemoErrorMemoryReadWrite1.vhd
 # RunTest  TbAxi4_AxiXResp3_slv.vhd
 
 # RunTest  TbAxi4_TransactionApiMemoryBurst.vhd

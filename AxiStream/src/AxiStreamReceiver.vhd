@@ -202,7 +202,7 @@ begin
   begin
     wait for 0 ns ;  -- Allow ModelID to initialize
     TransRec.BurstFifo <= NewID("RxBurstFifo", ModelID, Search => PRIVATE_NAME) ;
-    BurstCov           <= NewID("", ModelID) ;
+    BurstCov           <= NewID("DelayCov",    ModelID, ReportMode => DISABLED, Search => NAME_AND_PARENT) ;
     wait for 0 ns ;  -- Allow TransRec.BurstFifo to update.
     BurstFifoID        <= GetAlertLogID(TransRec.BurstFifo) ;
 
@@ -598,7 +598,7 @@ begin
 
   ------------------------------------------------------------
   --  ReceiveHandler
-  --    Execute Write Address Transactions
+  --    Receive Stream Data Transactions
   ------------------------------------------------------------
   ReceiveHandler : process
     variable Data           : std_logic_vector(TData'length-1 downto 0) ;
@@ -613,7 +613,6 @@ begin
     variable Keep : std_logic_vector(TKeep'length-1 downto 0) ;
 
     variable ReadyBeforeValid, ReadyDelayCycles : integer ; 
-    variable BurstLength : integer := 0 ; 
   begin
     -- Initialize
     TReady  <= '0' ;

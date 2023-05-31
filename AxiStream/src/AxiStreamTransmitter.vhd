@@ -400,13 +400,14 @@ begin
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
     -- BurstLength - once per BurstLength, use BurstDelay, otherwise use BeatDelay
-    AddBins (BurstCov.BurstLengthCov,  GenBin(8,132,1)) ;
+    AddBins (BurstCov.BurstLengthCov,  80, GenBin(3,11,1)) ;     -- 80% Small Burst Length
+    AddBins (BurstCov.BurstLengthCov,  20, GenBin(109,131,1)) ;  -- 20% Large Burst Length
     -- BurstDelay - happens at BurstLength boundaries
     AddBins (BurstCov.BurstDelayCov,   80, GenBin(2,8,1)) ;   -- 65% Small delay
     AddBins (BurstCov.BurstDelayCov,   20, GenBin(108,156,1)) ; -- 10% Large delay
     -- BeatDelay - happens between each transfer it not at a BurstLength boundary
-    AddBins (BurstCov.BeatDelayCov,    85, GenBin(0)) ;       -- 75% Ready Before Valid, no delay
-    AddBins (BurstCov.BeatDelayCov,    10, GenBin(1)) ;       -- 20% Ready Before Valid, 1 cycle delay
+    AddBins (BurstCov.BeatDelayCov,    85, GenBin(0)) ;       -- 85% Ready Before Valid, no delay
+    AddBins (BurstCov.BeatDelayCov,    10, GenBin(1)) ;       -- 10% Ready Before Valid, 1 cycle delay
     AddBins (BurstCov.BeatDelayCov,     5, GenBin(2)) ;       --  5% Ready Before Valid, 1 cycle delay
 
     TransmitLoop : loop

@@ -399,10 +399,15 @@ begin
     TLast   <= 'X' ;
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
-    -- Default settings for Burst Coverage
-    AddBins (BurstCov.BurstLengthCov,  GenBin(2,10,1)) ;
-    AddBins (BurstCov.BurstDelayCov,   GenBin(2,5,1)) ;
-    AddBins (BurstCov.BeatDelayCov,    GenBin(0,1,1)) ;
+    -- BurstLength - once per BurstLength, use BurstDelay, otherwise use BeatDelay
+    AddBins (BurstCov.BurstLengthCov,  GenBin(8,132,1)) ;
+    -- BurstDelay - happens at BurstLength boundaries
+    AddBins (BurstCov.BurstDelayCov,   80, GenBin(2,8,1)) ;   -- 65% Small delay
+    AddBins (BurstCov.BurstDelayCov,   20, GenBin(108,156,1)) ; -- 10% Large delay
+    -- BeatDelay - happens between each transfer it not at a BurstLength boundary
+    AddBins (BurstCov.BeatDelayCov,    85, GenBin(0)) ;       -- 75% Ready Before Valid, no delay
+    AddBins (BurstCov.BeatDelayCov,    10, GenBin(1)) ;       -- 20% Ready Before Valid, 1 cycle delay
+    AddBins (BurstCov.BeatDelayCov,     5, GenBin(2)) ;       --  5% Ready Before Valid, 1 cycle delay
 
     TransmitLoop : loop
       -- Find Transaction

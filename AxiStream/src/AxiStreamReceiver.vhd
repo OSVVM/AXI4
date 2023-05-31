@@ -618,10 +618,18 @@ begin
     TReady  <= '0' ;
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
-    -- Default settings for Burst Coverage
-    AddBins (BurstCov.BurstLengthCov,  GenBin(2,10,1)) ;
-    AddCross(BurstCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
-    AddCross(BurstCov.BeatDelayCov,    GenBin(0,1,1), GenBin(0,1,1)) ;
+    -- BurstLength - once per BurstLength, use BurstDelay, otherwise use BeatDelay
+    AddBins (BurstCov.BurstLengthCov,  GenBin(8,132,1)) ;
+    -- BurstDelay - happens at BurstLength boundaries
+    AddCross(BurstCov.BurstDelayCov,   65, GenBin(0), GenBin(2,8,1)) ;   -- 65% Ready Before Valid, small delay
+    AddCross(BurstCov.BurstDelayCov,   10, GenBin(0), GenBin(108,156,1)) ; -- 10% Ready Before Valid, large delay
+    AddCross(BurstCov.BurstDelayCov,   15, GenBin(1), GenBin(2,8,1)) ;   -- 15% Ready After Valid, small delay
+    AddCross(BurstCov.BurstDelayCov,   10, GenBin(1), GenBin(108,156,1)) ; -- 10% Ready After Valid, large delay
+    -- BeatDelay - happens between each transfer it not at a BurstLength boundary
+    AddCross(BurstCov.BeatDelayCov,    85, GenBin(0), GenBin(0)) ;       -- 75% Ready Before Valid, no delay
+    AddCross(BurstCov.BeatDelayCov,     5, GenBin(0), GenBin(1)) ;       -- 10% Ready Before Valid, 1 cycle delay
+    AddCross(BurstCov.BeatDelayCov,     5, GenBin(1), GenBin(0)) ;       -- 10% Ready After Valid, no delay
+    AddCross(BurstCov.BeatDelayCov,     5, GenBin(1), GenBin(1)) ;       --  5% Ready After Valid, 1 cycle delay
 
     ReceiveLoop : loop
 

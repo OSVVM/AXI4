@@ -234,6 +234,12 @@ begin
           TransRec.IntFromModel <= integer(ModelID) ;
           wait for 0 ns ;
 
+        when SET_USE_DELAYCOV =>
+          UseCoverageDelays <= TransRec.BoolToModel ; 
+
+        when GET_USE_DELAYCOV =>
+          TransRec.BoolFromModel <= UseCoverageDelays ;
+
         when SET_DELAYCOV_ID =>
           BurstCov          <= GetDelayCoverage(TransRec.IntToModel) ;
           UseCoverageDelays <= TRUE ; 

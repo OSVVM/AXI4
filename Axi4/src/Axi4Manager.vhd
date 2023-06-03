@@ -275,7 +275,7 @@ begin
     ReadDataDelayCov        <= NewID("ReadDataDelayCov",       ModelID, ReportMode => DISABLED) ; 
     
 --!! AWCache, ARCache Defaults
-    loop
+    DispatchLoop : loop
       WaitForTransaction(
          Clk      => Clk,
          Rdy      => TransRec.Rdy,
@@ -341,6 +341,12 @@ begin
         when GET_ALERTLOG_ID =>
           TransRec.IntFromModel <= integer(ModelID) ;
           wait for 0 ns ; 
+
+        when SET_USE_DELAYCOV =>        
+          UseCoverageDelays      <= TransRec.BoolToModel ; 
+
+        when GET_USE_DELAYCOV =>
+          TransRec.BoolFromModel <= UseCoverageDelays ;
 
         when SET_DELAYCOV_ID =>
           case TransRec.Options is
@@ -677,7 +683,7 @@ begin
         when others =>
           Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
       end case ;
-    end loop ;
+    end loop DispatchLoop ;
   end process TransactionDispatcher ;
 
   ------------------------------------------------------------

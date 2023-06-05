@@ -542,8 +542,9 @@ begin
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
     AddBins (WriteAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
-    AddBins (WriteAddressDelayCov.BurstDelayCov,   GenBin(2,5,1)) ;
-    AddBins (WriteAddressDelayCov.BeatDelayCov,    GenBin(0)) ;
+    -- Delays for Ready
+    AddCross(WriteAddressDelayCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
+    AddCross(WriteAddressDelayCov.BeatDelayCov,    GenBin(0),     GenBin(0)) ;  -- No beat delay
     WaitForClock(Clk, 2) ;  -- Initialize
 
     WriteAddressOperation : loop
@@ -603,8 +604,9 @@ begin
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
     AddBins (WriteDataDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
-    AddBins (WriteDataDelayCov.BurstDelayCov,   GenBin(2,5,1)) ;
-    AddBins (WriteDataDelayCov.BeatDelayCov,    GenBin(0)) ;
+    -- Delays for Ready
+    AddCross(WriteDataDelayCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
+    AddCross(WriteDataDelayCov.BeatDelayCov,    GenBin(0),     GenBin(0)) ;  -- No beat delay
     WaitForClock(Clk, 2) ;  -- Initialize
 
     WriteDataOperation : loop
@@ -750,8 +752,9 @@ begin
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
     AddBins (ReadAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
-    AddBins (ReadAddressDelayCov.BurstDelayCov,   GenBin(2,5,1)) ;
-    AddBins (ReadAddressDelayCov.BeatDelayCov,    GenBin(0)) ;
+    -- Delays for Ready
+    AddCross(ReadAddressDelayCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
+    AddCross(ReadAddressDelayCov.BeatDelayCov,    GenBin(0),     GenBin(0)) ;  -- No beat delay
     WaitForClock(Clk, 2) ;  -- Initialize
 
     ReadAddressOperation : loop

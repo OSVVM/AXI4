@@ -1080,7 +1080,7 @@ begin
     wait for 0 ns ; -- Allow Cov models to initialize 
     AddBins (ReadDataDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     AddCross(ReadDataDelayCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
-    AddCross(ReadDataDelayCov.BeatDelayCov,    GenBin(0), GenBin(0)) ;
+    AddCross(ReadDataDelayCov.BeatDelayCov,    GenBin(0),     GenBin(0)) ;
     WaitForClock(Clk, 2) ;  -- Initialize
 
     ReadDataOperation : loop

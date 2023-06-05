@@ -103,7 +103,7 @@ begin
     WaitForClock(ManagerRec, 2) ;
 
     -- Use Coverage based delays
-    GetDelayCoverageID(ManagerRec, DelayCov) ; 
+    SetUseDelayCoverage(ManagerRec) ; 
 
 
 -- Write and ReadCheck
@@ -130,8 +130,11 @@ begin
     BlankLine ; 
 
     -- Make burst length on address smaller s.t. burst address and data collide more.
+    GetDelayCoverageID(ManagerRec, DelayCov) ; 
     DeallocateBins(DelayCov(WRITE_ADDRESS_ID).BurstLengthCov) ;  -- Remove old coverage model
     AddBins(DelayCov(WRITE_ADDRESS_ID).BurstLengthCov, GenBin(2,4,1)) ; 
+    DeallocateBins(DelayCov(READ_ADDRESS_ID).BurstLengthCov) ;  -- Remove old coverage model
+    AddBins(DelayCov(READ_ADDRESS_ID).BurstLengthCov, GenBin(2,4,1)) ; 
 
     for i in 1 to 32 loop 
       WriteBurstIncrement    (ManagerRec, X"0000_1000" + 256*I, X"0000_1000" + 256*I, 6) ;

@@ -52,4 +52,11 @@ include TestCases_Burst.pro
 # Both NoBurst and Burst
 RunTest TbAxi4_ManagerRandomTiming1.vhd 
 RunTest TbAxi4_ManagerRandomTimingAsync1.vhd 
+RunTest TbAxi4_MemoryRandomTiming1.vhd 
+RunTest TbAxi4_MemoryRandomTimingAsync1.vhd 
+RunTest TbAxi4_ManagerMemoryRandomTiming1.vhd 
+RunTest TbAxi4_SubordinateRandomTiming1.vhd
+RunTest TbAxi4_ManagerSubordinateRandomTiming1.vhd
+RunTest TbAxi4_ManagerSubordinateRandomTimingAsync1.vhd
+RunTest TbAxi4_NoRandomTiming1.vhd 
 

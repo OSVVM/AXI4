@@ -111,19 +111,19 @@ begin
     Print("-----------------------------------------------------------------") ;
     log("Write and ReadCheck. Addr = 0000_0000 + 16*i.  32 words") ;
     BlankLine ; 
-    for I in 1 to 32 loop
+    for I in 1 to 128 loop
       WriteAsync( ManagerRec, X"0000_0000" + 16*I, X"0000_0000" + I ) ;
     end loop ;
     
     -- Let some number of Write Cycles complete before starting Read.   
     -- Reads will fail if this is too small
-    WaitForClock(ManagerRec, 12) ;
+    WaitForClock(ManagerRec, 32) ;
 
-    for I in 1 to 32 loop
+    for I in 1 to 128 loop
       ReadAddressAsync ( ManagerRec, X"0000_0000" + 16*I) ;
     end loop ;
     
-    for I in 1 to 32 loop
+    for I in 1 to 128 loop
       ReadCheckData ( ManagerRec, X"0000_0000" + I ) ;
     end loop ;
     
@@ -136,7 +136,7 @@ begin
     log("Burst Increment.  Addr = 0000_1000, 6 Word bursts -- word aligned") ;
     BlankLine ; 
 
-    for i in 1 to 32 loop 
+    for i in 1 to 128 loop 
       WriteBurstIncrementAsync (ManagerRec, X"0000_1000" + 256*I, X"0000_1000" + 256*I, 6) ;
     end loop ;
     
@@ -153,7 +153,7 @@ begin
     -- Reads will fail if this is too small
     WaitForClock(ManagerRec, 32) ;
 
-    for I in 1 to 32 loop
+    for I in 1 to 128 loop
       ReadCheckBurstIncrement  (ManagerRec, X"0000_1000" + 256*I, X"0000_1000" + 256*I, 6) ;
     end loop ;
 

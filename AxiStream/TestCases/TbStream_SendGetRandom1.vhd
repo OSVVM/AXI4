@@ -91,7 +91,8 @@ begin
 
     wait until nReset = '1' ;  
     WaitForClock(StreamTxRec, 2) ; 
-    GetAxiStreamOptions(StreamTxRec, BURST_COV, BurstCovID) ; 
+--    GetAxiStreamOptions(StreamTxRec, BURST_COV, BurstCovID) ; 
+    GetDelayCoverageID(StreamTxRec, BurstCovID) ;
     BurstLengthCovID := BurstCovID.BurstLengthCov ; 
     BurstDelayCovID  := BurstCovID.BurstDelayCov ; 
     BeatDelayCovID   := BurstCovID.BeatDelayCov ; 
@@ -167,7 +168,8 @@ begin
     variable BaseWord : std_logic_vector(31 downto 0) := X"0000_0000" ;
   begin
     WaitForClock(StreamRxRec, 1) ; 
-    GetAxiStreamOptions(StreamRxRec, BURST_COV, BurstCovID) ; 
+--    GetAxiStreamOptions(StreamRxRec, BURST_COV, BurstCovID) ; 
+    GetDelayCoverageID(StreamTxRec, BurstCovID) ;
     BurstLengthCovID := BurstCovID.BurstLengthCov ; 
     BurstDelayCovID  := BurstCovID.BurstDelayCov ; 
     BeatDelayCovID   := BurstCovID.BeatDelayCov ; 

@@ -169,7 +169,7 @@ begin
   begin
     WaitForClock(StreamRxRec, 1) ; 
 --    GetAxiStreamOptions(StreamRxRec, BURST_COV, BurstCovID) ; 
-    GetDelayCoverageID(StreamTxRec, BurstCovID) ;
+    GetDelayCoverageID(StreamRxRec, BurstCovID) ;
     BurstLengthCovID := BurstCovID.BurstLengthCov ; 
     BurstDelayCovID  := BurstCovID.BurstDelayCov ; 
     BeatDelayCovID   := BurstCovID.BeatDelayCov ; 

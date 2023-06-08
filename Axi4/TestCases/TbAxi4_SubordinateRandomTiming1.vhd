@@ -103,7 +103,7 @@ begin
     WaitForClock(ManagerRec, 2) ;
 
     -- Use Coverage based delays
---    SetUseDelayCoverage(ManagerRec) ; 
+--    SetUseRandomDelays(ManagerRec) ; 
 
 
 -- Write and ReadCheck
@@ -163,7 +163,7 @@ begin
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
     variable DelayCov       : AxiDelayCoverageIdArrayType ; 
   begin
-    SetUseDelayCoverage(SubordinateRec) ; 
+    SetUseRandomDelays(SubordinateRec) ; 
     GetDelayCoverageID(SubordinateRec, DelayCov) ; 
     DeallocateBins(DelayCov(WRITE_ADDRESS_ID).BurstLengthCov) ;  -- Remove old coverage model
     AddBins(DelayCov(WRITE_ADDRESS_ID).BurstLengthCov, GenBin(2,4,1)) ; 

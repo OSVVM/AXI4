@@ -103,7 +103,7 @@ begin
     WaitForClock(ManagerRec, 2) ;
 
     -- Use Coverage based delays
-    SetUseDelayCoverage(ManagerRec) ; 
+    SetUseRandomDelays(ManagerRec) ; 
 
 
 -- Write and ReadCheck

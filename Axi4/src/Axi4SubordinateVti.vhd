@@ -299,10 +299,10 @@ begin
         when GET_ALERTLOG_ID =>
           TransRec.IntFromModel <= integer(ModelID) ;
 
-        when SET_USE_DELAYCOV =>        
+        when SET_USE_RANDOM_DELAYS =>        
           UseCoverageDelays      <= TransRec.BoolToModel ; 
 
-        when GET_USE_DELAYCOV =>
+        when GET_USE_RANDOM_DELAYS =>
           TransRec.BoolFromModel <= UseCoverageDelays ;
 
         when SET_DELAYCOV_ID =>

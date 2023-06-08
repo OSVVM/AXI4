@@ -96,7 +96,8 @@ begin
 
     wait until nReset = '1' ;
     WaitForClock(StreamTxRec, 2) ;
-    SetUseDelayCoverage(StreamTxRec) ;
+    -- Use Delay Coverage Defined in the VC
+    SetUseRandomDelays(StreamTxRec) ;
 
     -- Send
     log("Transmit 256 words") ;
@@ -216,7 +217,7 @@ begin
     variable BaseWord, BurstWord : std_logic_vector(31 downto 0) := X"0000_0000" ;
   begin
     WaitForClock(StreamRxRec, 1) ;
-    SetUseDelayCoverage(StreamRxRec) ;
+    SetUseRandomDelays(StreamRxRec) ;
     
 -- An experiment with seed to change the large random delays at the start
 --    GetDelayCoverageID(StreamRxRec, DelayCoverageID) ;

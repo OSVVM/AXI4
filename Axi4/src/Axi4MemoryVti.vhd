@@ -293,10 +293,10 @@ begin
           TransRec.IntFromModel <= integer(ModelID) ;
           wait for 0 ns ;
 
-        when SET_USE_DELAYCOV =>        
+        when SET_USE_RANDOM_DELAYS =>        
           UseCoverageDelays      <= TransRec.BoolToModel ; 
 
-        when GET_USE_DELAYCOV =>
+        when GET_USE_RANDOM_DELAYS =>
           TransRec.BoolFromModel <= UseCoverageDelays ;
 
         when SET_DELAYCOV_ID =>

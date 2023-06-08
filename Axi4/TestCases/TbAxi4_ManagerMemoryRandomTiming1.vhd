@@ -103,7 +103,7 @@ begin
     WaitForClock(ManagerRec, 2) ;
 
     -- Use Coverage based delays
-    SetUseDelayCoverage(ManagerRec) ; 
+    SetUseRandomDelays(ManagerRec) ; 
 
 
 -- Write and ReadCheck
@@ -162,7 +162,7 @@ begin
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
     variable DelayCov       : AxiDelayCoverageIdArrayType ; 
   begin
-    SetUseDelayCoverage(SubordinateRec) ; 
+    SetUseRandomDelays(SubordinateRec) ; 
     WaitForClock(SubordinateRec, 2) ;
 
     WaitForBarrier(SyncPoint) ; 

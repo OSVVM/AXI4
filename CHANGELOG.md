@@ -2,6 +2,8 @@
 
 | Revision  |  Release Summary | 
 ------------|----------- 
+| 2023.05   |  Beta implementation of randomizing Ready and Valid in Axi4 Full VC and AxiStream VC.
+| 2023.04   |  Alpha implementation of randomizing TReady and TValid delays in AxiStreamTransmitter and AxiStreamReceiver
 | 2022.12   |  Updated read check to use MetaMatch in Axi4Manager, Axi4ManagerVti, and Axi4LiteManager
 | 2022.11   |  Added AxiStreamOptionsArrayPkg and Axi4OptionsArrayPkg
 | 2022.10   |  Changed PRIVATE to PRIVATE_NAME
@@ -24,6 +26,15 @@
 | 2020.07   |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
 | 2020.02   |  Initial version of AddressBusTransactionPkg.
 | 2018.04   |  Initial public release
+
+## 2023.05 May 2023
+- Beta implementation of randomizing Ready and Valid in:
+   - AxiStreamTransmitter[Vti], AxiStreamReceiver[Vti], 
+   - Axi4Manager[Vti], Axi4Memory[Vti], Axi4Subordinate[Vti]
+   - Note:  Beta implementation updates API and use models 
+
+## 2023.04 April 2023
+- Added Alpha implementation of randomizing TValid and TReady delays in AxiStreamTransmitter and AxiStreamReceiver
 
 ## 2022.12 December 2022
 - Updated read check to use MetaMatch in Axi4Manager, Axi4ManagerVti, and Axi4LiteManager

@@ -407,9 +407,10 @@ begin
     AddBins (BurstCov.BurstDelayCov,   80, GenBin(2,8,1)) ;   -- 80% Small delay
     AddBins (BurstCov.BurstDelayCov,   20, GenBin(108,156,1)) ; -- 20% Large delay
     -- BeatDelay - happens between each transfer it not at a BurstLength boundary
-    AddBins (BurstCov.BeatDelayCov,    85, GenBin(0)) ;       -- 85% Ready Before Valid, no delay
-    AddBins (BurstCov.BeatDelayCov,    10, GenBin(1)) ;       -- 10% Ready Before Valid, 1 cycle delay
-    AddBins (BurstCov.BeatDelayCov,     5, GenBin(2)) ;       --  5% Ready Before Valid, 1 cycle delay
+    -- These are all small
+    AddBins (BurstCov.BeatDelayCov,    85, GenBin(0)) ;       -- 85%  0 Delay
+    AddBins (BurstCov.BeatDelayCov,    10, GenBin(1)) ;       -- 10%  1 Delay
+    AddBins (BurstCov.BeatDelayCov,     5, GenBin(2)) ;       --  5%  2 Delay
 
     TransmitLoop : loop
       -- Find Transaction

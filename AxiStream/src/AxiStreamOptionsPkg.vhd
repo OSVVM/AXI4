@@ -74,7 +74,7 @@ package AxiStreamOptionsPkg is
     DEFAULT_DEST,                         -- std_logic_vector
     DEFAULT_USER,                         -- std_logic_vector
     DEFAULT_LAST,                         -- integer
-    BURST_COV,                            -- BurstCoverageIDType
+    BURST_COV,                            -- DelayCoverageIDType
     THE_END
   ) ;
 
@@ -95,14 +95,6 @@ package AxiStreamOptionsPkg is
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
     constant OptVal      : In    integer
-  ) ;
-
-  ------------------------------------------------------------
-  procedure SetAxiStreamOptions (
-  ------------------------------------------------------------
-    signal   TransRec    : InOut StreamRecType ;
-    constant Option      : In    AxiStreamOptionsType ;
-    constant OptVal      : In    BurstCoverageIDType
   ) ;
 
   ------------------------------------------------------------
@@ -134,14 +126,6 @@ package AxiStreamOptionsPkg is
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
-    variable OptVal      : Out   BurstCoverageIDType
-  ) ;
-
-  ------------------------------------------------------------
-  procedure GetAxiStreamOptions (
-  ------------------------------------------------------------
-    signal   TransRec    : InOut StreamRecType ;
-    constant Option      : In    AxiStreamOptionsType ;
     variable OptVal      : Out   boolean
   ) ;
 
@@ -152,6 +136,31 @@ package AxiStreamOptionsPkg is
     constant Option      : In    AxiStreamOptionsType ;
     variable OptVal      : Out   std_logic_vector
   ) ;
+
+
+  ------------------------------------------------------------
+  --
+  -- Deprecated Items - part of an early implementation
+  --
+  
+  ------------------------------------------------------------
+  procedure SetAxiStreamOptions (
+  -- Deprecated
+  ------------------------------------------------------------
+    signal   TransRec    : InOut StreamRecType ;
+    constant Option      : In    AxiStreamOptionsType ;
+    constant OptVal      : In    DelayCoverageIDType
+  ) ;
+
+  ------------------------------------------------------------
+  procedure GetAxiStreamOptions (
+  -- Deprecated
+  ------------------------------------------------------------
+    signal   TransRec    : InOut StreamRecType ;
+    constant Option      : In    AxiStreamOptionsType ;
+    variable OptVal      : Out   DelayCoverageIDType
+  ) ;
+
 
 
 end package AxiStreamOptionsPkg ;
@@ -176,17 +185,6 @@ package body AxiStreamOptionsPkg is
   ) is
   begin
     SetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), OptVal) ;
-  end procedure SetAxiStreamOptions ;
-
-  ------------------------------------------------------------
-  procedure SetAxiStreamOptions (
-  ------------------------------------------------------------
-    signal   TransRec    : InOut StreamRecType ;
-    constant Option      : In    AxiStreamOptionsType ;
-    constant OptVal      : In    BurstCoverageIDType
-  ) is
-  begin
-    SetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), OptVal.ID) ;
   end procedure SetAxiStreamOptions ;
 
   ------------------------------------------------------------
@@ -228,20 +226,6 @@ package body AxiStreamOptionsPkg is
   ------------------------------------------------------------
     signal   TransRec    : InOut StreamRecType ;
     constant Option      : In    AxiStreamOptionsType ;
-    variable OptVal      : Out   BurstCoverageIDType
-  ) is
-    variable IntVal : integer ; 
-  begin
-    GetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), IntVal) ;
-    OptVal := GetBurstCoverage(IntVal) ;  
-  end procedure GetAxiStreamOptions ;
-
-
-  ------------------------------------------------------------
-  procedure GetAxiStreamOptions (
-  ------------------------------------------------------------
-    signal   TransRec    : InOut StreamRecType ;
-    constant Option      : In    AxiStreamOptionsType ;
     variable OptVal      : Out   boolean
   ) is
   begin
@@ -259,5 +243,42 @@ package body AxiStreamOptionsPkg is
     GetModelOptions(TransRec, AxiStreamOptionsType'POS(Option)) ;
     OptVal := FromTransaction(TransRec.ParamFromModel, OptVal'length) ;
   end procedure GetAxiStreamOptions ;
+  
+  
+  ------------------------------------------------------------
+  --
+  -- Deprecated Items - part of an early implementation
+  --
+  
+  ------------------------------------------------------------
+  procedure SetAxiStreamOptions (
+  -- Deprecated
+  ------------------------------------------------------------
+    signal   TransRec    : InOut StreamRecType ;
+    constant Option      : In    AxiStreamOptionsType ;
+    constant OptVal      : In    DelayCoverageIDType
+  ) is
+  begin
+    SetDelayCoverageID(TransRec, OptVal) ; 
+--    SetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), OptVal.ID) ;
+  end procedure SetAxiStreamOptions ;
+
+  ------------------------------------------------------------
+  procedure GetAxiStreamOptions (
+  -- Deprecated
+  ------------------------------------------------------------
+    signal   TransRec    : InOut StreamRecType ;
+    constant Option      : In    AxiStreamOptionsType ;
+    variable OptVal      : Out   DelayCoverageIDType
+  ) is
+    variable IntVal : integer ; 
+  begin
+    GetDelayCoverageID(TransRec, OptVal) ; 
+--    GetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), IntVal) ;
+--    OptVal := GetBurstCoverage(IntVal) ;  
+  end procedure GetAxiStreamOptions ;
+
+
+
 
 end package body AxiStreamOptionsPkg ;

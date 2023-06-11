@@ -20,6 +20,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    05/2023   2023.05    Updated deprecated BURST_COV to call SetDelayCoverageID/GetDelayCoverageID 
 --    04/2023   2023.04    Updated to support delay randomization. 
 --    02/2022   2022.02    Added RECEIVE_READY_WAIT_FOR_GET to so don't send TReady until have a Get transaction
 --    03/2021   2021.03    Updated for detecting multiple drivers
@@ -74,7 +75,7 @@ package AxiStreamOptionsPkg is
     DEFAULT_DEST,                         -- std_logic_vector
     DEFAULT_USER,                         -- std_logic_vector
     DEFAULT_LAST,                         -- integer
-    BURST_COV,                            -- DelayCoverageIDType
+    BURST_COV,                            -- Deprecated, supported for backward compatibility - only released in 2023.04
     THE_END
   ) ;
 

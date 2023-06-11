@@ -543,10 +543,6 @@ begin
               ParamLast       <= TransRec.IntToModel ;
               LastOffsetCount <= WordReceiveCount ;
 
-            when BURST_COV =>
-              BurstCov          <= GetDelayCoverage(TransRec.IntToModel) ;
-              UseCoverageDelays <= TRUE ; 
-
             when others =>
               Alert(ModelID, "SetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
               wait for 0 ns ;
@@ -577,10 +573,6 @@ begin
 
             when DEFAULT_LAST =>
               TransRec.IntFromModel   <= ParamLast ;
-
-            when BURST_COV =>
-              TransRec.IntFromModel <= BurstCov.ID ;
-              UseCoverageDelays <= TRUE ; 
 
             when others =>
               Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;

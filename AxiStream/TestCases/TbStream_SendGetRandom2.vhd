@@ -49,10 +49,10 @@ architecture SendGetRandom2 of TestCtrl is
 
   signal   SequenceNumber : integer := 0 ; 
   signal   TestDone : integer_barrier := 1 ;
-  signal   TbID : AlertLogIDType := NewID("Testbench") ;
+  constant TbID : AlertLogIDType := NewID("Testbench") ;
 
   use osvvm.ScoreboardPkg_slv.all ; 
-  signal   SB : ScoreboardIDType := NewID("SB1", TbID) ; 
+  constant SB : ScoreboardIDType := NewID("SB1", TbID) ; 
 
 begin
 

@@ -676,12 +676,17 @@ begin
             TransRec.IntFromModel <= Axi4OptionVal ;
           end if ;
 
-        when MULTIPLE_DRIVER_DETECT =>
-          Alert(ModelID, "Multiple Drivers on Transaction Record." & 
-                         "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
+--!!        when MULTIPLE_DRIVER_DETECT =>
+--!!          Alert(ModelID, "Multiple Drivers on Transaction Record." & 
+--!!                         "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
+--!! 
+--!!        when others =>
+--!!          Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
 
+        -- The End -- Done
         when others =>
-          Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
+          Alert(ModelID, ClassifyUnimplementedOperation(TransRec.Operation, TransRec.Rdy), FAILURE) ;
+
       end case ;
     end loop DispatchLoop ;
   end process TransactionDispatcher ;

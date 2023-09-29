@@ -2,6 +2,7 @@
 
 | Revision  |  Release Summary | 
 ------------|----------- 
+| 2023.09   |  Updated Unimplemented Transaction messages in VC.
 | 2023.05   |  Beta implementation of randomizing Ready and Valid in Axi4 Full VC and AxiStream VC.
 | 2023.04   |  Alpha implementation of randomizing TReady and TValid delays in AxiStreamTransmitter and AxiStreamReceiver
 | 2022.12   |  Updated read check to use MetaMatch in Axi4Manager, Axi4ManagerVti, and Axi4LiteManager

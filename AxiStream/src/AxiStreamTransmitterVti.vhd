@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      AXI Stream Transmitter Model with Virtual Transaction Interface
+--      AXI Stream Transmitter Verification Component with Virtual Transaction Interface
 --
 --
 --  Developed by:

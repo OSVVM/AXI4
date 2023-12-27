@@ -19,6 +19,8 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    01/2024   2024.01    Updated Params to use singleton data structure
+--    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedOperation
 --    05/2023   2023.05    Adding Randomization of Valid and Ready timing   
 --    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
@@ -35,7 +37,7 @@
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2017 - 2023 by SynthWorks Design Inc.
+--  Copyright (c) 2017 - 2024 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -105,10 +107,6 @@ port (
   TransRec    : inout AddressBusRecType
 ) ;
 
-  -- Model Configuration
-  -- Access via transactions or external name
-  shared variable Params : ModelParametersPType ;
-
   -- Derive AXI interface properties from the AxiBus
   constant AXI_ADDR_WIDTH : integer := AxiBus.WriteAddress.Addr'length ;
   constant AXI_DATA_WIDTH : integer := AxiBus.WriteData.Data'length ;
@@ -131,6 +129,8 @@ architecture Transactor of Axi4Subordinate is
 
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
+
+  signal Params    : ModelParametersIDType ;
 
   signal WriteAddressFifo           : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
   signal WriteDataFifo              : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
@@ -176,10 +176,9 @@ begin
   --  Initialize AlertLogIDs
   ------------------------------------------------------------
   Initalize : process
-    variable ID : AlertLogIDType ;
+    variable ID      : AlertLogIDType ;
+    variable vParams : ModelParametersIDType ; 
   begin
-    InitAxiOptions(Params) ;
-
     -- Alerts
     ID                      := NewID(MODEL_INSTANCE_NAME) ;
     ModelID                 <= ID ;
@@ -187,6 +186,10 @@ begin
     ProtocolID              <= NewID("Protocol Error", ID ) ;
     DataCheckID             <= NewID("Data Check",     ID ) ;
     BusFailedID             <= NewID("No response",    ID ) ;
+
+    vParams                 := NewID("Axi4Subordinate Parameters", to_integer(OPTIONS_MARKER), ID) ; 
+    InitAxiOptions(vParams) ;
+    Params                  <= vParams ; 
 
     -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
     --   FIFOS only generate usage type errors 
@@ -230,12 +233,16 @@ begin
     variable FilterUndrivenWriteData       : boolean := TRUE ;
     variable UndrivenWriteDataValue        : std_logic := '0' ;
 
-    variable TransactionCount              : integer := 0 ; 
     variable WriteAddressTransactionCount  : integer := 0 ; 
     variable WriteDataTransactionCount     : integer := 0 ; 
     variable WriteResponseTransactionCount : integer := 0 ; 
   begin
     wait for 0 ns ; -- Allow ModelID to become valid
+    TransRec.Params         <= Params ; 
+--
+-- AxiLite does not support bursts
+--    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo",         ModelID, Search => PRIVATE_NAME) ;
+--    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",          ModelID, Search => PRIVATE_NAME) ;
     WriteAddressDelayCov    <= NewID("WriteAddressDelayCov",   ModelID, ReportMode => DISABLED) ; 
     WriteDataDelayCov       <= NewID("WriteDataDelayCov",      ModelID, ReportMode => DISABLED) ; 
     WriteResponseDelayCov   <= NewID("WriteResponseDelayCov",  ModelID, ReportMode => DISABLED) ; 
@@ -248,7 +255,6 @@ begin
          Rdy      => TransRec.Rdy,
          Ack      => TransRec.Ack
       ) ;
-      TransactionCount := TransactionCount + 1 ; 
 
       case TransRec.Operation is
         when WAIT_FOR_TRANSACTION =>
@@ -378,8 +384,10 @@ begin
               end loop ; 
             end if ; 
             
-            GetAxi4Parameter(Params, WRITE_DATA_FILTER_UNDRIVEN, FilterUndrivenWriteData) ;
-            GetAxi4Parameter(Params, WRITE_DATA_UNDRIVEN_VALUE,  UndrivenWriteDataValue) ;
+            FilterUndrivenWriteData := Get(Params, to_integer(WRITE_DATA_FILTER_UNDRIVEN)) ;
+            UndrivenWriteDataValue  := GetAxi4Parameter(Params, WRITE_DATA_UNDRIVEN_VALUE) ;
+--            GetAxi4Parameter(Params, WRITE_DATA_FILTER_UNDRIVEN, FilterUndrivenWriteData) ;
+--            GetAxi4Parameter(Params, WRITE_DATA_UNDRIVEN_VALUE,  UndrivenWriteDataValue) ;
             if FilterUndrivenWriteData then
               FilterUndrivenData(LocalWD.Data, LocalWD.Strb, UndrivenWriteDataValue) ;
             end if ;
@@ -472,7 +480,8 @@ begin
           -- Set Model Options
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
           if IsAxiParameter(Axi4Option) then
-            SetAxi4Parameter(Params, Axi4Option, TransRec.IntToModel) ;
+            Set(Params, TransRec.Options, TransRec.IntToModel) ;
+--            SetAxi4Parameter(Params, Axi4Option, TransRec.IntToModel) ;
           else
             case Axi4Option is
               -- RESP Settings
@@ -494,8 +503,9 @@ begin
         when GET_MODEL_OPTIONS =>
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
           if IsAxiParameter(Axi4Option) then
-            GetAxi4Parameter(Params, Axi4Option, Axi4OptionVal) ;
-            TransRec.IntFromModel <= Axi4OptionVal ;
+            TransRec.IntFromModel <= Get(Params, TransRec.Options) ;
+--            GetAxi4Parameter(Params, Axi4Option, Axi4OptionVal) ;
+--            TransRec.IntFromModel <= Axi4OptionVal ;
           else
             case Axi4Option is
               -- RESP Settings
@@ -513,13 +523,6 @@ begin
                 Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(Axi4OptionsType'val(TransRec.Options)), FAILURE) ;
             end case ;
           end if ;
-
---!!          when MULTIPLE_DRIVER_DETECT =>
---!!            Alert(ModelID, "Multiple Drivers on Transaction Record." & 
---!!                           "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
---!!
---!!        when others =>
---!!            Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
 
         -- The End -- Done
         when others =>
@@ -546,8 +549,8 @@ begin
     AW.Ready <= '0' ;
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
-    AddBins (WriteAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     -- Delays for Ready
+    AddBins (WriteAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     AddCross(WriteAddressDelayCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
     AddCross(WriteAddressDelayCov.BeatDelayCov,    GenBin(0),     GenBin(0)) ;  -- No beat delay
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -559,8 +562,10 @@ begin
         ReadyBeforeValid := intReadyBeforeValid = 0 ; 
       else
         -- Deprecated static settings
-        GetAxi4Parameter(Params, WRITE_ADDRESS_READY_BEFORE_VALID, ReadyBeforeValid) ;
-        GetAxi4Parameter(Params, WRITE_ADDRESS_READY_DELAY_CYCLES, ReadyDelayCycles) ;
+        ReadyBeforeValid := Get(Params, to_integer(WRITE_ADDRESS_READY_BEFORE_VALID)) ;
+        ReadyDelayCycles := Get(Params, to_integer(WRITE_ADDRESS_READY_DELAY_CYCLES)) ;
+--        GetAxi4Parameter(Params, WRITE_ADDRESS_READY_BEFORE_VALID, ReadyBeforeValid) ;
+--        GetAxi4Parameter(Params, WRITE_ADDRESS_READY_DELAY_CYCLES, ReadyDelayCycles) ;
       end if ; 
 
       ---------------------
@@ -608,8 +613,8 @@ begin
     WD.Ready <= '0' ;
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
-    AddBins (WriteDataDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     -- Delays for Ready
+    AddBins (WriteDataDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     AddCross(WriteDataDelayCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
     AddCross(WriteDataDelayCov.BeatDelayCov,    GenBin(0),     GenBin(0)) ;  -- No beat delay
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -621,8 +626,10 @@ begin
         ReadyBeforeValid := intReadyBeforeValid = 0 ; 
       else
         -- Deprecated static delays
-        GetAxi4Parameter(Params, WRITE_DATA_READY_BEFORE_VALID, ReadyBeforeValid) ;
-        GetAxi4Parameter(Params, WRITE_DATA_READY_DELAY_CYCLES, ReadyDelayCycles) ;
+        ReadyBeforeValid := Get(Params, to_integer(WRITE_DATA_READY_BEFORE_VALID)) ;
+        ReadyDelayCycles := Get(Params, to_integer(WRITE_DATA_READY_DELAY_CYCLES)) ;
+--        GetAxi4Parameter(Params, WRITE_DATA_READY_BEFORE_VALID, ReadyBeforeValid) ;
+--        GetAxi4Parameter(Params, WRITE_DATA_READY_DELAY_CYCLES, ReadyDelayCycles) ;
       end if ; 
 
       ---------------------
@@ -702,7 +709,8 @@ begin
         WaitForClock(Clk, DelayCycles) ;
       else
         -- Deprecated delays
-        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_RESPONSE_VALID_DELAY_CYCLES)))) ; 
+        WaitForClock(Clk, integer'(Get(Params, to_integer(WRITE_RESPONSE_VALID_DELAY_CYCLES)))) ; 
+--        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_RESPONSE_VALID_DELAY_CYCLES)))) ; 
       end if ; 
 
       -- Do Transaction
@@ -717,7 +725,8 @@ begin
         INFO
       ) ;
       
-      GetAxi4Parameter(Params, WRITE_RESPONSE_READY_TIME_OUT, WriteResponseReadyTimeOut) ;
+      WriteResponseReadyTimeOut := Get(Params, to_integer(WRITE_RESPONSE_READY_TIME_OUT)) ;
+--      GetAxi4Parameter(Params, WRITE_RESPONSE_READY_TIME_OUT, WriteResponseReadyTimeOut) ;
 
       ---------------------
       DoAxiValidHandshake (
@@ -756,8 +765,8 @@ begin
     AR.Ready <= '0' ;
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
-    AddBins (ReadAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     -- Delays for Ready
+    AddBins (ReadAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     AddCross(ReadAddressDelayCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
     AddCross(ReadAddressDelayCov.BeatDelayCov,    GenBin(0),     GenBin(0)) ;  -- No beat delay
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -769,8 +778,10 @@ begin
         ReadyBeforeValid := intReadyBeforeValid = 0 ; 
       else
         -- Deprecated static settings
-        GetAxi4Parameter(Params, READ_ADDRESS_READY_BEFORE_VALID, ReadyBeforeValid) ;
-        GetAxi4Parameter(Params, READ_ADDRESS_READY_DELAY_CYCLES, ReadyDelayCycles) ;
+        ReadyBeforeValid := Get(Params, to_integer(READ_ADDRESS_READY_BEFORE_VALID)) ;
+        ReadyDelayCycles := Get(Params, to_integer(READ_ADDRESS_READY_DELAY_CYCLES)) ;
+--        GetAxi4Parameter(Params, READ_ADDRESS_READY_BEFORE_VALID, ReadyBeforeValid) ;
+--        GetAxi4Parameter(Params, READ_ADDRESS_READY_DELAY_CYCLES, ReadyDelayCycles) ;
       end if ; 
       
       ---------------------
@@ -818,7 +829,7 @@ begin
     RD.Resp  <= (RD.Resp'range => '0') ;
     RD.ID    <= (RD.ID'range => '0') ;
     RD.User  <= (RD.User'range => '0') ; 
-    wait for 0 ns ; -- Allow ReadDataFifo to initialize
+    wait for 0 ns ; -- Allow Cov models to initialize
     wait for 0 ns ; -- Allow Cov models to initialize 
     AddBins (ReadDataDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     AddBins (ReadDataDelayCov.BurstDelayCov,   GenBin(2,5,1)) ;
@@ -830,13 +841,15 @@ begin
         WaitForToggle(ReadAddressReceiveCount) ;
       end if ;
 
+      -- Read Data Valid Delays
       if UseCoverageDelays then 
         -- BurstCoverage Delays
         DelayCycles := GetRandDelay(ReadDataDelayCov) ; 
         WaitForClock(Clk, DelayCycles) ;
       else
         -- Deprecated delays
-        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_DELAY_CYCLES)))) ; 
+        WaitForClock(Clk, integer'(Get(Params, to_integer(READ_DATA_VALID_DELAY_CYCLES)))) ; 
+--        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_DELAY_CYCLES)))) ; 
       end if ;
 
       if empty(ReadDataFifo) then
@@ -867,7 +880,8 @@ begin
         INFO
       ) ;
 
-      GetAxi4Parameter(Params, READ_DATA_READY_TIME_OUT, ReadDataReadyTimeOut) ;
+      ReadDataReadyTimeOut := Get(Params, to_integer(READ_DATA_READY_TIME_OUT)) ; 
+--      GetAxi4Parameter(Params, READ_DATA_READY_TIME_OUT, ReadDataReadyTimeOut) ;
       
       ---------------------
       DoAxiValidHandshake (

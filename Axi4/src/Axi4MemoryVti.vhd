@@ -19,6 +19,8 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    01/2024   2024.01    Updated Params to use singleton data structure
+--    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedOperation
 --    05/2023   2023.05    Adding Randomization of Valid and Ready timing   
 --    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
@@ -104,10 +106,6 @@ port (
   AxiBus      : inout Axi4RecType 
 ) ;
 
-  -- Model Configuration
-  -- Access via transactions or external name
-  shared variable Params : ModelParametersPType ;
-  
   -- Derive AXI interface properties from the AxiBus
   constant AXI_ADDR_WIDTH : integer := AxiBus.WriteAddress.Addr'length ;
   constant AXI_DATA_WIDTH : integer := AxiBus.WriteData.Data'length ;
@@ -142,7 +140,8 @@ architecture MemorySubordinate of Axi4MemoryVti is
   signal ReadAddressDelayCov,  ReadDataDelayCov : DelayCoverageIDType ;
   signal UseCoverageDelays : boolean := FALSE ; 
   
-  signal MemoryID : MemoryIDType ; 
+  signal Params    : ModelParametersIDType ;
+  signal MemoryID  : MemoryIDType ; 
 
 --  constant MemoryID : MemoryIDType := NewID(
 --      Name       => LOCAL_MEMORY_NAME, 
@@ -196,6 +195,7 @@ begin
   ------------------------------------------------------------
   InitalizeAlertLogIDs : process
     variable ID : AlertLogIDType ;
+    variable vParams : ModelParametersIDType ; 
   begin
     -- Alerts
     ID           := NewID(MODEL_INSTANCE_NAME) ;
@@ -203,6 +203,10 @@ begin
     BusFailedID  <= NewID("No response", ID ) ;
     DataCheckID  <= NewID("Data Check", ID ) ;
     
+    vParams                 := NewID("Axi4Memory Parameters", to_integer(OPTIONS_MARKER), ID) ; 
+    InitAxiOptions(vParams) ;
+    Params                  <= vParams ; 
+
     -- MEMORY_NAME
     MemoryID <= NewID(
       Name       => LOCAL_MEMORY_NAME, 
@@ -224,16 +228,16 @@ begin
   end process InitalizeAlertLogIDs ;
 
 
-  ------------------------------------------------------------
-  --  Initialize Model Options
-  ------------------------------------------------------------
-  InitalizeOptions : process
-  begin
-    InitAxiOptions (
-      Params => Params
-    ) ;
-    wait ;
-  end process InitalizeOptions ;
+--!!   ------------------------------------------------------------
+--!!   --  Initialize Model Options
+--!!   ------------------------------------------------------------
+--!!   InitalizeOptions : process
+--!!   begin
+--!!     InitAxiOptions (
+--!!       Params => Params
+--!!     ) ;
+--!!     wait ;
+--!!   end process InitalizeOptions ;
 
 
   ------------------------------------------------------------
@@ -253,6 +257,7 @@ begin
     variable Axi4OptionVal    : integer ; 
   begin
     wait for 0 ns ; -- Allow ModelID to become valid
+    TransRec.Params         <= Params ; 
     TransRec.WriteBurstFifo <= NewID("WriteBurstFifo",         ModelID, Search => PRIVATE_NAME) ;
     TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",          ModelID, Search => PRIVATE_NAME) ;
     WriteAddressDelayCov    <= NewID("WriteAddressDelayCov",   ModelID, ReportMode => DISABLED) ; 
@@ -389,7 +394,8 @@ begin
   --!!        Params.Set(TransRec.Options, TransRec.IntToModel) ;
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
           if IsAxiParameter(Axi4Option) then
-            SetAxi4Parameter(Params, Axi4Option, TransRec.IntToModel) ;
+            Set(Params, TransRec.Options, TransRec.IntToModel) ;
+--            SetAxi4Parameter(Params, Axi4Option, TransRec.IntToModel) ;
           else
             case Axi4Option is
               -- RESP Settings
@@ -412,8 +418,9 @@ begin
   --!!        TransRec.IntFromModel <= Params.Get(TransRec.Options) ;
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
           if IsAxiParameter(Axi4Option) then
-            GetAxi4Parameter(Params, Axi4Option, Axi4OptionVal) ;
-            TransRec.IntFromModel <= Axi4OptionVal ;
+            TransRec.IntFromModel <= Get(Params, TransRec.Options) ;
+--            GetAxi4Parameter(Params, Axi4Option, Axi4OptionVal) ;
+--            TransRec.IntFromModel <= Axi4OptionVal ;
           else
             case Axi4Option is
               -- RESP Settings
@@ -432,12 +439,10 @@ begin
             end case ;
           end if ;
 
-          when MULTIPLE_DRIVER_DETECT =>
-            Alert(ModelID, "Multiple Drivers on Transaction Record." & 
-                           "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
-
+        -- The End -- Done
         when others =>
-            Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
+          Alert(ModelID, ClassifyUnimplementedOperation(TransRec.Operation, TransRec.Rdy), FAILURE) ;
+
       end case ;
 
       -- Wait for 1 delta cycle, required if a wait is not in all case branches above
@@ -473,8 +478,10 @@ begin
         ReadyBeforeValid := intReadyBeforeValid = 0 ; 
       else
         -- Deprecated static settings
-        GetAxi4Parameter(Params, WRITE_ADDRESS_READY_BEFORE_VALID, ReadyBeforeValid) ;
-        GetAxi4Parameter(Params, WRITE_ADDRESS_READY_DELAY_CYCLES, ReadyDelayCycles) ;
+        ReadyBeforeValid := Get(Params, to_integer(WRITE_ADDRESS_READY_BEFORE_VALID)) ;
+        ReadyDelayCycles := Get(Params, to_integer(WRITE_ADDRESS_READY_DELAY_CYCLES)) ;
+--        GetAxi4Parameter(Params, WRITE_ADDRESS_READY_BEFORE_VALID, ReadyBeforeValid) ;
+--        GetAxi4Parameter(Params, WRITE_ADDRESS_READY_DELAY_CYCLES, ReadyDelayCycles) ;
       end if ; 
       
       ---------------------
@@ -541,8 +548,10 @@ begin
         ReadyBeforeValid := intReadyBeforeValid = 0 ; 
       else
         -- Deprecated static delays
-        GetAxi4Parameter(Params, WRITE_DATA_READY_BEFORE_VALID, ReadyBeforeValid) ;
-        GetAxi4Parameter(Params, WRITE_DATA_READY_DELAY_CYCLES, ReadyDelayCycles) ;
+        ReadyBeforeValid := Get(Params, to_integer(WRITE_DATA_READY_BEFORE_VALID)) ;
+        ReadyDelayCycles := Get(Params, to_integer(WRITE_DATA_READY_DELAY_CYCLES)) ;
+--        GetAxi4Parameter(Params, WRITE_DATA_READY_BEFORE_VALID, ReadyBeforeValid) ;
+--        GetAxi4Parameter(Params, WRITE_DATA_READY_DELAY_CYCLES, ReadyDelayCycles) ;
       end if ; 
       
       ---------------------
@@ -709,7 +718,8 @@ begin
         WaitForClock(Clk, DelayCycles) ;
       else
         -- Deprecated delays
-        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_RESPONSE_VALID_DELAY_CYCLES)))) ; 
+        WaitForClock(Clk, integer'(Get(Params, to_integer(WRITE_RESPONSE_VALID_DELAY_CYCLES)))) ; 
+--        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(WRITE_RESPONSE_VALID_DELAY_CYCLES)))) ; 
       end if ; 
 
       -- Do Transaction
@@ -726,7 +736,8 @@ begin
         DEBUG
       ) ;
 
-      GetAxi4Parameter(Params, WRITE_RESPONSE_READY_TIME_OUT, WriteResponseReadyTimeOut) ;
+      WriteResponseReadyTimeOut := Get(Params, to_integer(WRITE_RESPONSE_READY_TIME_OUT)) ;
+--      GetAxi4Parameter(Params, WRITE_RESPONSE_READY_TIME_OUT, WriteResponseReadyTimeOut) ;
 
       ---------------------
       DoAxiValidHandshake (
@@ -784,8 +795,10 @@ begin
         ReadyBeforeValid := intReadyBeforeValid = 0 ; 
       else
         -- Deprecated static settings
-        GetAxi4Parameter(Params, READ_ADDRESS_READY_BEFORE_VALID, ReadyBeforeValid) ;
-        GetAxi4Parameter(Params, READ_ADDRESS_READY_DELAY_CYCLES, ReadyDelayCycles) ;
+        ReadyBeforeValid := Get(Params, to_integer(READ_ADDRESS_READY_BEFORE_VALID)) ;
+        ReadyDelayCycles := Get(Params, to_integer(READ_ADDRESS_READY_DELAY_CYCLES)) ;
+--        GetAxi4Parameter(Params, READ_ADDRESS_READY_BEFORE_VALID, ReadyBeforeValid) ;
+--        GetAxi4Parameter(Params, READ_ADDRESS_READY_DELAY_CYCLES, ReadyDelayCycles) ;
       end if ; 
   
       ---------------------
@@ -968,10 +981,12 @@ begin
       else
         -- Deprecated delays
         if NewTransfer then
-          WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_DELAY_CYCLES)))) ; 
+          WaitForClock(Clk, integer'(Get(Params, to_integer(READ_DATA_VALID_DELAY_CYCLES)))) ; 
+--          WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_DELAY_CYCLES)))) ; 
     --      elsif Burst then 
         else 
-          WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_BURST_DELAY_CYCLES)))) ; 
+          WaitForClock(Clk, integer'(Get(Params, to_integer(READ_DATA_VALID_BURST_DELAY_CYCLES)))) ; 
+--          WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_BURST_DELAY_CYCLES)))) ; 
         end if ; 
       end if ; 
       
@@ -995,7 +1010,8 @@ begin
         DEBUG
       ) ;
 
-      GetAxi4Parameter(Params, READ_DATA_READY_TIME_OUT, ReadDataReadyTimeOut) ;
+      ReadDataReadyTimeOut := Get(Params, to_integer(READ_DATA_READY_TIME_OUT)) ; 
+--      GetAxi4Parameter(Params, READ_DATA_READY_TIME_OUT, ReadDataReadyTimeOut) ;
 
       ---------------------
       DoAxiValidHandshake (

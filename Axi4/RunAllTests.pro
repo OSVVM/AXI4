@@ -41,8 +41,12 @@
 TestSuite Axi4Full
 library osvvm_TbAxi4
 
-include ./testbench
-include ./TestCases
-include ./testbench_MultipleMemory
-# include ./testbench_interrupt  ; # moved to OsvvmLibraries/Common/TbInterrupt
+if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
+  include ./testbench
+  include ./TestCases
+  include ./testbench_MultipleMemory
+  # include ./testbench_interrupt  ; # moved to OsvvmLibraries/Common/TbInterrupt
+} else {
+  SkipTest Axi4VC "AXI4 VC not working in XSIM"
+}
 

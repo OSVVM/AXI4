@@ -37,15 +37,4 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-library osvvm_axi4
-analyze ./src/Axi4ComponentPkg.vhd
-analyze ./src/Axi4ComponentVtiPkg.vhd
-analyze ./src/Axi4Context.vhd
-analyze ./src/Axi4Manager.vhd
-analyze ./src/Axi4ManagerVti.vhd
-analyze ./src/Axi4Monitor_dummy.vhd
-analyze ./src/Axi4Subordinate.vhd
-analyze ./src/Axi4SubordinateVti.vhd
-analyze ./src/Axi4Memory.vhd
-analyze ./src/Axi4MemoryVti.vhd
-analyze ./src/Axi4PassThru.vhd
+build ./src

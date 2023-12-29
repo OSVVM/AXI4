@@ -79,12 +79,12 @@ architecture TestHarness of TbAxi4Memory is
 --          DataToModel(AXI_DATA_WIDTH-1 downto 0),
 --          DataFromModel(AXI_DATA_WIDTH-1 downto 0)
 --        ) ;
-  subtype TransRecType is AddressBusRecType (
-          Address(AXI_ADDR_WIDTH-1 downto 0),
-          DataToModel(AXI_DATA_WIDTH-1 downto 0),
-          DataFromModel(AXI_DATA_WIDTH-1 downto 0)
-        ) ;
-  signal ManagerRec, SubordinateRec  : TransRecType ;
+--  subtype TransRecType is AddressBusRecType (
+--          Address(AXI_ADDR_WIDTH-1 downto 0),
+--          DataToModel(AXI_DATA_WIDTH-1 downto 0),
+--          DataFromModel(AXI_DATA_WIDTH-1 downto 0)
+--        ) ;
+  signal ManagerRec, SubordinateRec  : AddressBusRecType ; -- fixed size Address and Data for Xilinx debug
 
 
 --  -- AXI Manager Functional Interface

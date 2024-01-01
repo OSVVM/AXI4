@@ -40,4 +40,10 @@
 TestSuite  Axi4Lite
 library    osvvm_TbAxi4Lite
 
-include  ./testbench
+
+if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
+  include  ./testbench/build.pro
+  include  ./TestCases/RunAllTests.pro
+} else {
+  SkipTest Axi4VC "Axi4Lite VC not working in XSIM"
+}

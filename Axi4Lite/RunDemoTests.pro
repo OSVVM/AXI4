@@ -40,4 +40,5 @@
 TestSuite  Axi4Lite
 library    osvvm_TbAxi4Lite
 
-include  ./testbench/demos.pro
+include  ./testbench/build.pro
+include  ./TestCases/RunDemoTests.pro

@@ -27,7 +27,7 @@
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
 --    03/2022   2022.03    Updated calls to NewID for AlertLogID and FIFOs
 --    02/2022   2022.02    Replaced to_hstring with to_hxstring
---    01/2022   2022.01    Moved MODEL_INSTANCE_NAME and MODEL_NAME to entity declarative region
+--    01/2022   2022.01    Moved MODEL_INSTANCE_NAME and MODEL_NAME to entity decLocalative region
 --    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability
 --    06/2021   2021.06    GHDL support + New Burst FIFOs 
 --    02/2021   2021.02    Added MultiDriver Detect.  Added Valid Delays.  Updated Generics.   
@@ -59,7 +59,8 @@ library ieee ;
   use ieee.numeric_std.all ;
   use ieee.numeric_std_unsigned.all ;
   use ieee.math_real.all ;
-
+  use std.textio.all ;
+  
 library osvvm ;
   context osvvm.OsvvmContext ;
   use osvvm.ScoreboardPkg_slv.all ;
@@ -181,12 +182,13 @@ architecture AxiFull of Axi4Manager is
   signal   BurstFifoMode      : AddressBusFifoBurstModeType := DEFAULT_BURST_MODE ;
   signal   BurstFifoByteMode  : boolean := (DEFAULT_BURST_MODE = ADDRESS_BUS_BURST_BYTE_MODE) ; 
 begin
+/*
 
   ------------------------------------------------------------
   -- Turn off drivers not being driven by this model
   ------------------------------------------------------------
   InitAxi4Rec (AxiBusRec => AxiBus) ;
-
+*/
 
   ------------------------------------------------------------
   --  Initialize alerts
@@ -195,7 +197,6 @@ begin
     variable ID : AlertLogIDType ;
     variable vParams : ModelParametersIDType ; 
   begin
-
     -- Alerts
     ID                      := NewID(MODEL_INSTANCE_NAME) ;
     ModelID                 <= ID ;
@@ -221,7 +222,7 @@ begin
     wait ;
   end process Initialize ;
 
-
+/*
   ------------------------------------------------------------
   --  Transaction Dispatcher
   --    Dispatches transactions to
@@ -239,7 +240,7 @@ begin
     alias    LAW : AxiDefaults.WriteAddress'subtype  is AxiDefaults.WriteAddress ;
     alias    LWD : AxiDefaults.WriteData'subtype     is AxiDefaults.WriteData ;
     alias    LWR : AxiDefaults.WriteResponse'subtype is AxiDefaults.WriteResponse ;
-    alias    LAR : AxiDefaults.ReadAddress'subtype   is AxiDefaults.ReadAddress ;
+    alias    Local : AxiDefaults.ReadAddress'subtype   is AxiDefaults.ReadAddress ;
     alias    LRD : AxiDefaults.ReadData'subtype      is AxiDefaults.ReadData ;
     
     variable WriteByteAddr   : integer ;
@@ -260,12 +261,17 @@ begin
     variable Operation       : AddressBusOperationType ;
     variable WriteDataCount   : integer := 0 ;
   begin
+    TransRec.Rdy <=  0 ;
+    TransRec.Ack <= -1 ; 
+    print("AxiManager, TransRec.Rdy: " & to_string(TransRec.Rdy) & ",  TransRec.Ack: " & to_string(TransRec.Ack) );
+    wait for 0 ns ; 
+    
     AxiDefaults := InitAxi4Rec(AxiDefaults, '0') ;
     LAW.Size    := to_slv(AXI_BYTE_ADDR_WIDTH, LAW.Size'length) ;
     LAW.Burst   := "01" ;  -- INCR
     LWR.Resp    := to_Axi4RespType(OKAY);
-    LAR.Size    := to_slv(AXI_BYTE_ADDR_WIDTH, LAR.Size'length) ;
-    LAR.Burst   := "01" ;  -- INCR
+    Local.Size    := to_slv(AXI_BYTE_ADDR_WIDTH, Local.Size'length) ;
+    Local.Burst   := "01" ;  -- INCR
     LRD.Resp    := to_Axi4RespType(OKAY) ;
     
     wait for 0 ns ; -- Allow ModelID to become valid
@@ -277,6 +283,7 @@ begin
     WriteResponseDelayCov   <= NewID("WriteResponseDelayCov",  ModelID, ReportMode => DISABLED) ; 
     ReadAddressDelayCov     <= NewID("ReadAddressDelayCov",    ModelID, ReportMode => DISABLED) ; 
     ReadDataDelayCov        <= NewID("ReadDataDelayCov",       ModelID, ReportMode => DISABLED) ; 
+    print("AxiManager, TransRec.Rdy: " & to_string(TransRec.Rdy) & ",  TransRec.Ack: " & to_string(TransRec.Ack) );
     
 --!! AWCache, ARCache Defaults
     DispatchLoop : loop
@@ -286,6 +293,7 @@ begin
          Ack      => TransRec.Ack
       ) ;
       Operation := TransRec.Operation ;
+      print("AxiManager, TransRec.Rdy: " & to_string(TransRec.Rdy) & ",  TransRec.Ack: " & to_string(TransRec.Ack) );
 
       case Operation is
         -- Execute Standard Directive Transactions
@@ -408,7 +416,18 @@ begin
             LAW.Len := (others => '0') ;
 
             -- Initiate Write Address
-            Push(WriteAddressFifo, LAW.Addr  & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
+--x            Push(WriteAddressFifo, LAW.Addr  & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
+            Push(WriteAddressFifo, LAW.Addr   ) ;
+            Push(WriteAddressFifo, LAW.Len    ) ;
+            Push(WriteAddressFifo, LAW.Prot   ) ;
+            Push(WriteAddressFifo, LAW.ID     ) ;
+            Push(WriteAddressFifo, LAW.Size   ) ;
+            Push(WriteAddressFifo, LAW.Burst  ) ;
+            Push(WriteAddressFifo, (1 => LAW.Lock)   ) ;
+            Push(WriteAddressFifo, LAW.Cache  ) ;
+            Push(WriteAddressFifo, LAW.QOS    ) ;
+            Push(WriteAddressFifo, LAW.Region ) ;
+            Push(WriteAddressFifo, LAW.User   ) ;
             Increment(WriteAddressRequestCount) ;
           end if ;
 
@@ -418,7 +437,12 @@ begin
             CheckDataWidth  (ModelID, TransRec.DataWidth, WriteByteAddr, AXI_DATA_WIDTH, "Manager Write: ", WriteDataRequestCount+1) ;
             LWD.Data  := AlignBytesToDataBus(SafeResize(TransRec.DataToModel, LWD.Data'length), TransRec.DataWidth, WriteByteAddr) ;
             LWD.Strb  := CalculateWriteStrobe(LWD.Data) ;
-            Push(WriteDataFifo, '0' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
+--            Push(WriteDataFifo, '0' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
+            Push(WriteDataFifo, '0' & '1') ;
+            Push(WriteDataFifo, LWD.Data ) ;
+            Push(WriteDataFifo, LWD.Strb ) ;
+            Push(WriteDataFifo, LWD.User ) ;
+            Push(WriteDataFifo, LWD.ID   ) ;
 
             Increment(WriteDataRequestCount) ;
             WriteDataCount := WriteDataCount + 1 ; 
@@ -472,7 +496,18 @@ begin
             end if ;
             
             -- Initiate Write Address
-            Push(WriteAddressFifo, LAW.Addr  & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
+--x            Push(WriteAddressFifo, LAW.Addr  & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
+            Push(WriteAddressFifo, LAW.Addr   ) ;
+            Push(WriteAddressFifo, LAW.Len    ) ;
+            Push(WriteAddressFifo, LAW.Prot   ) ;
+            Push(WriteAddressFifo, LAW.ID     ) ;
+            Push(WriteAddressFifo, LAW.Size   ) ;
+            Push(WriteAddressFifo, LAW.Burst  ) ;
+            Push(WriteAddressFifo, (1 => LAW.Lock)   ) ;
+            Push(WriteAddressFifo, LAW.Cache  ) ;
+            Push(WriteAddressFifo, LAW.QOS    ) ;
+            Push(WriteAddressFifo, LAW.Region ) ;
+            Push(WriteAddressFifo, LAW.User   ) ;
 
             Increment(WriteAddressRequestCount) ;
           end if ;
@@ -488,12 +523,22 @@ begin
             PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, WriteByteAddr) ;
 
             for BurstLoop in TransfersInBurst downto 2 loop    
-              Push(WriteDataFifo, '1' & '0' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
+--x              Push(WriteDataFifo, '1' & '0' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
+              Push(WriteDataFifo, '1' & '0') ;
+              Push(WriteDataFifo, LWD.Data ) ;
+              Push(WriteDataFifo, LWD.Strb ) ;
+              Push(WriteDataFifo, LWD.User ) ;
+              Push(WriteDataFifo, LWD.ID   ) ;
               PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, 0) ;
             end loop ; 
             
             -- Special handle last push
-            Push(WriteDataFifo, '1' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
+--x            Push(WriteDataFifo, '1' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
+            Push(WriteDataFifo, '1' & '1') ;
+            Push(WriteDataFifo, LWD.Data ) ;
+            Push(WriteDataFifo, LWD.Strb ) ;
+            Push(WriteDataFifo, LWD.User ) ;
+            Push(WriteDataFifo, LWD.ID   ) ;
 
             -- Increment(WriteDataRequestCount) ;
             WriteDataRequestCount        <= Increment(WriteDataRequestCount, TransfersInBurst) ;
@@ -527,15 +572,28 @@ begin
         when READ_OP | READ_CHECK | READ_ADDRESS | READ_DATA | READ_DATA_CHECK | ASYNC_READ_ADDRESS | ASYNC_READ_DATA | ASYNC_READ_DATA_CHECK =>
           if IsReadAddress(Operation) then
             -- Send Read Address to Read Address Handler and Read Data Handler
-            LAR.Addr   :=  SafeResize(TransRec.Address, LAR.Addr'length) ;
-            ReadByteAddr  :=  CalculateByteAddress(LAR.Addr, AXI_BYTE_ADDR_WIDTH);
+            Local.Addr   :=  SafeResize(TransRec.Address, Local.Addr'length) ;
+            ReadByteAddr  :=  CalculateByteAddress(Local.Addr, AXI_BYTE_ADDR_WIDTH);
 --             AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Read Address length does not match", FAILURE) ;
-            BytesPerTransfer := 2**to_integer(LAR.Size);
+            BytesPerTransfer := 2**to_integer(Local.Size);
 
-            LAR.Len := (others => '0') ;
+            Local.Len := (others => '0') ;
 
-            Push(ReadAddressFifo, LAR.Addr & LAR.Len & LAR.Prot & LAR.ID & LAR.Size & LAR.Burst & LAR.Lock & LAR.Cache & LAR.QOS & LAR.Region & LAR.User) ;
-            Push(ReadAddressTransactionFifo, LAR.Addr & LAR.Prot);
+--x            Push(ReadAddressFifo, Local.Addr & Local.Len & Local.Prot & Local.ID & Local.Size & Local.Burst & Local.Lock & Local.Cache & Local.QOS & Local.Region & Local.User) ;
+--x            Push(ReadAddressTransactionFifo, Local.Addr & Local.Prot);
+            Push(ReadAddressFifo, Local.Addr   ) ;
+            Push(ReadAddressFifo, Local.Len    ) ;
+            Push(ReadAddressFifo, Local.Prot   ) ;
+            Push(ReadAddressFifo, Local.ID     ) ;
+            Push(ReadAddressFifo, Local.Size   ) ;
+            Push(ReadAddressFifo, Local.Burst  ) ;
+            Push(ReadAddressFifo, (1 => Local.Lock)   ) ;
+            Push(ReadAddressFifo, Local.Cache  ) ;
+            Push(ReadAddressFifo, Local.QOS    ) ;
+            Push(ReadAddressFifo, Local.Region ) ;
+            Push(ReadAddressFifo, Local.User   ) ;
+            Push(ReadAddressTransactionFifo, Local.Addr);
+            Push(ReadAddressTransactionFifo, Local.Prot);
             Increment(ReadAddressRequestCount) ;
 
             -- Expect a Read Data Cycle
@@ -550,8 +608,10 @@ begin
             TransRec.BoolFromModel <= FALSE ;
             TransRec.DataFromModel <= (TransRec.DataFromModel'range => '0') ; 
           elsif IsReadData(Operation) then
-            (LAR.Addr, ReadProt) := Pop(ReadAddressTransactionFifo) ;
-            ReadByteAddr  :=  CalculateByteAddress(LAR.Addr, AXI_BYTE_ADDR_WIDTH);
+--x            (Local.Addr, ReadProt) := Pop(ReadAddressTransactionFifo) ;
+            Local.Addr := Pop(ReadAddressTransactionFifo) ;
+            ReadProt   := Pop(ReadAddressTransactionFifo) ;
+            ReadByteAddr  :=  CalculateByteAddress(Local.Addr, AXI_BYTE_ADDR_WIDTH);
 
             -- Wait for Data Ready
             if Empty(ReadDataFifo) then
@@ -564,7 +624,7 @@ begin
             CheckDataIsBytes(ModelID, TransRec.DataWidth, "Manager Read: ", ReadDataExpectCount) ;
             CheckDataWidth  (ModelID, TransRec.DataWidth, ReadByteAddr, AXI_DATA_WIDTH, "Manager Read: ", ReadDataExpectCount) ;
             LRD.Data := AlignDataBusToBytes(LRD.Data, TransRec.DataWidth, ReadByteAddr) ;
---            AxiReadDataAlignCheck (ModelID, LRD.Data, TransRec.DataWidth, LAR.Addr, AXI_DATA_BYTE_WIDTH, AXI_BYTE_ADDR_WIDTH) ;
+--            AxiReadDataAlignCheck (ModelID, LRD.Data, TransRec.DataWidth, Local.Addr, AXI_DATA_BYTE_WIDTH, AXI_BYTE_ADDR_WIDTH) ;
             TransRec.DataFromModel <= SafeResize(LRD.Data, TransRec.DataFromModel'length) ;
 
             -- Check or Log Read Data
@@ -574,7 +634,7 @@ begin
   --!! Run regressions before changing
               AffirmIf( DataCheckID, MetaMatch(LRD.Data, ExpectedData),
                 "Read Data: " & to_hxstring(LRD.Data) &
-                "  Read Address: " & to_hxstring(LAR.Addr) &
+                "  Read Address: " & to_hxstring(Local.Addr) &
                 "  Prot: " & to_hxstring(ReadProt),
                 "  Expected: " & to_hxstring(ExpectedData),
                 TransRec.StatusMsgOn or IsLogEnabled(ModelID, INFO) ) ;
@@ -583,7 +643,7 @@ begin
   --!! Run regressions before changing
               Log( ModelID,
                 "Read Data: " & to_hxstring(LRD.Data) &
-                "  Read Address: " & to_hxstring(LAR.Addr) &
+                "  Read Address: " & to_hxstring(Local.Addr) &
                 "  Prot: " & to_hxstring(ReadProt),
                 INFO,
                 TransRec.StatusMsgOn
@@ -597,10 +657,10 @@ begin
         when READ_BURST =>
           if IsReadAddress(Operation) then
             -- Send Read Address to Read Address Handler and Read Data Handler
-            LAR.Addr   :=  SafeResize(TransRec.Address, LAR.Addr'length) ;
-            ReadByteAddr  :=  CalculateByteAddress(LAR.Addr, AXI_BYTE_ADDR_WIDTH);
+            Local.Addr   :=  SafeResize(TransRec.Address, Local.Addr'length) ;
+            ReadByteAddr  :=  CalculateByteAddress(Local.Addr, AXI_BYTE_ADDR_WIDTH);
 --            AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Read Address length does not match", FAILURE) ;
-            BytesPerTransfer := 2**to_integer(LAR.Size);
+            BytesPerTransfer := 2**to_integer(Local.Size);
 
             -- Burst transfer, calculate burst length
             if BurstFifoByteMode then 
@@ -608,10 +668,23 @@ begin
             else 
               TransfersInBurst := TransRec.DataWidth ; 
             end if ;
-            LAR.Len := to_slv(TransfersInBurst - 1, LAR.Len'length) ;
+            Local.Len := to_slv(TransfersInBurst - 1, Local.Len'length) ;
 
-            Push(ReadAddressFifo, LAR.Addr & LAR.Len & LAR.Prot & LAR.ID & LAR.Size & LAR.Burst & LAR.Lock & LAR.Cache & LAR.QOS & LAR.Region & LAR.User) ;
-            Push(ReadAddressTransactionFifo, LAR.Addr & LAR.Prot);
+--x            Push(ReadAddressFifo, Local.Addr & Local.Len & Local.Prot & Local.ID & Local.Size & Local.Burst & Local.Lock & Local.Cache & Local.QOS & Local.Region & Local.User) ;
+--x            Push(ReadAddressTransactionFifo, Local.Addr & Local.Prot);
+            Push(ReadAddressFifo, Local.Addr   ) ;
+            Push(ReadAddressFifo, Local.Len    ) ;
+            Push(ReadAddressFifo, Local.Prot   ) ;
+            Push(ReadAddressFifo, Local.ID     ) ;
+            Push(ReadAddressFifo, Local.Size   ) ;
+            Push(ReadAddressFifo, Local.Burst  ) ;
+            Push(ReadAddressFifo, (1 => Local.Lock)   ) ;
+            Push(ReadAddressFifo, Local.Cache  ) ;
+            Push(ReadAddressFifo, Local.QOS    ) ;
+            Push(ReadAddressFifo, Local.Region ) ;
+            Push(ReadAddressFifo, Local.User   ) ;
+            Push(ReadAddressTransactionFifo, Local.Addr);
+            Push(ReadAddressTransactionFifo, Local.Prot);
             Increment(ReadAddressRequestCount) ;
 
             -- Expect a Read Data Cycle
@@ -634,9 +707,11 @@ begin
             TransRec.BoolFromModel <= FALSE ;
           elsif IsReadData(Operation) then
             TransRec.BoolFromModel <= TRUE ;
-            (LAR.Addr, ReadProt) := Pop(ReadAddressTransactionFifo) ;
-            ReadByteAddr := CalculateByteAddress(LAR.Addr, AXI_BYTE_ADDR_WIDTH);
-            BytesPerTransfer := 2**to_integer(LAR.Size);
+--x            (Local.Addr, ReadProt) := Pop(ReadAddressTransactionFifo) ;
+            Local.Addr := Pop(ReadAddressTransactionFifo) ;
+            ReadProt   := Pop(ReadAddressTransactionFifo) ;
+            ReadByteAddr := CalculateByteAddress(Local.Addr, AXI_BYTE_ADDR_WIDTH);
+            BytesPerTransfer := 2**to_integer(Local.Size);
 --!!            BytesPerTransfer  := AXI_DATA_BYTE_WIDTH ;
 
 --!!            AlertIf(ModelID, BytesPerTransfer /= AXI_DATA_BYTE_WIDTH,
@@ -687,6 +762,8 @@ begin
       end case ;
     end loop DispatchLoop ;
   end process TransactionDispatcher ;
+*/
+/*
 
   ------------------------------------------------------------
   --  WriteAddressHandler
@@ -697,7 +774,9 @@ begin
     variable Local : AxiBus.WriteAddress'subtype ;
     variable WriteAddressReadyTimeOut : integer ;
     variable DelayCycles : integer ; 
+    variable TempLock : std_logic_vector(1 downto 1) ; 
   begin
+  wait ;
     -- Initialize Ports
     -- AXI4 Lite Signaling
     AW.Valid  <= '0' ;
@@ -726,6 +805,18 @@ begin
          WaitForToggle(WriteAddressRequestCount) ;
       end if ;
       (Local.Addr, Local.Len, Local.Prot, Local.ID, Local.Size, Local.Burst, Local.Lock, Local.Cache, Local.QOS, Local.Region, Local.User) := Pop(WriteAddressFifo) ;
+      Pop(WriteAddressFifo, Local.Addr   ) ;
+      Pop(WriteAddressFifo, Local.Len    ) ;
+      Pop(WriteAddressFifo, Local.Prot   ) ;
+      Pop(WriteAddressFifo, Local.ID     ) ;
+      Pop(WriteAddressFifo, Local.Size   ) ;
+      Pop(WriteAddressFifo, Local.Burst  ) ;
+      Pop(WriteAddressFifo, TempLock ) ; -- Local.Lock   ) ; -- bit
+      Local.Lock := TempLock(1) ; 
+      Pop(WriteAddressFifo, Local.Cache  ) ;
+      Pop(WriteAddressFifo, Local.QOS    ) ;
+      Pop(WriteAddressFifo, Local.Region ) ;
+      Pop(WriteAddressFifo, Local.User   ) ;
 
       -- Valid Delay between Transfers
       if UseCoverageDelays then 
@@ -800,9 +891,10 @@ begin
     alias    WD : AxiBus.WriteData'subtype is AxiBus.WriteData ;
     variable Local : AxiBus.WriteData'subtype ;
     variable WriteDataReadyTimeOut : integer ;
-    variable Burst    : std_logic ; 
+    variable Burst       : std_logic ; 
     variable NewTransfer : std_logic := '1' ; 
-    variable DelayCycles : integer ; 
+    variable DelayCycles : integer ;
+    variable TempBurst   : std_logic_vector(2 downto 1) ;     
   begin
     -- initialize
     WD.Valid <= '0' ;
@@ -824,7 +916,13 @@ begin
       if Empty(WriteDataFifo) then
          WaitForToggle(WriteDataRequestCount) ;
       end if ;
-      (Burst, Local.Last, Local.Data, Local.Strb, Local.User, Local.ID) := Pop(WriteDataFifo) ;
+      TempBurst   := Pop(WriteDataFifo) ;
+      Burst       := TempBurst(2) ;
+      Local.Last  := TempBurst(1) ;
+      Local.Data  := Pop(WriteDataFifo) ;
+      Local.Strb  := Pop(WriteDataFifo) ;
+      Local.User  := Pop(WriteDataFifo) ;
+      Local.ID    := Pop(WriteDataFifo) ;
             
       if UseCoverageDelays then 
         -- BurstCoverage Delays
@@ -975,6 +1073,7 @@ begin
     variable Local : AxiBus.ReadAddress'subtype ;
     variable ReadAddressReadyTimeOut : integer ;
     variable DelayCycles : integer ; 
+    variable TempLock : std_logic_vector(1 downto 1) ; 
   begin
     -- AXI4 Lite Signaling
     AR.Valid  <= '0' ;
@@ -1003,6 +1102,20 @@ begin
          WaitForToggle(ReadAddressRequestCount) ;
       end if ;
       (Local.Addr, Local.Len, Local.Prot, Local.ID, Local.Size, Local.Burst, Local.Lock, Local.Cache, Local.QOS, Local.Region, Local.User) := Pop(ReadAddressFifo) ;
+      Pop(ReadAddressFifo, Local.Addr   ) ;
+      Pop(ReadAddressFifo, Local.Len    ) ;
+      Pop(ReadAddressFifo, Local.Prot   ) ;
+      Pop(ReadAddressFifo, Local.ID     ) ;
+      Pop(ReadAddressFifo, Local.Size   ) ;
+      Pop(ReadAddressFifo, Local.Burst  ) ;
+      Pop(ReadAddressFifo, TempLock ) ; -- Local.Lock   ) ; -- bit
+      Local.Lock := TempLock(1) ; 
+      Pop(ReadAddressFifo, Local.Cache  ) ;
+      Pop(ReadAddressFifo, Local.QOS    ) ;
+      Pop(ReadAddressFifo, Local.Region ) ;
+      Pop(ReadAddressFifo, Local.User   ) ;
+      Pop(ReadAddressTransactionFifo, Local.Addr);
+      Pop(ReadAddressTransactionFifo, Local.Prot);
 
       if UseCoverageDelays then 
         -- BurstCoverage Delays
@@ -1067,7 +1180,6 @@ begin
       wait for 0 ns;
     end loop AddressReadLoop ;
   end process ReadAddressHandler ;
-
 
   ------------------------------------------------------------
   --  ReadDataHandler
@@ -1146,4 +1258,5 @@ begin
       FAILURE
     ) ;
   end process ReadDataProtocolChecker ;
+*/
 end architecture AxiFull ;

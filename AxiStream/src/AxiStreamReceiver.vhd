@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      AXI Stream Master Model
+--      AXI Stream Receiver Verification Component
 --
 --
 --  Developed by:
@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedReceiverOperation
 --    05/2023   2023.05    Updated methods for Randomized delays 
 --    04/2023   2023.04    Update delays on TReady to be randomized
 --    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   

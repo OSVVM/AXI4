@@ -1,4 +1,4 @@
-#  File Name:         RunAllTests.pro
+#  File Name:         Axi4.pro
 #  Revision:          STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to run all Axi Stream tests  
+#        Script to compile the Axi4 models  
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -36,15 +36,27 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-#  
-
-# Run AxiStream Tests
-TestSuite AxiStream
-library   osvvm_TbAxiStream
+#
+library osvvm_axi4
+analyze Axi4ComponentPkg.vhd
+analyze Axi4ComponentVtiPkg.vhd
+analyze Axi4Context.vhd
 
 if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
-  include testbench
-  include TestCases
+  analyze Axi4Manager.vhd
+  analyze Axi4ManagerVti.vhd
+  analyze Axi4Monitor_dummy.vhd
+  analyze Axi4Subordinate.vhd
+  analyze Axi4SubordinateVti.vhd
+  analyze Axi4Memory.vhd
+  analyze Axi4MemoryVti.vhd
 } else {
-  include testbench_xilinx
+  analyze Axi4Manager_xilinx.vhd
+#  analyze Axi4ManagerVti.vhd
+  analyze Axi4Monitor_dummy.vhd
+#  analyze Axi4Subordinate.vhd
+#  analyze Axi4SubordinateVti.vhd
+  analyze Axi4Memory_xilinx.vhd
+#  analyze Axi4MemoryVti.vhd
 }
+analyze Axi4PassThru.vhd

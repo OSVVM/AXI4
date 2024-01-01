@@ -1,5 +1,5 @@
-#  File Name:         RunAllTests.pro
-#  Revision:          STANDARD VERSION
+#  File Name:         build.pro
+#  Revision:          OSVVM MODELS STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
 #  Contributor(s):
@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to run all Axi Stream tests  
+#        Script to compile the Axi Stream models  
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -36,15 +36,25 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
-#  
-
-# Run AxiStream Tests
-TestSuite AxiStream
-library   osvvm_TbAxiStream
+#
+library osvvm_axi4
+analyze AxiStreamOptionsPkg.vhd
+analyze AxiStreamOptionsArrayPkg.vhd
+analyze AxiStreamTbPkg.vhd
 
 if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
-  include testbench
-  include TestCases
+  analyze AxiStreamTransmitter.vhd
+  analyze AxiStreamTransmitterVti.vhd
+  analyze AxiStreamReceiver.vhd
+  analyze AxiStreamReceiverVti.vhd
 } else {
-  include testbench_xilinx
+  analyze AxiStreamTransmitter_xilinx.vhd
+#  analyze AxiStreamTransmitterVti_xilinx.vhd
+  analyze AxiStreamReceiver_xilinx.vhd
+#  analyze AxiStreamReceiverVti_xilinx.vhd
 }
+
+analyze AxiStreamComponentPkg.vhd
+analyze AxiStreamContext.vhd
+analyze AxiStreamGenericSignalsPkg.vhd
+analyze AxiStreamSignalsPkg_32.vhd

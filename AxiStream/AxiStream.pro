@@ -37,15 +37,4 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-library osvvm_axi4
-analyze ./src/AxiStreamOptionsPkg.vhd
-analyze ./src/AxiStreamOptionsArrayPkg.vhd
-analyze ./src/AxiStreamTbPkg.vhd
-analyze ./src/AxiStreamTransmitter.vhd
-analyze ./src/AxiStreamTransmitterVti.vhd
-analyze ./src/AxiStreamReceiver.vhd
-analyze ./src/AxiStreamReceiverVti.vhd
-analyze ./src/AxiStreamComponentPkg.vhd
-analyze ./src/AxiStreamContext.vhd
-analyze ./src/AxiStreamGenericSignalsPkg.vhd
-analyze ./src/AxiStreamSignalsPkg_32.vhd
+include src

@@ -41,36 +41,18 @@
 TestSuite Axi4Full
 library osvvm_TbAxi4
 
-include ./testbench
+if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
+  include ./testbench
 
-# Make TestCases the frame of reference
-set ::osvvm::CurrentWorkingDirectory [file join $::osvvm::CurrentWorkingDirectory TestCases]
+  # Make TestCases the frame of reference
+  set ::osvvm::CurrentWorkingDirectory [file join $::osvvm::CurrentWorkingDirectory TestCases]
+  RunTest  TbAxi4_DemoMemoryReadWrite1.vhd
+  RunTest TbAxi4_ManagerRandomTiming1.vhd 
+  RunTest TbAxi4_ManagerMemoryRandomTiming1.vhd 
+  RunTest  TbAxi4_MemoryBurstPattern1.vhd
+} else {
+  SkipTest Axi4VC "AXI4 VC not working in XSIM"
+}
 
-RunTest  TbAxi4_DemoMemoryReadWrite1.vhd
-# RunTest  TbAxi4_DemoErrorMemoryReadWrite1.vhd
 
-RunTest TbAxi4_ManagerRandomTiming1.vhd 
-# RunTest TbAxi4_ManagerRandomTimingAsync1.vhd 
-# RunTest TbAxi4_MemoryRandomTiming1.vhd 
-# RunTest TbAxi4_MemoryRandomTimingAsync1.vhd 
-RunTest TbAxi4_ManagerMemoryRandomTiming1.vhd 
-# RunTest TbAxi4_SubordinateRandomTiming1.vhd
-# RunTest TbAxi4_ManagerSubordinateRandomTiming1.vhd
-# RunTest TbAxi4_ManagerSubordinateRandomTimingAsync1.vhd
-# RunTest TbAxi4_NoRandomTiming1.vhd 
-
-# RunTest  TbAxi4_MemoryReadWriteDebug1.vhd
-
-# RunTest  TbAxi4_AxiXResp3_slv.vhd
-
-# RunTest  TbAxi4_TransactionApiMemoryBurst.vhd
-
-# RunTest  TbAxi4_MemoryBurst1.vhd
-# RunTest  TbAxi4_MemoryBurstAsync1.vhd
-# 
-RunTest  TbAxi4_MemoryBurstPattern1.vhd
-# RunTest  TbAxi4_MemoryBurstPattern2.vhd
-# RunTest  TbAxi4_MemoryBurstBytePattern1.vhd
-# RunTest  TbAxi4_MemoryBurstAsyncPattern1.vhd
-# RunTest  TbAxi4_MemoryBurstAsyncPattern2.vhd
 

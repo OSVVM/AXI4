@@ -42,32 +42,10 @@
 TestSuite AxiStream
 library   osvvm_TbAxiStream
 
-include ./testbench
+if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
+  include testbench
+  include TestCases/build_demo.pro
+} else {
+  include testbench_xilinx/build_demo.pro
+}
 
-RunTest ./TestCases/TbStream_SendGetRandom1.vhd
-RunTest ./TestCases/TbStream_SendGetRandom2.vhd
-# RunTest ./TestCases/TbStream_SendGetRandomDeprecated1.vhd
-# RunTest ./TestCases/TbStream_SendGetAsync1.vhd
-# RunTest ./TestCases/TbStream_SendGetDemo1.vhd
-# RunTest ./TestCases/TbStream_AxiTiming2.vhd
-#RunTest ./TestCases/TbStream_AxiTimingBurst2.vhd
-
-# RunTest  ./TestCases/TbStream_SendCheckBurstByte1.vhd
-# RunTest  ./TestCases/TbStream_SendGetBurstByte1.vhd
-
-# RunTest  ./TestCases/TbStream_SendGetPacketBurst1.vhd
-
-# RunTest ./TestCases/TbStream_WaitForGet1.vhd
-# RunTest ./TestCases/TbStream_WaitForGetAsync1.vhd
-
-# RunTest ./TestCases/TbStream_SendCheckBurstPattern1.vhd
-# RunTest ./TestCases/TbStream_SendCheckBurstPattern2.vhd
-# RunTest ./TestCases/TbStream_SendCheckBurstBytePattern1.vhd
-# RunTest ./TestCases/TbStream_SendCheckBurstAsyncPattern2.vhd
-# RunTest ./TestCases/TbStream_SendCheckBurstAsyncPattern1.vhd
-# RunTest ./TestCases/TbStream_SendCheckBurstByteAsyncPattern1.vhd
-# 
-# RunTest ./TestCases/TbStream_AxiSendCheckBurstPattern1.vhd
-# RunTest ./TestCases/TbStream_AxiSendCheckBurstPattern2.vhd
-# RunTest ./TestCases/TbStream_AxiSendCheckBurstAsyncPattern1.vhd
-# RunTest ./TestCases/TbStream_AxiSendCheckBurstAsyncPattern2.vhd

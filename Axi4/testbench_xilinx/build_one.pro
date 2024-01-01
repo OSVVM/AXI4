@@ -1,4 +1,4 @@
-#  File Name:         RunAllTests.pro
+#  File Name:         testbench.pro
 #  Revision:          STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to run all Axi Stream tests  
+#        Script to run one Axi4 test  
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -37,14 +37,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
+library osvvm_axi4
+analyze ../src/Axi4Manager_xilinx.vhd
+analyze ../src/Axi4Memory_xilinx.vhd
 
-# Run AxiStream Tests
-TestSuite AxiStream
-library   osvvm_TbAxiStream
+library osvvm_TbAxi4_xilinx
 
-if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
-  include testbench
-  include TestCases
-} else {
-  include testbench_xilinx
-}
+analyze  TbAxi4Memory.vhd
+analyze  TbAxi4_DemoMemoryReadWrite1.vhd
+TestName TbAxi4_DemoMemoryReadWrite1
+simulate TbAxi4Memory
+

@@ -1,5 +1,5 @@
-#  File Name:         RunAllTests.pro
-#  Revision:          STANDARD VERSION
+#  File Name:         testbench.pro
+#  Revision:          OSVVM MODELS STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
 #  Contributor(s):
@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to run all Axi Stream tests  
+#        Script to run one Axi4 Lite test  
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -38,13 +38,11 @@
 #  limitations under the License.
 #  
 
-# Run AxiStream Tests
-TestSuite AxiStream
-library   osvvm_TbAxiStream
+library    osvvm_TbAxi4Lite
 
-if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
-  include testbench
-  include TestCases
-} else {
-  include testbench_xilinx
-}
+analyze OsvvmTestCommonPkg.vhd
+
+analyze TestCtrl_e.vhd
+analyze TbAxi4.vhd
+analyze TbAxi4Memory.vhd
+

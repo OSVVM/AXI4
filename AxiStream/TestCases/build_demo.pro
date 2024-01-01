@@ -1,4 +1,4 @@
-#  File Name:         RunAllTests.pro
+#  File Name:         testbench.pro
 #  Revision:          STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to run all Axi Stream tests  
+#        Script to run one Axi Stream test  
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -17,13 +17,16 @@
 #
 #  Revision History:
 #    Date      Version    Description
-#     1/2019   2019.01    Compile Script for OSVVM
+#     1/2022   2022.01    Added Tests
+#     9/2021   2021.09    RunTest replacing analyze + simulate
+#     5/2021   2021.05    Start of Refactoring TestCases
 #     1/2020   2020.01    Updated Licenses to Apache
+#     1/2019   2019.01    Compile Script for OSVVM
 #
 #
 #  This file is part of OSVVM.
 #  
-#  Copyright (c) 2019 - 2020 by SynthWorks Design Inc.  
+#  Copyright (c) 2019 - 2022 by SynthWorks Design Inc.  
 #  
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -38,13 +41,15 @@
 #  limitations under the License.
 #  
 
-# Run AxiStream Tests
-TestSuite AxiStream
-library   osvvm_TbAxiStream
+##
+## Runs in conjunction with either 
+## Testbench/Testbench.pro or TestbenchVTI/TestbenchVTI.pro
+## Continuing with library set previously by the above
+##
 
-if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
-  include testbench
-  include TestCases
-} else {
-  include testbench_xilinx
-}
+## =============================================
+## Run Demo
+RunTest  TbStream_SendGetDemo1.vhd           ; # Demo of Send, Get, and Check of words and bursts
+RunTest  TbStream_SendGetPacketBurst1.vhd    ; # Prototype of burst packetization with FIFO in Byte and then Word mode
+RunTest  TbStream_SendGetRandom1.vhd         ; # Demo of Send, Get, and Check of words and bursts
+RunTest  TbStream_SendGetRandom2.vhd         ; # Demo of Send, Get, and Check of packets with Valid/Ready randomization

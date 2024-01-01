@@ -1,6 +1,6 @@
 --
---  File Name:         AxiStreamTransmitterVti.vhd
---  Design Unit Name:  AxiStreamTransmitterVti
+--  File Name:         AxiStreamTransmitter.vhd
+--  Design Unit Name:  AxiStreamTransmitter
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      AXI Stream Transmitter Verification Component with Virtual Transaction Interface
+--      AXI Stream Transmitter Verification Component
 --
 --
 --  Developed by:
@@ -19,18 +19,23 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedTransmitterOperation
 --    05/2023   2023.05    Updated methods for Randomized delays 
 --    04/2023   2023.04    Update delays on TValid to be randomized
 --    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
 --    03/2022   2022.03    Updated calls to NewID for AlertLogID and FIFOs
---                         Updated handling of TStrb
+--                         Updated TKeep and TStrb generation
 --    02/2022   2022.02    Replaced to_hstring to to_hxstring
 --    01/2022   2022.01    Moved MODEL_INSTANCE_NAME and MODEL_NAME to entity declarative region
 --    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
 --    06/2021   2021.06    Updated Burst FIFOs.
 --    02/2021   2021.02    Added Valid Delays.  Added MultiDriver Detect.  Updated Generics.
---    12/2020   2020.12    Created Virtual Transaction Interface from AxiStreamTransmitter.vhd
+--    10/2020   2020.10    Added Bursting per updates to Model Independent Transactions
+--    07/2020   2020.07    Updated for Streaming Model Independent Transactions
+--    01/2020   2020.01    Updated license notice
+--    05/2018   2018.05    First Release
+--
 --
 --  This file is part of OSVVM.
 --
@@ -66,7 +71,7 @@ library osvvm_common ;
   use work.Axi4CommonPkg.all ;
   use work.AxiStreamTbPkg.all ;
 
-entity AxiStreamTransmitterVti is
+entity AxiStreamTransmitter is
   generic (
     MODEL_ID_NAME  : string := "" ;
     INIT_ID        : std_logic_vector := "" ;
@@ -101,30 +106,23 @@ entity AxiStreamTransmitterVti is
     TData     : out std_logic_vector ;
     TStrb     : out std_logic_vector ;
     TKeep     : out std_logic_vector ;
-    TLast     : out std_logic
+    TLast     : out std_logic ;
+
+    -- Testbench Transaction Interface
+    TransRec  : inout StreamRecType
   ) ;
 
   -- Derive AXI interface properties from interface signals
   constant AXI_STREAM_DATA_WIDTH   : integer := TData'length ;
-  constant AXI_STREAM_PARAM_WIDTH  : integer := TID'length + TDest'length + TUser'length + 1 ;
-
-  -- Testbench Transaction Interface
-  -- Access via external names
-  signal TransRec  : StreamRecType (
-    DataToModel   (AXI_STREAM_DATA_WIDTH-1  downto 0),
-    DataFromModel (AXI_STREAM_DATA_WIDTH-1  downto 0),
-    ParamToModel  (AXI_STREAM_PARAM_WIDTH-1 downto 0),
-    ParamFromModel(AXI_STREAM_PARAM_WIDTH-1 downto 0)
-  ) ;
 
   -- Use MODEL_ID_NAME Generic if set, otherwise,
   -- use model instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
-    IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, 
-      to_lower(PathTail(AxiStreamTransmitterVti'PATH_NAME))) ;
+    ifelse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, 
+      to_lower(PathTail(AxiStreamTransmitter'PATH_NAME))) ;
 
-end entity AxiStreamTransmitterVti ;
-architecture SimpleTransmitter of AxiStreamTransmitterVti is
+end entity AxiStreamTransmitter ;
+architecture SimpleTransmitter of AxiStreamTransmitter is
   signal ModelID, BusFailedID : AlertLogIDType ;
 --  signal ProtocolID, DataCheckID : AlertLogIDType ;
   signal BurstCov : DelayCoverageIDType ;
@@ -185,9 +183,13 @@ begin
     variable Last : std_logic ;
     variable User : std_logic_vector(TUser'range) ;
   begin
+    log("Tx Rdy: " & to_string(TransRec.Rdy) & ",  Tx Ack: " & to_string(TransRec.Ack), DEBUG) ; --x
+    TransRec.Rdy <= 0 ;   --x bug work around
+    TransRec.Ack <= -1 ;   --x bug work around
     wait for 0 ns ; 
     TransRec.BurstFifo <= NewID("TxBurstFifo", ModelID, Search => PRIVATE_NAME) ;
     BurstCov           <= NewID("DelayCov", ModelID, ReportMode => DISABLED, Search => NAME_AND_PARENT) ;
+    log("Tx Rdy: " & to_string(TransRec.Rdy) & ",  Tx Ack: " & to_string(TransRec.Ack), DEBUG) ; --x
     
     DispatchLoop : loop 
       WaitForTransaction(
@@ -195,6 +197,8 @@ begin
          Rdy      => TransRec.Rdy,
          Ack      => TransRec.Ack
       ) ;
+      log("Tx Operation: " & to_string(TransRec.Operation), DEBUG) ; --x
+      log("Tx Rdy: " & to_string(TransRec.Rdy) & ",  Tx Ack: " & to_string(TransRec.Ack), DEBUG) ; --x
 
       case TransRec.Operation is
         when WAIT_FOR_CLOCK =>
@@ -357,13 +361,15 @@ begin
               Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
           end case ;
 
-        when MULTIPLE_DRIVER_DETECT =>
-          Alert(ModelID, "Multiple Drivers on Transaction Record." & 
-                         "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
+--!! Replaced by ClassifyUnimplementedTransmitterOperation
+--        when MULTIPLE_DRIVER_DETECT =>
+--          Alert(ModelID, "Multiple Drivers on Transaction Record." & 
+--                         "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
 
         -- The End -- Done
         when others =>
-          Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
+--          Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
+          Alert(ModelID, ClassifyUnimplementedTransmitterOperation(TransRec.Operation, TransRec.Rdy), FAILURE) ;
       end case ;
 
       -- Wait for 1 delta cycle, required if a wait is not in all case branches above
@@ -505,5 +511,3 @@ begin
     end loop TransmitLoop ;
   end process TransmitHandler ;
 end architecture SimpleTransmitter ;
-
-

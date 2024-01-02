@@ -194,28 +194,42 @@ begin
   --  Initialize AlertLogIDs
   ------------------------------------------------------------
   InitalizeAlertLogIDs : process
-    variable ID : AlertLogIDType ;
+    variable ID      : AlertLogIDType ;
+    variable vMemID  : MemoryIDType ; 
     variable vParams : ModelParametersIDType ; 
   begin
+  
+    if MODEL_INSTANCE_NAME /= LOCAL_MEMORY_NAME then 
+      -- No Match:  update the Memory Data Structure ParentID to the VC ID 
+      ID  := NewID(MODEL_INSTANCE_NAME) ;
+      vMemID := NewID(
+        Name       => LOCAL_MEMORY_NAME, 
+        AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
+        DataWidth  => 8,               -- Memory is byte oriented
+        ParentID   => ID, 
+        Search     => NAME
+      ) ; 
+    else
+      -- Match: make the VC AlertLogID = Memory Data Structure AlertLogID and ParentID = ALERTLOG_BASE_ID
+      vMemID := NewID(
+        Name       => LOCAL_MEMORY_NAME, 
+        AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
+        DataWidth  => 8,               -- Memory is byte oriented
+        ParentID   => ALERTLOG_BASE_ID, 
+        Search     => NAME
+      ) ; 
+      ID := GetAlertLogID(vMemID) ; 
+    end if  ;
+    MemoryID  <= vMemID ; 
+    ModelID   <= ID ;
+
     -- Alerts
-    ID           := NewID(MODEL_INSTANCE_NAME) ;
-    ModelID      <= ID ;
     BusFailedID  <= NewID("No response", ID ) ;
     DataCheckID  <= NewID("Data Check", ID ) ;
     
     vParams                 := NewID("Axi4Memory Parameters", to_integer(OPTIONS_MARKER), ID) ; 
     InitAxiOptions(vParams) ;
     Params                  <= vParams ; 
-
-    -- MEMORY_NAME
-    MemoryID <= NewID(
-      Name       => LOCAL_MEMORY_NAME, 
-      AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
-      DataWidth  => 8,               -- Memory is byte oriented
-      ParentID   => ID, 
-      Search     => NAME
-    ) ; 
-
 
     -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
     --   FIFOS only generate usage type errors 

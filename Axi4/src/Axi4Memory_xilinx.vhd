@@ -188,11 +188,33 @@ begin
   --  Initialize AlertLogIDs
   ------------------------------------------------------------
   InitalizeAlertLogIDs : process
-    variable ID : AlertLogIDType ;
+    variable ID, ParentID : AlertLogIDType ;
+    variable vMemID  : MemoryIDType ; 
     variable vParams : ModelParametersIDType ; 
   begin
+  
+    ID  := NewID(MODEL_INSTANCE_NAME) ;
+    ModelID   <= ID ;
+
+    -- Select ParentID for Memory Model
+    if MODEL_INSTANCE_NAME /= LOCAL_MEMORY_NAME then 
+      -- No Match:  Memory Model is a child of this ID 
+      ParentID := ID ; 
+    else
+      -- Match: Memory Data Structure uses same AlertLogID as VC
+      ParentID := ALERTLOG_BASE_ID ; 
+    end if ; 
+    
+    vMemID := NewID(
+      Name       => LOCAL_MEMORY_NAME, 
+      AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
+      DataWidth  => 8,               -- Memory is byte oriented
+      ParentID   => ParentID, 
+      Search     => NAME
+    ) ; 
+    MemoryID  <= vMemID ; 
+
     -- Alerts
-    ID           := NewID(MODEL_INSTANCE_NAME) ;
     ModelID      <= ID ;
     BusFailedID  <= NewID("No response", ID ) ;
     DataCheckID  <= NewID("Data Check", ID ) ;
@@ -200,15 +222,6 @@ begin
     vParams                 := NewID("Axi4Memory Parameters", to_integer(OPTIONS_MARKER), ID) ; 
     InitAxiOptions(vParams) ;
     Params                  <= vParams ; 
-
-    -- MEMORY_NAME
-    MemoryID <= NewID(
-      Name       => LOCAL_MEMORY_NAME, 
-      AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
-      DataWidth  => 8,               -- Memory is byte oriented
-      ParentID   => ID, 
-      Search     => NAME
-    ) ; 
 
     -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
     --   FIFOS only generate usage type errors 

@@ -169,34 +169,31 @@ begin
   --  Initialize AlertLogIDs
   ------------------------------------------------------------
   InitalizeAlertLogIDs : process
-    variable ID      : AlertLogIDType ;
+    variable ID, ParentID : AlertLogIDType ;
     variable vMemID  : MemoryIDType ; 
     variable vParams : ModelParametersIDType ; 
   begin
   
-    if MODEL_INSTANCE_NAME /= LOCAL_MEMORY_NAME then 
-      -- No Match:  update the Memory Data Structure ParentID to the VC ID 
-      ID  := NewID(MODEL_INSTANCE_NAME) ;
-      vMemID := NewID(
-        Name       => LOCAL_MEMORY_NAME, 
-        AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
-        DataWidth  => 8,               -- Memory is byte oriented
-        ParentID   => ID, 
-        Search     => NAME
-      ) ; 
-    else
-      -- Match: make the VC AlertLogID = Memory Data Structure AlertLogID and ParentID = ALERTLOG_BASE_ID
-      vMemID := NewID(
-        Name       => LOCAL_MEMORY_NAME, 
-        AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
-        DataWidth  => 8,               -- Memory is byte oriented
-        ParentID   => ALERTLOG_BASE_ID, 
-        Search     => NAME
-      ) ; 
-      ID := GetAlertLogID(vMemID) ; 
-    end if  ;
-    MemoryID  <= vMemID ; 
+    ID  := NewID(MODEL_INSTANCE_NAME) ;
     ModelID   <= ID ;
+
+    -- Select ParentID for Memory Model
+    if MODEL_INSTANCE_NAME /= LOCAL_MEMORY_NAME then 
+      -- No Match:  Memory Model is a child of this ID 
+      ParentID := ID ; 
+    else
+      -- Match: Memory Data Structure uses same AlertLogID as VC
+      ParentID := ALERTLOG_BASE_ID ; 
+    end if ; 
+    
+    vMemID := NewID(
+      Name       => LOCAL_MEMORY_NAME, 
+      AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
+      DataWidth  => 8,               -- Memory is byte oriented
+      ParentID   => ParentID, 
+      Search     => NAME
+    ) ; 
+    MemoryID  <= vMemID ; 
 
     -- Alerts
     BusFailedID  <= NewID("No response", ID ) ;

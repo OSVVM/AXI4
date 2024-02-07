@@ -71,7 +71,9 @@ begin
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
-    AffirmIfNotDiff(GetTranscriptName, OSVVM_VALIDATED_RESULTS_DIR & GetTranscriptName, "") ;   
+    AffirmIfTranscriptsMatch(OSVVM_VALIDATED_RESULTS_DIR) ;   
+   
+   
     
     EndOfTestReports ; 
     std.env.stop ; 

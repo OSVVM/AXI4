@@ -72,7 +72,7 @@ begin
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
-    -- AffirmIfNotDiff(GetTranscriptName, OSVVM_VALIDATED_RESULTS_DIR & GetTranscriptName, "") ;   
+    -- AffirmIfTranscriptsMatch(OSVVM_VALIDATED_RESULTS_DIR) ;   
     -- Miscompares between AR and MQ.
     --   Ordering of printing of receiver: ReadBurst and Transmitter: Data value when WaitForTransaction not separating bursts. 
     

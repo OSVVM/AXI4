@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    03/2024   2024.03    Updated SafeResize to use ModelID
 --    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedTransmitterOperation
 --    05/2023   2023.05    Updated methods for Randomized delays 
 --    04/2023   2023.04    Update delays on TValid to be randomized
@@ -233,9 +234,9 @@ begin
           TransRec.IntFromModel <= BurstFifoMode ;
 
         when SEND | SEND_ASYNC =>
-          Data   := SafeResize(TransRec.DataToModel, Data'length) ;
+          Data   := SafeResize(ModelID, TransRec.DataToModel, Data'length) ;
           Param  := UpdateOptions(
-                      Param      => SafeResize(TransRec.ParamToModel, TransRec.ParamToModel'length),
+                      Param      => SafeResize(ModelID, TransRec.ParamToModel, TransRec.ParamToModel'length),
                       ParamID    => ParamID,
                       ParamDest  => ParamDest,
                       ParamUser  => ParamUser,
@@ -251,7 +252,7 @@ begin
 
         when SEND_BURST | SEND_BURST_ASYNC =>
           Param  := UpdateOptions(
-                      Param      => SafeResize(TransRec.ParamToModel, TransRec.ParamToModel'length),
+                      Param      => SafeResize(ModelID, TransRec.ParamToModel, TransRec.ParamToModel'length),
                       ParamID    => ParamID,
                       ParamDest  => ParamDest,
                       ParamUser  => ParamUser,
@@ -311,13 +312,13 @@ begin
               TransmitReadyTimeOut      <= TransRec.IntToModel ;
 
             when DEFAULT_ID =>
-              ParamID         <= SafeResize(TransRec.ParamToModel, ParamID'length) ;
+              ParamID         <= SafeResize(ModelID, TransRec.ParamToModel, ParamID'length) ;
 
             when DEFAULT_DEST =>
-              ParamDest       <= SafeResize(TransRec.ParamToModel, ParamDest'length) ;
+              ParamDest       <= SafeResize(ModelID, TransRec.ParamToModel, ParamDest'length) ;
 
             when DEFAULT_USER =>
-              ParamUser       <= SafeResize(TransRec.ParamToModel, ParamUser'length) ;
+              ParamUser       <= SafeResize(ModelID, TransRec.ParamToModel, ParamUser'length) ;
 
             when DEFAULT_LAST =>
               ParamLast       <= TransRec.IntToModel ;
@@ -340,13 +341,13 @@ begin
               TransRec.IntFromModel   <=  TransmitReadyTimeOut ;
 
             when DEFAULT_ID =>
-              TransRec.ParamFromModel <= SafeResize(ParamID, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ModelID, ParamID, TransRec.ParamFromModel'length) ;
 
             when DEFAULT_DEST =>
-              TransRec.ParamFromModel <= SafeResize(ParamDest, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ModelID, ParamDest, TransRec.ParamFromModel'length) ;
 
             when DEFAULT_USER =>
-              TransRec.ParamFromModel <= SafeResize(ParamUser, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ModelID, ParamUser, TransRec.ParamFromModel'length) ;
 
             when DEFAULT_LAST =>
               TransRec.IntFromModel   <= ParamLast ;

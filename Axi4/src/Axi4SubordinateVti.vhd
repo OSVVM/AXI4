@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    03/2024   2024.03    Updated SafeResize to use ModelID
 --    01/2024   2024.01    Updated Params to use singleton data structure
 --    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedOperation
 --    05/2023   2023.05    Adding Randomization of Valid and Ready timing   
@@ -358,7 +359,7 @@ begin
             end if ;
 
             (LocalAW.Addr, LocalAW.Prot) := pop(WriteAddressFifo) ;
-            TransRec.Address       <= SafeResize(LocalAW.Addr, TransRec.Address'length) ;
+            TransRec.Address       <= SafeResize(ModelID, LocalAW.Addr, TransRec.Address'length) ;
             WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
 
   --!! Address checks intentionally removed - only want an error if the value changes.  
@@ -397,7 +398,7 @@ begin
 
             
             LocalWD.Data := AlignDataBusToBytes(LocalWD.Data, TransRec.DataWidth, WriteByteAddr) ;
-            TransRec.DataFromModel  <= SafeResize(LocalWD.Data, TransRec.DataFromModel'length) ;
+            TransRec.DataFromModel  <= SafeResize(ModelID, LocalWD.Data, TransRec.DataFromModel'length) ;
             
             if LocalWD.Last = '1' then
               WriteDataTransactionCount := Increment(WriteDataTransactionCount) ; 
@@ -454,7 +455,7 @@ begin
               WaitForToggle(ReadAddressReceiveCount) ;
             end if ;
             (LocalAR.Addr, LocalAR.Prot)  := pop(ReadAddressFifo) ;
-            TransRec.Address         <= SafeResize(LocalAR.Addr, TransRec.Address'length) ;
+            TransRec.Address         <= SafeResize(ModelID, LocalAR.Addr, TransRec.Address'length) ;
   --         AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Slave Read, Address length does not match", FAILURE) ;
   --!TODO Add Check here for actual PROT vs expected (ModelRProt)
   --        TransRec.Prot           <= to_integer(LocalAR.Prot) ;
@@ -469,7 +470,7 @@ begin
             CheckDataWidth  (ModelID, TransRec.DataWidth, ReadByteAddr, AXI_DATA_WIDTH, "Read Data", ReadDataRequestCount) ; 
    
             -- Get Read Data Response Values
-            LocalRD.Data  := AlignBytesToDataBus(SafeResize(TransRec.DataToModel, LocalRD.Data'length), TransRec.DataWidth, ReadByteAddr) ;
+            LocalRD.Data  := AlignBytesToDataBus(SafeResize(ModelID, TransRec.DataToModel, LocalRD.Data'length), TransRec.DataWidth, ReadByteAddr) ;
             push(ReadDataFifo, LocalRD.Data & ModelRResp) ;
             Increment(ReadDataRequestCount) ;
 

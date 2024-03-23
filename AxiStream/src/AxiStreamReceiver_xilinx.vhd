@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    03/2024   2024.03    Updated SafeResize to use ModelID
 --    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedReceiverOperation
 --    05/2023   2023.05    Updated methods for Randomized delays 
 --    04/2023   2023.04    Update delays on TReady to be randomized
@@ -306,8 +307,8 @@ begin
               (Data, Param, BurstBoundary) := pop(ReceiveFifo) ;
               BurstTransferCount := BurstTransferCount + 1 ;
             end if ;
-            TransRec.DataFromModel  <= SafeResize(Data, TransRec.DataFromModel'length) ;
-            TransRec.ParamFromModel <= SafeResize(Param, TransRec.ParamFromModel'length) ;
+            TransRec.DataFromModel  <= SafeResize(ModelID, Data, TransRec.DataFromModel'length) ;
+            TransRec.ParamFromModel <= SafeResize(ModelID, Param, TransRec.ParamFromModel'length) ;
 
             -- Param: (TID & TDest & TUser & TLast)
             if Param(0) = '1' then
@@ -315,9 +316,9 @@ begin
             end if ;
 
             if IsCheck(Operation) then
-              ExpectedData  := SafeResize(TransRec.DataToModel, ExpectedData'length) ;
+              ExpectedData  := SafeResize(ModelID, TransRec.DataToModel, ExpectedData'length) ;
               ExpectedParam  := UpdateOptions(
-                          Param      => SafeResize(TransRec.ParamToModel, ExpectedParam'length),
+                          Param      => SafeResize(ModelID, TransRec.ParamToModel, ExpectedParam'length),
                           ParamID    => ParamID,
                           ParamDest  => ParamDest,
                           ParamUser  => ParamUser,
@@ -401,8 +402,8 @@ begin
 
             BurstTransferCount      := BurstTransferCount + 1 ;
             TransRec.IntFromModel   <= FifoWordCount ;
-            TransRec.DataFromModel  <= SafeResize(Data, TransRec.DataFromModel'length) ;
-            TransRec.ParamFromModel <= SafeResize(Param, TransRec.ParamFromModel'length) ;
+            TransRec.DataFromModel  <= SafeResize(ModelID, Data, TransRec.DataFromModel'length) ;
+            TransRec.ParamFromModel <= SafeResize(ModelID, Param, TransRec.ParamFromModel'length) ;
 
             Log(ModelID,
               "Burst Receive. " &
@@ -477,8 +478,8 @@ begin
 
             BurstTransferCount      := BurstTransferCount + 1 ;
             TransRec.IntFromModel   <= FifoWordCount ;
-            TransRec.DataFromModel  <= SafeResize(Data, TransRec.DataFromModel'length) ;
-            TransRec.ParamFromModel <= SafeResize(Param, TransRec.ParamFromModel'length) ;
+            TransRec.DataFromModel  <= SafeResize(ModelID, Data, TransRec.DataFromModel'length) ;
+            TransRec.ParamFromModel <= SafeResize(ModelID, Param, TransRec.ParamFromModel'length) ;
 
             Log(ModelID,
               "Burst Check. " &
@@ -494,7 +495,7 @@ begin
             end if ;
             AffirmIfEqual(ModelID, FifoWordCount, CheckWordCount, "Burst Check WordCount") ;
             ExpectedParam  := UpdateOptions(
-                        Param      => SafeResize(TransRec.ParamToModel, ExpectedParam'length),
+                        Param      => SafeResize(ModelID, TransRec.ParamToModel, ExpectedParam'length),
                         ParamID    => ParamID,
                         ParamDest  => ParamDest,
                         ParamUser  => ParamUser,
@@ -538,13 +539,13 @@ begin
               DropUndriven    := TransRec.BoolToModel ;
 
             when DEFAULT_ID =>
-              ParamID         <= SafeResize(TransRec.ParamToModel, ParamID'length) ;
+              ParamID         <= SafeResize(ModelID, TransRec.ParamToModel, ParamID'length) ;
 
             when DEFAULT_DEST =>
-              ParamDest       <= SafeResize(TransRec.ParamToModel, ParamDest'length) ;
+              ParamDest       <= SafeResize(ModelID, TransRec.ParamToModel, ParamDest'length) ;
 
             when DEFAULT_USER =>
-              ParamUser       <= SafeResize(TransRec.ParamToModel, ParamUser'length) ;
+              ParamUser       <= SafeResize(ModelID, TransRec.ParamToModel, ParamUser'length) ;
 
             when DEFAULT_LAST =>
               ParamLast       <= TransRec.IntToModel ;
@@ -570,13 +571,13 @@ begin
               TransRec.BoolFromModel <= DropUndriven ;
 
             when DEFAULT_ID =>
-              TransRec.ParamFromModel <= SafeResize(ParamID, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ModelID, ParamID, TransRec.ParamFromModel'length) ;
 
             when DEFAULT_DEST =>
-              TransRec.ParamFromModel <= SafeResize(ParamDest, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ModelID, ParamDest, TransRec.ParamFromModel'length) ;
 
             when DEFAULT_USER =>
-              TransRec.ParamFromModel <= SafeResize(ParamUser, TransRec.ParamFromModel'length) ;
+              TransRec.ParamFromModel <= SafeResize(ModelID, ParamUser, TransRec.ParamFromModel'length) ;
 
             when DEFAULT_LAST =>
               TransRec.IntFromModel   <= ParamLast ;

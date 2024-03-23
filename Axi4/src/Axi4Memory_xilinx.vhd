@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    03/2024   2024.03    Updated SafeResize to use ModelID
 --    01/2024   2024.01    Updated Params to use singleton data structure
 --    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedOperation
 --    05/2023   2023.05    Adding Randomization of Valid and Ready timing   
@@ -336,8 +337,8 @@ begin
 
         when WRITE_OP =>
           -- Back door Write access to memory.  Completes without time passing.
-          Address    := SafeResize(TransRec.Address, Address'length) ;
-          Data       := SafeResize(TransRec.DataToModel, Data'length) ;
+          Address    := SafeResize(ModelID, TransRec.Address, Address'length) ;
+          Data       := SafeResize(ModelID, TransRec.DataToModel, Data'length) ;
           DataWidth  := TransRec.DataWidth ;
           NumBytes   := DataWidth / 8 ;
 
@@ -352,7 +353,7 @@ begin
 
         when READ_OP | READ_CHECK =>
           -- Back door Read access to memory.  Completes without time passing.
-          Address    := SafeResize(TransRec.Address, Address'length) ;
+          Address    := SafeResize(ModelID, TransRec.Address, Address'length) ;
   --        ByteAddr   := CalculateByteAddress(Address, AXI_BYTE_ADDR_WIDTH);
           Data       := (others => '0') ;
           DataWidth  := TransRec.DataWidth ;
@@ -368,10 +369,10 @@ begin
             Data((8*i + 7)  downto 8*i) := ByteData ;
           end loop ;
 
-          TransRec.DataFromModel <= SafeResize(Data, TransRec.DataFromModel'length) ;
+          TransRec.DataFromModel <= SafeResize(ModelID, Data, TransRec.DataFromModel'length) ;
 
           if IsReadCheck(TransRec.Operation) then
-            ExpectedData := SafeResize(TransRec.DataToModel, ExpectedData'length) ;
+            ExpectedData := SafeResize(ModelID, TransRec.DataToModel, ExpectedData'length) ;
             AffirmIf( DataCheckID, Data = ExpectedData,
               "Read Address: " & to_hxstring(Address) &
               "  Data: " & to_hxstring(Data) &

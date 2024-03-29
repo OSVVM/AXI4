@@ -2,6 +2,7 @@
 
 | Revision  |  Release Summary | 
 ------------|----------- 
+| 2024.04   |  Updated SafeResize to include ModelID.
 | 2023.09   |  Updated Unimplemented Transaction messages in VC.
 | 2023.05   |  Beta implementation of randomizing Ready and Valid in Axi4 Full VC and AxiStream VC.
 | 2023.04   |  Alpha implementation of randomizing TReady and TValid delays in AxiStreamTransmitter and AxiStreamReceiver
@@ -27,6 +28,14 @@
 | 2020.07   |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
 | 2020.02   |  Initial version of AddressBusTransactionPkg.
 | 2018.04   |  Initial public release
+
+## 2024.03 March 2024
+Updated SafeResize to include ModelID
+In test cases, added AffirmIfTranscriptsMatch to check transcripts
+Params now use singleton in transaction record rather than protected type
+
+## 2023.09 September 2023
+Updated Unimplemented Transaction messages in VC.
 
 ## 2023.05 May 2023
 - Beta implementation of randomizing Ready and Valid in:

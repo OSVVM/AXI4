@@ -38,14 +38,14 @@
 #  limitations under the License.
 #  
 
-# RunTest TbAxi4_RandomReadWrite.vhd
+RunTest TbAxi4_RandomReadWrite.vhd
 # RunTest TbAxi4_AxiXResp2_Enum.vhd
 
 # Testing Valid and Ready Randomization
 # RunTest TbAxi4_NoRandomTiming1.vhd
 # RunTest TbAxi4_ManagerRandomTiming1.vhd
 # RunTest TbAxi4_MemoryRandomTiming1.vhd
-RunTest TbAxi4_SubordinateRandomTiming1.vhd
+# RunTest TbAxi4_SubordinateRandomTiming1.vhd
 # RunTest TbAxi4_ManagerMemoryRandomTiming1.vhd
 # RunTest TbAxi4_ManagerSubordinateRandomTiming1.vhd
 

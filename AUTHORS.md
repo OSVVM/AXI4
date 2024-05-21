@@ -9,13 +9,25 @@
 #### [Patrick Lehmann](https://opensource.ieee.org/patrick.lehmann)
 * Maintainer / Contributor
 
+## OSVVM Project Contributors - The people who contribute to OSVVM
+
+#### [Jim Lewis](https://opensource.ieee.org/jim)
+* Technical/Project lead
+* Maintainer / Contributor
+* email: jim (at) synthworks.com
+
+#### [Patrick Lehmann](https://opensource.ieee.org/patrick.lehmann)
+* Maintainer / Contributor
+
+#### [Rob Gaddi](https://opensource.ieee.org/)
+* Contributor
+
+### [Full contributors list](https://github.com/OSVVM/AXI4/graphs/contributors)
+
 ## Participating  
 The OSVVM project welcomes your participation with either 
 issue reports or pull requests.
-For details on [how to participate see](https://opensource.ieee.org/osvvm/OsvvmLibraries/-/blob/master/CONTRIBUTING.md)
-
-You can find the project
-[Contributors here](CONTRIBUTORS.md).
+For details on [how to participate see](https://github.com/OSVVM/OsvvmLibraries/blob/main/CONTRIBUTING.md)
 
 
 

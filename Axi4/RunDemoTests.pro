@@ -47,8 +47,8 @@ if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
   # Make TestCases the frame of reference
   set ::osvvm::CurrentWorkingDirectory [file join $::osvvm::CurrentWorkingDirectory TestCases]
   RunTest  TbAxi4_DemoMemoryReadWrite1.vhd
-  RunTest TbAxi4_ManagerRandomTiming1.vhd 
-  RunTest TbAxi4_ManagerMemoryRandomTiming1.vhd 
+  RunTest  TbAxi4_ManagerRandomTiming1.vhd 
+  RunTest  TbAxi4_ManagerMemoryRandomTiming1.vhd 
   RunTest  TbAxi4_MemoryBurstPattern1.vhd
 } else {
   SkipTest Axi4VC "AXI4 VC not working in XSIM"

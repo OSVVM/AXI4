@@ -71,7 +71,7 @@ begin
     AlertIf(now >= 35 ms, "Test finished due to timeout") ;
 --    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
-    AffirmIf(GetAlertCount = (FAILURE => 1, ERROR => 0, WARNING => 0), "Expecting: (FAILURE => 1, ERROR => 0, WARNING => 0)") ;
+    AffirmIf(GetAlertCount = AlertCountType'(FAILURE => 1, ERROR => 0, WARNING => 0), "Expecting: (FAILURE => 1, ERROR => 0, WARNING => 0)") ;
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
     -- AlertIfDiff("./results/TbAxi4_MultipleDriversMemory.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MultipleDriversMemory.txt", "") ; 

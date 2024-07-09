@@ -635,7 +635,7 @@ begin
     AddCross(BurstCov.BeatDelayCov,     5, GenBin(1), GenBin(0)) ;       --  5% Ready After Valid, no delay
     AddCross(BurstCov.BeatDelayCov,     5, GenBin(1), GenBin(1)) ;       --  5% Ready After Valid, 1 cycle delay
 
-    WaitForBarrier(VcInit) ;
+    WaitForBarrier(OsvvmVcInit) ;
     ReceiveLoop : loop
 
       if WaitForGet then 

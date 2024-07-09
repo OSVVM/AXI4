@@ -70,10 +70,9 @@ begin
     AlertIf(now >= 35 ms, "Test finished due to timeout") ;
 --    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
+    AffirmIf(GetAlertCount = (FAILURE => 1, ERROR => 0, WARNING => 0), "Expecting: (FAILURE => 1, ERROR => 0, WARNING => 0)") ;
     TranscriptClose ; 
     AffirmIfTranscriptsMatch(OSVVM_VALIDATED_RESULTS_DIR) ;   
-   
-   
     
     EndOfTestReports(ExternalErrors => (FAILURE => -1, ERROR => 0, WARNING => 0)) ; 
     std.env.stop ;

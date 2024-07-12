@@ -208,16 +208,16 @@ begin
     InitAxiOptions(vParams) ;
     Params                  <= vParams ; 
 
-    WriteResponseScoreboard <= NewID("WriteResponse Scoreboard", ID, Search => PRIVATE_NAME);
-    ReadResponseScoreboard  <= NewID("ReadResponse Scoreboard",  ID, Search => PRIVATE_NAME);
+    WriteResponseScoreboard <= NewID("WriteResp SB", ID, Search => PRIVATE_NAME);
+    ReadResponseScoreboard  <= NewID("ReadResp SB",  ID, Search => PRIVATE_NAME);
 
     -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
     --   FIFOS only generate usage type errors 
-    WriteAddressFifo           <= NewID("WriteAddressFIFO",             ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    WriteDataFifo              <= NewID("WriteDataFifo",                ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    ReadAddressFifo            <= NewID("ReadAddressFifo",              ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    ReadAddressTransactionFifo <= NewID("ReadAddressTransactionFifo",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    ReadDataFifo               <= NewID("ReadDataFifo",                 ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    WriteAddressFifo           <= NewID("WriteAddrFifo",     ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    WriteDataFifo              <= NewID("WriteDataFifo",     ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    ReadAddressFifo            <= NewID("ReadAddrFifo",      ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    ReadAddressTransactionFifo <= NewID("ReadByteAddrFifo",  ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    ReadDataFifo               <= NewID("ReadDataFifo",      ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
 
     wait ;
   end process Initialize ;
@@ -271,13 +271,13 @@ begin
     
     wait for 0 ns ; -- Allow ModelID to become valid
     TransRec.Params         <= Params ; 
-    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo",         ModelID, Search => PRIVATE_NAME) ;
-    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",          ModelID, Search => PRIVATE_NAME) ;
-    WriteAddressDelayCov    <= NewID("WriteAddressDelayCov",   ModelID, ReportMode => DISABLED) ; 
-    WriteDataDelayCov       <= NewID("WriteDataDelayCov",      ModelID, ReportMode => DISABLED) ; 
-    WriteResponseDelayCov   <= NewID("WriteResponseDelayCov",  ModelID, ReportMode => DISABLED) ; 
-    ReadAddressDelayCov     <= NewID("ReadAddressDelayCov",    ModelID, ReportMode => DISABLED) ; 
-    ReadDataDelayCov        <= NewID("ReadDataDelayCov",       ModelID, ReportMode => DISABLED) ; 
+    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo",      ModelID, Search => PRIVATE_NAME) ;
+    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",       ModelID, Search => PRIVATE_NAME) ;
+    WriteAddressDelayCov    <= NewID("WriteAddrDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    WriteDataDelayCov       <= NewID("WriteDataDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    WriteResponseDelayCov   <= NewID("WriteRespDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    ReadAddressDelayCov     <= NewID("ReadAddrDelayCov",    ModelID, ReportMode => DISABLED) ; 
+    ReadDataDelayCov        <= NewID("ReadDataDelayCov",    ModelID, ReportMode => DISABLED) ; 
     
 --!! AWCache, ARCache Defaults
     DispatchLoop : loop

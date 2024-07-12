@@ -206,11 +206,11 @@ begin
 
     -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
     --   FIFOS only generate usage type errors 
-    WriteAddressFifo    <= NewID("WriteAddressFIFO",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    WriteDataFifo       <= NewID("WriteDataFifo",      ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    WriteResponseFifo   <= NewID("WriteResponseFifo",  ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    ReadAddressFifo     <= NewID("ReadAddressFifo",    ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    ReadDataFifo        <= NewID("ReadDataFifo",       ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    WriteAddressFifo    <= NewID("WriteAddrFifo",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    WriteDataFifo       <= NewID("WriteDataFifo",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    WriteResponseFifo   <= NewID("WriteRespFifo",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    ReadAddressFifo     <= NewID("ReadAddrFifo",    ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    ReadDataFifo        <= NewID("ReadDataFifo",    ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
     wait ;
   end process InitalizeAlertLogIDs ;
 
@@ -236,11 +236,11 @@ begin
 -- AxiLite does not support bursts
 --    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo",         ModelID, Search => PRIVATE_NAME) ;
 --    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",          ModelID, Search => PRIVATE_NAME) ;
-    WriteAddressDelayCov    <= NewID("WriteAddressDelayCov",   ModelID, ReportMode => DISABLED) ; 
-    WriteDataDelayCov       <= NewID("WriteDataDelayCov",      ModelID, ReportMode => DISABLED) ; 
-    WriteResponseDelayCov   <= NewID("WriteResponseDelayCov",  ModelID, ReportMode => DISABLED) ; 
-    ReadAddressDelayCov     <= NewID("ReadAddressDelayCov",    ModelID, ReportMode => DISABLED) ; 
-    ReadDataDelayCov        <= NewID("ReadDataDelayCov",       ModelID, ReportMode => DISABLED) ; 
+    WriteAddressDelayCov    <= NewID("WriteAddrDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    WriteDataDelayCov       <= NewID("WriteDataDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    WriteResponseDelayCov   <= NewID("WriteRespDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    ReadAddressDelayCov     <= NewID("ReadAddrDelayCov",    ModelID, ReportMode => DISABLED) ; 
+    ReadDataDelayCov        <= NewID("ReadDataDelayCov",    ModelID, ReportMode => DISABLED) ; 
     
 --!! AWCache, ARCache Defaults
     DispatchLoop : loop

@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    07/2024   2024.07    Updated CreateClock
 --    01/2023   2023.01    Added DUT (pass thru)
 --    10/2020   2020.10    Updated name to be TbStream.vhd in conjunction with Model Indepenedent Transactions
 --    01/2020   2020.01    Updated license notice
@@ -27,7 +28,7 @@
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.  
+--  Copyright (c) 2018 - 2024 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -59,7 +60,7 @@ architecture TestHarness of TbStream is
   constant tperiod_Clk : time := 10 ns ; 
   constant tpd         : time := 2 ns ; 
 
-  signal Clk       : std_logic ;
+  signal Clk       : std_logic := '1' ;
   signal nReset    : std_logic ;
   
   constant AXI_DATA_WIDTH   : integer := 32 ;
@@ -139,7 +140,7 @@ begin
   -- create Clock 
   Osvvm.ClockResetPkg.CreateClock ( 
     Clk        => Clk, 
-    Period     => Tperiod_Clk 
+    Period     => Tperiod_Clk
   )  ; 
   
   -- create nReset 

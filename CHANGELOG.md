@@ -35,6 +35,7 @@ Updated Axi4 VC to shorten AlertLogID and data structure names - impacts justifi
 Added OsvvmVcInit barrier to AxiStreamReceiver to allow parameters to be initialized before it starts.
 Testbenches now include PassThru DUT model.
 Updated CreateClock to be in Osvvm.ClockResetPkg.CreateClock
+Moved _xilinx versions of sources to subdirectory deprecated
 
 ## 2024.03 March 2024
 Updated SafeResize to include ModelID

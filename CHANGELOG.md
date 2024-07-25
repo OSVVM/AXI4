@@ -2,6 +2,7 @@
 
 | Revision  |  Release Summary | 
 ------------|----------- 
+| 2024.07   |  Updated Axi4 VC to shorten AlertLogID names.  Added OsvvmVcInit barrier to AxiStreamReceiver 
 | 2024.04   |  Updated SafeResize to include ModelID.
 | 2023.09   |  Updated Unimplemented Transaction messages in VC.
 | 2023.05   |  Beta implementation of randomizing Ready and Valid in Axi4 Full VC and AxiStream VC.
@@ -28,6 +29,13 @@
 | 2020.07   |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
 | 2020.02   |  Initial version of AddressBusTransactionPkg.
 | 2018.04   |  Initial public release
+
+## 2024.07 July 2024
+Updated Axi4 VC to shorten AlertLogID and data structure names - impacts justification of alerts and logs
+Added OsvvmVcInit barrier to AxiStreamReceiver to allow parameters to be initialized before it starts.
+Testbenches now include PassThru DUT model.
+Updated CreateClock to be in Osvvm.ClockResetPkg.CreateClock
+Moved _xilinx versions of sources to subdirectory deprecated
 
 ## 2024.03 March 2024
 Updated SafeResize to include ModelID

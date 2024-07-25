@@ -51,12 +51,12 @@ if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
   analyze Axi4Memory.vhd
   analyze Axi4MemoryVti.vhd
 } else {
-  analyze Axi4Manager_xilinx.vhd
+  analyze deprecated/Axi4Manager_xilinx.vhd
 #  analyze Axi4ManagerVti.vhd
   analyze Axi4Monitor_dummy.vhd
 #  analyze Axi4Subordinate.vhd
 #  analyze Axi4SubordinateVti.vhd
-  analyze Axi4Memory_xilinx.vhd
+  analyze deprecated/Axi4Memory_xilinx.vhd
 #  analyze Axi4MemoryVti.vhd
 }
 analyze Axi4PassThru.vhd

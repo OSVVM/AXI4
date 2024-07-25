@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    07/2024   2024.07    Added OsvvmVcInit barrier before starting to receive.
 --    03/2024   2024.03    Updated SafeResize to use ModelID
 --    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedReceiverOperation
 --    05/2023   2023.05    Updated methods for Randomized delays 
@@ -42,7 +43,7 @@
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2018 - 2023 by SynthWorks Design Inc.
+--  Copyright (c) 2018 - 2024 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -635,6 +636,7 @@ begin
     AddCross(BurstCov.BeatDelayCov,     5, GenBin(1), GenBin(0)) ;       --  5% Ready After Valid, no delay
     AddCross(BurstCov.BeatDelayCov,     5, GenBin(1), GenBin(1)) ;       --  5% Ready After Valid, 1 cycle delay
 
+    WaitForBarrier(OsvvmVcInit) ;
     ReceiveLoop : loop
 
       if WaitForGet then 

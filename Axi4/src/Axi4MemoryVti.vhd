@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    07/2024   2024.07    Shortened AlertLog and data structure names for better printing
 --    03/2024   2024.03    Updated SafeResize to use ModelID
 --    01/2024   2024.01    Updated Params to use singleton data structure
 --    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedOperation
@@ -133,6 +134,7 @@ port (
 end entity Axi4MemoryVti ;
 
 architecture MemorySubordinate of Axi4MemoryVti is
+
   constant AXI_DATA_BYTE_WIDTH  : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH  : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 
@@ -221,7 +223,6 @@ begin
     ) ; 
     MemoryID  <= vMemID ; 
 
-
     -- Alerts
     BusFailedID  <= NewID("No response", ID ) ;
     DataCheckID  <= NewID("Data Check", ID ) ;
@@ -232,25 +233,13 @@ begin
 
     -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
     --   FIFOS only generate usage type errors 
-    WriteAddressFifo    <= NewID("WriteAddressFIFO",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    WriteDataFifo       <= NewID("WriteDataFifo",      ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    WriteResponseFifo   <= NewID("WriteResponseFifo",  ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    ReadAddressFifo     <= NewID("ReadAddressFifo",    ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    ReadDataFifo        <= NewID("ReadDataFifo",       ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    WriteAddressFifo    <= NewID("WriteAddrFifo",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    WriteDataFifo       <= NewID("WriteDataFifo",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    WriteResponseFifo   <= NewID("WriteRespFifo",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    ReadAddressFifo     <= NewID("ReadAddrFifo",    ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    ReadDataFifo        <= NewID("ReadDataFifo",    ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
     wait ;
   end process InitalizeAlertLogIDs ;
-
-
---!!   ------------------------------------------------------------
---!!   --  Initialize Model Options
---!!   ------------------------------------------------------------
---!!   InitalizeOptions : process
---!!   begin
---!!     InitAxiOptions (
---!!       Params => Params
---!!     ) ;
---!!     wait ;
---!!   end process InitalizeOptions ;
 
 
   ------------------------------------------------------------
@@ -271,13 +260,13 @@ begin
   begin
     wait for 0 ns ; -- Allow ModelID to become valid
     TransRec.Params         <= Params ; 
-    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo",         ModelID, Search => PRIVATE_NAME) ;
-    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",          ModelID, Search => PRIVATE_NAME) ;
-    WriteAddressDelayCov    <= NewID("WriteAddressDelayCov",   ModelID, ReportMode => DISABLED) ; 
-    WriteDataDelayCov       <= NewID("WriteDataDelayCov",      ModelID, ReportMode => DISABLED) ; 
-    WriteResponseDelayCov   <= NewID("WriteResponseDelayCov",  ModelID, ReportMode => DISABLED) ; 
-    ReadAddressDelayCov     <= NewID("ReadAddressDelayCov",    ModelID, ReportMode => DISABLED) ; 
-    ReadDataDelayCov        <= NewID("ReadDataDelayCov",       ModelID, ReportMode => DISABLED) ; 
+    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo",      ModelID, Search => PRIVATE_NAME) ;
+    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",       ModelID, Search => PRIVATE_NAME) ;
+    WriteAddressDelayCov    <= NewID("WriteAddrDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    WriteDataDelayCov       <= NewID("WriteDataDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    WriteResponseDelayCov   <= NewID("WriteRespDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    ReadAddressDelayCov     <= NewID("ReadAddrDelayCov",    ModelID, ReportMode => DISABLED) ; 
+    ReadDataDelayCov        <= NewID("ReadDataDelayCov",    ModelID, ReportMode => DISABLED) ; 
     
 --!! AWCache, ARCache Defaults
     DispatchLoop : loop
@@ -478,8 +467,8 @@ begin
     AW.Ready <= '0' ;
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
-    AddBins (WriteAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     -- Delays for Ready
+    AddBins (WriteAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     AddCross(WriteAddressDelayCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
     AddCross(WriteAddressDelayCov.BeatDelayCov,    GenBin(0),     GenBin(0)) ;  -- No beat delay
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -548,8 +537,8 @@ begin
     WD.Ready <= '0' ;
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
-    AddBins (WriteDataDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     -- Delays for Ready
+    AddBins (WriteDataDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     AddCross(WriteDataDelayCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
     AddCross(WriteDataDelayCov.BeatDelayCov,    GenBin(0),     GenBin(0)) ;  -- No beat delay
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -794,14 +783,15 @@ begin
     AR.Ready <= '0' ;
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
-    AddBins (ReadAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     -- Delays for Ready
+    AddBins (ReadAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     AddCross(ReadAddressDelayCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
     AddCross(ReadAddressDelayCov.BeatDelayCov,    GenBin(0),     GenBin(0)) ;  -- No beat delay
     WaitForClock(Clk, 2) ;  -- Initialize
 
     ReadAddressOperation : loop
 --!! ToDo Add Delay calculation here that is f(ReadAddressBurstCov) 
+      -- Ready Delays:  ReadyDelayCycles + ReadAddressDelayCycles
       if UseCoverageDelays then 
         -- BurstCoverage Delays
         (intReadyBeforeValid, ReadyDelayCycles)  := GetRandDelay(ReadAddressDelayCov) ; 
@@ -958,11 +948,6 @@ begin
   ReadDataHandler : process
     alias    RD    : AxiBus.ReadData'subtype is AxiBus.ReadData ;
     variable Local : AxiBus.ReadData'subtype ;
-    -- variable Local : Axi4ReadDataRecType (
-                      -- Data(RD.Data'range),
-                      -- User(RD.User'range),
-                      -- ID(RD.ID'range)
-                    -- );
     variable ReadDataReadyTimeOut : integer := 25 ;
     variable NewTransfer : std_logic := '1' ; 
     variable DelayCycles : integer ; 
@@ -987,6 +972,7 @@ begin
       (Local.Data, Local.Last, Local.Resp, Local.ID, Local.User) := pop(ReadDataFifo) ;
 
 --?6 Add delay that is a function of the access: Single Word, First Burst, Burst, Last Burst
+      -- Delay before generating RD.Valid
       if UseCoverageDelays then 
         -- BurstCoverage Delays
         DelayCycles := GetRandDelay(ReadDataDelayCov) ; 

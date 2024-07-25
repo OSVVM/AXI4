@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    07/2024   2024.07    Shortened AlertLog and data structure names for better printing
 --    03/2024   2024.03    Updated SafeResize to use ModelID
 --    01/2024   2024.01    Updated Params to use singleton data structure
 --    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedOperation
@@ -141,7 +142,7 @@ architecture Transactor of Axi4SubordinateVti is
 
   signal WriteAddressFifo           : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
   signal WriteDataFifo              : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
-  signal WriteTransactionFifo       : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+--  signal WriteTransactionFifo       : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
   signal WriteResponseFifo          : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
   signal ReadAddressFifo            : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
   signal ReadAddressTransactionFifo : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
@@ -183,7 +184,7 @@ begin
   --  Initialize AlertLogIDs
   ------------------------------------------------------------
   Initalize : process
-    variable ID : AlertLogIDType ;
+    variable ID      : AlertLogIDType ;
     variable vParams : ModelParametersIDType ; 
   begin
     -- Alerts
@@ -194,21 +195,20 @@ begin
     DataCheckID             <= NewID("Data Check",     ID ) ;
     BusFailedID             <= NewID("No response",    ID ) ;
 
-    vParams                 := NewID("Axi4Memory Parameters", to_integer(OPTIONS_MARKER), ID) ; 
+    vParams                 := NewID("AxiS Parameters", to_integer(OPTIONS_MARKER), ID) ; 
     InitAxiOptions(vParams) ;
     Params                  <= vParams ; 
 
     -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
     --   FIFOS only generate usage type errors 
-    WriteAddressFifo           <= NewID("WriteAddressFIFO",             ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    WriteDataFifo              <= NewID("WriteDataFifo",                ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    WriteTransactionFifo       <= NewID("WriteTransactionFifo",         ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    WriteResponseFifo          <= NewID("WriteResponseFifo",            ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    WriteAddressFifo           <= NewID("WriteAddrFifo",          ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    WriteDataFifo              <= NewID("WriteDataFifo",          ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+--    WriteTransactionFifo       <= NewID("WriteTransactionFifo",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    WriteResponseFifo          <= NewID("WriteResponseFifo",      ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
 
-    ReadAddressFifo            <= NewID("ReadAddressFifo",              ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    ReadAddressTransactionFifo <= NewID("ReadAddressTransactionFifo",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    ReadDataFifo               <= NewID("ReadDataFifo",                 ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-
+    ReadAddressFifo            <= NewID("ReadAddrFifo",           ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    ReadAddressTransactionFifo <= NewID("ReadByteAddrFifo",       ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    ReadDataFifo               <= NewID("ReadDataFifo",           ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
     wait ;
   end process Initalize ;
 
@@ -240,16 +240,20 @@ begin
     variable FilterUndrivenWriteData       : boolean := TRUE ;
     variable UndrivenWriteDataValue        : std_logic := '0' ;
 
-    variable TransactionCount              : integer := 0 ; 
     variable WriteAddressTransactionCount  : integer := 0 ; 
     variable WriteDataTransactionCount     : integer := 0 ; 
     variable WriteResponseTransactionCount : integer := 0 ; 
   begin
     wait for 0 ns ; -- Allow ModelID to become valid
-    WriteAddressDelayCov    <= NewID("WriteAddressDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    TransRec.Params         <= Params ; 
+--
+-- AxiLite does not support bursts
+--    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo",         ModelID, Search => PRIVATE_NAME) ;
+--    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",          ModelID, Search => PRIVATE_NAME) ;
+    WriteAddressDelayCov    <= NewID("WriteAddrDelayCov",   ModelID, ReportMode => DISABLED) ; 
     WriteDataDelayCov       <= NewID("WriteDataDelayCov",      ModelID, ReportMode => DISABLED) ; 
-    WriteResponseDelayCov   <= NewID("WriteResponseDelayCov",  ModelID, ReportMode => DISABLED) ; 
-    ReadAddressDelayCov     <= NewID("ReadAddressDelayCov",    ModelID, ReportMode => DISABLED) ; 
+    WriteResponseDelayCov   <= NewID("WriteRespDelayCov",  ModelID, ReportMode => DISABLED) ; 
+    ReadAddressDelayCov     <= NewID("ReadAddrDelayCov",    ModelID, ReportMode => DISABLED) ; 
     ReadDataDelayCov        <= NewID("ReadDataDelayCov",       ModelID, ReportMode => DISABLED) ; 
 
     DispatchLoop : loop
@@ -258,7 +262,6 @@ begin
          Rdy      => TransRec.Rdy,
          Ack      => TransRec.Ack
       ) ;
-      TransactionCount := TransactionCount + 1 ; 
 
       case TransRec.Operation is
         when WAIT_FOR_TRANSACTION =>
@@ -553,8 +556,8 @@ begin
     AW.Ready <= '0' ;
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
-    AddBins (WriteAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     -- Delays for Ready
+    AddBins (WriteAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     AddCross(WriteAddressDelayCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
     AddCross(WriteAddressDelayCov.BeatDelayCov,    GenBin(0),     GenBin(0)) ;  -- No beat delay
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -617,8 +620,8 @@ begin
     WD.Ready <= '0' ;
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
-    AddBins (WriteDataDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     -- Delays for Ready
+    AddBins (WriteDataDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     AddCross(WriteDataDelayCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
     AddCross(WriteDataDelayCov.BeatDelayCov,    GenBin(0),     GenBin(0)) ;  -- No beat delay
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -769,8 +772,8 @@ begin
     AR.Ready <= '0' ;
     wait for 0 ns ; -- Allow Cov models to initialize 
     wait for 0 ns ; -- Allow Cov models to initialize 
-    AddBins (ReadAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     -- Delays for Ready
+    AddBins (ReadAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     AddCross(ReadAddressDelayCov.BurstDelayCov,   GenBin(0,1,1), GenBin(2,5,1)) ;
     AddCross(ReadAddressDelayCov.BeatDelayCov,    GenBin(0),     GenBin(0)) ;  -- No beat delay
     WaitForClock(Clk, 2) ;  -- Initialize
@@ -833,7 +836,7 @@ begin
     RD.Resp  <= (RD.Resp'range => '0') ;
     RD.ID    <= (RD.ID'range => '0') ;
     RD.User  <= (RD.User'range => '0') ; 
-    wait for 0 ns ; -- Allow ReadDataFifo to initialize
+    wait for 0 ns ; -- Allow Cov models to initialize
     wait for 0 ns ; -- Allow Cov models to initialize 
     AddBins (ReadDataDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     AddBins (ReadDataDelayCov.BurstDelayCov,   GenBin(2,5,1)) ;
@@ -845,6 +848,7 @@ begin
         WaitForToggle(ReadAddressReceiveCount) ;
       end if ;
 
+      -- Read Data Valid Delays
       if UseCoverageDelays then 
         -- BurstCoverage Delays
         DelayCycles := GetRandDelay(ReadDataDelayCov) ; 

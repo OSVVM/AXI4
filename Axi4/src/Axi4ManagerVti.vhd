@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    07/2024   2024.07    Shortened AlertLog and data structure names for better printing
 --    03/2024   2024.03    Updated SafeResize to use ModelID
 --    01/2024   2024.01    Updated Params to use singleton data structure
 --    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedOperation
@@ -162,7 +163,6 @@ architecture AxiFull of Axi4ManagerVti is
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
   constant AXI_STRB_WIDTH      : integer := AXI_DATA_WIDTH/8 ;
   
-
   signal Params : ModelParametersIDType ;
 
   -- Internal Resources
@@ -214,16 +214,16 @@ begin
     InitAxiOptions(vParams) ;
     Params                  <= vParams ; 
 
-    WriteResponseScoreboard <= NewID("WriteResponse Scoreboard", ID, Search => PRIVATE_NAME);
-    ReadResponseScoreboard  <= NewID("ReadResponse Scoreboard",  ID, Search => PRIVATE_NAME);
+    WriteResponseScoreboard <= NewID("WriteResp SB", ID, Search => PRIVATE_NAME);
+    ReadResponseScoreboard  <= NewID("ReadResp SB",  ID, Search => PRIVATE_NAME);
 
     -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
     --   FIFOS only generate usage type errors 
-    WriteAddressFifo           <= NewID("WriteAddressFIFO",             ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    WriteDataFifo              <= NewID("WriteDataFifo",                ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    ReadAddressFifo            <= NewID("ReadAddressFifo",              ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    ReadAddressTransactionFifo <= NewID("ReadAddressTransactionFifo",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    ReadDataFifo               <= NewID("ReadDataFifo",                 ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    WriteAddressFifo           <= NewID("WriteAddrFifo",     ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    WriteDataFifo              <= NewID("WriteDataFifo",     ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    ReadAddressFifo            <= NewID("ReadAddrFifo",      ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    ReadAddressTransactionFifo <= NewID("ReadByteAddrFifo",  ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    ReadDataFifo               <= NewID("ReadDataFifo",      ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
 
     wait ;
   end process Initialize ;
@@ -277,13 +277,13 @@ begin
     
     wait for 0 ns ; -- Allow ModelID to become valid
     TransRec.Params         <= Params ; 
-    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo",         ModelID, Search => PRIVATE_NAME) ;
-    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",          ModelID, Search => PRIVATE_NAME) ;
-    WriteAddressDelayCov    <= NewID("WriteAddressDelayCov",   ModelID, ReportMode => DISABLED) ; 
-    WriteDataDelayCov       <= NewID("WriteDataDelayCov",      ModelID, ReportMode => DISABLED) ; 
-    WriteResponseDelayCov   <= NewID("WriteResponseDelayCov",  ModelID, ReportMode => DISABLED) ; 
-    ReadAddressDelayCov     <= NewID("ReadAddressDelayCov",    ModelID, ReportMode => DISABLED) ; 
-    ReadDataDelayCov        <= NewID("ReadDataDelayCov",       ModelID, ReportMode => DISABLED) ; 
+    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo",      ModelID, Search => PRIVATE_NAME) ;
+    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",       ModelID, Search => PRIVATE_NAME) ;
+    WriteAddressDelayCov    <= NewID("WriteAddrDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    WriteDataDelayCov       <= NewID("WriteDataDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    WriteResponseDelayCov   <= NewID("WriteRespDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    ReadAddressDelayCov     <= NewID("ReadAddrDelayCov",    ModelID, ReportMode => DISABLED) ; 
+    ReadDataDelayCov        <= NewID("ReadDataDelayCov",    ModelID, ReportMode => DISABLED) ; 
     
 --!! AWCache, ARCache Defaults
     DispatchLoop : loop
@@ -705,6 +705,7 @@ begin
     variable WriteAddressReadyTimeOut : integer ;
     variable DelayCycles : integer ; 
   begin
+    -- Initialize Ports
     -- AXI4 Lite Signaling
     AW.Valid  <= '0' ;
     AW.Addr   <= (Local.Addr'range   => '0') ;
@@ -721,22 +722,25 @@ begin
     AW.User   <= (Local.User'range   => '0') ;
     wait for 0 ns ; -- Allow WriteAddressFifo to initialize
     wait for 0 ns ; -- Allow Cov models to initialize 
+    -- Initialize DelayCoverage Models
     AddBins (WriteAddressDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
-    AddBins (WriteAddressDelayCov.BurstDelayCov,   GenBin(2,5,1)) ;
     AddBins (WriteAddressDelayCov.BeatDelayCov,    GenBin(0)) ;
+    AddBins (WriteAddressDelayCov.BurstDelayCov,   GenBin(2,5,1)) ;
 
     WriteAddressLoop : loop
-      -- Find Transaction
+      -- Find Transaction in FIFO
       if Empty(WriteAddressFifo) then
          WaitForToggle(WriteAddressRequestCount) ;
       end if ;
       (Local.Addr, Local.Len, Local.Prot, Local.ID, Local.Size, Local.Burst, Local.Lock, Local.Cache, Local.QOS, Local.Region, Local.User) := Pop(WriteAddressFifo) ;
 
+      -- Valid Delay between Transfers
       if UseCoverageDelays then 
-        -- BurstCoverage Delays
+        -- BurstCoverage Delay
         DelayCycles := GetRandDelay(WriteAddressDelayCov) ; 
         WaitForClock(Clk, DelayCycles) ;
       else
+        -- Constant Delay
         WaitForClock(Clk, integer'(Get(Params, to_integer(WRITE_ADDRESS_VALID_DELAY_CYCLES)))) ; 
       end if ; 
 
@@ -776,7 +780,7 @@ begin
         TimeOutPeriod  =>  WriteAddressReadyTimeOut * tperiod_Clk
       ) ;
 
-      -- State after operation
+      -- Transaction Finalization
       AW.Addr   <= Local.Addr   + 4  after tpd_Clk_AWAddr   ;
       AW.Prot   <= Local.Prot   + 1  after tpd_clk_AWProt   ;
       -- AXI4 Full
@@ -801,9 +805,7 @@ begin
   ------------------------------------------------------------
   WriteDataHandler : process
     alias    WD : AxiBus.WriteData'subtype is AxiBus.WriteData ;
-
     variable Local : AxiBus.WriteData'subtype ;
-    
     variable WriteDataReadyTimeOut : integer ;
     variable Burst    : std_logic ; 
     variable NewTransfer : std_logic := '1' ; 
@@ -1152,4 +1154,5 @@ begin
     ) ;
   end process ReadDataProtocolChecker ;
 end architecture AxiFull ;
+
 

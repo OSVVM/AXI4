@@ -1,1 +1,2 @@
 %%    140 ns    Alert  FAILURE   in transmitter_1,                Multiple Drivers on Transaction Record.  Transaction # 3
+%%    140 ns    Log    PASSED    in Default,                      Expecting: (FAILURE => 1, ERROR => 0, WARNING => 0)

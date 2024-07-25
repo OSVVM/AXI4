@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    07/2024   2024.07    Added OsvvmVcInit barrier before starting to receive.
 --    03/2024   2024.03    Updated SafeResize to use ModelID
 --    05/2023   2023.05    Updated methods for Randomized delays 
 --    04/2023   2023.04    Update delays on TReady to be randomized
@@ -37,7 +38,7 @@
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2018 - 2023 by SynthWorks Design Inc.  
+--  Copyright (c) 2018 - 2024 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -584,12 +585,15 @@ begin
           end case ;
         -- The End -- Done
 
-        when MULTIPLE_DRIVER_DETECT =>
-          Alert(ModelID, "Multiple Drivers on Transaction Record." & 
-                         "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
+--!! Replaced by ClassifyUnimplementedReceiverOperation
+--        when MULTIPLE_DRIVER_DETECT =>
+--          Alert(ModelID, "Multiple Drivers on Transaction Record." & 
+--                         "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
 
+        -- The End -- Done
         when others =>
-          Alert(ModelID, "Unimplemented Transaction: " & to_string(Operation), FAILURE) ;
+--          Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
+          Alert(ModelID, ClassifyUnimplementedReceiverOperation(TransRec.Operation, TransRec.Rdy), FAILURE) ;
       end case ;
 
       -- Wait for 1 delta cycle, required if a wait is not in all case branches above
@@ -634,6 +638,7 @@ begin
     AddCross(BurstCov.BeatDelayCov,     5, GenBin(1), GenBin(0)) ;       --  5% Ready After Valid, no delay
     AddCross(BurstCov.BeatDelayCov,     5, GenBin(1), GenBin(1)) ;       --  5% Ready After Valid, 1 cycle delay
 
+    WaitForBarrier(OsvvmVcInit) ;
     ReceiveLoop : loop
 
       if WaitForGet then 
@@ -740,3 +745,4 @@ begin
     end loop ReceiveLoop ;
   end process ReceiveHandler ;
 end architecture behavioral ;
+

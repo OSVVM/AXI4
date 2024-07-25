@@ -56,5 +56,8 @@ if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
 
 analyze AxiStreamComponentPkg.vhd
 analyze AxiStreamContext.vhd
-analyze AxiStreamGenericSignalsPkg.vhd
-analyze AxiStreamSignalsPkg_32.vhd
+
+if {$::osvvm::ToolSupportsGenericPackages}  {
+  analyze AxiStreamGenericSignalsPkg.vhd
+  analyze AxiStreamSignalsPkg_32.vhd
+}

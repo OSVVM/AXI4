@@ -54,7 +54,7 @@ begin
     SetTestName("TbStream_MultipleDriversReceiver1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
-    SetAlertStopCount(FAILURE, 2) ;    -- Allow 2 FAILURE Alerts
+    SetAlertStopCount(FAILURE, 12) ;    -- Allow 2 FAILURE Alerts
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;

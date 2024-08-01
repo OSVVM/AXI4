@@ -78,7 +78,7 @@ begin
     -- Wait for Design Reset
     wait until nReset = '1' ;  
     ClearAlerts ;
-    SetAlertStopCount(ERROR, 2) ;
+    SetAlertStopCount(ERROR, 12) ;
 
     -- Wait for test to finish
     WaitForBarrier(TestDone, 1 ms) ;

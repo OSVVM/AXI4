@@ -683,8 +683,8 @@ begin
 
         -- The End -- Done
         when others =>
-          -- Covers messages for Multiple drivers as well as anything not imnplemented
-          Alert(ModelID, ClassifyUnimplementedOperation(TransRec.Operation, TransRec.Rdy), FAILURE) ;
+          -- Signal multiple Driver Detect or not implemented transactions.
+          Alert(ModelID, ClassifyUnimplementedOperation(TransRec), FAILURE) ;
 
       end case ;
     end loop DispatchLoop ;

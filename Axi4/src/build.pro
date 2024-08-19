@@ -60,3 +60,4 @@ if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
 #  analyze Axi4MemoryVti.vhd
 }
 analyze Axi4PassThru.vhd
+analyze Axi4GenericSignalsPkg.vhd

@@ -65,12 +65,17 @@ architecture TestHarness of TbAxi4_MultipleMemory is
   signal Clk         : std_logic ;
   signal nReset      : std_logic ;
 
-  type AddressBusArrayRecType is array(1 to 2) of AddressBusRecType (
+--  type AddressBusArrayRecType is array(1 to 2) of AddressBusRecType (
+--          Address(AXI_ADDR_WIDTH-1 downto 0),
+--          DataToModel(AXI_DATA_WIDTH-1 downto 0),
+--          DataFromModel(AXI_DATA_WIDTH-1 downto 0)
+--        ) ;
+--  signal ManagerRec, SubordinateRec : AddressBusArrayRecType ; 
+  signal ManagerRec, SubordinateRec : AddressBusRecArrayType(1 to 2)(
           Address(AXI_ADDR_WIDTH-1 downto 0),
           DataToModel(AXI_DATA_WIDTH-1 downto 0),
           DataFromModel(AXI_DATA_WIDTH-1 downto 0)
         ) ;
-  signal ManagerRec, SubordinateRec : AddressBusArrayRecType ; 
 
   type Axi4ArrayRecType is array(1 to 2) of Axi4RecType(
     WriteAddress(

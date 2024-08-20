@@ -232,6 +232,8 @@ begin
     WriteResponseFifo   <= NewID("WriteRespFifo",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
     ReadAddressFifo     <= NewID("ReadAddrFifo",    ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
     ReadDataFifo        <= NewID("ReadDataFifo",    ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    wait for 0 ns ; wait for 0 ns ; 
+    log(ID, "Memory name: " & LOCAL_MEMORY_NAME, DEBUG) ; 
     wait ;
   end process InitalizeAlertLogIDs ;
 

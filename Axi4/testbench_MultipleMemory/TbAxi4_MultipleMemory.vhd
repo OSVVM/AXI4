@@ -65,7 +65,13 @@ architecture TestHarness of TbAxi4_MultipleMemory is
   signal Clk         : std_logic ;
   signal nReset      : std_logic ;
 
-  signal Manager1Rec, Manager2Rec, Subordinate1Rec, Subordinate2Rec : AddressBusRecType (
+--  signal Manager1Rec, Manager2Rec, Subordinate1Rec, Subordinate2Rec : AddressBusRecType (
+--          Address(AXI_ADDR_WIDTH-1 downto 0),
+--          DataToModel(AXI_DATA_WIDTH-1 downto 0),
+--          DataFromModel(AXI_DATA_WIDTH-1 downto 0)
+--        ) ;
+
+  signal ManagerRec, SubordinateRec : AddressBusRecArrayType(1 to 2)(
           Address(AXI_ADDR_WIDTH-1 downto 0),
           DataToModel(AXI_DATA_WIDTH-1 downto 0),
           DataFromModel(AXI_DATA_WIDTH-1 downto 0)
@@ -143,7 +149,7 @@ begin
     AxiBus  => AxiBus1,
     
     -- Testbench Transaction Interface
-    TransRec    => Subordinate1Rec
+    TransRec    => SubordinateRec(1)
   ) ;
 
   Memory_2 : Axi4Memory
@@ -156,7 +162,7 @@ begin
     AxiBus  => AxiBus2,
     
     -- Testbench Transaction Interface
-    TransRec    => Subordinate2Rec
+    TransRec    => SubordinateRec(2)
   ) ;
 
   Manager_1 : Axi4Manager
@@ -169,7 +175,7 @@ begin
     AxiBus      => AxiBus1,
 
     -- Testbench Transaction Interface
-    TransRec    => Manager1Rec
+    TransRec    => ManagerRec(1)
   ) ;
 
   Manager_2 : Axi4Manager
@@ -182,7 +188,7 @@ begin
     AxiBus      => AxiBus2,
 
     -- Testbench Transaction Interface
-    TransRec    => Manager2Rec
+    TransRec    => ManagerRec(2)
   ) ;
 
 
@@ -192,11 +198,11 @@ begin
     nReset        => nReset,
 
     -- Transaction Interfaces
-    Manager1Rec      => Manager1Rec,
-    Subordinate1Rec  => Subordinate1Rec,
+    Manager1Rec      => ManagerRec(1),
+    Subordinate1Rec  => SubordinateRec(1),
 
-    Manager2Rec      => Manager2Rec,
-    Subordinate2Rec  => Subordinate2Rec
+    Manager2Rec      => ManagerRec(2),
+    Subordinate2Rec  => SubordinateRec(2)
   ) ;
 
 end architecture TestHarness ;

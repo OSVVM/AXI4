@@ -37,12 +37,14 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
-library osvvm_TbAxi4_MultipleMemory
+library osvvm_TbAxi4_MultipleMemory_G
 
 analyze ../TestCases/OsvvmTestCommonPkg.vhd
 
 analyze TestCtrl_e.vhd
 analyze TbAxi4_MultipleMemory_Generate.vhd
 
+# Will not work with current configuration
+# Working configuration is commented out
 RunTest TbAxi4_Shared1.vhd
 RunTest TbAxi4_Separate1.vhd

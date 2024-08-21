@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    09/2024   2024.09    Updated ClassifyUnimplementedOperation.  Added DEBUG log for LOCAL_MEMORY_NAME
 --    07/2024   2024.07    Shortened AlertLog and data structure names for better printing
 --    03/2024   2024.03    Updated SafeResize to use ModelID
 --    01/2024   2024.01    Updated Params to use singleton data structure
@@ -347,9 +348,9 @@ begin
   --        AlignCheckWriteData (ModelID, Data, Strb, TransRec.DataWidth, ByteAddr) ;
 
           -- Memory is byte oriented.  Access as Bytes
-          for i in 0 to NumBytes-1 loop
-            ByteData := Data((8*i + 7)  downto 8*i) ;
-            MemWrite(MemoryID, Address + i, ByteData) ;
+          for ByteNum in 0 to NumBytes-1 loop
+            ByteData := Data((8*ByteNum + 7)  downto 8*ByteNum) ;
+            MemWrite(MemoryID, Address + ByteNum, ByteData) ;
           end loop ;
 
         when READ_OP | READ_CHECK =>
@@ -365,9 +366,9 @@ begin
   --??  ERROR, or OK & return unaddressed bytes as X?
 
           -- Memory is byte oriented.  Access as Bytes
-          for i in 0 to NumBytes-1 loop
-            MemRead(MemoryID, Address + i, ByteData) ;
-            Data((8*i + 7)  downto 8*i) := ByteData ;
+          for ByteNum in 0 to NumBytes-1 loop
+            MemRead(MemoryID, Address + ByteNum, ByteData) ;
+            Data((8*ByteNum + 7)  downto 8*ByteNum) := ByteData ;
           end loop ;
 
           TransRec.DataFromModel <= SafeResize(ModelID, Data, TransRec.DataFromModel'length) ;
@@ -594,7 +595,7 @@ begin
   ------------------------------------------------------------
   WriteHandler : process
     variable LAW : AxiBus.WriteAddress'subtype ;
-    alias AW : AxiBus.WriteAddress'subtype is AxiBus.WriteAddress ;
+    alias    AW : AxiBus.WriteAddress'subtype is AxiBus.WriteAddress ;
     variable LWD : AxiBus.WriteData'subtype ;
     alias    WD  : AxiBus.WriteData'subtype is AxiBus.WriteData ;
     variable BurstLen         : integer ;
@@ -635,14 +636,14 @@ begin
   --!3 Delay before first word - burst vs. single word
 
       -- Burst transfers
-      BurstLoop : for i in 1 to BurstLen loop
+      BurstLoop : for BurstIndex in 1 to BurstLen loop
         -- Wait for Data
         if empty(WriteDataFifo) then
           WaitForToggle(WriteDataReceiveCount) ;
         end if ;
         (LWD.Data, LWD.Strb) := pop(WriteDataFifo) ;
 
-        if i = 1 then
+        if BurstIndex = 1 then
           Log(ModelID,
             "Memory Write." &
             "  AWAddr: "    & to_hxstring(LAW.Addr) &
@@ -898,14 +899,14 @@ begin
       -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
 
       LRD.Last := '0' ;
-      BurstLoop : for i in 1 to BurstLen loop
+      BurstLoop : for BurstIndex in 1 to BurstLen loop
         -- Memory is byte oriented.  Access as Bytes
-        for i in 0 to AXI_DATA_BYTE_WIDTH-1 loop
-          MemRead(MemoryID, MemoryAddress + i, ByteData) ;
-          LRD.Data((8*i + 7)  downto 8*i) := ByteData ;
+        for ByteNum in 0 to AXI_DATA_BYTE_WIDTH-1 loop
+          MemRead(MemoryID, MemoryAddress + ByteNum, ByteData) ;
+          LRD.Data((8*ByteNum + 7)  downto 8*ByteNum) := ByteData ;
         end loop ;
 
-        if i = 1 then
+        if BurstIndex = 1 then
           Log(ModelID,
             "Memory Read." &
             "  ARAddr: "    & to_hxstring(LAR.Addr) &
@@ -921,12 +922,12 @@ begin
         MemoryAddress    := TransferAddress(TransferAddress'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
         -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
 
-        if i = BurstLen then
+        if BurstIndex = BurstLen then
           LRD.Last := '1' ;
         end if ;
         push(ReadDataFifo, LRD.Data & LRD.Last & ModelRResp & LAR.ID & LAR.User) ;
         increment(ReadDataRequestCount) ;
-        if i /= BurstLen then 
+        if BurstIndex /= BurstLen then 
           wait until Rising_Edge(Clk) ; -- read memory location per clock
         else
           wait for 0 ns ;

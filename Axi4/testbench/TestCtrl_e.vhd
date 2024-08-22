@@ -60,11 +60,11 @@ use work.OsvvmTestCommonPkg.all ;
 entity TestCtrl is
   port (
     -- Global Signal Interface
-    nReset         : In    std_logic ;
+    nReset          : In    std_logic ;
 
     -- Transaction Interfaces
     ManagerRec      : inout AddressBusRecType ;
-    SubordinateRec   : inout AddressBusRecType 
+    SubordinateRec  : inout AddressBusRecType 
   ) ;
   
   -- Derive AXI interface properties from the ManagerRec

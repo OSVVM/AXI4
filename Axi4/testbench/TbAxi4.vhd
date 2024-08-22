@@ -88,7 +88,7 @@ architecture TestHarness of TbAxi4 is
 --    ReadData    ( RData (AXI_DATA_WIDTH-1 downto 0) )
 --  ) ;
 
-  signal   AxiBus1, AxiBus2 : Axi4RecType(
+  signal   ManagerAxiBus, SubordinateAxiBus : Axi4RecType(
     WriteAddress(
       Addr(AXI_ADDR_WIDTH-1 downto 0),
       ID(7 downto 0),
@@ -120,11 +120,11 @@ architecture TestHarness of TbAxi4 is
   component TestCtrl is
     port (
       -- Global Signal Interface
-      nReset         : In    std_logic ;
+      nReset          : In    std_logic ;
 
       -- Transaction Interfaces
       ManagerRec      : inout AddressBusRecType ;
-      SubordinateRec   : inout AddressBusRecType
+      SubordinateRec  : inout AddressBusRecType
     ) ;
   end component TestCtrl ;
 
@@ -156,117 +156,117 @@ begin
   port map (
   -- AXI Manager Interface - Driven By PassThru
     -- AXI Write Address Channel
-    mAwAddr       => AxiBus2.WriteAddress.Addr,
-    mAwProt       => AxiBus2.WriteAddress.Prot,
-    mAwValid      => AxiBus2.WriteAddress.Valid,
-    mAwReady      => AxiBus2.WriteAddress.Ready,
-    mAwID         => AxiBus2.WriteAddress.ID,
-    mAwLen        => AxiBus2.WriteAddress.Len,
-    mAwSize       => AxiBus2.WriteAddress.Size,
-    mAwBurst      => AxiBus2.WriteAddress.Burst,
-    mAwLock       => AxiBus2.WriteAddress.Lock,
-    mAwCache      => AxiBus2.WriteAddress.Cache,
-    mAwQOS        => AxiBus2.WriteAddress.QOS,
-    mAwRegion     => AxiBus2.WriteAddress.Region,
-    mAwUser       => AxiBus2.WriteAddress.User,
+    mAwAddr       => SubordinateAxiBus.WriteAddress.Addr,
+    mAwProt       => SubordinateAxiBus.WriteAddress.Prot,
+    mAwValid      => SubordinateAxiBus.WriteAddress.Valid,
+    mAwReady      => SubordinateAxiBus.WriteAddress.Ready,
+    mAwID         => SubordinateAxiBus.WriteAddress.ID,
+    mAwLen        => SubordinateAxiBus.WriteAddress.Len,
+    mAwSize       => SubordinateAxiBus.WriteAddress.Size,
+    mAwBurst      => SubordinateAxiBus.WriteAddress.Burst,
+    mAwLock       => SubordinateAxiBus.WriteAddress.Lock,
+    mAwCache      => SubordinateAxiBus.WriteAddress.Cache,
+    mAwQOS        => SubordinateAxiBus.WriteAddress.QOS,
+    mAwRegion     => SubordinateAxiBus.WriteAddress.Region,
+    mAwUser       => SubordinateAxiBus.WriteAddress.User,
 
     -- AXI Write Data Channel
-    mWData        => AxiBus2.WriteData.Data, 
-    mWStrb        => AxiBus2.WriteData.Strb, 
-    mWValid       => AxiBus2.WriteData.Valid, 
-    mWReady       => AxiBus2.WriteData.Ready, 
-    mWLast        => AxiBus2.WriteData.Last,
-    mWUser        => AxiBus2.WriteData.User,
-    mWID          => AxiBus2.WriteData.ID,
+    mWData        => SubordinateAxiBus.WriteData.Data, 
+    mWStrb        => SubordinateAxiBus.WriteData.Strb, 
+    mWValid       => SubordinateAxiBus.WriteData.Valid, 
+    mWReady       => SubordinateAxiBus.WriteData.Ready, 
+    mWLast        => SubordinateAxiBus.WriteData.Last,
+    mWUser        => SubordinateAxiBus.WriteData.User,
+    mWID          => SubordinateAxiBus.WriteData.ID,
 
     -- AXI Write Response Channel
-    mBValid       => AxiBus2.WriteResponse.Valid, 
-    mBReady       => AxiBus2.WriteResponse.Ready, 
-    mBResp        => AxiBus2.WriteResponse.Resp, 
-    mBID          => AxiBus2.WriteResponse.ID,
-    mBUser        => AxiBus2.WriteResponse.User,
+    mBValid       => SubordinateAxiBus.WriteResponse.Valid, 
+    mBReady       => SubordinateAxiBus.WriteResponse.Ready, 
+    mBResp        => SubordinateAxiBus.WriteResponse.Resp, 
+    mBID          => SubordinateAxiBus.WriteResponse.ID,
+    mBUser        => SubordinateAxiBus.WriteResponse.User,
   
     -- AXI Read Address Channel
-    mArAddr       => AxiBus2.ReadAddress.Addr,
-    mArProt       => AxiBus2.ReadAddress.Prot,
-    mArValid      => AxiBus2.ReadAddress.Valid,
-    mArReady      => AxiBus2.ReadAddress.Ready,
-    mArID         => AxiBus2.ReadAddress.ID,
-    mArLen        => AxiBus2.ReadAddress.Len,
-    mArSize       => AxiBus2.ReadAddress.Size,
-    mArBurst      => AxiBus2.ReadAddress.Burst,
-    mArLock       => AxiBus2.ReadAddress.Lock,
-    mArCache      => AxiBus2.ReadAddress.Cache,
-    mArQOS        => AxiBus2.ReadAddress.QOS,
-    mArRegion     => AxiBus2.ReadAddress.Region,
-    mArUser       => AxiBus2.ReadAddress.User,
+    mArAddr       => SubordinateAxiBus.ReadAddress.Addr,
+    mArProt       => SubordinateAxiBus.ReadAddress.Prot,
+    mArValid      => SubordinateAxiBus.ReadAddress.Valid,
+    mArReady      => SubordinateAxiBus.ReadAddress.Ready,
+    mArID         => SubordinateAxiBus.ReadAddress.ID,
+    mArLen        => SubordinateAxiBus.ReadAddress.Len,
+    mArSize       => SubordinateAxiBus.ReadAddress.Size,
+    mArBurst      => SubordinateAxiBus.ReadAddress.Burst,
+    mArLock       => SubordinateAxiBus.ReadAddress.Lock,
+    mArCache      => SubordinateAxiBus.ReadAddress.Cache,
+    mArQOS        => SubordinateAxiBus.ReadAddress.QOS,
+    mArRegion     => SubordinateAxiBus.ReadAddress.Region,
+    mArUser       => SubordinateAxiBus.ReadAddress.User,
 
     -- AXI Read Data Channel
-    mRData        => AxiBus2.ReadData.Data, 
-    mRResp        => AxiBus2.ReadData.Resp,
-    mRValid       => AxiBus2.ReadData.Valid, 
-    mRReady       => AxiBus2.ReadData.Ready, 
-    mRLast        => AxiBus2.ReadData.Last,
-    mRUser        => AxiBus2.ReadData.User,
-    mRID          => AxiBus2.ReadData.ID,
+    mRData        => SubordinateAxiBus.ReadData.Data, 
+    mRResp        => SubordinateAxiBus.ReadData.Resp,
+    mRValid       => SubordinateAxiBus.ReadData.Valid, 
+    mRReady       => SubordinateAxiBus.ReadData.Ready, 
+    mRLast        => SubordinateAxiBus.ReadData.Last,
+    mRUser        => SubordinateAxiBus.ReadData.User,
+    mRID          => SubordinateAxiBus.ReadData.ID,
 
 
   -- AXI Subordinate Interface - Driven by DUT
     -- AXI Write Address Channel
-    sAwAddr       => AxiBus1.WriteAddress.Addr,
-    sAwProt       => AxiBus1.WriteAddress.Prot,
-    sAwValid      => AxiBus1.WriteAddress.Valid,
-    sAwReady      => AxiBus1.WriteAddress.Ready,
-    sAwID         => AxiBus1.WriteAddress.ID,
-    sAwLen        => AxiBus1.WriteAddress.Len,
-    sAwSize       => AxiBus1.WriteAddress.Size,
-    sAwBurst      => AxiBus1.WriteAddress.Burst,
-    sAwLock       => AxiBus1.WriteAddress.Lock,
-    sAwCache      => AxiBus1.WriteAddress.Cache,
-    sAwQOS        => AxiBus1.WriteAddress.QOS,
-    sAwRegion     => AxiBus1.WriteAddress.Region,
-    sAwUser       => AxiBus1.WriteAddress.User,
+    sAwAddr       => ManagerAxiBus.WriteAddress.Addr,
+    sAwProt       => ManagerAxiBus.WriteAddress.Prot,
+    sAwValid      => ManagerAxiBus.WriteAddress.Valid,
+    sAwReady      => ManagerAxiBus.WriteAddress.Ready,
+    sAwID         => ManagerAxiBus.WriteAddress.ID,
+    sAwLen        => ManagerAxiBus.WriteAddress.Len,
+    sAwSize       => ManagerAxiBus.WriteAddress.Size,
+    sAwBurst      => ManagerAxiBus.WriteAddress.Burst,
+    sAwLock       => ManagerAxiBus.WriteAddress.Lock,
+    sAwCache      => ManagerAxiBus.WriteAddress.Cache,
+    sAwQOS        => ManagerAxiBus.WriteAddress.QOS,
+    sAwRegion     => ManagerAxiBus.WriteAddress.Region,
+    sAwUser       => ManagerAxiBus.WriteAddress.User,
 
     -- AXI Write Data Channel
-    sWData        => AxiBus1.WriteData.Data,  
-    sWStrb        => AxiBus1.WriteData.Strb,  
-    sWValid       => AxiBus1.WriteData.Valid, 
-    sWReady       => AxiBus1.WriteData.Ready, 
-    sWLast        => AxiBus1.WriteData.Last,
-    sWUser        => AxiBus1.WriteData.User,
-    sWID          => AxiBus1.WriteData.ID,
+    sWData        => ManagerAxiBus.WriteData.Data,  
+    sWStrb        => ManagerAxiBus.WriteData.Strb,  
+    sWValid       => ManagerAxiBus.WriteData.Valid, 
+    sWReady       => ManagerAxiBus.WriteData.Ready, 
+    sWLast        => ManagerAxiBus.WriteData.Last,
+    sWUser        => ManagerAxiBus.WriteData.User,
+    sWID          => ManagerAxiBus.WriteData.ID,
 
     -- AXI Write Response Channel
-    sBValid       => AxiBus1.WriteResponse.Valid, 
-    sBReady       => AxiBus1.WriteResponse.Ready, 
-    sBResp        => AxiBus1.WriteResponse.Resp,  
-    sBID          => AxiBus1.WriteResponse.ID,
-    sBUser        => AxiBus1.WriteResponse.User,
+    sBValid       => ManagerAxiBus.WriteResponse.Valid, 
+    sBReady       => ManagerAxiBus.WriteResponse.Ready, 
+    sBResp        => ManagerAxiBus.WriteResponse.Resp,  
+    sBID          => ManagerAxiBus.WriteResponse.ID,
+    sBUser        => ManagerAxiBus.WriteResponse.User,
   
   
     -- AXI Read Address Channel
-    sArAddr       => AxiBus1.ReadAddress.Addr,
-    sArProt       => AxiBus1.ReadAddress.Prot,
-    sArValid      => AxiBus1.ReadAddress.Valid,
-    sArReady      => AxiBus1.ReadAddress.Ready,
-    sArID         => AxiBus1.ReadAddress.ID,
-    sArLen        => AxiBus1.ReadAddress.Len,
-    sArSize       => AxiBus1.ReadAddress.Size,
-    sArBurst      => AxiBus1.ReadAddress.Burst,
-    sArLock       => AxiBus1.ReadAddress.Lock,
-    sArCache      => AxiBus1.ReadAddress.Cache,
-    sArQOS        => AxiBus1.ReadAddress.QOS,
-    sArRegion     => AxiBus1.ReadAddress.Region,
-    sArUser       => AxiBus1.ReadAddress.User,
+    sArAddr       => ManagerAxiBus.ReadAddress.Addr,
+    sArProt       => ManagerAxiBus.ReadAddress.Prot,
+    sArValid      => ManagerAxiBus.ReadAddress.Valid,
+    sArReady      => ManagerAxiBus.ReadAddress.Ready,
+    sArID         => ManagerAxiBus.ReadAddress.ID,
+    sArLen        => ManagerAxiBus.ReadAddress.Len,
+    sArSize       => ManagerAxiBus.ReadAddress.Size,
+    sArBurst      => ManagerAxiBus.ReadAddress.Burst,
+    sArLock       => ManagerAxiBus.ReadAddress.Lock,
+    sArCache      => ManagerAxiBus.ReadAddress.Cache,
+    sArQOS        => ManagerAxiBus.ReadAddress.QOS,
+    sArRegion     => ManagerAxiBus.ReadAddress.Region,
+    sArUser       => ManagerAxiBus.ReadAddress.User,
 
     -- AXI Read Data Channel
-    sRData        => AxiBus1.ReadData.Data,  
-    sRResp        => AxiBus1.ReadData.Resp,
-    sRValid       => AxiBus1.ReadData.Valid, 
-    sRReady       => AxiBus1.ReadData.Ready, 
-    sRLast        => AxiBus1.ReadData.Last,
-    sRUser        => AxiBus1.ReadData.User,   
-    sRID          => AxiBus1.ReadData.ID
+    sRData        => ManagerAxiBus.ReadData.Data,  
+    sRResp        => ManagerAxiBus.ReadData.Resp,
+    sRValid       => ManagerAxiBus.ReadData.Valid, 
+    sRReady       => ManagerAxiBus.ReadData.Ready, 
+    sRLast        => ManagerAxiBus.ReadData.Last,
+    sRUser        => ManagerAxiBus.ReadData.User,   
+    sRID          => ManagerAxiBus.ReadData.ID
   ) ;
   
   ------------------------------------------------------------
@@ -279,7 +279,7 @@ begin
     nReset      => nReset,
 
     -- AXI Manager Functional Interface
-    AxiBus  => AxiBus2,
+    AxiBus      => SubordinateAxiBus,
 
     -- Testbench Transaction Interface
     TransRec    => SubordinateRec
@@ -294,7 +294,7 @@ begin
     nReset      => nReset,
 
     -- AXI Manager Functional Interface
-    AxiBus      => AxiBus1,
+    AxiBus      => ManagerAxiBus,
 
     -- Testbench Transaction Interface
     TransRec    => ManagerRec
@@ -310,7 +310,7 @@ begin
     nReset      => nReset,
 
     -- AXI Manager Functional Interface
-    AxiBus      => AxiBus1
+    AxiBus      => ManagerAxiBus
   ) ;
 
 
@@ -319,10 +319,10 @@ begin
   ------------------------------------------------------------
   port map (
     -- Global Signal Interface
-    nReset        => nReset,
+    nReset          => nReset,
 
     -- Transaction Interfaces
-    ManagerRec     => ManagerRec,
+    ManagerRec      => ManagerRec,
     SubordinateRec  => SubordinateRec
   ) ;
 

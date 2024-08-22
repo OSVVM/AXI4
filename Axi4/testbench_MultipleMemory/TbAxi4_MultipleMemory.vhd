@@ -78,7 +78,7 @@ architecture TestHarness of TbAxi4_MultipleMemory is
         ) ;
 
 
-  signal AxiBus1, AxiBus2 : Axi4RecType(
+  signal AxiBus :  Axi4RecArrayType(1 to 2)(
     WriteAddress(
       Addr(AXI_ADDR_WIDTH-1 downto 0),
       ID(7 downto 0),
@@ -146,7 +146,7 @@ begin
     nReset      => nReset,
 
     -- AXI Manager Functional Interface
-    AxiBus  => AxiBus1,
+    AxiBus  => AxiBus(1),
     
     -- Testbench Transaction Interface
     TransRec    => SubordinateRec(1)
@@ -159,7 +159,7 @@ begin
     nReset      => nReset,
 
     -- AXI Manager Functional Interface
-    AxiBus  => AxiBus2,
+    AxiBus  => AxiBus(2),
     
     -- Testbench Transaction Interface
     TransRec    => SubordinateRec(2)
@@ -172,7 +172,7 @@ begin
     nReset      => nReset,
 
     -- AXI Manager Functional Interface
-    AxiBus      => AxiBus1,
+    AxiBus      => AxiBus(1),
 
     -- Testbench Transaction Interface
     TransRec    => ManagerRec(1)
@@ -185,7 +185,7 @@ begin
     nReset      => nReset,
 
     -- AXI Manager Functional Interface
-    AxiBus      => AxiBus2,
+    AxiBus      => AxiBus(2),
 
     -- Testbench Transaction Interface
     TransRec    => ManagerRec(2)

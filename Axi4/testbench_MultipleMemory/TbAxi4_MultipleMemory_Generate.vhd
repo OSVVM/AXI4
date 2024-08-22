@@ -77,7 +77,8 @@ architecture TestHarness of TbAxi4_MultipleMemory is
           DataFromModel(AXI_DATA_WIDTH-1 downto 0)
         ) ;
 
-  type Axi4ArrayRecType is array(1 to 2) of Axi4RecType(
+
+  signal AxiBus :  Axi4RecArrayType(1 to 2)(
     WriteAddress(
       Addr(AXI_ADDR_WIDTH-1 downto 0),
       ID(7 downto 0),
@@ -104,9 +105,6 @@ architecture TestHarness of TbAxi4_MultipleMemory is
       User(7 downto 0)
     )
   ) ;
-  
-  signal AxiBus : Axi4ArrayRecType ;
-
 
   component TestCtrl is
     port (

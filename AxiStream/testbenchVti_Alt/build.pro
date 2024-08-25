@@ -37,11 +37,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
-library osvvm_TbAxiStreamVti_Mentor
+library osvvm_TbAxiStreamVti_Alt
 
 analyze ../TestCases/OsvvmTestCommonPkg.vhd
 
 analyze TestCtrl_e.vhd
 analyze TbStream.vhd
 
-include ../TestCases
+#include ../TestCases
+RunTest ../TestCases/TbStream_SendGetDemo1.vhd

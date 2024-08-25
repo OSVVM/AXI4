@@ -46,17 +46,8 @@ include ./testbenchVti
 # Make TestCases the frame of reference
 set ::osvvm::CurrentWorkingDirectory [file join $::osvvm::CurrentWorkingDirectory TestCases]
 
-# RunTest  TbAxi4_DemoMemoryReadWrite1.vhd
-# RunTest  TbAxi4_DemoErrorMemoryReadWrite1.vhd
-
-# RunTest TbAxi4_ManagerRandomTiming1.vhd 
-# RunTest TbAxi4_ManagerRandomTimingAsync1.vhd 
-# RunTest TbAxi4_MemoryRandomTiming1.vhd 
-RunTest TbAxi4_MemoryRandomTimingAsync1.vhd 
-# RunTest TbAxi4_ManagerMemoryRandomTiming1.vhd 
-# RunTest TbAxi4_SubordinateRandomTiming1.vhd
-# RunTest TbAxi4_ManagerSubordinateRandomTiming1.vhd
-# RunTest TbAxi4_ManagerSubordinateRandomTimingAsync1.vhd
-# RunTest TbAxi4_NoRandomTiming1.vhd 
-
-# RunTest  TbAxi4_MemoryReadWriteDebug1.vhd
+RunTest  TbAxi4_DemoMemoryReadWrite1.vhd
+RunTest  TbAxi4_BasicReadWrite.vhd
+RunTest  TbAxi4_ManagerRandomTiming1.vhd 
+RunTest  TbAxi4_ManagerMemoryRandomTiming1.vhd 
+RunTest  TbAxi4_MemoryBurstPattern1.vhd

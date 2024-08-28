@@ -78,13 +78,11 @@ package AxiStreamGenericSignalsPkg is
   signal TKeep     : std_logic_vector(AXI_BYTE_WIDTH-1 downto 0) ; 
   signal TLast     : std_logic ; 
 
---  -- Testbench Transaction Interface
---  subtype TransactionRecType is StreamRecType(
---    DataToModel   (AXI_DATA_WIDTH-1  downto 0),
---    DataFromModel (AXI_DATA_WIDTH-1  downto 0),
---    ParamToModel  (AXI_PARAM_WIDTH-1 downto 0),
---    ParamFromModel(AXI_PARAM_WIDTH-1 downto 0)
---  ) ;  
---  signal TransRec : TransactionRecType ;
+  signal TransRec : StreamRecType(
+    DataToModel   (AXI_DATA_WIDTH-1  downto 0),
+    DataFromModel (AXI_DATA_WIDTH-1  downto 0),
+    ParamToModel  (AXI_PARAM_WIDTH-1 downto 0),
+    ParamFromModel(AXI_PARAM_WIDTH-1 downto 0)
+  ) ;  
 end package AxiStreamGenericSignalsPkg ;
 

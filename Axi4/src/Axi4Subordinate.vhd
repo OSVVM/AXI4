@@ -527,7 +527,8 @@ begin
 
         -- The End -- Done
         when others =>
-          Alert(ModelID, ClassifyUnimplementedOperation(TransRec.Operation, TransRec.Rdy), FAILURE) ;
+          -- Signal multiple Driver Detect or not implemented transactions.
+          Alert(ModelID, ClassifyUnimplementedOperation(TransRec), FAILURE) ;
 
       end case ;
 

@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to run one Axi Stream test  
+#        Script to run one Axi4 test  
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -37,11 +37,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
-library osvvm_TbAxiStreamVti_Mentor
-
 analyze ../TestCases/OsvvmTestCommonPkg.vhd
 
 analyze TestCtrl_e.vhd
-analyze TbStream.vhd
+analyze TbAxi4.vhd
+analyze TbAxi4Memory.vhd
 
-include ../TestCases

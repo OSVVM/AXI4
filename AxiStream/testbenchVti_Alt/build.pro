@@ -1,4 +1,4 @@
-#  File Name:         RunAllTests.pro
+#  File Name:         testbench.pro
 #  Revision:          STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to run all Axi4 tests  
+#        Script to run one Axi Stream test  
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -37,17 +37,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
+library osvvm_TbAxiStreamVti_Alt
 
-TestSuite Axi4Full_VTI
-library osvvm_TbAxi4Vti
+analyze ../TestCases/OsvvmTestCommonPkg.vhd
 
-include ./testbenchVti
+analyze TestCtrl_e.vhd
+analyze TbStream.vhd
 
-# Make TestCases the frame of reference
-set ::osvvm::CurrentWorkingDirectory [file join $::osvvm::CurrentWorkingDirectory TestCases]
-
-RunTest  TbAxi4_DemoMemoryReadWrite1.vhd
-RunTest  TbAxi4_BasicReadWrite.vhd
-RunTest  TbAxi4_ManagerRandomTiming1.vhd 
-RunTest  TbAxi4_ManagerMemoryRandomTiming1.vhd 
-RunTest  TbAxi4_MemoryBurstPattern1.vhd
+#include ../TestCases
+RunTest ../TestCases/TbStream_SendGetDemo1.vhd

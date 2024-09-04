@@ -581,17 +581,11 @@ begin
               Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
               wait for 0 ns ;
           end case ;
-        -- The End -- Done
-
---!! Replaced by ClassifyUnimplementedReceiverOperation
---        when MULTIPLE_DRIVER_DETECT =>
---          Alert(ModelID, "Multiple Drivers on Transaction Record." & 
---                         "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
 
         -- The End -- Done
         when others =>
---          Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
-          Alert(ModelID, ClassifyUnimplementedReceiverOperation(TransRec.Operation, TransRec.Rdy), FAILURE) ;
+          -- Signal multiple Driver Detect or not implemented transactions.
+          Alert(ModelID, ClassifyUnimplementedReceiverOperation(TransRec), FAILURE) ;
       end case ;
 
       -- Wait for 1 delta cycle, required if a wait is not in all case branches above

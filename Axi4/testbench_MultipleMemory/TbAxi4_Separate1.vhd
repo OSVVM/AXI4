@@ -56,6 +56,7 @@ begin
     SetTestName("TbAxi4_Separate1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
+    SetLogEnable(DEBUG, TRUE) ;    -- Enable INFO logs
     TbID <= GetAlertLogID("Testbench") ;
 
     -- Wait for testbench initialization 

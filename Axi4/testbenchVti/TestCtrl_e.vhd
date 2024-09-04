@@ -64,12 +64,12 @@ entity TestCtrl is
   ) ;
   
   -- Connect transaction interfaces using external names
-  alias ManagerRec    is <<signal ^.Manager_1.TransRec : AddressBusRecType>> ;
+  alias ManagerRec     is <<signal ^.Manager_1.TransRec : AddressBusRecType>> ;
   alias SubordinateRec is <<signal ^.Subordinate_1.TransRec : AddressBusRecType>> ;
   
   -- Derive AXI interface properties from the ManagerRec
-  constant AXI_ADDR_WIDTH : integer := ManagerRec.Address'length ; 
-  constant AXI_DATA_WIDTH : integer := ManagerRec.DataToModel'length ;  
+  constant AXI_ADDR_WIDTH      : integer := ManagerRec.Address'length ; 
+  constant AXI_DATA_WIDTH      : integer := ManagerRec.DataToModel'length ;  
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 

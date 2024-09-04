@@ -38,16 +38,22 @@
 #  limitations under the License.
 #  
 
-TestSuite Axi4Full_VTI
-library osvvm_TbAxi4Vti
+TestSuite Axi4Full_GenericSignals
+library osvvm_TbAxi4_GenericSignals
 
-include ./testbenchVti
+if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
+  include ./testbench_GenericSignals
 
-# Make TestCases the frame of reference
-set ::osvvm::CurrentWorkingDirectory [file join $::osvvm::CurrentWorkingDirectory TestCases]
+  # Make TestCases the frame of reference
+  set ::osvvm::CurrentWorkingDirectory [file join $::osvvm::CurrentWorkingDirectory TestCases]
+  RunTest  TbAxi4_BasicReadWrite.vhd          ; # TbAxi4
+  RunTest  TbAxi4_DemoMemoryReadWrite1.vhd   ; # TbAxi4Memory
+#  RunTest  TbAxi4_ManagerRandomTiming1.vhd 
+#  RunTest  TbAxi4_ManagerMemoryRandomTiming1.vhd 
+#  RunTest  TbAxi4_MemoryBurstPattern1.vhd
+} else {
+  SkipTest Axi4VC "AXI4 VC not working in XSIM"
+}
 
-RunTest  TbAxi4_DemoMemoryReadWrite1.vhd
-RunTest  TbAxi4_BasicReadWrite.vhd
-RunTest  TbAxi4_ManagerRandomTiming1.vhd 
-RunTest  TbAxi4_ManagerMemoryRandomTiming1.vhd 
-RunTest  TbAxi4_MemoryBurstPattern1.vhd
+
+

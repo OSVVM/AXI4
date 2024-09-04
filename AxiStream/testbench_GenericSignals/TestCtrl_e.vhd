@@ -46,7 +46,7 @@ library ieee ;
   
 library OSVVM ; 
   context OSVVM.OsvvmContext ; 
-    use osvvm.ScoreboardPkg_slv.all ;
+  use osvvm.ScoreboardPkg_slv.all ;
 
 library osvvm_AXI4 ;
     context osvvm_AXI4.AxiStreamContext ;
@@ -68,6 +68,8 @@ entity TestCtrl is
       StreamRxRec        : InOut StreamRecType 
 
   ) ;
+
+  -- Derive AXI interface properties from the StreamTxRec
   constant DATA_WIDTH : integer := StreamTxRec.DataToModel'length ; 
   constant DATA_BYTES : integer := DATA_WIDTH/8 ; 
   

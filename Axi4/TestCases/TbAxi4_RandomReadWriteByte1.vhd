@@ -78,7 +78,7 @@ begin
     -- Wait for Design Reset
     wait until nReset = '1' ;  
     ClearAlerts ;
-    SetAlertStopCount(ERROR, 2) ;
+    SetAlertStopCount(ERROR, 10) ;
 
     -- Wait for test to finish
     WaitForBarrier(TestDone, 1 ms) ;
@@ -136,7 +136,7 @@ begin
 
       -- Get ManagerData right aligned and SubordinateData word aligned
       SubordinateData  := (others => '0') ;
-      ManagerData     := (others => '0') ;
+      ManagerData      := (others => '0') ;
       for i in AXI_DATA_BYTES - 1 downto 0 loop
         SubordinateData := SubordinateData(AXI_DATA_BYTES*8 - 9 downto 0) & (0 to 7 => '0') ;
         if i >= ByteAddress and i < ByteAddress + NumberOfBytes then

@@ -2,6 +2,7 @@
 
 | Revision  |  Release Summary | 
 ------------|----------- 
+| 2024.09   |  Axi4InterfacePkg - updated Added Axi4RecArrayType 
 | 2024.07   |  Updated Axi4 VC to shorten AlertLogID names.  Added OsvvmVcInit barrier to AxiStreamReceiver 
 | 2024.04   |  Updated SafeResize to include ModelID.
 | 2023.09   |  Updated Unimplemented Transaction messages in VC.
@@ -29,6 +30,12 @@
 | 2020.07   |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
 | 2020.02   |  Initial version of AddressBusTransactionPkg.
 | 2018.04   |  Initial public release
+
+## 2024.09 September 2024
+Axi4InterfacePkg - updated Added Axi4RecArrayType.  Updated Axi4RecType to be the record rather than an alias
+Axi4 - Added Axi4GenericSignalsPkg and testbench_GenericSignals
+AxiStream - updated AxiStreamSignalsPkg (added TransRec) and added testbench_GenericSignals
+Added shorter call to ClassifyUnimplementedOperation, ClassifyUnimplementedTransmitterOperation, ClassifyUnimplementedReceiverOperation
 
 ## 2024.07 July 2024
 Updated Axi4 VC to shorten AlertLogID and data structure names - impacts justification of alerts and logs

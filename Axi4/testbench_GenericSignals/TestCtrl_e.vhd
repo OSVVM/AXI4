@@ -19,13 +19,15 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2018   2018.05    Initial revision
+--    09/2017   2017.09    Initial revision
+--    05/2019   2019.05    Added context reference
 --    01/2020   2020.01    Updated license notice
+--    12/2020   2020.12    Updated port names
 --
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.  
+--  Copyright (c) 2017 - 2020 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -39,39 +41,39 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --  
+
 library ieee ;
   use ieee.std_logic_1164.all ;
   use ieee.numeric_std.all ;
   use ieee.numeric_std_unsigned.all ;
+  use ieee.math_real.all ;
   
 library OSVVM ; 
   context OSVVM.OsvvmContext ; 
-    use osvvm.ScoreboardPkg_slv.all ;
+  use osvvm.ScoreboardPkg_slv.all ;
 
-library osvvm_AXI4 ;
-    context osvvm_AXI4.AxiStreamContext ;
+library OSVVM_AXI4 ;
+  context OSVVM_AXI4.Axi4Context ; 
 
 use work.OsvvmTestCommonPkg.all ;
 
 entity TestCtrl is
-  generic ( 
-    ID_LEN       : integer ;
-    DEST_LEN     : integer ;
-    USER_LEN     : integer 
-  ) ;
   port (
-      -- Global Signal Interface
-      nReset             : In    std_logic ;
+    -- Global Signal Interface
+    nReset         : In    std_logic ;
 
-      -- Transaction Interfaces
-      StreamTxRec        : InOut StreamRecType ;
-      StreamRxRec        : InOut StreamRecType 
-
+    -- Transaction Interfaces
+    ManagerRec      : inout AddressBusRecType ;
+    SubordinateRec   : inout AddressBusRecType 
   ) ;
-  constant DATA_WIDTH : integer := StreamTxRec.DataToModel'length ; 
-  constant DATA_BYTES : integer := DATA_WIDTH/8 ; 
   
+  -- Derive AXI interface properties from the ManagerRec
+  constant AXI_ADDR_WIDTH : integer := ManagerRec.Address'length ; 
+  constant AXI_DATA_WIDTH : integer := ManagerRec.DataToModel'length ;  
+  constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
+  constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
+    
   -- Simplifying access to Burst FIFOs using aliases
-  alias TxBurstFifo : ScoreboardIdType is StreamTxRec.BurstFifo ; 
-  alias RxBurstFifo : ScoreboardIdType is StreamRxRec.BurstFifo ;
+  alias WriteBurstFifo : ScoreboardIdType is ManagerRec.WriteBurstFifo ;
+  alias ReadBurstFifo  : ScoreboardIdType is ManagerRec.ReadBurstFifo ;
 end entity TestCtrl ;

@@ -56,6 +56,7 @@ begin
     SetTestName("TbAxi4_Shared1") ;
     SetLogEnable(PASSED, TRUE) ;    -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;    -- Enable INFO logs
+    SetLogEnable(DEBUG, TRUE) ;    -- Enable INFO logs
     TbID <= GetAlertLogID("Testbench") ;
 
     -- Wait for testbench initialization 
@@ -171,9 +172,17 @@ Configuration TbAxi4_Shared1 of TbAxi4_MultipleMemory is
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(Shared1) ; 
     end for ; 
+-- works with the TbAxi4_MultipleMemory.vhd
     for all : Axi4Memory
       use entity OSVVM_AXI4.Axi4Memory(MemorySubordinate) 
-          generic map (MEMORY_NAME => "SharedMemory");
+          generic map (MEMORY_NAME => "SharedMemory", MODEL_ID_NAME => MODEL_ID_NAME);
     end for ; 
+-- works with the TbAxi4_MultipleMemory_Generate.vhd
+--!!    for GenerateVC 
+--!!      for all : Axi4Memory
+--!!        use entity OSVVM_AXI4.Axi4Memory(MemorySubordinate) 
+--!!            generic map (MEMORY_NAME => "SharedMemory", MODEL_ID_NAME => MODEL_ID_NAME);
+--!!      end for ; 
+--!!    end for ; 
   end for ; 
 end TbAxi4_Shared1 ; 

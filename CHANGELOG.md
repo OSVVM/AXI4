@@ -32,7 +32,7 @@
 | 2018.04   |  Initial public release
 
 ## 2024.09 September 2024
-Axi4InterfacePkg - updated Added Axi4RecArrayType.  Updated Axi4RecType to be the record rather than an alias
+Axi4InterfacePkg - Added Axi4RecArrayType.  Updated Axi4RecType to be the record rather than an alias
 Axi4 - Added Axi4GenericSignalsPkg and testbench_GenericSignals
 AxiStream - updated AxiStreamSignalsPkg (added TransRec) and added testbench_GenericSignals
 Added shorter call to ClassifyUnimplementedOperation, ClassifyUnimplementedTransmitterOperation, ClassifyUnimplementedReceiverOperation

@@ -117,7 +117,7 @@ begin
     
     -- Let some number of Write Cycles complete before starting Read.   
     -- Reads will fail if this is too small
-    WaitForClock(ManagerRec, 32) ;
+    WaitForClock(ManagerRec, 48) ;
 
     for I in 1 to 128 loop
       ReadAddressAsync ( ManagerRec, X"0000_0000" + 16*I) ;
@@ -151,7 +151,7 @@ begin
 
     -- Let some number of Write Cycles complete before starting Read.   
     -- Reads will fail if this is too small
-    WaitForClock(ManagerRec, 32) ;
+    WaitForClock(ManagerRec, 48) ;
 
     for I in 1 to 128 loop
       ReadCheckBurstIncrement  (ManagerRec, X"0000_1000" + 256*I, X"0000_1000" + 256*I, 6) ;
@@ -181,7 +181,7 @@ begin
     DeallocateBins(DelayCov(WRITE_ADDRESS_ID).BurstLengthCov) ;  -- Remove old coverage model
     AddBins(DelayCov(WRITE_ADDRESS_ID).BurstLengthCov, GenBin(2,4,1)) ; 
     DeallocateBins(DelayCov(READ_ADDRESS_ID).BurstLengthCov) ;  -- Remove old coverage model
-    AddBins(DelayCov(READ_ADDRESS_ID).BurstLengthCov, GenBin(2,4,1)) ; 
+    AddBins(DelayCov(READ_ADDRESS_ID).BurstLengthCov, GenBin(3,6,1)) ; 
     WaitForBarrier(SyncPoint) ; 
 
     -- Wait for outputs to propagate and signal TestDone

@@ -119,6 +119,13 @@ begin
         DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
         DATA_ZERO+21,  DATA_ZERO+23, DATA_ZERO+25) ) ;
 
+    log("Write with ByteAddr = x2000, 13 Words ") ;
+    WriteBurstVector(ManagerRec, X"0000_2000", 
+        (0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24), DATA_WIDTH)  ; 
+
+    ReadCheckBurstVector(ManagerRec, X"0000_2000", 
+        (0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24), DATA_WIDTH )  ; 
+
     log("Write with ByteAddr = X3001, 13 Bytes -- unaligned") ;
     WriteBurstRandom(ManagerRec, X"0000_3001", X"30", 13) ;
 

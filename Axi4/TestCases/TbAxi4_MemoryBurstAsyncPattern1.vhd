@@ -110,6 +110,10 @@ begin
         DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
         DATA_ZERO+21,  DATA_ZERO+23, DATA_ZERO+25) ) ;
 
+    log("Write with ByteAddr = x2000, 13 Words ") ;
+    WriteBurstVectorAsync(ManagerRec, X"0000_2000", 
+        (0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24), DATA_WIDTH)  ; 
+
     log("Write with ByteAddr = 31, 12 Bytes -- unaligned") ;
     WriteBurstRandomAsync(ManagerRec, X"0000_3001", X"A015_2800", 13) ;
     
@@ -121,6 +125,9 @@ begin
         (X"0001_----", DATA_ZERO+3,  DATA_ZERO+5,  DATA_ZERO+7,  DATA_ZERO+9,
         DATA_ZERO+11,  DATA_ZERO+13, DATA_ZERO+15, DATA_ZERO+17, DATA_ZERO+19,
         DATA_ZERO+21,  DATA_ZERO+23, DATA_ZERO+25) ) ;
+
+    ReadCheckBurstVector(ManagerRec, X"0000_2000", 
+        (0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24), DATA_WIDTH )  ; 
 
     ReadCheckBurstRandom(ManagerRec, X"0000_3001", X"A015_28UU", 13) ;
 

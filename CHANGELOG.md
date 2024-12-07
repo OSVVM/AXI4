@@ -1,7 +1,8 @@
 # AXI4 Verification Component Change Log
 
-| Revision  |  Release Summary | 
+| Revision  |  Release Summary |   DEFAULT_DELAY  : time := maximum(tperiod_Clk/10, std.env.resolution_limit);
 ------------|----------- 
+| 2024.11   |  AxiStream - updated DEFAULT_DELAY 
 | 2024.09   |  Axi4InterfacePkg - updated Added Axi4RecArrayType 
 | 2024.07   |  Updated Axi4 VC to shorten AlertLogID names.  Added OsvvmVcInit barrier to AxiStreamReceiver 
 | 2024.04   |  Updated SafeResize to include ModelID.
@@ -30,6 +31,9 @@
 | 2020.07   |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
 | 2020.02   |  Initial version of AddressBusTransactionPkg.
 | 2018.04   |  Initial public release
+
+## 2024.11 November 2024
+AxiStream - updated DEFAULT_DELAY init value to maximum(tperiod_Clk/10, std.env.resolution_limit);
 
 ## 2024.09 September 2024
 Axi4InterfacePkg - Added Axi4RecArrayType.  Updated Axi4RecType to be the record rather than an alias

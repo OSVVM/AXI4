@@ -74,7 +74,7 @@ begin
     
     TranscriptClose ; 
     AffirmIfTranscriptsMatch(OSVVM_VALIDATED_RESULTS_DIR) ;   
-    
+
     -- Expecting two check errors at 128 and 256
     EndOfTestReports(ExternalErrors => (0, 0, 0)) ; 
     std.env.stop ;

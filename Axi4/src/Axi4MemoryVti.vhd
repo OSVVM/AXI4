@@ -614,7 +614,7 @@ begin
     
     WriteHandlerLoop : loop 
       -- Find Write Address and Data transaction
-      if empty(WriteAddressFifo) then
+      if IsEmpty(WriteAddressFifo) then
         WaitForToggle(WriteAddressReceiveCount) ;
       end if ;
       (LAW.Addr, LAW.Len, LAW.Prot, LAW.Size, LAW.Burst, LAW.ID, LAW.User) := pop(WriteAddressFifo) ;
@@ -644,7 +644,7 @@ begin
       -- Burst transfers
       BurstLoop : for BurstIndex in 1 to BurstLen loop
         -- Wait for Data
-        if empty(WriteDataFifo) then
+        if IsEmpty(WriteDataFifo) then
           WaitForToggle(WriteDataReceiveCount) ;
         end if ;
         (LWD.Data, LWD.Strb) := pop(WriteDataFifo) ;
@@ -713,7 +713,7 @@ begin
 
     WriteResponseLoop : loop
       -- Find Transaction
-      if empty(WriteResponseFifo) then
+      if IsEmpty(WriteResponseFifo) then
         WaitForToggle(WriteReceiveCount) ;
       end if ;
       (Local.Resp, Local.ID, Local.User) := pop(WriteResponseFifo) ;
@@ -877,7 +877,7 @@ begin
     wait for 0 ns ; -- Allow ReadAddressFifo to initialize
 
     ReadHandlerLoop : loop 
-      if empty(ReadAddressFifo) then
+      if IsEmpty(ReadAddressFifo) then
         WaitForToggle(ReadAddressReceiveCount) ;
       end if ;
       (LAR.Addr, LAR.Len, LAR.Prot, LAR.Size, LAR.Burst, LAR.ID, LAR.User) := pop(ReadAddressFifo) ;
@@ -970,7 +970,7 @@ begin
     AddBins (ReadDataDelayCov.BeatDelayCov,    GenBin(0)) ;
 
     ReadDataLoop : loop
-      if empty(ReadDataFifo) then
+      if IsEmpty(ReadDataFifo) then
         WaitForToggle(ReadDataRequestCount) ;
       end if ;
       (Local.Data, Local.Last, Local.Resp, Local.ID, Local.User) := pop(ReadDataFifo) ;

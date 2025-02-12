@@ -241,23 +241,23 @@ begin
         when WAIT_FOR_TRANSACTION =>
           -- wait for write or read transaction to be available
           loop
-            exit when not empty(WriteAddressFifo) and not empty(WriteDataFifo) ; -- Write Available
-            exit when not empty(ReadAddressFifo) ; -- Read Available
+            exit when not IsEmpty(WriteAddressFifo) and not IsEmpty(WriteDataFifo) ; -- Write Available
+            exit when not IsEmpty(ReadAddressFifo) ; -- Read Available
             wait on WriteAddressReceiveCount, WriteDataReceiveCount, ReadAddressReceiveCount ;
           end loop ;
 
         when WAIT_FOR_WRITE_TRANSACTION =>
           -- wait for write transaction to be available
-          if empty(WriteAddressFifo) then
+          if IsEmpty(WriteAddressFifo) then
             WaitForToggle(WriteAddressReceiveCount) ;
           end if ;
-          if empty(WriteDataFifo) then
+          if IsEmpty(WriteDataFifo) then
             WaitForToggle(WriteDataReceiveCount) ;
           end if ;
 
         when WAIT_FOR_READ_TRANSACTION =>
           -- wait for read transaction to be available
-          if empty(ReadAddressFifo) then
+          if IsEmpty(ReadAddressFifo) then
             WaitForToggle(ReadAddressReceiveCount) ;
           end if ;
 
@@ -307,8 +307,8 @@ begin
         when WRITE_OP | WRITE_ADDRESS | WRITE_DATA |
              ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
 
-          if (IsTryWriteAddress(TransRec.Operation) and empty(WriteAddressFifo)) or
-             (IsTryWriteData(TransRec.Operation)    and empty(WriteDataFifo)) then
+          if (IsTryWriteAddress(TransRec.Operation) and IsEmpty(WriteAddressFifo)) or
+             (IsTryWriteData(TransRec.Operation)    and IsEmpty(WriteDataFifo)) then
             WriteAvailable         := FALSE ;
             TransRec.DataFromModel <= (TransRec.DataFromModel'range => '0') ; 
           else
@@ -318,7 +318,7 @@ begin
 
           if WriteAvailable and IsWriteAddress(TransRec.Operation) then
             -- Find Write Address transaction
-            if empty(WriteAddressFifo) then
+            if IsEmpty(WriteAddressFifo) then
               WaitForToggle(WriteAddressReceiveCount) ;
             end if ;
 
@@ -331,7 +331,7 @@ begin
 
           if WriteAvailable and IsWriteData(TransRec.Operation) then
             -- Find Write Data transaction
-            if empty(WriteDataFifo) then
+            if IsEmpty(WriteDataFifo) then
               WaitForToggle(WriteDataReceiveCount) ;
             end if ;
 
@@ -403,7 +403,7 @@ begin
         when READ_OP | READ_ADDRESS | READ_DATA |
              ASYNC_READ | ASYNC_READ_ADDRESS | ASYNC_READ_DATA =>
 
-          if (IsTryReadAddress(TransRec.Operation) and empty(ReadAddressFifo)) then
+          if (IsTryReadAddress(TransRec.Operation) and IsEmpty(ReadAddressFifo)) then
             ReadAvailable          := FALSE ;
           else
             ReadAvailable          := TRUE ;
@@ -412,7 +412,7 @@ begin
 
           if ReadAvailable and IsReadAddress(TransRec.Operation) then
             -- Expect Read Address Cycle
-            if empty(ReadAddressFifo) then
+            if IsEmpty(ReadAddressFifo) then
               WaitForToggle(ReadAddressReceiveCount) ;
             end if ;
             (LocalAR.Addr, LocalAR.Prot)  := pop(ReadAddressFifo) ;
@@ -643,7 +643,7 @@ begin
       if WriteResponseDoneCount >= WriteReceiveCount then
         WaitForToggle(WriteReceiveCount) ;
       end if ;
-      if not empty(WriteResponseFifo) then
+      if not IsEmpty(WriteResponseFifo) then
         Local.Resp := pop(WriteResponseFifo) ;
       else
         Local.Resp := AXI4_RESP_OKAY ;
@@ -793,7 +793,7 @@ begin
       end if ;
 
 
-      if empty(ReadDataFifo) then
+      if IsEmpty(ReadDataFifo) then
         WaitForToggle(ReadDataRequestCount) ;
       end if ;
 

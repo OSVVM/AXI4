@@ -410,7 +410,7 @@ begin
 
     TransmitLoop : loop
       -- Find Transaction
-      if Empty(TransmitFifo) then
+      if IsEmpty(TransmitFifo) then
          WaitForToggle(TransmitRequestCount) ;
       end if ;
 

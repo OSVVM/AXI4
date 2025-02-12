@@ -556,7 +556,7 @@ begin
     
     WriteHandlerLoop : loop 
       -- Find Write Address and Data transaction
-      if empty(WriteAddressFifo) then
+      if IsEmpty(WriteAddressFifo) then
         WaitForToggle(WriteAddressReceiveCount) ;
       end if ;
       (LAW.Addr, LAW.Prot) := pop(WriteAddressFifo) ;
@@ -574,7 +574,7 @@ begin
   --!3 Delay before first word - burst vs. single word
 
       -- Wait for Data
-      if empty(WriteDataFifo) then
+      if IsEmpty(WriteDataFifo) then
         WaitForToggle(WriteDataReceiveCount) ;
       end if ;
       (LWD.Data, LWD.Strb) := pop(WriteDataFifo) ;
@@ -628,7 +628,7 @@ begin
 
     WriteResponseLoop : loop
       -- Find Transaction
-      if empty(WriteResponseFifo) then
+      if IsEmpty(WriteResponseFifo) then
         WaitForToggle(WriteReceiveCount) ;
       end if ;
       Local.Resp := pop(WriteResponseFifo) ;
@@ -769,7 +769,7 @@ begin
     wait for 0 ns ; -- Allow ReadAddressFifo to initialize
 
     ReadHandlerLoop : loop 
-      if empty(ReadAddressFifo) then
+      if IsEmpty(ReadAddressFifo) then
         WaitForToggle(ReadAddressReceiveCount) ;
       end if ;
       (LAR.Addr, LAR.Prot) := pop(ReadAddressFifo) ;
@@ -830,7 +830,7 @@ begin
     AddBins (ReadDataDelayCov.BeatDelayCov,    GenBin(0)) ;
 
     ReadDataLoop : loop
-      if empty(ReadDataFifo) then
+      if IsEmpty(ReadDataFifo) then
         WaitForToggle(ReadDataRequestCount) ;
       end if ;
       (Local.Data, Local.Resp) := pop(ReadDataFifo) ;

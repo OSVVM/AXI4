@@ -273,7 +273,7 @@ begin
           end if ;
 
         when GET | TRY_GET | CHECK | TRY_CHECK =>
-          if Empty(ReceiveFifo) and  IsTry(Operation) then
+          if IsEmpty(ReceiveFifo) and  IsTry(Operation) then
             if not TryWordWaiting then
               increment(WordRequestCount) ; 
             end if ;
@@ -292,7 +292,7 @@ begin
 
             -- Get data
             TransRec.BoolFromModel <= TRUE ;
-            if Empty(ReceiveFifo) then
+            if IsEmpty(ReceiveFifo) then
               -- Wait for data
               WaitForToggle(WordReceiveCount) ;
             end if ;

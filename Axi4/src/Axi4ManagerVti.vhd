@@ -551,7 +551,7 @@ begin
           end if ;
           wait for 0 ns ; 
 
-          if IsTryReadData(Operation) and Empty(ReadDataFifo) then
+          if IsTryReadData(Operation) and IsEmpty(ReadDataFifo) then
             -- Data not available
             -- ReadDataReceiveCount < ReadDataTransactionCount then
             TransRec.BoolFromModel <= FALSE ;
@@ -561,7 +561,7 @@ begin
             ReadByteAddr  :=  CalculateByteAddress(LAR.Addr, AXI_BYTE_ADDR_WIDTH);
 
             -- Wait for Data Ready
-            if Empty(ReadDataFifo) then
+            if IsEmpty(ReadDataFifo) then
               WaitForToggle(ReadDataReceiveCount) ;
             end if ;
             TransRec.BoolFromModel <= TRUE ;
@@ -635,7 +635,7 @@ begin
   --!!3 First Check IsReadData, then Calculate #Transfers,
   --!!3 Then if TryRead, and ReadDataFifo.FifoCount < #Transfers, then FALSE
   --!!3 Which reverses the order of the following IF statements
-          if IsTryReadData(Operation) and Empty(ReadDataFifo) then
+          if IsTryReadData(Operation) and IsEmpty(ReadDataFifo) then
             -- Data not available
             -- ReadDataReceiveCount < ReadDataTransactionCount then
             TransRec.BoolFromModel <= FALSE ;
@@ -659,7 +659,7 @@ begin
             end if ; 
 
             for BurstLoop in 1 to TransfersInBurst loop
-              if Empty(ReadDataFifo) then
+              if IsEmpty(ReadDataFifo) then
                 WaitForToggle(ReadDataReceiveCount) ;
               end if ;
               LRD.Data := Pop(ReadDataFifo) ;
@@ -729,7 +729,7 @@ begin
 
     WriteAddressLoop : loop
       -- Find Transaction in FIFO
-      if Empty(WriteAddressFifo) then
+      if IsEmpty(WriteAddressFifo) then
          WaitForToggle(WriteAddressRequestCount) ;
       end if ;
       (Local.Addr, Local.Len, Local.Prot, Local.ID, Local.Size, Local.Burst, Local.Lock, Local.Cache, Local.QOS, Local.Region, Local.User) := Pop(WriteAddressFifo) ;
@@ -828,7 +828,7 @@ begin
 
     WriteDataLoop : loop
       -- Find Transaction
-      if Empty(WriteDataFifo) then
+      if IsEmpty(WriteDataFifo) then
          WaitForToggle(WriteDataRequestCount) ;
       end if ;
       (Burst, Local.Last, Local.Data, Local.Strb, Local.User, Local.ID) := Pop(WriteDataFifo) ;
@@ -914,7 +914,7 @@ begin
     WriteResponseOperation : loop
       -- Find Expected Transaction
       WriteResponseActive <= FALSE ;
-      if empty(WriteResponseScoreboard) then
+      if IsEmpty(WriteResponseScoreboard) then
         WaitForToggle(WriteResponseExpectCount) ;
       end if ;
       WriteResponseActive <= TRUE ;
@@ -1006,7 +1006,7 @@ begin
 
     AddressReadLoop : loop
       -- Find Transaction
-      if Empty(ReadAddressFifo) then
+      if IsEmpty(ReadAddressFifo) then
          WaitForToggle(ReadAddressRequestCount) ;
       end if ;
       (Local.Addr, Local.Len, Local.Prot, Local.ID, Local.Size, Local.Burst, Local.Lock, Local.Cache, Local.QOS, Local.Region, Local.User) := Pop(ReadAddressFifo) ;

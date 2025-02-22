@@ -128,7 +128,8 @@ port (
 
   -- Memory Data Structure, Access via MemoryName
   constant LOCAL_MEMORY_NAME : string := 
-    IfElse(MEMORY_NAME /= "", MEMORY_NAME, to_lower(Axi4MemoryVti'PATH_NAME) & ":memory") ;
+    IfElse(MEMORY_NAME /= "", MEMORY_NAME, MODEL_INSTANCE_NAME & ":memory") ;
+--    IfElse(MEMORY_NAME /= "", MEMORY_NAME, to_lower(Axi4MemoryVti'PATH_NAME) & ":memory") ;
     
   constant MODEL_NAME : string := "Axi4MemoryVti" ;
 

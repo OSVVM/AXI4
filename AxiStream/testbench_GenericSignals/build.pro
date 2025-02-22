@@ -41,7 +41,7 @@
 library osvvm_TbAxiStream_GenericSignals
 TestSuite TbAxiStream_GenericSignals
 
-analyze ../TestCases/OsvvmTestCommonPkg.vhd
+include ../TestCases/OsvvmTestCommonPkg.pro
 
 analyze TestCtrl_e.vhd
 analyze AxiStreamDut.vhd

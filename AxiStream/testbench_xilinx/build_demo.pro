@@ -39,7 +39,7 @@
 #  
 library osvvm_TbAxiStream
 
-analyze ../TestCases/OsvvmTestCommonPkg.vhd
+include ../TestCases/OsvvmTestCommonPkg.pro
 
 analyze TestCtrl_e.vhd
 analyze AxiStreamDut.vhd

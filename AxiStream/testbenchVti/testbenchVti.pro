@@ -40,7 +40,7 @@
 
 library osvvm_TbAxiStreamVti
 
-analyze ../TestCases/OsvvmTestCommonPkg.vhd
+include ../TestCases/OsvvmTestCommonPkg.pro
 
 analyze TestCtrl_e.vhd
 analyze TbStream.vhd

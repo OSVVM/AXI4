@@ -77,7 +77,9 @@ begin
     AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
 
     TranscriptClose ;
-    -- AffirmIfTranscriptsMatch(OSVVM_VALIDATED_RESULTS_DIR) ;   
+    if CHECK_TRANSCRIPT then 
+    --  AffirmIfTranscriptsMatch(AXISTREAM_VALIDATED_RESULTS_DIR) ; 
+    end if ;   
    
 
 

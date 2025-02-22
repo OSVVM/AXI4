@@ -72,7 +72,9 @@ begin
     
     AffirmIf(GetAlertCount = AlertCountType'(FAILURE => 1, ERROR => 0, WARNING => 0), "Expecting: (FAILURE => 1, ERROR => 0, WARNING => 0)") ;
     TranscriptClose ; 
-    AffirmIfTranscriptsMatch(OSVVM_VALIDATED_RESULTS_DIR) ;   
+    if CHECK_TRANSCRIPT then 
+      AffirmIfTranscriptsMatch(AXISTREAM_VALIDATED_RESULTS_DIR) ; 
+    end if ;   
     
     EndOfTestReports(ExternalErrors => (FAILURE => -1, ERROR => 0, WARNING => 0)) ; 
     std.env.stop ;

@@ -142,7 +142,7 @@ package Axi4ModelPkg is
     constant WriteBurstFifo  : In    osvvm.ScoreboardPkg_slv.ScoreboardIdType ;
     constant BurstFifoMode   : In    AddressBusFifoBurstModeType ;
     variable WriteData       : InOut std_logic_vector ;
-    variable WriteStrb       : InOut std_logic_vector ;
+--!!    variable WriteStrb       : InOut std_logic_vector ;
     variable BytesToSend     : InOut integer ; 
     constant ByteAddress     : In    integer := 0 
   ) ;
@@ -380,24 +380,24 @@ package body Axi4ModelPkg is
   ------------------------------------------------------------
     constant WriteBurstFifo  : In    osvvm.ScoreboardPkg_slv.ScoreboardIdType ;
     variable WriteData       : InOut std_logic_vector ;
-    variable WriteStrb       : InOut std_logic_vector ;
+--!!    variable WriteStrb       : InOut std_logic_vector ;
     variable BytesToSend     : InOut integer ; 
     constant ByteAddress     : In    integer := 0 
   ) is
     constant DataLeft : integer := WriteData'length-1; 
     alias aWriteData : std_logic_vector(DataLeft downto 0) is WriteData ; 
-    alias aWriteStrb : std_logic_vector(WriteStrb'length-1 downto 0) is WriteStrb ;
+--!!    alias aWriteStrb : std_logic_vector(WriteStrb'length-1 downto 0) is WriteStrb ;
     variable DataIndex    : integer := ByteAddress * 8 ; 
     variable StrbIndex    : integer := ByteAddress ; 
   begin
     aWriteData := (others => 'U') ;
-    aWriteStrb := (others => '0') ;
+--!!    aWriteStrb := (others => '0') ;
     -- First Byte is put in right side of word
     PopByte : while DataIndex <= DataLeft loop  
       aWriteData(DataIndex+7 downto DataIndex) := Pop(WriteBurstFifo) ; 
-      if aWriteData(DataIndex) /= 'U' then 
-        aWriteStrb(StrbIndex) := '1' ; 
-      end if ; 
+--!!      if aWriteData(DataIndex) /= 'U' then 
+--!!        aWriteStrb(StrbIndex) := '1' ; 
+--!!      end if ; 
       BytesToSend := BytesToSend - 1 ; 
       exit when BytesToSend = 0 ; 
       DataIndex := DataIndex + 8 ; 
@@ -411,27 +411,27 @@ package body Axi4ModelPkg is
   ------------------------------------------------------------
     constant WriteBurstFifo  : In    osvvm.ScoreboardPkg_slv.ScoreboardIdType ;
     variable WriteData       : InOut std_logic_vector ;
-    variable WriteStrb       : InOut std_logic_vector ;
+--!!    variable WriteStrb       : InOut std_logic_vector ;
     constant ByteAddress     : In    integer := 0 
   ) is
     alias aWriteData : std_logic_vector(WriteData'length-1 downto 0) is WriteData ; 
-    alias aWriteStrb : std_logic_vector(WriteStrb'length-1 downto 0) is WriteStrb ;
+--!!    alias aWriteStrb : std_logic_vector(WriteStrb'length-1 downto 0) is WriteStrb ;
     variable DataIndex    : integer := 0 ; 
   begin
     aWriteData := Pop(WriteBurstFifo) ; 
-    aWriteStrb := (others => '0') ; 
+--!!    aWriteStrb := (others => '0') ; 
     
     for i in 0 to ByteAddress-1 loop 
       aWriteData(DataIndex + 7 downto DataIndex) := (others => 'U') ; 
       DataIndex := DataIndex + 8 ; 
     end loop ; 
     
-    for i in ByteAddress to WriteStrb'length-1 loop 
-      if aWriteData(DataIndex) /= 'U' then 
-        aWriteStrb(i) := '1' ; 
-      end if ; 
-      DataIndex := DataIndex + 8 ;
-    end loop ;
+--!!    for i in ByteAddress to WriteStrb'length-1 loop 
+--!!      if aWriteData(DataIndex) /= 'U' then 
+--!!        aWriteStrb(i) := '1' ; 
+--!!      end if ; 
+--!!      DataIndex := DataIndex + 8 ;
+--!!    end loop ;
   end procedure PopWriteBurstWordData ; 
   
   ------------------------------------------------------------
@@ -440,17 +440,19 @@ package body Axi4ModelPkg is
     constant WriteBurstFifo  : In    osvvm.ScoreboardPkg_slv.ScoreboardIdType ;
     constant BurstFifoMode   : In    AddressBusFifoBurstModeType ;
     variable WriteData       : InOut std_logic_vector ;
-    variable WriteStrb       : InOut std_logic_vector ;
+--!!    variable WriteStrb       : InOut std_logic_vector ;
     variable BytesToSend     : InOut integer ; 
     constant ByteAddress     : In    integer := 0 
   ) is
   begin
     case BurstFifoMode is
       when ADDRESS_BUS_BURST_BYTE_MODE => 
-        PopWriteBurstByteData(WriteBurstFifo, WriteData, WriteStrb, BytesToSend, ByteAddress) ;
+--!!        PopWriteBurstByteData(WriteBurstFifo, WriteData, WriteStrb, BytesToSend, ByteAddress) ;
+        PopWriteBurstByteData(WriteBurstFifo, WriteData, BytesToSend, ByteAddress) ;
         
       when ADDRESS_BUS_BURST_WORD_MODE => 
-        PopWriteBurstWordData(WriteBurstFifo, WriteData, WriteStrb, ByteAddress) ;
+--!!        PopWriteBurstWordData(WriteBurstFifo, WriteData, WriteStrb, ByteAddress) ;
+        PopWriteBurstWordData(WriteBurstFifo, WriteData, ByteAddress) ;
 
       when others => 
         -- Already checked, this should never happen

@@ -76,4 +76,5 @@ entity TestCtrl is
   -- Simplifying access to Burst FIFOs using aliases
   alias WriteBurstFifo : ScoreboardIdType is ManagerRec.WriteBurstFifo ;
   alias ReadBurstFifo  : ScoreboardIdType is ManagerRec.ReadBurstFifo ;
+  
 end entity TestCtrl ;

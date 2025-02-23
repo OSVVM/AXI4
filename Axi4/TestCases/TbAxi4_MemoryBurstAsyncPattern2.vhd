@@ -47,6 +47,10 @@ architecture MemoryBurstAsyncPattern1 of TestCtrl is
   constant DATA_WIDTH : integer := IfElse(BURST_MODE = ADDRESS_BUS_BURST_BYTE_MODE, 8, AXI_DATA_WIDTH)  ;  
   constant DATA_ZERO  : std_logic_vector := (DATA_WIDTH - 1 downto 0 => '0') ; 
 
+--!! Works around Xilinx 2024.02 issue with single element arrays
+  subtype  Slv_v1_32 is slv_vector(1 to 1)(31 downto 0) ; 
+
+
 begin
 
   ------------------------------------------------------------
@@ -129,31 +133,31 @@ begin
 --    ReadCheckBurstRandom(ManagerRec, X"0000_3001", X"A015_28UU", 13) ;
 --
 --    log("Write with ByteAddr = 8, 12 Bytes -- word aligned") ;
---    WriteBurstVectorAsync(ManagerRec, X"0000_5050", (1 => X"UUUU_UU01")) ;
---    WriteBurstVectorAsync(ManagerRec, X"0000_5051", (1 => X"UUUU_02UU")) ;
---    WriteBurstVectorAsync(ManagerRec, X"0000_5052", (1 => X"UU03_UUUU")) ;
---    WriteBurstVectorAsync(ManagerRec, X"0000_5053", (1 => X"04UU_UUUU")) ;
+--    WriteBurstVectorAsync(ManagerRec, X"0000_5050", Slv_v1_32'(1 => X"UUUU_UU01")) ;
+--    WriteBurstVectorAsync(ManagerRec, X"0000_5051", Slv_v1_32'(1 => X"UUUU_02UU")) ;
+--    WriteBurstVectorAsync(ManagerRec, X"0000_5052", Slv_v1_32'(1 => X"UU03_UUUU")) ;
+--    WriteBurstVectorAsync(ManagerRec, X"0000_5053", Slv_v1_32'(1 => X"04UU_UUUU")) ;
 --
---    WriteBurstVectorAsync(ManagerRec, X"0000_5060", (1 => X"UUUU_0605")) ;
---    WriteBurstVectorAsync(ManagerRec, X"0000_5071", (1 => X"UU08_07UU")) ;
---    WriteBurstVectorAsync(ManagerRec, X"0000_5082", (1 => X"0A09_UUUU")) ;
+--    WriteBurstVectorAsync(ManagerRec, X"0000_5060", Slv_v1_32'(1 => X"UUUU_0605")) ;
+--    WriteBurstVectorAsync(ManagerRec, X"0000_5071", Slv_v1_32'(1 => X"UU08_07UU")) ;
+--    WriteBurstVectorAsync(ManagerRec, X"0000_5082", Slv_v1_32'(1 => X"0A09_UUUU")) ;
 --
---    WriteBurstVectorAsync(ManagerRec, X"0000_5090", (1 => X"UU0D_0C0B")) ;
---    WriteBurstVectorAsync(ManagerRec, X"0000_50A1", (1 => X"100F_0EUU")) ;
+--    WriteBurstVectorAsync(ManagerRec, X"0000_5090", Slv_v1_32'(1 => X"UU0D_0C0B")) ;
+--    WriteBurstVectorAsync(ManagerRec, X"0000_50A1", Slv_v1_32'(1 => X"100F_0EUU")) ;
 --
 --    WaitForWriteTransaction(ManagerRec) ;
 --
---    ReadCheckBurstVector (ManagerRec, X"0000_5050", (1 => X"----_--01")) ;
---    ReadCheckBurstVector (ManagerRec, X"0000_5051", (1 => X"----_02--")) ;
---    ReadCheckBurstVector (ManagerRec, X"0000_5052", (1 => X"--03_----")) ;
---    ReadCheckBurstVector (ManagerRec, X"0000_5053", (1 => X"04--_----")) ;
+--    ReadCheckBurstVector (ManagerRec, X"0000_5050", Slv_v1_32'(1 => X"----_--01")) ;
+--    ReadCheckBurstVector (ManagerRec, X"0000_5051", Slv_v1_32'(1 => X"----_02--")) ;
+--    ReadCheckBurstVector (ManagerRec, X"0000_5052", Slv_v1_32'(1 => X"--03_----")) ;
+--    ReadCheckBurstVector (ManagerRec, X"0000_5053", Slv_v1_32'(1 => X"04--_----")) ;
 --
---    ReadCheckBurstVector (ManagerRec, X"0000_5060", (1 => X"----_0605")) ;
---    ReadCheckBurstVector (ManagerRec, X"0000_5071", (1 => X"--08_07--")) ;
---    ReadCheckBurstVector (ManagerRec, X"0000_5082", (1 => X"0A09_----")) ;
+--    ReadCheckBurstVector (ManagerRec, X"0000_5060", Slv_v1_32'(1 => X"----_0605")) ;
+--    ReadCheckBurstVector (ManagerRec, X"0000_5071", Slv_v1_32'(1 => X"--08_07--")) ;
+--    ReadCheckBurstVector (ManagerRec, X"0000_5082", Slv_v1_32'(1 => X"0A09_----")) ;
 --
---    ReadCheckBurstVector (ManagerRec, X"0000_5090", (1 => X"--0D_0C0B")) ;
---    ReadCheckBurstVector (ManagerRec, X"0000_50A1", (1 => X"100F_0E--")) ;
+--    ReadCheckBurstVector (ManagerRec, X"0000_5090", Slv_v1_32'(1 => X"--0D_0C0B")) ;
+--    ReadCheckBurstVector (ManagerRec, X"0000_50A1", Slv_v1_32'(1 => X"100F_0E--")) ;
 --
 --    WaitForBarrier(WriteDone) ;
     

@@ -37,7 +37,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-if {$::osvvm::ToolVendor ne "GHDL"} { 
+if {$::osvvm::ToolVendor ne "GHDL" && $::osvvm::ToolName ne "XSIM" } { 
   include ./Axi4/RunAllTestsVti.pro
   include ./AxiStream/RunAllTestsVti.pro
 #  include ./Axi4Lite/RunAllTestsVti.pro

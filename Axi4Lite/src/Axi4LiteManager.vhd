@@ -374,9 +374,9 @@ begin
             CheckDataIsBytes(ModelID, TransRec.DataWidth, "Manager Write: ", WriteDataRequestCount+1) ;
             CheckDataWidth  (ModelID, TransRec.DataWidth, WriteByteAddr, AXI_DATA_WIDTH, "Manager Write: ", WriteDataRequestCount+1) ;
             LWD.Data  := AlignBytesToDataBus(SafeResize(ModelID, TransRec.DataToModel, LWD.Data'length), TransRec.DataWidth, WriteByteAddr) ;
-            LWD.Strb  := CalculateWriteStrobe(LWD.Data) ;
---            Push(WriteDataFifo, '0' & '1' & LWD.Data & LWD.Strb) ;
-            Push(WriteDataFifo, LWD.Data & LWD.Strb) ;
+--!!            LWD.Strb  := CalculateWriteStrobe(LWD.Data) ;
+--!!            Push(WriteDataFifo, LWD.Data & LWD.Strb) ;
+            Push(WriteDataFifo, LWD.Data) ;
 
             Increment(WriteDataRequestCount) ;
             WriteDataCount := WriteDataCount + 1; 
@@ -442,17 +442,19 @@ begin
               TransfersInBurst := TransRec.DataWidth ;
             end if ; 
             
-            PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, WriteByteAddr) ;
+--!!            PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, WriteByteAddr) ;
+            PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, BytesToSend, WriteByteAddr) ;
 
             for BurstLoop in TransfersInBurst downto 2 loop    
---              Push(WriteDataFifo, '1' & '0' & LWD.Data & LWD.Strb) ;
-              Push(WriteDataFifo, LWD.Data & LWD.Strb) ;
-              PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, 0) ;
+--!!              Push(WriteDataFifo, LWD.Data & LWD.Strb) ;
+--!!              PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, 0) ;
+              Push(WriteDataFifo, LWD.Data ) ;
+              PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, BytesToSend, 0) ;
             end loop ; 
             
             -- Special handle last push
---            Push(WriteDataFifo, '1' & '1' & LWD.Data & LWD.Strb) ;
-            Push(WriteDataFifo, LWD.Data & LWD.Strb) ;
+--!!            Push(WriteDataFifo, LWD.Data & LWD.Strb) ;
+            Push(WriteDataFifo, LWD.Data) ;
 
             -- Increment(WriteDataRequestCount) ;
             WriteDataRequestCount        <= Increment(WriteDataRequestCount, TransfersInBurst) ;
@@ -742,8 +744,9 @@ begin
       if IsEmpty(WriteDataFifo) then
          WaitForToggle(WriteDataRequestCount) ;
       end if ;
---!!      (Burst, Local.Last, Local.Data, Local.Strb) := Pop(WriteDataFifo) ;
-      (Local.Data, Local.Strb) := Pop(WriteDataFifo) ;
+--!!      (Local.Data, Local.Strb) := Pop(WriteDataFifo) ;
+      Local.Data  := Pop(WriteDataFifo) ;
+      Local.Strb  := CalculateWriteStrobe(Local.Data) ;
             
       if UseCoverageDelays then 
         -- BurstCoverage Delays

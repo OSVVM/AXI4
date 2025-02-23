@@ -424,8 +424,9 @@ begin
             CheckDataIsBytes(ModelID, TransRec.DataWidth, "Manager Write: ", WriteDataRequestCount+1) ;
             CheckDataWidth  (ModelID, TransRec.DataWidth, WriteByteAddr, AXI_DATA_WIDTH, "Manager Write: ", WriteDataRequestCount+1) ;
             LWD.Data  := AlignBytesToDataBus(SafeResize(ModelID, TransRec.DataToModel, LWD.Data'length), TransRec.DataWidth, WriteByteAddr) ;
-            LWD.Strb  := CalculateWriteStrobe(LWD.Data) ;
-            Push(WriteDataFifo, '0' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
+--            LWD.Strb  := CalculateWriteStrobe(LWD.Data) ;
+--            Push(WriteDataFifo, '0' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
+            Push(WriteDataFifo, '0' & '1' & LWD.Data & LWD.User & LWD.ID) ;
 
             Increment(WriteDataRequestCount) ;
             WriteDataCount := WriteDataCount + 1 ; 
@@ -492,15 +493,19 @@ begin
               TransfersInBurst := TransRec.DataWidth ;
             end if ; 
             
-            PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, WriteByteAddr) ;
+--            PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, WriteByteAddr) ;
+            PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, BytesToSend, WriteByteAddr) ;
 
             for BurstLoop in TransfersInBurst downto 2 loop    
-              Push(WriteDataFifo, '1' & '0' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
-              PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, 0) ;
+ --!!              Push(WriteDataFifo, '1' & '0' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
+             Push(WriteDataFifo, '1' & '0' & LWD.Data & LWD.User & LWD.ID) ;
+--!!              PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, LWD.Strb, BytesToSend, 0) ;
+              PopWriteBurstData(TransRec.WriteBurstFifo, BurstFifoMode, LWD.Data, BytesToSend, 0) ;
             end loop ; 
             
             -- Special handle last push
-            Push(WriteDataFifo, '1' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
+--!!            Push(WriteDataFifo, '1' & '1' & LWD.Data & LWD.Strb & LWD.User & LWD.ID) ;
+            Push(WriteDataFifo, '1' & '1' & LWD.Data & LWD.User & LWD.ID) ;
 
             -- Increment(WriteDataRequestCount) ;
             WriteDataRequestCount        <= Increment(WriteDataRequestCount, TransfersInBurst) ;
@@ -688,8 +693,8 @@ begin
 
         -- The End -- Done
         when others =>
-          -- Covers messages for Multiple drivers as well as anything not imnplemented
-          Alert(ModelID, ClassifyUnimplementedOperation(TransRec.Operation, TransRec.Rdy), FAILURE) ;
+          -- Signal multiple Driver Detect or not implemented transactions.
+          Alert(ModelID, ClassifyUnimplementedOperation(TransRec), FAILURE) ;
 
       end case ;
     end loop DispatchLoop ;
@@ -831,8 +836,10 @@ begin
       if IsEmpty(WriteDataFifo) then
          WaitForToggle(WriteDataRequestCount) ;
       end if ;
-      (Burst, Local.Last, Local.Data, Local.Strb, Local.User, Local.ID) := Pop(WriteDataFifo) ;
-            
+--!!      (Burst, Local.Last, Local.Data, Local.Strb, Local.User, Local.ID) := Pop(WriteDataFifo) ;
+      (Burst, Local.Last, Local.Data, Local.User, Local.ID) := Pop(WriteDataFifo) ;
+      Local.Strb  := CalculateWriteStrobe(Local.Data) ;
+
       if UseCoverageDelays then 
         -- BurstCoverage Delays
         DelayCycles := GetRandDelay(WriteDataDelayCov) ; 
@@ -1154,5 +1161,3 @@ begin
     ) ;
   end process ReadDataProtocolChecker ;
 end architecture AxiFull ;
-
-

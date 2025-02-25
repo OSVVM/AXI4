@@ -2,6 +2,7 @@
 
 | Revision  |  Release Summary |   DEFAULT_DELAY  : time := maximum(tperiod_Clk/10, std.env.resolution_limit);
 ------------|----------- 
+| 2025.02   |  Axi4Manager, Axi4LiteManager - updates for Xilinx 
 | 2024.11   |  AxiStream - updated DEFAULT_DELAY 
 | 2024.09   |  Axi4InterfacePkg - updated Added Axi4RecArrayType 
 | 2024.07   |  Updated Axi4 VC to shorten AlertLogID names.  Added OsvvmVcInit barrier to AxiStreamReceiver 
@@ -31,6 +32,11 @@
 | 2020.07   |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
 | 2020.02   |  Initial version of AddressBusTransactionPkg.
 | 2018.04   |  Initial public release
+
+## 2025.02 February 2025
+Axi4Manager, Axi4LiteManager - refactored WStrb to be in in WriteDataHandler
+Axi4Memory, Axi4LiteMemory - updated the memory name to be reasonable in length
+OsvvmTestCommonPkg - now uses FILE_PATH to be independent of install area
 
 ## 2024.11 November 2024
 AxiStream - updated DEFAULT_DELAY init value to maximum(tperiod_Clk/10, std.env.resolution_limit);

@@ -925,7 +925,7 @@ begin
 
       if UseCoverageDelays then 
         -- BurstCoverage Delays
-        (intReadyBeforeValid, ReadyDelayCycles)  := GetRandDelay(ReadDataDelayCov) ; 
+        (intReadyBeforeValid, ReadyDelayCycles)  := GetRandDelay(WriteResponseDelayCov) ; 
         ReadyBeforeValid := intReadyBeforeValid = 0 ; 
       else
         -- Deprecated static settings

@@ -62,26 +62,21 @@ begin
 
     -- Wait for testbench initialization
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_SubordinateRandomTiming1.txt") ;
+    TranscriptOpen ;
     SetTranscriptMirror(TRUE) ;
-    SetAlertLogOptions(WriteTimeLast => FALSE) ; 
-    SetAlertLogOptions(TimeJustifyAmount => 15) ; 
-    SetAlertLogJustify ; 
 
     -- Wait for Design Reset
     wait until nReset = '1' ;
     ClearAlerts ;
 
     -- Wait for test to finish
-    WaitForBarrier(TestDone, 1 ms) ;
-    AlertIf(now >= 1 ms, "Test finished due to timeout") ;
-    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
+    WaitForBarrier(TestDone, 10 ms) ;
 
     TranscriptClose ;
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_SubordinateRandomTiming1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_SubordinateRandomTiming1.txt", "") ;
+    -- AffirmIfTranscriptsMatch("../AXI4/Axi4/testbench/validated_results") ;
 
-    EndOfTestReports ;
+    EndOfTestReports (TimeOut => (now >= 10 ms)) ;
     std.env.stop ;
     wait ;
   end process ControlProc ;
@@ -91,13 +86,6 @@ begin
   --   Generate transactions for AxiManager
   ------------------------------------------------------------
   ManagerProc : process
-    variable BurstVal  : AddressBusFifoBurstModeType ;
-    variable RxData    : std_logic_vector(31 downto 0) ;
-    constant DATA_ZERO : std_logic_vector := (DATA_WIDTH - 1 downto 0 => '0') ;
-    variable CoverID1, CoverID2 : CoverageIdType ;
-    variable slvBurstVector : slv_vector(1 to 5)(31 downto 0) ;
-    variable intBurstVector : integer_vector(1 to 5) ;
-    variable DelayCov       : AxiDelayCoverageIdArrayType ; 
   begin
     wait until nReset = '1' ;
     WaitForClock(ManagerRec, 2) ;
@@ -105,54 +93,26 @@ begin
     -- Use Coverage based delays
 --    SetUseRandomDelays(ManagerRec) ; 
 
-
--- Write and ReadCheck
-    BlankLine ; 
-    Print("-----------------------------------------------------------------") ;
-    log("Write and ReadCheck. Addr = 0000_0000 + 16*i.  32 words") ;
-    BlankLine ; 
-    for I in 1 to 32 loop
-      Write     ( ManagerRec, X"0000_0000" + 16*I, X"0000_0000" + I ) ;
-    end loop ;
-
-    for I in 1 to 32 loop
-      ReadCheck ( ManagerRec, X"0000_0000" + 16*I, X"0000_0000" + I ) ;
+    for I in 1 to 64 loop
+      WriteAsync  ( ManagerRec, X"0000_0000" + 16*I, X"0000_0000" + I ) ;
     end loop ;
 
     WaitForTransaction(ManagerRec) ; 
-    WaitForClock(ManagerRec, 2) ;
 
--- Subordinate does not currently support bursting
---
---  -- Burst Increment
---      BlankLine ; 
---      Print("-----------------------------------------------------------------") ;
---      log("Burst Increment.  Addr = 0000_1000, 6 Word bursts -- word aligned") ;
---      BlankLine ; 
---  
---      WaitForBarrier(SyncPoint) ; 
---  --    -- Make burst length on address smaller s.t. burst address and data collide more.
---  --    GetDelayCoverageID(ManagerRec, DelayCov) ; 
---  --    DeallocateBins(DelayCov(WRITE_ADDRESS_ID).BurstLengthCov) ;  -- Remove old coverage model
---  --    AddBins(DelayCov(WRITE_ADDRESS_ID).BurstLengthCov, GenBin(2,4,1)) ; 
---  --    DeallocateBins(DelayCov(READ_ADDRESS_ID).BurstLengthCov) ;  -- Remove old coverage model
---  --    AddBins(DelayCov(READ_ADDRESS_ID).BurstLengthCov, GenBin(2,4,1)) ; 
---      WaitForBarrier(SyncPoint) ; 
---  
---      for i in 1 to 32 loop 
---        WriteBurstIncrement    (ManagerRec, X"0000_1000" + 256*I, X"0000_1000" + 256*I, 6) ;
---      end loop ;
---  
---      for I in 1 to 32 loop
---        ReadCheckBurstIncrement(ManagerRec, X"0000_1000" + 256*I, X"0000_1000" + 256*I, 6) ;
---      end loop ;
+    for I in 1 to 64 loop
+      ReadAddressAsync ( ManagerRec, X"0000_0000" + 16*I) ;
+    end loop ;
+    for I in 1 to 64 loop
+      ReadCheckData    ( ManagerRec, X"0000_0000" + I ) ;
+    end loop ;
+    WaitForTransaction(ManagerRec) ; 
+    WaitForClock(ManagerRec, 2) ;
 
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
   end process ManagerProc ;
-
 
   ------------------------------------------------------------
   -- SubordinateProc
@@ -165,34 +125,22 @@ begin
   begin
     SetUseRandomDelays(SubordinateRec) ; 
     GetDelayCoverageID(SubordinateRec, DelayCov) ; 
-    DeallocateBins(DelayCov(WRITE_ADDRESS_ID).BurstLengthCov) ;  -- Remove old coverage model
-    AddBins(DelayCov(WRITE_ADDRESS_ID).BurstLengthCov, GenBin(2,4,1)) ; 
-    DeallocateBins(DelayCov(READ_ADDRESS_ID).BurstLengthCov) ;  -- Remove old coverage model
-    AddBins(DelayCov(READ_ADDRESS_ID).BurstLengthCov, GenBin(2,4,1)) ; 
     WaitForClock(SubordinateRec, 2) ;
     
     -- Check Single transactions
-    for I in 1 to 32 loop
+    for I in 1 to 64 loop
 --      Write     ( ManagerRec, X"0000_0000" + 16*I, X"0000_0000" + I ) ;
       GetWrite(SubordinateRec, Addr, Data) ;
       AffirmIfEqual(Addr, X"0000_0000" + 16*I, "Subordinate Write Addr: ") ;
       AffirmIfEqual(Data, X"0000_0000" + I, "Subordinate Write Data: ") ;
     end loop ;
     
-    for I in 1 to 32 loop
+    for I in 1 to 64 loop
 --      ReadCheck ( ManagerRec, X"0000_0000" + 16*I, X"0000_0000" + I ) ;
       SendRead(SubordinateRec, Addr, X"0000_0000" + I) ; 
       AffirmIfEqual(Addr, X"0000_0000" + 16*I, "Subordinate Read Addr: ") ;
     end loop ;
 
-
---  Subordinate does not currently support bursting
---
---    WaitForBarrier(SyncPoint) ; 
---    WaitForBarrier(SyncPoint) ; 
---
---    -- Check burst transactions
---
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;

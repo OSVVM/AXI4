@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Testing of Burst Features in AXI Model
+--      Testing of Randomization features enabled by SetUseRandomDelays
 --
 --
 --  Developed by:
@@ -19,12 +19,13 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    04/2025   2025.04    Removed AXI features.   Kept nominal Address Bus features
 --    05/2023   2023.05    Initial revision
 --
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2023 by SynthWorks Design Inc.
+--  Copyright (c) 2023-2025 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -62,26 +63,21 @@ begin
 
     -- Wait for testbench initialization
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_ManagerRandomTiming1.txt") ;
+    TranscriptOpen ;
     SetTranscriptMirror(TRUE) ;
-    SetAlertLogOptions(WriteTimeLast => FALSE) ; 
-    SetAlertLogOptions(TimeJustifyAmount => 15) ; 
-    SetAlertLogJustify ; 
 
     -- Wait for Design Reset
     wait until nReset = '1' ;
     ClearAlerts ;
 
     -- Wait for test to finish
-    WaitForBarrier(TestDone, 1 ms) ;
-    AlertIf(now >= 1 ms, "Test finished due to timeout") ;
-    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
+    WaitForBarrier(TestDone, 10 ms) ;
 
     TranscriptClose ;
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_ManagerRandomTiming1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_ManagerRandomTiming1.txt", "") ;
+    -- AffirmIfTranscriptsMatch("../AXI4/Axi4/testbench/validated_results") ;
 
-    EndOfTestReports ;
+    EndOfTestReports(TimeOut => (now >= 10 ms)) ;
     std.env.stop ;
     wait ;
   end process ControlProc ;
@@ -106,46 +102,39 @@ begin
     SetUseRandomDelays(ManagerRec) ; 
 
 
--- Write and ReadCheck
     BlankLine ; 
     Print("-----------------------------------------------------------------") ;
-    log("Write and ReadCheck. Addr = 0000_0000 + 16*i.  32 words") ;
+    log("Write and Read 32 words. Addr = 0000_0000 + 16*i.") ;
     BlankLine ; 
     for I in 1 to 32 loop
-      Write     ( ManagerRec, X"0000_0000" + 16*I, X"0000_0000" + I ) ;
-    end loop ;
-
-    for I in 1 to 32 loop
-      ReadCheck ( ManagerRec, X"0000_0000" + 16*I, X"0000_0000" + I ) ;
+      WriteAsync  ( ManagerRec, X"0000_0000" + 16*I, X"0000_0000" + 16*I ) ;
     end loop ;
 
     WaitForTransaction(ManagerRec) ; 
-    WaitForClock(ManagerRec, 2) ;
-
-
--- Burst Increment
-    BlankLine ; 
-    Print("-----------------------------------------------------------------") ;
-    log("Burst Increment.  Addr = 0000_1000, 6 Word bursts -- word aligned") ;
-    BlankLine ; 
-
-    -- Make burst length on address smaller s.t. burst address and data collide more.
-    GetDelayCoverageID(ManagerRec, DelayCov) ; 
-    DeallocateBins(DelayCov(WRITE_ADDRESS_ID).BurstLengthCov) ;  -- Remove old coverage model
-    AddBins(DelayCov(WRITE_ADDRESS_ID).BurstLengthCov, GenBin(2,4,1)) ; 
-    DeallocateBins(DelayCov(READ_ADDRESS_ID).BurstLengthCov) ;  -- Remove old coverage model
-    AddBins(DelayCov(READ_ADDRESS_ID).BurstLengthCov, GenBin(2,4,1)) ; 
-
-    for i in 1 to 32 loop 
-      WriteBurstIncrement    (ManagerRec, X"0000_1000" + 256*I, X"0000_1000" + 256*I, 6) ;
-    end loop ;
 
     for I in 1 to 32 loop
-      ReadCheckBurstIncrement(ManagerRec, X"0000_1000" + 256*I, X"0000_1000" + 256*I, 6) ;
+      ReadAddressAsync ( ManagerRec, X"0000_0000" + 16*I) ;
+    end loop ;
+    for I in 1 to 32 loop
+      ReadCheckData    ( ManagerRec, X"0000_0000" + 16*I ) ;
     end loop ;
 
-    -- Wait for outputs to propagate and signal TestDone
+    BlankLine ; 
+    Print("-----------------------------------------------------------------") ;
+    log("Write and Read 3 bursts of 16 words. Addr = 0000_1000 + 256*i.") ;
+    BlankLine ; 
+    for i in 1 to 3 loop 
+      WriteBurstIncrementAsync    (ManagerRec, X"0000_1000" + 256*I, X"0000_1000" + 16*I, 16) ;
+    end loop ;
+
+    WaitForTransaction(ManagerRec) ; 
+      
+    for I in 1 to 3 loop
+      ReadCheckBurstIncrement(ManagerRec, X"0000_1000" + 256*I, X"0000_1000" + 16*I, 16) ;
+    end loop ;
+
     WaitForClock(ManagerRec, 2) ;
+
     WaitForBarrier(TestDone) ;
     wait ;
   end process ManagerProc ;

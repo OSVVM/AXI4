@@ -765,7 +765,6 @@ begin
     end loop WriteResponseLoop ;
   end process WriteResponseHandler ;
 
-
   ------------------------------------------------------------
   --  ReadAddressHandler
   --    Execute Read Address Transactions

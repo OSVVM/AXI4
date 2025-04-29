@@ -968,24 +968,24 @@ begin
       end if ;
       (Local.Data, Local.Last, Local.Resp, Local.ID, Local.User) := pop(ReadDataFifo) ;
 
---?6 Add delay that is a function of the access: Single Word, First Burst, Burst, Last Burst
       -- Delay before generating RD.Valid
       if UseCoverageDelays then 
-        -- BurstCoverage Delays
         DelayCycles := GetRandDelay(ReadDataDelayCov) ; 
-        WaitForClock(Clk, DelayCycles) ;
       else
         -- Deprecated delays
         if NewTransfer then
-          WaitForClock(Clk, integer'(Get(Params, to_integer(READ_DATA_VALID_DELAY_CYCLES)))) ; 
---          WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_DELAY_CYCLES)))) ; 
-    --      elsif Burst then 
+          DelayCycles := Get(Params, to_integer(READ_DATA_VALID_DELAY_CYCLES)) ; 
         else 
-          WaitForClock(Clk, integer'(Get(Params, to_integer(READ_DATA_VALID_BURST_DELAY_CYCLES)))) ; 
---          WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_BURST_DELAY_CYCLES)))) ; 
+          DelayCycles := Get(Params, to_integer(READ_DATA_VALID_BURST_DELAY_CYCLES)) ; 
         end if ; 
       end if ; 
-      
+--      DelayCycles := 
+--        GetRandDelay(ReadDataDelayCov) when UseCoverageDelays else
+--        -- Deprecated static delays
+--        Get(Params, to_integer(READ_DATA_VALID_DELAY_CYCLES)) when NewTransfer else
+--        Get(Params, to_integer(READ_DATA_VALID_BURST_DELAY_CYCLES)) ;
+      WaitForClock(Clk, DelayCycles) ;
+
       NewTransfer := Local.Last ; -- Last is '1' for burst end and single word transfers
 
       -- Transaction Values

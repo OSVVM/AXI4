@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_SubordinateRandomTiming1.vhd
+--  File Name:         TbAxi4_AxiSubordinateRandomTiming2.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -19,12 +19,12 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2023   2023.05    Initial revision
+--    04/2025   2024.05    Initial revision
 --
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2023 by SynthWorks Design Inc.
+--  Copyright (c) 2025 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@
 --  limitations under the License.
 --
 
-architecture SubordinateRandomTiming1 of TestCtrl is
+architecture AxiSubordinateRandomTiming2 of TestCtrl is
 
   signal SyncPoint, TestDone, WriteDone : integer_barrier := 1 ;
   constant BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;
@@ -55,7 +55,7 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetTestName("TbAxi4_SubordinateRandomTiming1") ;
+    SetTestName("TbAxi4_AxiSubordinateRandomTiming2") ;
     SetLogEnable(PASSED, TRUE) ;   -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;     -- Enable INFO logs
     -- SetLogEnable(DEBUG, TRUE) ;    -- Enable INFO logs
@@ -121,10 +121,49 @@ begin
   SubordinateProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
-    variable DelayCov       : AxiDelayCoverageIdArrayType ; 
+    variable DelayCovID, NewDelayCovID       : AxiDelayCoverageIdArrayType ; 
+    variable TbID : AlertLogIDType ;
   begin
+    WaitForClock(SubordinateRec, 1) ;
+
+    -- Use Coverage based delays
     SetUseRandomDelays(SubordinateRec) ; 
-    GetDelayCoverageID(SubordinateRec, DelayCov) ; 
+
+    -- Testing AXI Specific Random Delay Capability
+    GetDelayCoverageID(SubordinateRec, DelayCovID) ; 
+
+    TbID := NewID("TbID") ;
+
+    NewDelayCovID(WRITE_ADDRESS_ID)    := NewID("WriteAddrDelayCov",   TbID, ReportMode => DISABLED, Search => PRIVATE_NAME) ; 
+    NewDelayCovID(WRITE_DATA_ID)       := NewID("WriteDataDelayCov",   TbID, ReportMode => DISABLED, Search => PRIVATE_NAME) ; 
+    NewDelayCovID(WRITE_RESPONSE_ID)   := NewID("WriteRespDelayCov",   TbID, ReportMode => DISABLED, Search => PRIVATE_NAME) ; 
+    NewDelayCovID(READ_ADDRESS_ID)     := NewID("ReadAddrDelayCov",    TbID, ReportMode => DISABLED, Search => PRIVATE_NAME) ; 
+    NewDelayCovID(READ_DATA_ID)        := NewID("ReadDataDelayCov",    TbID, ReportMode => DISABLED, Search => PRIVATE_NAME) ; 
+
+    -- Change all of the Coverage Bins
+    AddBins (NewDelayCovID(WRITE_ADDRESS_ID).BurstLengthCov,    GenBin(7)) ; 
+    AddCross(NewDelayCovID(WRITE_ADDRESS_ID).BurstDelayCov,     GenBin(0), GenBin(1)) ;
+    AddCross(NewDelayCovID(WRITE_ADDRESS_ID).BeatDelayCov,      GenBin(0), GenBin(0)) ;
+
+    AddBins (NewDelayCovID(WRITE_DATA_ID).BurstLengthCov,       GenBin(6)) ; 
+    AddCross(NewDelayCovID(WRITE_DATA_ID).BurstDelayCov,        GenBin(1), GenBin(4)) ;
+    AddCross(NewDelayCovID(WRITE_DATA_ID).BeatDelayCov,         GenBin(0), GenBin(0)) ;
+
+    AddBins (NewDelayCovID(WRITE_RESPONSE_ID).BurstLengthCov,  GenBin(4)) ;
+    AddBins (NewDelayCovID(WRITE_RESPONSE_ID).BurstDelayCov,   GenBin(3)) ;
+    AddBins (NewDelayCovID(WRITE_RESPONSE_ID).BeatDelayCov,    GenBin(0)) ;
+    -- Write Response timing is influenced by both WriteAddress and WriteData timing
+
+    AddBins (NewDelayCovID(READ_ADDRESS_ID).BurstLengthCov,     GenBin(8)) ; 
+    AddCross(NewDelayCovID(READ_ADDRESS_ID).BurstDelayCov,      GenBin(1), GenBin(3)) ;
+    AddCross(NewDelayCovID(READ_ADDRESS_ID).BeatDelayCov,       GenBin(0), GenBin(0)) ;
+
+    AddBins (NewDelayCovID(READ_DATA_ID).BurstLengthCov,       GenBin(6)) ;
+    AddBins (NewDelayCovID(READ_DATA_ID).BurstDelayCov,        GenBin(5)) ;
+    AddBins (NewDelayCovID(READ_DATA_ID).BeatDelayCov,         GenBin(0)) ;
+
+    SetDelayCoverageID(SubordinateRec, NewDelayCovID) ; 
+
     WaitForClock(SubordinateRec, 2) ;
     
     -- Check Single transactions
@@ -148,12 +187,12 @@ begin
   end process SubordinateProc ;
 
 
-end SubordinateRandomTiming1 ;
+end AxiSubordinateRandomTiming2 ;
 
-Configuration TbAxi4_SubordinateRandomTiming1 of TbAxi4 is
+Configuration TbAxi4_AxiSubordinateRandomTiming2 of TbAxi4 is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(SubordinateRandomTiming1) ;
+      use entity work.TestCtrl(AxiSubordinateRandomTiming2) ;
     end for ;
   end for ;
-end TbAxi4_SubordinateRandomTiming1 ;
+end TbAxi4_AxiSubordinateRandomTiming2 ;

@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to run one Axi Stream test  
+#        Script to run one Axi test cases  
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -17,13 +17,14 @@
 #
 #  Revision History:
 #    Date      Version    Description
+#     4/2025   2025.04    Added Tests
 #     1/2022   2022.01    Added Tests
 #     1/2020   2020.01    Updated Licenses to Apache
 #
 #
 #  This file is part of OSVVM.
 #  
-#  Copyright (c) 2019 - 2022 by SynthWorks Design Inc.  
+#  Copyright (c) 2019 - 2025 by SynthWorks Design Inc.  
 #  
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -51,11 +52,20 @@ include TestCases_Burst.pro
 
 # Both NoBurst and Burst
 RunTest TbAxi4_ManagerRandomTiming1.vhd 
+RunTest  TbAxi4_AxiManagerRandomTiming1.vhd 
+RunTest  TbAxi4_AxiManagerRandomTiming2.vhd 
 RunTest TbAxi4_ManagerRandomTimingAsync1.vhd 
+
 RunTest TbAxi4_MemoryRandomTiming1.vhd 
+RunTest  TbAxi4_AxiMemoryRandomTiming1.vhd 
+RunTest  TbAxi4_AxiMemoryRandomTiming2.vhd 
 RunTest TbAxi4_MemoryRandomTimingAsync1.vhd 
-RunTest TbAxi4_ManagerMemoryRandomTiming1.vhd 
+
 RunTest TbAxi4_SubordinateRandomTiming1.vhd
+RunTest  TbAxi4_AxiSubordinateRandomTiming1.vhd 
+RunTest  TbAxi4_AxiSubordinateRandomTiming2.vhd 
+
+RunTest TbAxi4_ManagerMemoryRandomTiming1.vhd 
 RunTest TbAxi4_ManagerSubordinateRandomTiming1.vhd
 RunTest TbAxi4_ManagerSubordinateRandomTimingAsync1.vhd
 RunTest TbAxi4_NoRandomTiming1.vhd 

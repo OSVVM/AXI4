@@ -51,7 +51,8 @@
 ## Run Demo
 RunTest  TbStream_SendGetDemo1.vhd           ; # Demo of Send, Get, and Check of words and bursts
 RunTest  TbStream_SendGetPacketBurst1.vhd    ; # Prototype of burst packetization with FIFO in Byte and then Word mode
-RunTest  TbStream_SendGetRandom1.vhd         ; # Demo of Send, Get, and Check of words and bursts
+RunTest  TbStream_SendGetRandom1.vhd         ; # Uses Basic Randomization Features
+RunTest  TbStream_AxiSendGetRandom1.vhd      ; # Uses Randomization Features specific to AxiStream
 RunTest  TbStream_SendGetRandom2.vhd         ; # Demo of Send, Get, and Check of packets with Valid/Ready randomization
 
 ## =============================================

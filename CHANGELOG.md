@@ -1,7 +1,8 @@
 # AXI4 Verification Component Change Log
 
-| Revision  |  Release Summary |   DEFAULT_DELAY  : time := maximum(tperiod_Clk/10, std.env.resolution_limit);
+| Revision  |  Release Summary 
 ------------|----------- 
+| 2025.04   |  Updated test cases using delay coverage delays  
 | 2025.02   |  Axi4Manager, Axi4LiteManager - updates for Xilinx 
 | 2024.11   |  AxiStream - updated DEFAULT_DELAY 
 | 2024.09   |  Axi4InterfacePkg - updated Added Axi4RecArrayType 
@@ -32,6 +33,10 @@
 | 2020.07   |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
 | 2020.02   |  Initial version of AddressBusTransactionPkg.
 | 2018.04   |  Initial public release
+
+## 2025.04 April 2025
+Updated Axi4Full and AxiStream test cases that use Delay coverage
+Minor update to Axi4Manager to fix WriteResponseDelayCov DelayCoverage setting
 
 ## 2025.02 February 2025
 Axi4Manager, Axi4LiteManager - refactored WStrb to be in in WriteDataHandler

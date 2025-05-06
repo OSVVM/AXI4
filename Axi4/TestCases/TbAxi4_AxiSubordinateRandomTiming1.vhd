@@ -1,5 +1,5 @@
 --
---  File Name:         TbAxi4_MemoryRandomTiming1.vhd
+--  File Name:         TbAxi4_AxiSubordinateRandomTiming1.vhd
 --  Design Unit Name:  Architecture of TestCtrl
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
@@ -19,12 +19,12 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    05/2023   2023.05    Initial revision
+--    04/2025   2024.05    Initial revision
 --
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2023 by SynthWorks Design Inc.
+--  Copyright (c) 2025 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -39,7 +39,7 @@
 --  limitations under the License.
 --
 
-architecture MemoryRandomTiming1 of TestCtrl is
+architecture AxiSubordinateRandomTiming1 of TestCtrl is
 
   signal SyncPoint, TestDone, WriteDone : integer_barrier := 1 ;
   constant BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;
@@ -55,10 +55,10 @@ begin
   ControlProc : process
   begin
     -- Initialization of test
-    SetTestName("TbAxi4_MemoryRandomTiming1") ;
+    SetTestName("TbAxi4_AxiSubordinateRandomTiming1") ;
     SetLogEnable(PASSED, TRUE) ;   -- Enable PASSED logs
     SetLogEnable(INFO, TRUE) ;     -- Enable INFO logs
-    -- SetLogEnable(DEBUG, TRUE) ;    -- Enable DEBUG logs
+    -- SetLogEnable(DEBUG, TRUE) ;    -- Enable INFO logs
 
     -- Wait for testbench initialization
     wait for 0 ns ;  wait for 0 ns ;
@@ -74,9 +74,9 @@ begin
 
     TranscriptClose ;
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_MemoryRandomTiming1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MemoryRandomTiming1.txt", "") ;
+    -- AffirmIfTranscriptsMatch("../AXI4/Axi4/testbench/validated_results") ;
 
-    EndOfTestReports(TimeOut => (now >= 10 ms)) ;
+    EndOfTestReports (TimeOut => (now >= 10 ms)) ;
     std.env.stop ;
     wait ;
   end process ControlProc ;
@@ -86,13 +86,6 @@ begin
   --   Generate transactions for AxiManager
   ------------------------------------------------------------
   ManagerProc : process
-    variable BurstVal  : AddressBusFifoBurstModeType ;
-    variable RxData    : std_logic_vector(31 downto 0) ;
-    constant DATA_ZERO : std_logic_vector := (DATA_WIDTH - 1 downto 0 => '0') ;
-    variable CoverID1, CoverID2 : CoverageIdType ;
-    variable slvBurstVector : slv_vector(1 to 5)(31 downto 0) ;
-    variable intBurstVector : integer_vector(1 to 5) ;
-    variable DelayCov       : AxiDelayCoverageIdArrayType ; 
   begin
     wait until nReset = '1' ;
     WaitForClock(ManagerRec, 2) ;
@@ -100,70 +93,97 @@ begin
     -- Use Coverage based delays
 --    SetUseRandomDelays(ManagerRec) ; 
 
-    BlankLine ; 
-    Print("-----------------------------------------------------------------") ;
-    log("Write and Read 32 words. Addr = 0000_0000 + 16*i.") ;
-    BlankLine ; 
-    for I in 1 to 32 loop
-      WriteAsync  ( ManagerRec, X"0000_0000" + 16*I, X"0000_0000" + 16*I ) ;
+    for I in 1 to 64 loop
+      WriteAsync  ( ManagerRec, X"0000_0000" + 16*I, X"0000_0000" + I ) ;
     end loop ;
 
     WaitForTransaction(ManagerRec) ; 
 
-    for I in 1 to 32 loop
+    for I in 1 to 64 loop
       ReadAddressAsync ( ManagerRec, X"0000_0000" + 16*I) ;
     end loop ;
-    for I in 1 to 32 loop
-      ReadCheckData    ( ManagerRec, X"0000_0000" + 16*I ) ;
+    for I in 1 to 64 loop
+      ReadCheckData    ( ManagerRec, X"0000_0000" + I ) ;
     end loop ;
-
-    BlankLine ; 
-    Print("-----------------------------------------------------------------") ;
-    log("Write and Read 3 bursts of 16 words. Addr = 0000_1000 + 256*i.") ;
-    BlankLine ; 
-    for i in 1 to 3 loop 
-      WriteBurstIncrementAsync    (ManagerRec, X"0000_1000" + 256*I, X"0000_1000" + 16*I, 16) ;
-    end loop ;
-
     WaitForTransaction(ManagerRec) ; 
-
-    for I in 1 to 3 loop
-      ReadCheckBurstIncrement(ManagerRec, X"0000_1000" + 256*I, X"0000_1000" + 16*I, 16) ;
-    end loop ;
-
     WaitForClock(ManagerRec, 2) ;
 
+    -- Wait for outputs to propagate and signal TestDone
+    WaitForClock(ManagerRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-
   end process ManagerProc ;
 
-
   ------------------------------------------------------------
-  -- MemoryProc
+  -- SubordinateProc
   --   Generate transactions for AxiSubordinate
   ------------------------------------------------------------
-  MemoryProc : process
+  SubordinateProc : process
     variable Addr : std_logic_vector(AXI_ADDR_WIDTH-1 downto 0) ;
     variable Data : std_logic_vector(AXI_DATA_WIDTH-1 downto 0) ;
-    variable DelayCov       : AxiDelayCoverageIdArrayType ; 
+    variable DelayCovID       : AxiDelayCoverageIdArrayType ; 
   begin
+    WaitForClock(SubordinateRec, 1) ;
+
     SetUseRandomDelays(SubordinateRec) ; 
+    GetDelayCoverageID(SubordinateRec, DelayCovID) ; 
+
+    -- Change all of the Coverage Bins
+    DeallocateBins(DelayCovID(WRITE_ADDRESS_ID)) ;  -- Remove old coverage model
+    AddBins (DelayCovID(WRITE_ADDRESS_ID).BurstLengthCov,    GenBin(7)) ; 
+    AddCross(DelayCovID(WRITE_ADDRESS_ID).BurstDelayCov,     GenBin(1), GenBin(2)) ;
+    AddCross(DelayCovID(WRITE_ADDRESS_ID).BeatDelayCov,      GenBin(0), GenBin(0)) ;
+
+    DeallocateBins(DelayCovID(WRITE_DATA_ID)) ;  -- Remove old coverage model
+    AddBins (DelayCovID(WRITE_DATA_ID).BurstLengthCov,       GenBin(6)) ; 
+    AddCross(DelayCovID(WRITE_DATA_ID).BurstDelayCov,        GenBin(1), GenBin(4)) ;
+    AddCross(DelayCovID(WRITE_DATA_ID).BeatDelayCov,         GenBin(0), GenBin(0)) ;
+
+    DeallocateBins(DelayCovID(WRITE_RESPONSE_ID)) ;  -- Remove old coverage model
+    AddBins (DelayCovID(WRITE_RESPONSE_ID).BurstLengthCov,  GenBin(4)) ;
+    AddBins (DelayCovID(WRITE_RESPONSE_ID).BurstDelayCov,   GenBin(3)) ;
+    AddBins (DelayCovID(WRITE_RESPONSE_ID).BeatDelayCov,    GenBin(0)) ;
+    -- Write Response timing is influenced by both WriteAddress and WriteData timing
+
+    DeallocateBins(DelayCovID(READ_ADDRESS_ID)) ;  -- Remove old coverage model
+    AddBins (DelayCovID(READ_ADDRESS_ID).BurstLengthCov,     GenBin(8)) ; 
+    AddCross(DelayCovID(READ_ADDRESS_ID).BurstDelayCov,      GenBin(1), GenBin(3)) ;
+    AddCross(DelayCovID(READ_ADDRESS_ID).BeatDelayCov,       GenBin(0), GenBin(0)) ;
+
+    DeallocateBins(DelayCovID(READ_DATA_ID)) ;  -- Remove old coverage model
+    AddBins (DelayCovID(READ_DATA_ID).BurstLengthCov,       GenBin(6)) ;
+    AddBins (DelayCovID(READ_DATA_ID).BurstDelayCov,        GenBin(5)) ;
+    AddBins (DelayCovID(READ_DATA_ID).BeatDelayCov,         GenBin(0)) ;
+
     WaitForClock(SubordinateRec, 2) ;
+    
+    -- Check Single transactions
+    for I in 1 to 64 loop
+--      Write     ( ManagerRec, X"0000_0000" + 16*I, X"0000_0000" + I ) ;
+      GetWrite(SubordinateRec, Addr, Data) ;
+      AffirmIfEqual(Addr, X"0000_0000" + 16*I, "Subordinate Write Addr: ") ;
+      AffirmIfEqual(Data, X"0000_0000" + I, "Subordinate Write Data: ") ;
+    end loop ;
+    
+    for I in 1 to 64 loop
+--      ReadCheck ( ManagerRec, X"0000_0000" + 16*I, X"0000_0000" + I ) ;
+      SendRead(SubordinateRec, Addr, X"0000_0000" + I) ; 
+      AffirmIfEqual(Addr, X"0000_0000" + 16*I, "Subordinate Read Addr: ") ;
+    end loop ;
 
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(SubordinateRec, 2) ;
     WaitForBarrier(TestDone) ;
     wait ;
-  end process MemoryProc ;
+  end process SubordinateProc ;
 
 
-end MemoryRandomTiming1 ;
+end AxiSubordinateRandomTiming1 ;
 
-Configuration TbAxi4_MemoryRandomTiming1 of TbAxi4Memory is
+Configuration TbAxi4_AxiSubordinateRandomTiming1 of TbAxi4 is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(MemoryRandomTiming1) ;
+      use entity work.TestCtrl(AxiSubordinateRandomTiming1) ;
     end for ;
   end for ;
-end TbAxi4_MemoryRandomTiming1 ;
+end TbAxi4_AxiSubordinateRandomTiming1 ;

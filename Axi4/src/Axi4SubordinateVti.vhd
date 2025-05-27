@@ -95,7 +95,8 @@ generic (
   tpd_Clk_RData   : time   := DEFAULT_DELAY ;
   tpd_Clk_RResp   : time   := DEFAULT_DELAY ;
   tpd_Clk_RID     : time   := DEFAULT_DELAY ;
-  tpd_Clk_RUser   : time   := DEFAULT_DELAY 
+  tpd_Clk_RUser   : time   := DEFAULT_DELAY ;
+  tpd_Clk_RLast   : time   := DEFAULT_DELAY
 ) ;
 port (
   -- Globals
@@ -836,6 +837,7 @@ begin
     RD.Resp  <= (RD.Resp'range => '0') ;
     RD.ID    <= (RD.ID'range => '0') ;
     RD.User  <= (RD.User'range => '0') ; 
+    RD.Last  <= '0' ; 
     wait for 0 ns ; -- Allow Cov models to initialize
     wait for 0 ns ; -- Allow Cov models to initialize 
     AddBins (ReadDataDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
@@ -878,6 +880,7 @@ begin
       RD.Resp  <= Local.Resp  after tpd_Clk_RResp ;
       RD.ID    <= ModelRID    after tpd_Clk_RID ; 
       RD.User  <= ModelRUser  after tpd_Clk_RUser ; 
+      RD.Last  <= '1'         after tpd_Clk_RLast ;
 
       Log(ModelID,
         "Read Data." &
@@ -908,6 +911,7 @@ begin
       RD.Resp  <= not Local.Resp after tpd_Clk_RResp ;
       RD.ID    <= not ModelRID    after tpd_Clk_RID ; 
       RD.User  <= not ModelRUser  after tpd_Clk_RUser ; 
+      RD.Last  <= '0'            after tpd_Clk_RLast ;
 
       -- Signal completion
       Increment(ReadDataDoneCount) ;

@@ -54,6 +54,8 @@ if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
 #  analyze AxiStreamReceiverVti_xilinx.vhd
 }
 
+analyze AxiStreamMonitor.vhd
+
 analyze AxiStreamComponentPkg.vhd
 analyze AxiStreamContext.vhd
 

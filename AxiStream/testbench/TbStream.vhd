@@ -222,7 +222,24 @@ begin
       TransRec  => StreamRxRec
     ) ;
   
+    AxiStreamMonitor_1 : AxiStreamMonitor 
+    port map (
+      -- Globals
+      Clk       => Clk, 
+      nReset    => nReset, 
   
+      -- AXI Stream Interface
+      TValid    => TxTValid,
+      TReady    => TxTReady,
+      TID       => TxTID   ,
+      TDest     => TxTDest ,
+      TUser     => TxTUser ,
+      TData     => TxTData ,
+      TStrb     => TxTStrb ,
+      TKeep     => TxTKeep ,
+      TLast     => TxTLast
+    ) ;
+
   TestCtrl_1 : TestCtrl
   generic map ( 
     ID_LEN       => TxTID'length,

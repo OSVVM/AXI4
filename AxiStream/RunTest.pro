@@ -48,4 +48,5 @@ include ./testbench
 set ::osvvm::CurrentWorkingDirectory [file join $::osvvm::CurrentWorkingDirectory TestCases]
 # RunTest  TbStream_SendGetRandom1.vhd
 # RunTest  TbStream_SendGetRandom2.vhd
-RunTest  TbStream_AxiSendGetRandomParam2.vhd
+# RunTest  TbStream_AxiSendGetRandomParam2.vhd
+RunTest  TbStream_AxiSendGetRandomParamAsync2.vhd

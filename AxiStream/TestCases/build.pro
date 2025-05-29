@@ -54,6 +54,8 @@ RunTest  TbStream_SendGetPacketBurst1.vhd    ; # Prototype of burst packetizatio
 RunTest  TbStream_SendGetRandom1.vhd         ; # Uses Basic Randomization Features
 RunTest  TbStream_AxiSendGetRandom1.vhd      ; # Uses Randomization Features specific to AxiStream
 RunTest  TbStream_SendGetRandom2.vhd         ; # Demo of Send, Get, and Check of packets with Valid/Ready randomization
+RunTest  TbStream_AxiSendGetRandomParam2.vhd        ; # SendGetRandom2 + Change parameters
+RunTest  TbStream_AxiSendGetRandomParamAsync2.vhd   ; # AxiSendGetRandomParam2 + use SendBurstVectorAsync
 
 ## =============================================
 ## MIT Record Checks Single Transfer Tests - only test once for all 

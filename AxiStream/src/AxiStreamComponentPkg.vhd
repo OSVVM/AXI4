@@ -221,7 +221,7 @@ package AxiStreamComponentPkg is
       TData     : in  std_logic_vector ;
       TStrb     : in  std_logic_vector ;
       TKeep     : in  std_logic_vector ;
-      TLast     : in  std_logic ;
+      TLast     : in  std_logic 
     ) ;
   end component AxiStreamMonitor ;
 end package AxiStreamComponentPkg ;

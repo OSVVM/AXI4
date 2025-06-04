@@ -66,7 +66,7 @@ entity AxiStreamMonitor is
     TData     : in  std_logic_vector ;
     TStrb     : in  std_logic_vector ;
     TKeep     : in  std_logic_vector ;
-    TLast     : in  std_logic ;
+    TLast     : in  std_logic 
   ) ;
 
   -- Use MODEL_ID_NAME Generic if set, otherwise,

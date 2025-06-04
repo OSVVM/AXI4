@@ -94,6 +94,7 @@ begin
   begin
     wait until nReset = '1' ;  
     WaitForClock(StreamTxRec, 2) ; 
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_LAST, 1) ;
     
     log("Send 256 words with each byte incrementing") ;
     for i in 1 to 256 loop 
@@ -135,6 +136,7 @@ begin
     variable Available : boolean ; 
   begin
     WaitForClock(StreamRxRec, 2) ; 
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_LAST, 1) ;
     
     -- Get and check the 256 words
     log("Send 256 words with each byte incrementing") ;

@@ -107,7 +107,7 @@ begin
       Dest := to_slv((256 - i)/16, DEST_LEN) ; 
       User := to_slv((i-1)/16, USER_LEN) ; 
       
-      Send(StreamTxRec, Data, ID & Dest & User & '0') ;
+      Send(StreamTxRec, Data, ID & Dest & User & '1') ;
     end loop ;
    
     -- Wait for outputs to propagate and signal TestDone
@@ -143,7 +143,7 @@ begin
       ExpID    := to_slv((i-1)/32, ID_LEN);
       ExpDest  := to_slv((256 - i)/16, DEST_LEN) ; 
       ExpUser  := to_slv((i-1)/16, USER_LEN) ; 
-      ExpParam := ExpID & ExpDest & ExpUser & '0' ;
+      ExpParam := ExpID & ExpDest & ExpUser & '1' ;
        
       -- Alternate using Get and Check
       if (i mod 2) /= 0 and i < 252 then 

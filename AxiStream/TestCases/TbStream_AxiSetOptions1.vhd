@@ -94,6 +94,7 @@ begin
   begin
     wait until nReset = '1' ;  
     WaitForClock(StreamTxRec, 2) ; 
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_LAST, 1) ;
     
     log("Send 256 words with each byte incrementing") ;
     for i in 1 to 256 loop 
@@ -134,6 +135,7 @@ begin
     variable ExpParam, RxParam : std_logic_vector(ID_LEN + DEST_LEN + USER_LEN downto 0) ;
   begin
     WaitForClock(StreamRxRec, 2) ; 
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_LAST, 1) ;
     
     -- Get and check the 256 words
     log("Send 256 words with each byte incrementing") ;
@@ -156,9 +158,9 @@ begin
         when 252 =>   -- Error in Data
           Check(StreamRxRec, ExpData+1) ; 
         when 253 =>   -- Error in LAST
-          SetAxiStreamOptions(StreamRxRec, DEFAULT_LAST, 1) ;
-          Check(StreamRxRec, ExpData) ; 
           SetAxiStreamOptions(StreamRxRec, DEFAULT_LAST, 0) ;
+          Check(StreamRxRec, ExpData) ; 
+          SetAxiStreamOptions(StreamRxRec, DEFAULT_LAST, 1) ;
         when 254 =>   -- Error in USER
           SetAxiStreamOptions(StreamRxRec, DEFAULT_USER, ExpUser+1) ;
           Check(StreamRxRec, ExpData) ; 

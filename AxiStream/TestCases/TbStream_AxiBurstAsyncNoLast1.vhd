@@ -75,7 +75,7 @@ begin
       AffirmIfTranscriptsMatch(AXISTREAM_VALIDATED_RESULTS_DIR) ; 
     end if ;   
     
-    EndOfTestReports ; 
+    EndOfTestReports(ExternalErrors => (FAILURE => 0, ERROR => -8, WARNING => 0)) ; -- expecting 8 errors from  
     std.env.stop ; 
     wait ; 
   end process ControlProc ; 

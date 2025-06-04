@@ -49,4 +49,10 @@ set ::osvvm::CurrentWorkingDirectory [file join $::osvvm::CurrentWorkingDirector
 # RunTest  TbStream_SendGetRandom1.vhd
 # RunTest  TbStream_SendGetRandom2.vhd
 # RunTest  TbStream_AxiSendGetRandomParam2.vhd
-RunTest  TbStream_AxiSendGetRandomParamAsync2.vhd
+# RunTest  TbStream_AxiSendGetRandomParamAsync2.vhd
+# RunTest  TbStream_AxiSetOptions1.vhd
+# RunTest  TbStream_AxiSetOptions2.vhd
+# RunTest  TbStream_AxiSetOptionsAsync1.vhd
+# RunTest  TbStream_AxiSetOptionsAsync2.vhd
+RunTest  TbStream_AxiBurstNoLast1.vhd
+RunTest  TbStream_AxiBurstAsyncNoLast1.vhd

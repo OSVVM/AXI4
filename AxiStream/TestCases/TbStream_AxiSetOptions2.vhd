@@ -105,40 +105,54 @@ begin
     SetAxiStreamOptions(StreamTxRec, DEFAULT_DEST, Dest + 2) ;
     SetAxiStreamOptions(StreamTxRec, DEFAULT_USER, User + 1) ;
     
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       Send(StreamTxRec, Data) ;
       Data := Data + 1; 
     end loop ;
+    Send(StreamTxRec, Data, "1") ;
+    Data := Data + 1; 
     
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       Send(StreamTxRec, Data, (USER+5) & "0") ;
       Data := Data + 1; 
     end loop ;
-    
-    for i in 1 to 4 loop 
+    Send(StreamTxRec, Data, (USER+5) & "1") ;
+    Data := Data + 1; 
+   
+    for i in 1 to 3 loop 
       Send(StreamTxRec, Data, (Dest+6) & (USER+5) & "0") ;
       Data := Data + 1; 
     end loop ;
+    Send(StreamTxRec, Data, (Dest+6) & (USER+5) & "1") ;
+    Data := Data + 1; 
     
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       Send(StreamTxRec, Data, (ID+7) & (Dest+6) & (USER+5) & "0") ;
       Data := Data + 1; 
     end loop ;
+    Send(StreamTxRec, Data, (ID+7) & (Dest+6) & (USER+5) & "1") ;
+    Data := Data + 1; 
     
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       Send(StreamTxRec, Data, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
       Data := Data + 1; 
     end loop ;
+    Send(StreamTxRec, Data, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "1") ;
+    Data := Data + 1; 
 
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       Send(StreamTxRec, Data, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
       Data := Data + 1; 
     end loop ;
+    Send(StreamTxRec, Data, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "1") ;
+    Data := Data + 1; 
 
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       Send(StreamTxRec, Data, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-") ;
       Data := Data + 1; 
     end loop ;
+    Send(StreamTxRec, Data, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "1") ;
+    Data := Data + 1; 
    
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(StreamTxRec, 2) ;
@@ -171,7 +185,7 @@ begin
     SetAxiStreamOptions(StreamRxRec, DEFAULT_USER, User + 1) ;
     
     Param := (ID+3) & (Dest+2) & (User+1) & "0" ;
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       case i is 
         when 1 =>
           Get(StreamRxRec, RxData, RxParam) ;
@@ -184,9 +198,11 @@ begin
       end case ; 
       Data := Data + 1; 
     end loop ;
-    
+    Check(StreamRxRec, Data, "1") ;
+    Data := Data + 1; 
+
     Param := (ID+3) & (Dest+2) & (User+5) & "0" ;
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       case i is 
         when 1 =>
           Get(StreamRxRec, RxData, RxParam) ;
@@ -199,9 +215,11 @@ begin
       end case ; 
       Data := Data + 1; 
     end loop ;
-    
+    Check(StreamRxRec, Data, (USER+5) & "1") ;
+    Data := Data + 1; 
+
     Param := (ID+3) & (Dest+6) & (User+5) & "0" ;
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       case i is 
         when 1 =>
           Get(StreamRxRec, RxData, RxParam) ;
@@ -214,9 +232,11 @@ begin
       end case ; 
       Data := Data + 1; 
     end loop ;
-    
+    Check(StreamRxRec, Data, (Dest+6) & (USER+5) & "1") ;
+    Data := Data + 1; 
+
     Param := (ID+7) & (Dest+6) & (User+5) & "0" ;
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       case i is 
         when 1 =>
           Get(StreamRxRec, RxData, RxParam) ;
@@ -229,9 +249,11 @@ begin
       end case ; 
       Data := Data + 1; 
     end loop ;
-    
+    Check(StreamRxRec, Data, (ID+7) & (Dest+6) & (USER+5) & "1") ;
+    Data := Data + 1; 
+
     Param := (ID+3) & (Dest+2) & (User+5) & "0" ;
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       case i is 
         when 1 =>
           Get(StreamRxRec, RxData, RxParam) ;
@@ -244,9 +266,11 @@ begin
       end case ; 
       Data := Data + 1; 
     end loop ;
+    Check(StreamRxRec, Data, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "1") ;
+    Data := Data + 1; 
 
     Param := (ID+3) & (Dest+6) & (User+1) & "0" ;
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       case i is 
         when 1 =>
           Get(StreamRxRec, RxData, RxParam) ;
@@ -259,9 +283,11 @@ begin
       end case ; 
       Data := Data + 1; 
     end loop ;
+    Check(StreamRxRec, Data, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "1") ;
+    Data := Data + 1; 
 
     Param := (ID+7) & (Dest+2) & (User+1) & "0" ;
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       case i is 
         when 1 =>
           Get(StreamRxRec, RxData, RxParam) ;
@@ -274,7 +300,9 @@ begin
       end case ; 
       Data := Data + 1; 
     end loop ;     
-    
+    Check(StreamRxRec, Data, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "1") ;
+    Data := Data + 1; 
+
     
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(StreamRxRec, 2) ;

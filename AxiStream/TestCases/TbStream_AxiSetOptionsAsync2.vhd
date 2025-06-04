@@ -105,41 +105,55 @@ begin
     SetAxiStreamOptions(StreamTxRec, DEFAULT_DEST, Dest + 2) ;
     SetAxiStreamOptions(StreamTxRec, DEFAULT_USER, User + 1) ;
     
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       SendAsync(StreamTxRec, Data) ;
       Data := Data + 1; 
     end loop ;
-    
-    for i in 1 to 4 loop 
+    SendAsync(StreamTxRec, Data, "1") ;
+    Data := Data + 1; 
+  
+    for i in 1 to 3 loop 
       SendAsync(StreamTxRec, Data, (USER+5) & "0") ;
       Data := Data + 1; 
     end loop ;
-    
-    for i in 1 to 4 loop 
+    SendAsync(StreamTxRec, Data, (USER+5) & "1") ;
+    Data := Data + 1; 
+  
+    for i in 1 to 3 loop 
       SendAsync(StreamTxRec, Data, (Dest+6) & (USER+5) & "0") ;
       Data := Data + 1; 
     end loop ;
-    
-    for i in 1 to 4 loop 
+    SendAsync(StreamTxRec, Data, (Dest+6) & (USER+5) & "1") ;
+    Data := Data + 1; 
+  
+    for i in 1 to 3 loop 
       SendAsync(StreamTxRec, Data, (ID+7) & (Dest+6) & (USER+5) & "0") ;
       Data := Data + 1; 
     end loop ;
-    
-    for i in 1 to 4 loop 
+    SendAsync(StreamTxRec, Data, (ID+7) & (Dest+6) & (USER+5) & "1") ;
+    Data := Data + 1; 
+  
+    for i in 1 to 3 loop 
       SendAsync(StreamTxRec, Data, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "-") ;
       Data := Data + 1; 
     end loop ;
+    SendAsync(StreamTxRec, Data, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "1") ;
+    Data := Data + 1; 
 
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       SendAsync(StreamTxRec, Data, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "-") ;
       Data := Data + 1; 
     end loop ;
+    SendAsync(StreamTxRec, Data, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "1") ;
+    Data := Data + 1; 
 
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       SendAsync(StreamTxRec, Data, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "-") ;
       Data := Data + 1; 
     end loop ;
-   
+    SendAsync(StreamTxRec, Data, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "1") ;
+    Data := Data + 1; 
+ 
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(StreamTxRec, 2) ;
     WaitForBarrier(TestDone) ;
@@ -173,7 +187,7 @@ begin
     SetAxiStreamOptions(StreamRxRec, DEFAULT_USER, User + 1) ;
     
     Param := (ID+3) & (Dest+2) & (User+1) & "0" ;
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       TryCount := 0 ; 
       loop 
         case i is 
@@ -195,9 +209,11 @@ begin
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       Data := Data + 1; 
     end loop ;
+    Check(StreamRxRec, Data, "1") ;
+    Data := Data + 1; 
     
     Param := (ID+3) & (Dest+2) & (User+5) & "0" ;
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       TryCount := 0 ; 
       loop 
         case i is 
@@ -219,9 +235,11 @@ begin
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       Data := Data + 1; 
     end loop ;
+    Check(StreamRxRec, Data, (USER+5) & "1") ;
+    Data := Data + 1; 
     
     Param := (ID+3) & (Dest+6) & (User+5) & "0" ;
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       TryCount := 0 ; 
       loop 
         case i is 
@@ -243,9 +261,11 @@ begin
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       Data := Data + 1; 
     end loop ;
-    
+    Check(StreamRxRec, Data, (Dest+6) & (USER+5) & "1") ;
+    Data := Data + 1; 
+
     Param := (ID+7) & (Dest+6) & (User+5) & "0" ;
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       TryCount := 0 ; 
       loop 
         case i is 
@@ -267,9 +287,11 @@ begin
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       Data := Data + 1; 
     end loop ;
-    
+    Check(StreamRxRec, Data, (ID+7) & (Dest+6) & (USER+5) & "1") ;
+    Data := Data + 1; 
+
     Param := (ID+3) & (Dest+2) & (User+5) & "0" ;
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       TryCount := 0 ; 
       loop 
         case i is 
@@ -291,9 +313,11 @@ begin
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       Data := Data + 1; 
     end loop ;
+    Check(StreamRxRec, Data, Dash(ID'range) & Dash(Dest'range) & (USER+5) & "1") ;
+    Data := Data + 1; 
 
     Param := (ID+3) & (Dest+6) & (User+1) & "0" ;
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       TryCount := 0 ; 
       loop 
         case i is 
@@ -315,9 +339,11 @@ begin
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       Data := Data + 1; 
     end loop ;
+    Check(StreamRxRec, Data, Dash(ID'range) & (Dest+6) & Dash(USER'range) & "1") ;
+    Data := Data + 1; 
 
     Param := (ID+7) & (Dest+2) & (User+1) & "0" ;
-    for i in 1 to 4 loop 
+    for i in 1 to 3 loop 
       TryCount := 0 ; 
       loop 
         case i is 
@@ -339,7 +365,9 @@ begin
       AffirmIf(TryCount > 0, "TryCount " & to_string(TryCount)) ;
       Data := Data + 1; 
     end loop ;     
-    
+    Check(StreamRxRec, Data, (ID+7) & Dash(Dest'range) & Dash(USER'range) & "1") ;
+    Data := Data + 1; 
+
     
     -- Wait for outputs to propagate and signal TestDone
     WaitForClock(StreamRxRec, 2) ;

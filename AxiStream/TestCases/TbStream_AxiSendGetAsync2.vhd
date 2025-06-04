@@ -108,7 +108,7 @@ begin
       Dest := to_slv((256 - i)/16, DEST_LEN) ; 
       User := to_slv((i-1)/16, USER_LEN) ; 
       
-      SendAsync(StreamTxRec, Data, ID & Dest & User & '0') ;
+      SendAsync(StreamTxRec, Data, ID & Dest & User & '1') ;
       
       if (i mod 32) = 0 then
         CurTime := now ; 
@@ -156,7 +156,7 @@ begin
       ExpID    := to_slv((i-1)/32, ID_LEN);
       ExpDest  := to_slv((256 - i)/16, DEST_LEN) ; 
       ExpUser  := to_slv((i-1)/16, USER_LEN) ; 
-      ExpParam := ExpID & ExpDest & ExpUser & '0' ;
+      ExpParam := ExpID & ExpDest & ExpUser & '1' ;
        
       -- Alternate using Get and Check
       TryCount := 0 ; 

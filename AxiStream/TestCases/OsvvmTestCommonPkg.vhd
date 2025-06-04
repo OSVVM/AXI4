@@ -47,8 +47,10 @@ context OSVVM.OsvvmContext ;
 
 package OsvvmTestCommonPkg is
   constant RESULTS_DIR                     : string := "" ;
+--  constant PATH_TO_OsvvmTestCommonPkg      : string := "C:/OsvvmLibraries/AXI4/AxiStream/TestCases" ;  -- OSVVM Dev Setting
   constant PATH_TO_OsvvmTestCommonPkg      : string := FILE_PATH ;
   constant AXISTREAM_VALIDATED_RESULTS_DIR : string := PATH_TO_OsvvmTestCommonPkg & "/../ValidatedResults" ;
---  constant AXISTREAM_VALIDATED_RESULTS_DIR : string := std.env.FILE_PATH & "/../ValidatedResults" ;
+--  constant AXISTREAM_VALIDATED_RESULTS_DIR : string := std.env.FILE_PATH & "/../ValidatedResults" ; 
+--  constant CHECK_TRANSCRIPT                : boolean := TRUE ; -- OSVVM Dev Setting
   constant CHECK_TRANSCRIPT                : boolean := PATH_TO_OsvvmTestCommonPkg'length > 0 ;
 end package OsvvmTestCommonPkg ; 

@@ -156,13 +156,13 @@ begin
           when 252 =>   -- Error in Data
             Check(StreamRxRec, ExpData+1, ExpParam) ; 
           when 253 =>   -- Error in LAST
-            Check(StreamRxRec, ExpData, ExpID & ExpDest & ExpUser & '1') ; 
+            Check(StreamRxRec, ExpData, ExpID & ExpDest & ExpUser & '0') ; 
           when 254 =>   -- Error in USER
-            Check(StreamRxRec, ExpData, ExpID & ExpDest & (ExpUser+1) & '0') ; 
+            Check(StreamRxRec, ExpData, ExpID & ExpDest & (ExpUser+1) & '1') ; 
           when 255 =>   -- Error in DEST
-            Check(StreamRxRec, ExpData, ExpID & (ExpDest+1) & ExpUser & '0') ; 
+            Check(StreamRxRec, ExpData, ExpID & (ExpDest+1) & ExpUser & '1') ; 
           when 256 =>   -- Error in ID
-            Check(StreamRxRec, ExpData, (ExpID + 1) & ExpDest & ExpUser & '0') ; 
+            Check(StreamRxRec, ExpData, (ExpID + 1) & ExpDest & ExpUser & '1') ; 
           when others =>  -- No Errors 
             Check(StreamRxRec, ExpData, ExpParam) ; 
         end case ; 

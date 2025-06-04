@@ -52,7 +52,9 @@ set ::osvvm::CurrentWorkingDirectory [file join $::osvvm::CurrentWorkingDirector
 # RunTest  TbStream_AxiSendGetRandomParamAsync2.vhd
 # RunTest  TbStream_AxiSetOptions1.vhd
 # RunTest  TbStream_AxiSetOptions2.vhd
-# RunTest  TbStream_AxiSetOptionsAsync1.vhd
+RunTest  TbStream_AxiSetOptionsAsync1.vhd
 # RunTest  TbStream_AxiSetOptionsAsync2.vhd
-RunTest  TbStream_AxiBurstNoLast1.vhd
-RunTest  TbStream_AxiBurstAsyncNoLast1.vhd
+# RunTest  TbStream_AxiBurstNoLast1.vhd
+# RunTest  TbStream_AxiBurstAsyncNoLast1.vhd
+# RunTest  TbStream_AxiSendGet2.vhd
+# RunTest  TbStream_AxiSendGetAsync2.vhd

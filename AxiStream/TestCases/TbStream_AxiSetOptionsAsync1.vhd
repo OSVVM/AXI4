@@ -161,9 +161,9 @@ begin
           when 252 =>   -- Error in Data
             TryCheck(StreamRxRec, ExpData+1, Available) ; 
           when 253 =>   -- Error in LAST
-            SetAxiStreamOptions(StreamRxRec, DEFAULT_LAST, 1) ;
-            TryCheck(StreamRxRec, ExpData, Available) ; 
             SetAxiStreamOptions(StreamRxRec, DEFAULT_LAST, 0) ;
+            TryCheck(StreamRxRec, ExpData, Available) ; 
+            SetAxiStreamOptions(StreamRxRec, DEFAULT_LAST, 1) ;
           when 254 =>   -- Error in USER
             SetAxiStreamOptions(StreamRxRec, DEFAULT_USER, ExpUser+1) ;
             TryCheck(StreamRxRec, ExpData, Available) ; 

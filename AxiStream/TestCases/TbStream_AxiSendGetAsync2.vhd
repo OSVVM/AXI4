@@ -176,13 +176,13 @@ begin
             when 252 =>   -- Error in Data
               TryCheck(StreamRxRec, ExpData+1, ExpParam, Available) ; 
             when 253 =>   -- Error in LAST
-              TryCheck(StreamRxRec, ExpData, ExpID & ExpDest & ExpUser & '1', Available) ; 
+              TryCheck(StreamRxRec, ExpData, ExpID & ExpDest & ExpUser & '0', Available) ; 
             when 254 =>   -- Error in USER
-              TryCheck(StreamRxRec, ExpData, ExpID & ExpDest & (ExpUser+1) & '0', Available) ; 
+              TryCheck(StreamRxRec, ExpData, ExpID & ExpDest & (ExpUser+1) & '1', Available) ; 
             when 255 =>   -- Error in DEST
-              TryCheck(StreamRxRec, ExpData, ExpID & (ExpDest+1) & ExpUser & '0', Available) ; 
+              TryCheck(StreamRxRec, ExpData, ExpID & (ExpDest+1) & ExpUser & '1', Available) ; 
             when 256 =>   -- Error in ID
-              TryCheck(StreamRxRec, ExpData, (ExpID + 1) & ExpDest & ExpUser & '0', Available) ; 
+              TryCheck(StreamRxRec, ExpData, (ExpID + 1) & ExpDest & ExpUser & '1', Available) ; 
             when others =>  -- No Errors 
               TryCheck(StreamRxRec, ExpData, ExpParam, Available) ; 
           end case ; 

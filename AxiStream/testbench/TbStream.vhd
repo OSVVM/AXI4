@@ -222,7 +222,7 @@ begin
       TransRec  => StreamRxRec
     ) ;
   
-    AxiStreamMonitor_1 : AxiStreamMonitor 
+  AxiStreamMonitor_1 : AxiStreamMonitor 
     port map (
       -- Globals
       Clk       => Clk, 

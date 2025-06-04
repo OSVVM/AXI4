@@ -210,6 +210,24 @@ begin
       TransRec  => RX.TransRec
     ) ;
   
+  AxiStreamMonitor_1 : AxiStreamMonitor 
+    port map (
+      -- Globals
+      Clk       => Clk, 
+      nReset    => nReset, 
+
+      -- AXI Stream Interface
+      TValid    => TX.TValid,
+      TReady    => TX.TReady,
+      TID       => TX.TID   ,
+      TDest     => TX.TDest ,
+      TUser     => TX.TUser ,
+      TData     => TX.TData ,
+      TStrb     => TX.TStrb ,
+      TKeep     => TX.TKeep ,
+      TLast     => TX.TLast
+    ) ;
+
   
   TestCtrl_1 : TestCtrl
   generic map ( 

@@ -160,6 +160,23 @@ begin
       TLast     => TLast 
     ) ;
   
+  AxiStreamMonitor_1 : AxiStreamMonitor 
+    port map (
+      -- Globals
+      Clk       => Clk, 
+      nReset    => nReset, 
+  
+      -- AXI Stream Interface
+      TValid    => TValid,
+      TReady    => TReady,
+      TID       => TID   ,
+      TDest     => TDest ,
+      TUser     => TUser ,
+      TData     => TData ,
+      TStrb     => TStrb ,
+      TKeep     => TKeep ,
+      TLast     => TLast
+    ) ;
   
   TestCtrl_1 : TestCtrl
   generic map ( 

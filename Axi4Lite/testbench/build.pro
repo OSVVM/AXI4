@@ -40,7 +40,7 @@
 
 library    osvvm_TbAxi4Lite
 
-analyze OsvvmTestCommonPkg.vhd
+analyze ../TestCases/OsvvmTestCommonPkg.vhd
 
 analyze TestCtrl_e.vhd
 analyze TbAxi4.vhd

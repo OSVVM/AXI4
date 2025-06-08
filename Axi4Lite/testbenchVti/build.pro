@@ -1,5 +1,5 @@
-#  File Name:         RunAllTests.pro
-#  Revision:          OSVVM MODELS STANDARD VERSION
+#  File Name:         build.pro
+#  Revision:          STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
 #  Contributor(s):
@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to run all Axi4 Lite tests  
+#        Script to run one Axi4 test  
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -37,9 +37,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
-TestSuite  Axi4Lite
-library    osvvm_TbAxi4Lite
+library osvvm_TbAxi4LiteVti
 
+analyze ../TestCases/OsvvmTestCommonPkg.vhd
 
-include  ./testbench/build.pro
-include  ./TestCases/RunAllTests.pro
+analyze TestCtrl_e.vhd
+analyze TbAxi4.vhd
+analyze TbAxi4Memory.vhd

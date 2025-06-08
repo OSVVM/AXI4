@@ -169,13 +169,13 @@ end MemoryReadWrite1 ;
 
 library osvvm_Axi4 ;
 
-Configuration TbAxi4_MemoryReadWrite1 of TbAxi4 is
+Configuration TbAxi4_MemoryReadWrite1 of TbAxi4Memory is
   for TestHarness
     for TestCtrl_1 : TestCtrl
       use entity work.TestCtrl(MemoryReadWrite1) ; 
     end for ; 
-  for Subordinate_1 : Axi4LiteSubordinate 
-      use entity osvvm_Axi4.Axi4LiteMemory ; 
-    end for ; 
+--!!  for Subordinate_1 : Axi4LiteSubordinate 
+--!!      use entity osvvm_Axi4.Axi4LiteMemory ; 
+--!!    end for ; 
   end for ; 
 end TbAxi4_MemoryReadWrite1 ; 

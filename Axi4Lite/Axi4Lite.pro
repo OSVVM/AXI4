@@ -23,7 +23,7 @@
 #
 #  This file is part of OSVVM.
 #  
-#  Copyright (c) 2019 - 2020 by SynthWorks Design Inc.  
+#  Copyright (c) 2019 - 2025 by SynthWorks Design Inc.  
 #  
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -37,12 +37,5 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #
-library osvvm_axi4
-analyze ./src/Axi4LiteComponentPkg.vhd
-analyze ./src/Axi4LiteContext.vhd
-analyze ./src/Axi4LiteManager.vhd
-analyze ./src/Axi4LiteMonitor_dummy.vhd
-analyze ./src/Axi4LiteSubordinate.vhd
-analyze ./src/Axi4LiteMemory.vhd
-analyze ./src/Axi4LitePassThru.vhd
+build ./src
 

@@ -37,11 +37,4 @@
 #  limitations under the License.
 #  
 
-  analyze ../TestCases/OsvvmTestCommonPkg.vhd
-
-#   if {$::osvvm::Support2019FilePath} {
-#     analyze ../TestCases/OsvvmTestCommonPkg.vhd
-#   } else {
-#     # Need for NVC.  NVC has implemented implemented FILE_PATH, however its implementation is incorrect
-#     analyze ../TestCases/deprecated/OsvvmTestCommonPkg_NoFilePath.vhd
-#   }
+  analyze OsvvmTestCommonPkg.vhd

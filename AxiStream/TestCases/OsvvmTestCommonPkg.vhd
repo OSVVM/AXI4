@@ -20,13 +20,14 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    06/2025   2025.06    Normalizing naming.
 --    02/2025   2025.02    Static paths break.  Using VHDL-2019 FILE_PATH
 --    10/2020   2020.10    Initial revision
 --
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2020 by SynthWorks Design Inc.  
+--  Copyright (c) 2020 - 2025 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -46,11 +47,14 @@ context OSVVM.OsvvmContext ;
 -- use std.env.all ; -- see osvvm/FileLinePathPkg.vhd
 
 package OsvvmTestCommonPkg is
+  constant PATH_TO_TEST_SRC            : string  := FILE_PATH ;  -- only valid with VHDL-2019, for 2008 = ""
+  constant PATH_TO_VALIDATED_RESULTS   : string  := PATH_TO_TEST_SRC & "/../ValidatedResults"  ;
+  constant CHECK_TRANSCRIPT            : boolean := PATH_TO_TEST_SRC'length > 0 ; 
+--  constant CHECK_TRANSCRIPT            : boolean := TRUE ; 
+
   constant RESULTS_DIR                     : string := "" ;
 --  constant PATH_TO_OsvvmTestCommonPkg      : string := "C:/OsvvmLibraries/AXI4/AxiStream/TestCases" ;  -- OSVVM Dev Setting
   constant PATH_TO_OsvvmTestCommonPkg      : string := FILE_PATH ;
   constant AXISTREAM_VALIDATED_RESULTS_DIR : string := PATH_TO_OsvvmTestCommonPkg & "/../ValidatedResults" ;
---  constant AXISTREAM_VALIDATED_RESULTS_DIR : string := std.env.FILE_PATH & "/../ValidatedResults" ; 
 --  constant CHECK_TRANSCRIPT                : boolean := TRUE ; -- OSVVM Dev Setting
-  constant CHECK_TRANSCRIPT                : boolean := PATH_TO_OsvvmTestCommonPkg'length > 0 ;
 end package OsvvmTestCommonPkg ; 

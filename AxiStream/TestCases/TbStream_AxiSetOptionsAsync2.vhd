@@ -69,15 +69,18 @@ begin
 
     -- Wait for test to finish
     WaitForBarrier(TestDone, 35 ms) ;
-    AlertIf(now >= 35 ms, "Test finished due to timeout") ;
-    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
+-- both are now checked in reporting
+--    AlertIf(now >= 35 ms, "Test finished due to timeout") ;
+--    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
-    if CHECK_TRANSCRIPT then 
-      AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ; 
-    end if ;   
+-- Tx and Rx VC print at same time step resulting in random 
+-- file ordering when they print at the same time
+--    if CHECK_TRANSCRIPT then 
+--      AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ; 
+--    end if ;   
     
-    EndOfTestReports ; 
+    EndOfTestReports(TimeOut => now >= 35 ms) ; 
     std.env.stop ; 
     wait ; 
   end process ControlProc ; 

@@ -40,7 +40,6 @@
 TestSuite AxiStreamVti_Alt
 library osvvm_TbAxiStreamVti_Alt
 
-
 analyze [CreateTestCaseCommonPkg OsvvmTestCommonPkg ../ValidatedResults]
 
 analyze TestCtrl_e.vhd

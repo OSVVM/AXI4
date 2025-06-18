@@ -72,7 +72,7 @@ begin
     
     TranscriptClose ; 
     if CHECK_TRANSCRIPT then 
-      AffirmIfTranscriptsMatch(AXISTREAM_VALIDATED_RESULTS_DIR) ; 
+      AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ; 
     end if ;   
     
     EndOfTestReports(ExternalErrors => (FAILURE => 0, ERROR => -8, WARNING => 0)) ; -- expecting 8 errors from  

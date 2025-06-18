@@ -73,7 +73,7 @@ begin
     
     TranscriptClose ; 
     if CHECK_TRANSCRIPT then 
-    --   AffirmIfTranscriptsMatch(AXISTREAM_VALIDATED_RESULTS_DIR) ; 
+    --   AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ; 
     end if ;   
     -- Miscompares between AR and MQ.
     --   Ordering of printing of receiver: ReadBurst and Transmitter: Data value when WaitForTransaction not separating bursts. 

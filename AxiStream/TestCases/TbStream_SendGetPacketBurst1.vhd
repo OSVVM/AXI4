@@ -71,7 +71,7 @@ begin
     
     TranscriptClose ; 
     if CHECK_TRANSCRIPT then 
-      AffirmIfTranscriptsMatch(AXISTREAM_VALIDATED_RESULTS_DIR) ; 
+      AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ; 
     end if ;   
    
    

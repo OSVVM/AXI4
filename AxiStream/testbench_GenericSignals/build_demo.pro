@@ -47,4 +47,4 @@ analyze TestCtrl_e.vhd
 analyze AxiStreamDut.vhd
 analyze TbStream.vhd
 
-include ../TestCases
+include ../TestCases/build_demo.pro

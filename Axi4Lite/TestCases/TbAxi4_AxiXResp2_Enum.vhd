@@ -58,7 +58,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("TbAxi4_AxiXResp2_Enum.txt") ;
+    TranscriptOpen ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -73,7 +73,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_AxiXResp2_Enum.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_AxiXResp2_Enum.txt", "") ; 
+    -- AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ;
 
     EndOfTestReports ; 
     std.env.stop ; 

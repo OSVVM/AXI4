@@ -64,7 +64,7 @@ begin
 
     -- Wait for testbench initialization
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen("TbAxi4_DemoErrorMemoryReadWrite1.txt") ;
+    TranscriptOpen ;
     SetTranscriptMirror(TRUE) ;
     SetAlertLogOptions(WriteTimeLast => FALSE) ; 
     SetAlertLogOptions(TimeJustifyAmount => 15) ; 
@@ -81,7 +81,7 @@ begin
 
     TranscriptClose ;
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_DemoErrorMemoryReadWrite1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_DemoErrorMemoryReadWrite1.txt", "") ;
+    -- AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ;
 
     EndOfTestReports ;
     std.env.stop ;

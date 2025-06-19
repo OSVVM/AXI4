@@ -74,7 +74,7 @@ begin
     AffirmIf(GetAlertCount = AlertCountType'(FAILURE => 1, ERROR => 0, WARNING => 0), "Expecting: (FAILURE => 1, ERROR => 0, WARNING => 0)") ;
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_MultipleDriversManager.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MultipleDriversManager.txt", "") ; 
+    -- AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ;
 
     EndOfTestReports(ExternalErrors => (FAILURE => -1, ERROR => 0, WARNING => 0)) ; 
     std.env.stop ;

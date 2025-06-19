@@ -42,17 +42,10 @@ analyze AxiStreamOptionsPkg.vhd
 analyze AxiStreamOptionsArrayPkg.vhd
 analyze AxiStreamTbPkg.vhd
 
-if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
-  analyze AxiStreamTransmitter.vhd
-  analyze AxiStreamTransmitterVti.vhd
-  analyze AxiStreamReceiver.vhd
-  analyze AxiStreamReceiverVti.vhd
-} else {
-  analyze AxiStreamTransmitter_xilinx.vhd
-#  analyze AxiStreamTransmitterVti_xilinx.vhd
-  analyze AxiStreamReceiver_xilinx.vhd
-#  analyze AxiStreamReceiverVti_xilinx.vhd
-}
+analyze AxiStreamTransmitter.vhd
+analyze AxiStreamTransmitterVti.vhd
+analyze AxiStreamReceiver.vhd
+analyze AxiStreamReceiverVti.vhd
 
 analyze AxiStreamMonitor.vhd
 

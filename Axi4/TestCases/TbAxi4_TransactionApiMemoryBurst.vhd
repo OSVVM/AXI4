@@ -67,7 +67,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_TransactionApiMemoryBurst.txt") ;
+    TranscriptOpen("TbAxi4_TransactionApiMemoryBurst.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset

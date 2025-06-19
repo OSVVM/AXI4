@@ -71,7 +71,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_RandomReadWrite.txt") ;
+    TranscriptOpen("TbAxi4_RandomReadWrite.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset

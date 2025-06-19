@@ -86,7 +86,7 @@ Contains packages shared by Axi4, Axi4Lite, and AxiStream.
       * Used by testbenches that used earlier versions of Axi4 and Axi4Lite verification components
       * Used to minimize changes made to the AXI4
 
-For current compile order see AXI4/common/common.pro.
+For current compile order see AXI4/common/build.pro.
 
 ### AXI4/Axi4/src
 AXI4 Full verification components.
@@ -109,7 +109,7 @@ Common/src/AddressBusResponderTransactionPkg.vhd
    * Axi4Memory.vhd and Axi4MemoryVti.vhd
       * AXI4 Memory Subordinate verification component with bursting
 
-For current compile order see AXI4/Axi4/Axi4.pro.
+For current compile order see AXI4/Axi4/build.pro.
 
 ### AXI4/Axi4Lite/src 
 AXI4 Lite verification components.
@@ -129,7 +129,7 @@ Common/src/AddressBusResponderTransactionPkg.vhd
    * Axi4LiteMemory.vhd
       * AXI4 Memory verification component
 
-For current compile order see AXI4/Axi4Lite/Axi4Lite.pro.
+For current compile order see AXI4/Axi4Lite/build.pro.
 
 ### AXI4/AxiStream/src 
 AxiStream Transmitter and Receiver verification components. 
@@ -148,7 +148,7 @@ See OSVVM-Common repository, file Common/src/StreamTransactionPkg.vhd
    * AxiStreamContext.vhd
       * References all packages required to use the AxiStream verification components
 
-For current compile order see AXI4/AxiStream/AxiStream.pro.
+For current compile order see AXI4/AxiStream/build.pro.
 
 ## More Information on OSVVM
 

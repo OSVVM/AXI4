@@ -62,7 +62,7 @@ begin
 
     -- Wait for testbench initialization
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_SubordinateRandomTiming1.txt") ;
+    TranscriptOpen("TbAxi4_SubordinateRandomTiming1.txt") ;
     SetTranscriptMirror(TRUE) ;
     SetAlertLogOptions(WriteTimeLast => FALSE) ; 
     SetAlertLogOptions(TimeJustifyAmount => 15) ; 

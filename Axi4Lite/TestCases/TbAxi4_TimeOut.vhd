@@ -69,7 +69,7 @@ begin
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
     SetAlertLogJustify ;
-    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_TimeOut.txt") ;
+    TranscriptOpen("TbAxi4_TimeOut.txt") ;
 --    SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset

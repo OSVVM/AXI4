@@ -1,4 +1,4 @@
-#  File Name:         testbench.pro
+#  File Name:         testbench_interrupt.pro
 #  Revision:          STANDARD VERSION
 #
 #  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -37,12 +37,20 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
-library osvvm_TbAxi4_MultipleMemory
+TestSuite Axi4Full_Interrupt
+library   osvvm_TbAxi4Full_Interrupt
 
-analyze ../TestCases/OsvvmTestCommonPkg.vhd
+analyze [CreateTestCaseCommonPkg OsvvmTestCommonPkg ../ValidatedResults]
 
 analyze TestCtrl_e.vhd
-analyze TbAxi4_MultipleMemory.vhd
+# analyze TbAxi4.vhd
+analyze TbAxi4Memory.vhd
 
-RunTest TbAxi4_Shared1.vhd
-RunTest TbAxi4_Separate1.vhd
+RunTest TbAxi4_Interrupt1.vhd
+RunTest TbAxi4_Interrupt2.vhd
+RunTest TbAxi4_InterruptBurst1.vhd
+RunTest TbAxi4_InterruptBurst2.vhd
+
+RunTest TbAxi4_InterruptNoHandler1.vhd
+#RunTest TbAxi4_InterruptNoHandler2.vhd
+

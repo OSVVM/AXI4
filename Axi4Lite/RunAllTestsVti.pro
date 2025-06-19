@@ -37,8 +37,5 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
-TestSuite  Axi4LiteVti
-library    osvvm_TbAxi4LiteVti
-
 include  ./testbenchVti/build.pro
 include  ./TestCases/RunAllTests.pro

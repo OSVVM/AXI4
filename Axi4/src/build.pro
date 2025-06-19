@@ -42,22 +42,14 @@ analyze Axi4ComponentPkg.vhd
 analyze Axi4ComponentVtiPkg.vhd
 analyze Axi4Context.vhd
 
-if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
-  # for XSIM, VTI not supported in 2024.2
-  analyze Axi4Manager.vhd
-  analyze Axi4ManagerVti.vhd
-  analyze Axi4Monitor_dummy.vhd
-  analyze Axi4Subordinate.vhd
-  analyze Axi4SubordinateVti.vhd
-  analyze Axi4Memory.vhd
-  analyze Axi4MemoryVti.vhd
-} else {
-  # maybe comment all of these out as they do not work in 2023.2
-  # 2024.2 supports the above
-  analyze deprecated/Axi4Manager_xilinx.vhd
-  analyze Axi4Monitor_dummy.vhd
-  analyze deprecated/Axi4Memory_xilinx.vhd
-}
+# for XSIM, VTI not supported in 2024.2
+analyze Axi4Manager.vhd
+analyze Axi4ManagerVti.vhd
+analyze Axi4Monitor_dummy.vhd
+analyze Axi4Subordinate.vhd
+analyze Axi4SubordinateVti.vhd
+analyze Axi4Memory.vhd
+analyze Axi4MemoryVti.vhd
 
 analyze Axi4PassThru.vhd
 analyze Axi4GenericSignalsPkg.vhd

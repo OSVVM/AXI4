@@ -61,7 +61,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_Shared1.txt") ;
+    TranscriptOpen("TbAxi4_Shared1.txt") ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -76,7 +76,7 @@ begin
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff(OSVVM_RESULTS_DIR & "TbAxi4_Shared1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_Shared1.txt", "") ; 
+    -- AlertIfDiff("TbAxi4_Shared1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_Shared1.txt", "") ; 
 
     EndOfTestReports ; 
     std.env.stop ; 

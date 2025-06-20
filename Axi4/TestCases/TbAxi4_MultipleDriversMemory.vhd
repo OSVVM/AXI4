@@ -69,7 +69,7 @@ begin
     -- Wait for test to finish
     WaitForBarrier(TestDone, 35 ms) ;
     AlertIf(now >= 35 ms, "Test finished due to timeout") ;
---    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
+--    -- AlertIf(GetAffirmCount < 1, "Test is not Self-Checking"); -- Now handled by EndOfTestReports
     
     AffirmIf(GetAlertCount = AlertCountType'(FAILURE => 1, ERROR => 0, WARNING => 0), "Expecting: (FAILURE => 1, ERROR => 0, WARNING => 0)") ;
     TranscriptClose ; 

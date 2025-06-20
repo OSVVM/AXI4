@@ -68,8 +68,6 @@ begin
 
     -- Wait for test to finish
     WaitForBarrier(TestDone, 5 ms) ;
-    AlertIf(now >= 5 ms, "Test finished due to timeout") ;
-    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
     if CHECK_TRANSCRIPT then 
@@ -78,7 +76,7 @@ begin
     -- Miscompares between AR and MQ.
     --   Ordering of printing of receiver: ReadBurst and Transmitter: Data value when WaitForTransaction not separating bursts. 
     
-    EndOfTestReports ; 
+    EndOfTestReports(TimeOut => (now >= 5 ms)) ; 
     std.env.stop ; 
     wait ; 
   end process ControlProc ; 

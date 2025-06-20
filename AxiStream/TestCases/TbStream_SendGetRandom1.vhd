@@ -70,18 +70,13 @@ begin
 
     -- Wait for test to finish
     WaitForBarrier(TestDone, 35 ms) ;
-    AlertIf(now >= 35 ms, "Test finished due to timeout") ;
-    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
 
     TranscriptClose ;
     if CHECK_TRANSCRIPT then 
     --  AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ; 
     end if ;   
    
-
-
-    -- Expecting two check errors at 128 and 256
-    EndOfTestReports(ExternalErrors => (0, 0, 0)) ;
+    EndOfTestReports(TimeOut => (now >= 35 ms)) ; 
     std.env.stop ;
     wait ;
   end process ControlProc ;

@@ -70,8 +70,6 @@ begin
     -- Wait for test to finish
     WaitForBarrier(TestDone, 35 ms) ;
 -- both are now checked in reporting
---    AlertIf(now >= 35 ms, "Test finished due to timeout") ;
---    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
 -- Tx and Rx VC print at same time step resulting in random 

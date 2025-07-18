@@ -67,15 +67,14 @@ begin
 
     -- Wait for test to finish
     WaitForBarrier(TestDone, 1 ms) ;
-    AlertIf(now >= 1 ms, "Test finished due to timeout") ;
-    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
     if CHECK_TRANSCRIPT then 
-      AffirmIfTranscriptsMatch(AXISTREAM_VALIDATED_RESULTS_DIR) ; 
+      AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ; 
     end if ;   
     
-    EndOfTestReports(ExternalErrors => (0, -5, 0)) ; 
+    EndOfTestReports(ExternalErrors => (0, -5, 0), TimeOut => (now >= 1 ms)) ; 
+
     std.env.stop ;
     wait ; 
   end process ControlProc ; 
@@ -108,7 +107,7 @@ begin
       Dest := to_slv((256 - i)/16, DEST_LEN) ; 
       User := to_slv((i-1)/16, USER_LEN) ; 
       
-      SendAsync(StreamTxRec, Data, ID & Dest & User & '0') ;
+      SendAsync(StreamTxRec, Data, ID & Dest & User & '1') ;
       
       if (i mod 32) = 0 then
         CurTime := now ; 
@@ -156,7 +155,7 @@ begin
       ExpID    := to_slv((i-1)/32, ID_LEN);
       ExpDest  := to_slv((256 - i)/16, DEST_LEN) ; 
       ExpUser  := to_slv((i-1)/16, USER_LEN) ; 
-      ExpParam := ExpID & ExpDest & ExpUser & '0' ;
+      ExpParam := ExpID & ExpDest & ExpUser & '1' ;
        
       -- Alternate using Get and Check
       TryCount := 0 ; 
@@ -176,13 +175,13 @@ begin
             when 252 =>   -- Error in Data
               TryCheck(StreamRxRec, ExpData+1, ExpParam, Available) ; 
             when 253 =>   -- Error in LAST
-              TryCheck(StreamRxRec, ExpData, ExpID & ExpDest & ExpUser & '1', Available) ; 
+              TryCheck(StreamRxRec, ExpData, ExpID & ExpDest & ExpUser & '0', Available) ; 
             when 254 =>   -- Error in USER
-              TryCheck(StreamRxRec, ExpData, ExpID & ExpDest & (ExpUser+1) & '0', Available) ; 
+              TryCheck(StreamRxRec, ExpData, ExpID & ExpDest & (ExpUser+1) & '1', Available) ; 
             when 255 =>   -- Error in DEST
-              TryCheck(StreamRxRec, ExpData, ExpID & (ExpDest+1) & ExpUser & '0', Available) ; 
+              TryCheck(StreamRxRec, ExpData, ExpID & (ExpDest+1) & ExpUser & '1', Available) ; 
             when 256 =>   -- Error in ID
-              TryCheck(StreamRxRec, ExpData, (ExpID + 1) & ExpDest & ExpUser & '0', Available) ; 
+              TryCheck(StreamRxRec, ExpData, (ExpID + 1) & ExpDest & ExpUser & '1', Available) ; 
             when others =>  -- No Errors 
               TryCheck(StreamRxRec, ExpData, ExpParam, Available) ; 
           end case ; 

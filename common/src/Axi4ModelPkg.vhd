@@ -206,7 +206,11 @@ package body Axi4ModelPkg is
   ) return integer is
     alias    aAddr         : std_logic_vector(Address'length downto 1) is Address ; 
   begin 
-    return to_integer(aAddr(AddrBitsPerWord downto 1) ) ;
+    if Address'length = 0 then 
+      return 0 ; 
+    else
+      return to_integer(aAddr(AddrBitsPerWord downto 1) ) ;
+    end if ; 
   end function CalculateByteAddress ; 
   
   ------------------------------------------------------------

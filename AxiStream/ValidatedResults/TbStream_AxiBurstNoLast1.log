@@ -33,6 +33,7 @@
 %%    420 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 0000001F  TStrb: 1111  TKeep: 1111  TID: 01  TDest: 3  TUser: 3  TLast: 0  Operation# 32
 %%    430 ns    Log    ALWAYS    in Default,                      Transmit 37 Bytes. Starting with 32
 %%    430 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 00000020  TStrb: 1111  TKeep: 1111  TID: 02  TDest: 3  TUser: 3  TLast: 0  Operation# 33
+%%    440 ns    Alert  ERROR     in axistreammonitor_1,           TID: 00000010 /= Previous TID: 00000001
 %%    440 ns    Log    INFO      in receiver_1,                   Burst Receive.  Operation# 1  Last Data: 0000001F  TID: 01  TDest: 3  TUser: 3  TLast: 0
 %%    440 ns    Log    PASSED    in Default,                      Receiver: NumBytes Received Received : 32
 %%    440 ns    Log    PASSED    in Default,                      Receiver, ID:  Received : 01
@@ -108,6 +109,7 @@
 %%    790 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 00000044  TStrb: 1111  TKeep: 1111  TID: 02  TDest: 3  TUser: 3  TLast: 0  Operation# 69
 %%    800 ns    Log    ALWAYS    in Default,                      Transmit 42 Bytes. Starting with 64
 %%    800 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 00000040  TStrb: 1111  TKeep: 1111  TID: 02  TDest: 4  TUser: 3  TLast: 0  Operation# 70
+%%    810 ns    Alert  ERROR     in axistreammonitor_1,           TDest: 0100 /= Previous TDest: 0011
 %%    810 ns    Log    INFO      in receiver_1,                   Burst Receive.  Operation# 2  Last Data: 00000044  TID: 02  TDest: 3  TUser: 3  TLast: 0
 %%    810 ns    Log    PASSED    in Default,                      Receiver: NumBytes Received Received : 37
 %%    810 ns    Log    PASSED    in Default,                      Receiver, ID:  Received : 02
@@ -193,6 +195,7 @@
 %%   1210 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 00000069  TStrb: 1111  TKeep: 1111  TID: 02  TDest: 4  TUser: 3  TLast: 0  Operation# 111
 %%   1220 ns    Log    ALWAYS    in Default,                      Transmit 47 Bytes. Starting with 96
 %%   1220 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 00000060  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 4  TUser: 3  TLast: 0  Operation# 112
+%%   1230 ns    Alert  ERROR     in axistreammonitor_1,           TID: 00000011 /= Previous TID: 00000010
 %%   1230 ns    Log    INFO      in receiver_1,                   Burst Receive.  Operation# 3  Last Data: 00000069  TID: 02  TDest: 4  TUser: 3  TLast: 0
 %%   1230 ns    Log    PASSED    in Default,                      Receiver: NumBytes Received Received : 42
 %%   1230 ns    Log    PASSED    in Default,                      Receiver, ID:  Received : 02
@@ -288,6 +291,7 @@
 %%   1680 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 0000008E  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 4  TUser: 3  TLast: 0  Operation# 158
 %%   1690 ns    Log    ALWAYS    in Default,                      Transmit 52 Bytes. Starting with 128
 %%   1690 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 00000080  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 5  TUser: 3  TLast: 0  Operation# 159
+%%   1700 ns    Alert  ERROR     in axistreammonitor_1,           TDest: 0101 /= Previous TDest: 0100
 %%   1700 ns    Log    INFO      in receiver_1,                   Burst Receive.  Operation# 4  Last Data: 0000008E  TID: 03  TDest: 4  TUser: 3  TLast: 0
 %%   1700 ns    Log    PASSED    in Default,                      Receiver: NumBytes Received Received : 47
 %%   1700 ns    Log    PASSED    in Default,                      Receiver, ID:  Received : 03
@@ -393,6 +397,7 @@
 %%   2200 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 000000B3  TStrb: 1111  TKeep: 1111  TID: 03  TDest: 5  TUser: 3  TLast: 0  Operation# 210
 %%   2210 ns    Log    ALWAYS    in Default,                      Transmit 57 Bytes. Starting with 160
 %%   2210 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 000000A0  TStrb: 1111  TKeep: 1111  TID: 04  TDest: 5  TUser: 3  TLast: 0  Operation# 211
+%%   2220 ns    Alert  ERROR     in axistreammonitor_1,           TID: 00000100 /= Previous TID: 00000011
 %%   2220 ns    Log    INFO      in receiver_1,                   Burst Receive.  Operation# 5  Last Data: 000000B3  TID: 03  TDest: 5  TUser: 3  TLast: 0
 %%   2220 ns    Log    PASSED    in Default,                      Receiver: NumBytes Received Received : 52
 %%   2220 ns    Log    PASSED    in Default,                      Receiver, ID:  Received : 03
@@ -508,6 +513,7 @@
 %%   2770 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 000000D8  TStrb: 1111  TKeep: 1111  TID: 04  TDest: 5  TUser: 3  TLast: 0  Operation# 267
 %%   2780 ns    Log    ALWAYS    in Default,                      Transmit 62 Bytes. Starting with 192
 %%   2780 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 000000C0  TStrb: 1111  TKeep: 1111  TID: 04  TDest: 6  TUser: 3  TLast: 0  Operation# 268
+%%   2790 ns    Alert  ERROR     in axistreammonitor_1,           TDest: 0110 /= Previous TDest: 0101
 %%   2790 ns    Log    INFO      in receiver_1,                   Burst Receive.  Operation# 6  Last Data: 000000D8  TID: 04  TDest: 5  TUser: 3  TLast: 0
 %%   2790 ns    Log    PASSED    in Default,                      Receiver: NumBytes Received Received : 57
 %%   2790 ns    Log    PASSED    in Default,                      Receiver, ID:  Received : 04
@@ -632,6 +638,8 @@
 %%   3380 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 000000FC  TStrb: 1111  TKeep: 1111  TID: 04  TDest: 6  TUser: 3  TLast: 0  Operation# 328
 %%   3390 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 000000FD  TStrb: 1111  TKeep: 1111  TID: 04  TDest: 6  TUser: 3  TLast: 0  Operation# 329
 %%   3400 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 00000000  TStrb: 1111  TKeep: 1111  TID: 06  TDest: 8  TUser: 3  TLast: 0  Operation# 330
+%%   3410 ns    Alert  ERROR     in axistreammonitor_1,           TID: 00000110 /= Previous TID: 00000100
+%%   3410 ns    Alert  ERROR     in axistreammonitor_1,           TDest: 1000 /= Previous TDest: 0110
 %%   3410 ns    Log    INFO      in receiver_1,                   Burst Receive.  Operation# 7  Last Data: 000000FD  TID: 04  TDest: 6  TUser: 3  TLast: 0
 %%   3410 ns    Log    PASSED    in Default,                      Receiver: NumBytes Received Received : 62
 %%   3410 ns    Log    PASSED    in Default,                      Receiver, ID:  Received : 04

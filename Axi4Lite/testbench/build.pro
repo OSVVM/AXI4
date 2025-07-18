@@ -37,10 +37,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
-
+TestSuite  Axi4Lite
 library    osvvm_TbAxi4Lite
 
-analyze OsvvmTestCommonPkg.vhd
+analyze [CreateTestCaseCommonPkg OsvvmTestCommonPkg ../ValidatedResults]
 
 analyze TestCtrl_e.vhd
 analyze TbAxi4.vhd

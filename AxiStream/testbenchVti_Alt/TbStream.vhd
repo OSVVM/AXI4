@@ -80,7 +80,6 @@ architecture TestHarness of TbStream is
     ) ;
   end component TestCtrl ;
 
-  
 begin
 
   -- create Clock 
@@ -160,7 +159,25 @@ begin
       TLast     => TLast 
     ) ;
   
+  AxiStreamMonitor_1 : AxiStreamMonitor 
+    port map (
+      -- Globals
+      Clk       => Clk, 
+      nReset    => nReset, 
   
+      -- AXI Stream Interface
+      TValid    => TValid,
+      TReady    => TReady,
+      TID       => TID   ,
+      TDest     => TDest ,
+      TUser     => TUser ,
+      TData     => TData ,
+      TStrb     => TStrb ,
+      TKeep     => TKeep ,
+      TLast     => TLast
+    ) ;
+  
+
   TestCtrl_1 : TestCtrl
   generic map ( 
     ID_LEN       => TID'length,
@@ -172,8 +189,9 @@ begin
     nReset       => nReset,
     
     -- Testbench Transaction Interfaces
-    StreamTxRec  => <<signal .TbStream.Transmitter_1.TransRec : StreamRecType>>, 
-    StreamRxRec  => <<signal .TbStream.Receiver_1.TransRec : StreamRecType>>  
+    StreamTxRec  => <<signal .TbStream.Transmitter_1.TransRec : StreamRecType>> ,
+    StreamRxRec  => <<signal .TbStream.Receiver_1.TransRec : StreamRecType>> 
+--    StreamTxRec  => <<signal Transmitter_1.TransRec : StreamRecType>> ,
+--    StreamRxRec  => <<signal Receiver_1.TransRec : StreamRecType>> 
   ) ; 
-
 end architecture TestHarness ;

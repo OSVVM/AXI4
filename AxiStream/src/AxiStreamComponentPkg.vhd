@@ -202,5 +202,26 @@ package AxiStreamComponentPkg is
     ) ;
   end component AxiStreamReceiverVti ;
 
-
+  component AxiStreamMonitor is
+    generic (
+      MODEL_ID_NAME  : string :="" ;
+      USES_TLAST     : boolean := TRUE 
+    ) ;
+    port (
+      -- Globals
+      Clk       : in  std_logic ;
+      nReset    : in  std_logic ;
+  
+      -- AXI Stream Interface
+      TValid    : in  std_logic ;
+      TReady    : in  std_logic ;
+      TID       : in  std_logic_vector ;
+      TDest     : in  std_logic_vector ;
+      TUser     : in  std_logic_vector ;
+      TData     : in  std_logic_vector ;
+      TStrb     : in  std_logic_vector ;
+      TKeep     : in  std_logic_vector ;
+      TLast     : in  std_logic 
+    ) ;
+  end component AxiStreamMonitor ;
 end package AxiStreamComponentPkg ;

@@ -2,6 +2,7 @@
 
 | Revision  |  Release Summary 
 ------------|----------- 
+| 2025.06   |  build.pro replaced <DirectoryName>.pro.  Autogenerate OsvvmTestCommonPkg.  Update testbenches for TranscriptOpen and AffirmIfTranscriptsMatch
 | 2025.04   |  Updated test cases using delay coverage delays  
 | 2025.02   |  Axi4Manager, Axi4LiteManager - updates for Xilinx 
 | 2024.11   |  AxiStream - updated DEFAULT_DELAY 

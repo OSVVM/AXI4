@@ -41,10 +41,10 @@
 library osvvm_TbAxiStream_GenericSignals
 TestSuite TbAxiStream_GenericSignals
 
-include ../TestCases/OsvvmTestCommonPkg.pro
+analyze [CreateTestCaseCommonPkg OsvvmTestCommonPkg ../ValidatedResults]
 
 analyze TestCtrl_e.vhd
 analyze AxiStreamDut.vhd
 analyze TbStream.vhd
 
-include ../TestCases/build_demo.pro
+include ../TestCases

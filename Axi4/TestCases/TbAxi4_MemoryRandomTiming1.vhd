@@ -74,7 +74,7 @@ begin
 
     TranscriptClose ;
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_MemoryRandomTiming1.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_MemoryRandomTiming1.txt", "") ;
+    -- AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ;
 
     EndOfTestReports(TimeOut => (now >= 10 ms)) ;
     std.env.stop ;

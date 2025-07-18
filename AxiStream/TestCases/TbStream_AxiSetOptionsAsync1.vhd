@@ -67,15 +67,13 @@ begin
 
     -- Wait for test to finish
     WaitForBarrier(TestDone, 35 ms) ;
-    AlertIf(now >= 35 ms, "Test finished due to timeout") ;
-    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
     
     TranscriptClose ; 
     if CHECK_TRANSCRIPT then 
-      AffirmIfTranscriptsMatch(AXISTREAM_VALIDATED_RESULTS_DIR) ; 
+      AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ; 
     end if ;   
     
-    EndOfTestReports(ExternalErrors => (0, -5, 0)) ; 
+    EndOfTestReports(ExternalErrors => (0, -5, 0), TimeOut => (now >= 35 ms)) ; 
     std.env.stop ;
     wait ; 
   end process ControlProc ; 
@@ -94,6 +92,7 @@ begin
   begin
     wait until nReset = '1' ;  
     WaitForClock(StreamTxRec, 2) ; 
+    SetAxiStreamOptions(StreamTxRec, DEFAULT_LAST, 1) ;
     
     log("Send 256 words with each byte incrementing") ;
     for i in 1 to 256 loop 
@@ -135,6 +134,7 @@ begin
     variable Available : boolean ; 
   begin
     WaitForClock(StreamRxRec, 2) ; 
+    SetAxiStreamOptions(StreamRxRec, DEFAULT_LAST, 1) ;
     
     -- Get and check the 256 words
     log("Send 256 words with each byte incrementing") ;
@@ -159,9 +159,9 @@ begin
           when 252 =>   -- Error in Data
             TryCheck(StreamRxRec, ExpData+1, Available) ; 
           when 253 =>   -- Error in LAST
-            SetAxiStreamOptions(StreamRxRec, DEFAULT_LAST, 1) ;
-            TryCheck(StreamRxRec, ExpData, Available) ; 
             SetAxiStreamOptions(StreamRxRec, DEFAULT_LAST, 0) ;
+            TryCheck(StreamRxRec, ExpData, Available) ; 
+            SetAxiStreamOptions(StreamRxRec, DEFAULT_LAST, 1) ;
           when 254 =>   -- Error in USER
             SetAxiStreamOptions(StreamRxRec, DEFAULT_USER, ExpUser+1) ;
             TryCheck(StreamRxRec, ExpData, Available) ; 

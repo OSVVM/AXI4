@@ -138,7 +138,8 @@ package Axi4ComponentVtiPkg is
       tpd_Clk_RData   : time   := DEFAULT_DELAY ;
       tpd_Clk_RResp   : time   := DEFAULT_DELAY ;
       tpd_Clk_RID     : time   := DEFAULT_DELAY ;
-      tpd_Clk_RUser   : time   := DEFAULT_DELAY 
+      tpd_Clk_RUser   : time   := DEFAULT_DELAY ;
+      tpd_Clk_RLast   : time   := DEFAULT_DELAY
     ) ;
     port (
       -- Globals

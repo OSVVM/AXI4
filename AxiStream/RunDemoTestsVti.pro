@@ -44,24 +44,4 @@ library   osvvm_TbAxiStreamVti
 
 include ./testbenchVti
 
-RunTest ./TestCases/TbStream_SendGetDemo1.vhd
-
-# RunTest  ./TestCases/TbStream_SendCheckBurstByte1.vhd
-# RunTest  ./TestCases/TbStream_SendGetBurstByte1.vhd
-
-# RunTest  ./TestCases/TbStream_SendGetPacketBurst1.vhd
-
-# RunTest ./TestCases/TbStream_WaitForGet1.vhd
-# RunTest ./TestCases/TbStream_WaitForGetAsync1.vhd
-
-# RunTest ./TestCases/TbStream_SendCheckBurstPattern1.vhd
-# RunTest ./TestCases/TbStream_SendCheckBurstPattern2.vhd
-# RunTest ./TestCases/TbStream_SendCheckBurstBytePattern1.vhd
-# RunTest ./TestCases/TbStream_SendCheckBurstAsyncPattern2.vhd
-# RunTest ./TestCases/TbStream_SendCheckBurstAsyncPattern1.vhd
-# RunTest ./TestCases/TbStream_SendCheckBurstByteAsyncPattern1.vhd
-# 
-# RunTest ./TestCases/TbStream_AxiSendCheckBurstPattern1.vhd
-# RunTest ./TestCases/TbStream_AxiSendCheckBurstPattern2.vhd
-# RunTest ./TestCases/TbStream_AxiSendCheckBurstAsyncPattern1.vhd
-# RunTest ./TestCases/TbStream_AxiSendCheckBurstAsyncPattern2.vhd
+include TestCases/build_demo.pro

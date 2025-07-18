@@ -42,10 +42,6 @@
 TestSuite AxiStream
 library   osvvm_TbAxiStream
 
-if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
-  include testbench
-  include TestCases/build_demo.pro
-} else {
-  include testbench_xilinx/build_demo.pro
-}
+include testbench
+include TestCases/build_demo.pro
 

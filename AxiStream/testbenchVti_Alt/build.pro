@@ -37,12 +37,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
+TestSuite AxiStreamVti_Alt
 library osvvm_TbAxiStreamVti_Alt
 
-include ../TestCases/OsvvmTestCommonPkg.pro
+analyze [CreateTestCaseCommonPkg OsvvmTestCommonPkg ../ValidatedResults]
 
 analyze TestCtrl_e.vhd
 analyze TbStream.vhd
 
-#include ../TestCases
-RunTest ../TestCases/TbStream_SendGetDemo1.vhd
+include ../TestCases

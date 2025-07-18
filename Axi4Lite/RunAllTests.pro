@@ -37,13 +37,5 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 #  
-TestSuite  Axi4Lite
-library    osvvm_TbAxi4Lite
-
-
-if {$::osvvm::ToolNameVersion ne "XSIM-2023.2"}  {
-  include  ./testbench/build.pro
-  include  ./TestCases/RunAllTests.pro
-} else {
-  SkipTest Axi4VC "Axi4Lite VC not working in XSIM"
-}
+include  ./testbench/build.pro
+include  ./TestCases/RunAllTests.pro

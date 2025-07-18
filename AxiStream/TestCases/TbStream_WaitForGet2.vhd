@@ -67,15 +67,13 @@ begin
 
     -- Wait for test to finish
     WaitForBarrier(TestDone, 35 ms) ;
-    AlertIf(now >= 35 ms, "Test finished due to timeout") ;
-    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
 
     TranscriptClose ;
     if CHECK_TRANSCRIPT then 
-    --   AffirmIfTranscriptsMatch(AXISTREAM_VALIDATED_RESULTS_DIR) ; 
+    --   AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ; 
     end if ;   
    
-    EndOfTestReports(ExternalErrors => (0, 0, 0)) ;
+    EndOfTestReports(TimeOut => (now >= 35 ms)) ; 
     std.env.stop ;
     wait ;
   end process ControlProc ;

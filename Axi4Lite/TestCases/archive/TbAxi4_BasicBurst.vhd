@@ -64,7 +64,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_BasicBurst.txt") ;
+    TranscriptOpen ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -74,12 +74,12 @@ begin
     -- Wait for test to finish
     WaitForBarrier(TestDone, 1 ms) ;
     AlertIf(now >= 1 ms, "Test finished due to timeout") ;
-    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
+    -- AlertIf(GetAffirmCount < 1, "Test is not Self-Checking"); -- Now handled by EndOfTestReports
     
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_BasicBurst.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_BasicBurst.txt", "") ; 
+    -- AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ;
 
     EndOfTestReports ; 
     std.env.stop ; 

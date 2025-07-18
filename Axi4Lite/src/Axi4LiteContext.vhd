@@ -23,7 +23,7 @@
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2019 - 2020 by SynthWorks Design Inc.
+--  Copyright (c) 2019 - 2025 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ context Axi4LiteContext is
     use osvvm_Axi4.Axi4ModelPkg.all ;
     
     use osvvm_Axi4.Axi4LiteComponentPkg.all ;
+    use osvvm_Axi4.Axi4LiteComponentVtiPkg.all ;
     
     -- Temporary inclusion of Axi4 things that become deprecated with changes
     use osvvm_Axi4.Axi4VersionCompatibilityPkg.all ;

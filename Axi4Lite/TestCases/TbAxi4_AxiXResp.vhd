@@ -58,7 +58,7 @@ begin
 
     -- Wait for testbench initialization 
     wait for 0 ns ;  wait for 0 ns ;
-    TranscriptOpen(OSVVM_RESULTS_DIR & "TbAxi4_AxiXResp.txt") ;
+    TranscriptOpen ;
     SetTranscriptMirror(TRUE) ; 
 
     -- Wait for Design Reset
@@ -67,15 +67,12 @@ begin
 
     -- Wait for test to finish
     WaitForBarrier(TestDone, 35 ms) ;
-    AlertIf(now >= 35 ms, "Test finished due to timeout") ;
-    AlertIf(GetAffirmCount < 1, "Test is not Self-Checking");
-    
     
     TranscriptClose ; 
     -- Printing differs in different simulators due to differences in process order execution
-    -- AlertIfDiff("./results/TbAxi4_AxiXResp.txt", "../AXI4/Axi4/testbench/validated_results/TbAxi4_AxiXResp.txt", "") ; 
+    -- AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ;
 
-    EndOfTestReports ; 
+    EndOfTestReports(TimeOut => (now >= 35 ms)) ; 
     std.env.stop ; 
     wait ; 
   end process ControlProc ; 

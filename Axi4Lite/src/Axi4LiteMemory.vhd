@@ -449,7 +449,8 @@ begin
         Valid                   => AxiBus.WriteAddress.Valid,
         Ready                   => AxiBus.WriteAddress.Ready,
         ReadyBeforeValid        => ReadyBeforeValid,
-        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
+--        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
+        ReadyDelayCycles        => ReadyDelayCycles,
         tpd_Clk_Ready           => tpd_Clk_AWReady
       ) ;
 
@@ -511,7 +512,8 @@ begin
         Valid                   => AxiBus.WriteData.Valid,
         Ready                   => AxiBus.WriteData.Ready,
         ReadyBeforeValid        => ReadyBeforeValid,
-        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
+--        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
+        ReadyDelayCycles        => ReadyDelayCycles,
         tpd_Clk_Ready           => tpd_Clk_WReady
       ) ;
 
@@ -723,7 +725,8 @@ begin
         Valid                   => AxiBus.ReadAddress.Valid,
         Ready                   => AxiBus.ReadAddress.Ready,
         ReadyBeforeValid        => ReadyBeforeValid,
-        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
+--        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
+        ReadyDelayCycles        => ReadyDelayCycles,
         tpd_Clk_Ready           => tpd_Clk_ARReady
       ) ;
 

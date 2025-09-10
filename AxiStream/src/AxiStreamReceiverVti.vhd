@@ -666,7 +666,8 @@ begin
         Valid                   => TValid,
         Ready                   => TReady,
         ReadyBeforeValid        => ReadyBeforeValid = 0,
-        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
+--        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
+        ReadyDelayCycles        => ReadyDelayCycles,
         tpd_Clk_Ready           => tpd_Clk_TReady,
         AlertLogID              => ModelID
       ) ;

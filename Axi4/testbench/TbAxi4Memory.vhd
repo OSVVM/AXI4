@@ -258,6 +258,7 @@ begin
   -- Behavioral model.  Replaces DUT for labs
   Memory_1 : Axi4Memory
   ------------------------------------------------------------
+  generic map (  DEFAULT_DELAY  => 0 ns )
   port map (
     -- Globals
     Clk         => Clk,

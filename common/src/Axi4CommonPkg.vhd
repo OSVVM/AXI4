@@ -69,13 +69,28 @@ package Axi4CommonPkg is
     signal   Valid                  : in    std_logic ; 
     signal   Ready                  : inout std_logic ; 
     constant ReadyBeforeValid       : in    boolean ; 
+    constant ReadyDelayCycles       : in    natural ; 
+    constant tpd_Clk_Ready          : in    time ;
+    constant AlertLogID             : in    AlertLogIDType := ALERTLOG_DEFAULT_ID; 
+    constant TimeOutMessage         : in    string := "" ; 
+    constant TimeOutPeriod          : in    time := - 1 sec 
+  ) ;
+
+  ------------------------------------------------------------
+  -- Deprecated!   No longer used by OSVVM VC
+  procedure DoAxiReadyHandshake (
+  ------------------------------------------------------------
+    signal   Clk                    : in    std_logic ; 
+    signal   Valid                  : in    std_logic ; 
+    signal   Ready                  : inout std_logic ; 
+    constant ReadyBeforeValid       : in    boolean ; 
     constant ReadyDelayCycles       : in    time ; 
     constant tpd_Clk_Ready          : in    time ;
     constant AlertLogID             : in    AlertLogIDType := ALERTLOG_DEFAULT_ID; 
     constant TimeOutMessage         : in    string := "" ; 
     constant TimeOutPeriod          : in    time := - 1 sec 
   ) ;
-  
+
 end package Axi4CommonPkg ;
 
 -- /////////////////////////////////////////////////////////////////////////////////////////
@@ -116,6 +131,70 @@ package body Axi4CommonPkg is
       wait until Clk = '1' ; 
     end if ; 
   end procedure DoAxiValidHandshake ;
+
+  ------------------------------------------------------------
+  procedure DoAxiReadyHandshake (
+  ------------------------------------------------------------
+    signal   Clk                    : in    std_logic ; 
+    signal   Valid                  : in    std_logic ; 
+    signal   Ready                  : inout std_logic ; 
+    constant ReadyBeforeValid       : in    boolean ; 
+    constant ReadyDelayCycles       : in    natural ; 
+    constant tpd_Clk_Ready          : in    time ;
+    constant AlertLogID             : in    AlertLogIDType := ALERTLOG_DEFAULT_ID; 
+    constant TimeOutMessage         : in    string := "" ; 
+    constant TimeOutPeriod          : in    time := - 1 sec 
+  ) is
+  begin 
+    
+    if ReadyBeforeValid then
+      WaitForClock(Clk, ReadyDelayCycles) ; 
+      Ready <= transport '1' after tpd_Clk_Ready ;
+    end if ;  
+    
+    -- Wait to Receive Transaction
+    if TimeOutPeriod > 0 sec then 
+      wait on Clk until Clk = '1' and Valid = '1' for TimeOutPeriod ;
+    else
+      wait on Clk until Clk = '1' and Valid = '1' ;
+    end if ;
+    
+    if Valid = '1' then 
+      -- Proper handling
+      if not ReadyBeforeValid then 
+        WaitForClock(Clk, ReadyDelayCycles) ; 
+        Ready <= '1' after tpd_Clk_Ready ;
+      end if ; 
+      
+      -- If ready not signaled yet, find ready at a rising edge of clk
+      if Ready /= '1' then
+        wait on Clk until Clk = '1' and (Ready = '1' or Valid /= '1') ;
+        AlertIf(
+          AlertLogID, 
+          Valid /= '1', 
+          TimeOutMessage & 
+          " Valid (" & to_string(Valid) & ") " & 
+          "deasserted before Ready asserted (" & to_string(Ready) & ") ",
+          FAILURE
+        ) ;
+      end if ; 
+    else 
+      -- TimeOut handling
+      Alert(
+        AlertLogID, 
+        TimeOutMessage & " Valid: " & to_string(Valid) & "  Expected: 1",
+        FAILURE
+      ) ;
+    end if ; 
+    
+    -- End of operation
+    Ready <= '0' after tpd_Clk_Ready ;
+    
+    if Valid /= '1' then 
+      -- TimeOut or Valid deasserted after before Ready asserted
+      wait until Clk = '1' ;
+    end if ; 
+  end procedure DoAxiReadyHandshake ;
 
   ------------------------------------------------------------
   procedure DoAxiReadyHandshake (

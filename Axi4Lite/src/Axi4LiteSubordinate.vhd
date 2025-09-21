@@ -528,7 +528,8 @@ begin
         Valid                   => AxiBus.WriteAddress.Valid,
         Ready                   => AxiBus.WriteAddress.Ready,
         ReadyBeforeValid        => ReadyBeforeValid,
-        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
+--        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
+        ReadyDelayCycles        => ReadyDelayCycles,
         tpd_Clk_Ready           => tpd_Clk_AWReady,
         AlertLogID              => BusFailedID -- ,
 --        TimeOutMessage          => "Write Address # " & to_string(WriteAddressReceiveCount + 1)
@@ -592,7 +593,8 @@ begin
         Valid                   => AxiBus.WriteData.Valid,
         Ready                   => AxiBus.WriteData.Ready,
         ReadyBeforeValid        => ReadyBeforeValid,
-        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
+--        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
+        ReadyDelayCycles        => ReadyDelayCycles,
         tpd_Clk_Ready           => tpd_Clk_WReady,  
         AlertLogID              => BusFailedID  -- ,
 --        TimeOutMessage          => "Write Data # " & to_string(WriteDataReceiveCount + 1)
@@ -733,7 +735,8 @@ begin
         Valid                   => AxiBus.ReadAddress.Valid,
         Ready                   => AxiBus.ReadAddress.Ready,
         ReadyBeforeValid        => ReadyBeforeValid,
-        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
+--        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
+        ReadyDelayCycles        => ReadyDelayCycles,
         tpd_Clk_Ready           => tpd_Clk_ARReady,
         AlertLogID              => BusFailedID  --,
 --        TimeOutMessage          => "Read Address # " & to_string(ReadAddressReceiveCount + 1)

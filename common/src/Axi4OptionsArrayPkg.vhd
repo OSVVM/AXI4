@@ -52,8 +52,8 @@ library OSVVM_Common ;
     context OSVVM_Common.OsvvmCommonContext ;
 
 use work.Axi4InterfaceCommonPkg.all ;
-use work.Axi4InterfacePkg.all ;
-use work.Axi4LiteInterfacePkg.all ; 
+-- use work.Axi4InterfacePkg.all ;
+-- use work.Axi4LiteInterfacePkg.all ; 
 
 use work.Axi4OptionsPkg.all ; 
 

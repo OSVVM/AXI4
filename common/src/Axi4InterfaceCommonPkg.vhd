@@ -48,13 +48,6 @@ library ieee ;
   
 
 package Axi4InterfaceCommonPkg is 
-  subtype  Axi4RespType is std_logic_vector(1 downto 0) ;
-  constant AXI4_RESP_OKAY   : Axi4RespType := "00" ;
-  constant AXI4_RESP_EXOKAY : Axi4RespType := "01" ; -- Not for Lite
-  constant AXI4_RESP_SLVERR : Axi4RespType := "10" ;
-  constant AXI4_RESP_DECERR : Axi4RespType := "11" ;
-  constant AXI4_RESP_INIT   : Axi4RespType := "ZZ" ;
-
   subtype Axi4ProtType is std_logic_vector(2 downto 0) ;
   --  [0] 0 Unprivileged access
   --      1 Privileged access
@@ -64,7 +57,72 @@ package Axi4InterfaceCommonPkg is
   --      1 Instruction access
   constant AXI4_PROT_INIT   : Axi4ProtType := "ZZZ" ;
 
+  -- Note the enum position number must match the interface value
+  --                            00    01      10      11
+  type     Axi4RespEnumType is (OKAY, EXOKAY, SLVERR, DECERR) ;
+  subtype  Axi4RespType is std_logic_vector(1 downto 0) ;
+
+  -- Create Axi4RespType / std_logic_vector constants
+  constant AXI4_RESP_OKAY   : Axi4RespType := to_slv(Axi4RespEnumType'pos(OKAY  ), Axi4RespType'length) ;
+  constant AXI4_RESP_EXOKAY : Axi4RespType := to_slv(Axi4RespEnumType'pos(EXOKAY), Axi4RespType'length) ; -- Not for Lite
+  constant AXI4_RESP_SLVERR : Axi4RespType := to_slv(Axi4RespEnumType'pos(SLVERR), Axi4RespType'length)  ;
+  constant AXI4_RESP_DECERR : Axi4RespType := to_slv(Axi4RespEnumType'pos(DECERR), Axi4RespType'length)  ;
+  constant AXI4_RESP_INIT   : Axi4RespType := "ZZ" ;
+
+--  type  Axi4UnresolvedRespEnumType is (OKAY, EXOKAY, SLVERR, DECERR) ;
+--  type Axi4UnresolvedRespVectorEnumType is array (natural range <>) of Axi4UnresolvedRespEnumType ;
+--  -- alias resolved_max is maximum[ Axi4UnresolvedRespVectorEnumType return Axi4UnresolvedRespEnumType] ;
+--  -- Maximum is implicitly defined for any array type in VHDL-2008.   Function resolved_max is a fall back.
+--  function resolved_max ( s : Axi4UnresolvedRespVectorEnumType) return Axi4UnresolvedRespEnumType ;
+--  subtype Axi4RespEnumType is resolved_max Axi4UnresolvedRespEnumType ;
+
+  function to_Axi4RespEnumType (a: Axi4RespType) return Axi4RespEnumType ;
+  function to_Axi4RespEnumType (a: integer) return Axi4RespEnumType ;
+  function from_Axi4RespEnumType (a: Axi4RespEnumType) return Axi4RespType ;
+  function from_Axi4RespEnumType (a: Axi4RespEnumType) return integer ;
+
+  alias to_Axi4RespType is from_Axi4RespEnumType[Axi4RespEnumType return Axi4RespType] ; 
+  function from_Axi4RespType (a: Axi4RespType) return Axi4RespEnumType ;
+
 end package Axi4InterfaceCommonPkg ;
+
+package body Axi4InterfaceCommonPkg is 
+  ------------------------------------------------------------
+  -- in Axi4OptionsPkg
+  function to_Axi4RespEnumType (a: Axi4RespType) return Axi4RespEnumType is
+  begin
+    return Axi4RespEnumType'val(to_integer(a)) ; 
+  end function to_Axi4RespEnumType ;
+
+  ------------------------------------------------------------
+  -- in Axi4OptionsPkg
+  function to_Axi4RespEnumType (a: integer) return Axi4RespEnumType is
+  begin
+    return Axi4RespEnumType'val(a) ; 
+  end function to_Axi4RespEnumType ;
+
+  ------------------------------------------------------------
+  -- in VC via alias to_Axi4RespType
+  function from_Axi4RespEnumType (a: Axi4RespEnumType) return Axi4RespType is
+  begin
+    return to_slv(Axi4RespEnumType'pos(a), Axi4RespType'length) ; 
+  end function from_Axi4RespEnumType ;
+
+  ------------------------------------------------------------
+  -- in Axi4OptionsPkg
+  function from_Axi4RespEnumType (a: Axi4RespEnumType) return integer is
+  begin
+    return Axi4RespEnumType'pos(a) ; 
+  end function from_Axi4RespEnumType ;
+
+  ------------------------------------------------------------
+  function from_Axi4RespType (a: Axi4RespType) return Axi4RespEnumType is
+  begin
+    return Axi4RespEnumType'val(to_integer(a)) ;
+  end function from_Axi4RespType ;
+  
+
+end package body Axi4InterfaceCommonPkg ;
 
 
   

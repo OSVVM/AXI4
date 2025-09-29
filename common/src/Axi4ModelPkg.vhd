@@ -54,7 +54,7 @@ library osvvm_common ;
   context osvvm_common.OsvvmCommonContext ;
     
 use work.Axi4InterfaceCommonPkg.all ;
-use work.Axi4InterfacePkg.all ; 
+-- use work.Axi4InterfacePkg.all ; 
   
 package Axi4ModelPkg is 
 

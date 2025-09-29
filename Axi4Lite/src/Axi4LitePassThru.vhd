@@ -50,7 +50,6 @@ library osvvm ;
   context osvvm.OsvvmContext ;
 
   use work.Axi4InterfaceCommonPkg.all ;
-  use work.Axi4InterfacePkg.all ;
 
 entity Axi4LitePassThru is
   port (

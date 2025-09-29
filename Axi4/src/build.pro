@@ -38,9 +38,9 @@
 #  limitations under the License.
 #
 library osvvm_axi4
+analyze Axi4InterfacePkg.vhd
 analyze Axi4ComponentPkg.vhd
 analyze Axi4ComponentVtiPkg.vhd
-analyze Axi4InterfacePkg.vhd
 analyze Axi4Context.vhd
 
 # for XSIM, VTI not supported in 2024.2

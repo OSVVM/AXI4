@@ -41,8 +41,6 @@
 library osvvm_axi4
 ChangeWorkingDirectory ./src
 analyze Axi4InterfaceCommonPkg.vhd
-analyze Axi4LiteInterfacePkg.vhd
-analyze Axi4InterfacePkg.vhd
 analyze Axi4CommonPkg.vhd
 analyze Axi4ModelPkg.vhd
 analyze Axi4OptionsPkg.vhd

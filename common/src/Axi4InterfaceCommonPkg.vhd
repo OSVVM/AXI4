@@ -21,6 +21,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    10/2025   2025.10    Refactored and brought Axi4RespEnumType and conversions here
 --    03/2022   2022.03    Factored out of Axi4InterfacePkg/Axi4LiteInterfacePkg
 --    01/2020   2020.01    Updated license notice
 --    09/2017   2017       Initial revision
@@ -28,7 +29,7 @@
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2017 - 2022 by SynthWorks Design Inc.  
+--  Copyright (c) 2017 - 2025 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.

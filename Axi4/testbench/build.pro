@@ -42,7 +42,14 @@ library   osvvm_TbAxi4
 
 analyze [CreateTestCaseCommonPkg OsvvmTestCommonPkg ../ValidatedResults]
 
-analyze TestCtrl_e.vhd
+if {$::osvvm::VhdlVersion >= 2019 && $::osvvm::Supports2019Interface}  {
+  analyze TestCtrl_e.vhd
+  analyze TestCtrlComponentPkg.vhd
+} else {
+  analyze deprecated/TestCtrl_e_c.vhd
+  analyze deprecated/TestCtrlComponentPkg_c.vhd
+}
+
 analyze TbAxi4.vhd
 analyze TbAxi4Memory.vhd
 

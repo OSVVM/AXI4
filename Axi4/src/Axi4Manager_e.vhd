@@ -119,12 +119,10 @@ port (
   nReset      : in   std_logic ;
 
   -- AXI Manager Functional Interface
---  AxiBus      : view Axi4ManagerView of Axi4RecType ;
-  AxiBus      : inout Axi4RecType ;
+  AxiBus      : view Axi4ManagerView of Axi4RecType ;
 
   -- Testbench Transaction Interface
   TransRec    : view AddressBusVerificationComponentView of AddressBusRecType  
---  TransRec    : inout AddressBusRecType  
 ) ;
 
   -- Derive AXI interface properties from the AxiBus

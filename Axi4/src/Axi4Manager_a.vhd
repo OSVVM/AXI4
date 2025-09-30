@@ -100,7 +100,7 @@ begin
   ------------------------------------------------------------
   -- Turn off drivers not being driven by this model
   ------------------------------------------------------------
-  InitAxi4Rec (AxiBusRec => AxiBus) ;
+  -- InitAxi4Rec (AxiBusRec => AxiBus) ;
 
 
   ------------------------------------------------------------
@@ -619,6 +619,7 @@ begin
     variable Local : AxiBus.WriteAddress'subtype ;
     variable WriteAddressReadyTimeOut : integer ;
     variable DelayCycles : integer ; 
+    alias AWValid is AxiBus.WriteAddress.Valid ;  -- Penguins for Aldec
   begin
     -- Initialize Ports
     -- AXI4 Lite Signaling
@@ -687,7 +688,8 @@ begin
       DoAxiValidHandshake (
       ---------------------
         Clk            =>  Clk,
-        Valid          =>  AxiBus.WriteAddress.Valid,  --!GHDL
+        Valid          =>  AWValid,  --!Aldec 
+--        Valid          =>  AxiBus.WriteAddress.Valid,  --!GHDL
         Ready          =>  AxiBus.WriteAddress.Ready,  --!GHDL
         tpd_Clk_Valid  =>  tpd_Clk_AWValid,
         AlertLogID     =>  BusFailedID,
@@ -725,6 +727,7 @@ begin
     variable Burst    : std_logic ; 
     variable NewTransfer : std_logic := '1' ; 
     variable DelayCycles : integer ; 
+    alias WDValid is AxiBus.WriteData.Valid ; 
   begin
     -- initialize
     WD.Valid <= '0' ;
@@ -787,7 +790,8 @@ begin
       DoAxiValidHandshake (
       ---------------------
         Clk            =>  Clk,
-        Valid          =>  AxiBus.WriteData.Valid,  --!GHDL
+        Valid          =>  WDValid,  --!GHDL
+--        Valid          =>  AxiBus.WriteData.Valid,  --!GHDL
         Ready          =>  AxiBus.WriteData.Ready,  --!GHDL
         tpd_Clk_Valid  =>  tpd_Clk_WValid,
         AlertLogID     =>  BusFailedID,
@@ -819,6 +823,7 @@ begin
     variable ReadyBeforeValid  : boolean ;
     variable ReadyDelayCycles  : integer ;
     variable ValidTimeOut : integer ;
+    alias WRReady is AxiBus.WriteResponse.Ready ;
   begin
     -- initialize
     AxiBus.WriteResponse.Ready <= '0' ;
@@ -855,7 +860,8 @@ begin
       ---------------------
         Clk                     => Clk,
         Valid                   => AxiBus.WriteResponse.Valid,
-        Ready                   => AxiBus.WriteResponse.Ready,
+        Ready                   => WRReady,
+--        Ready                   => AxiBus.WriteResponse.Ready,
         ReadyBeforeValid        => ReadyBeforeValid,
 --        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
         ReadyDelayCycles        => ReadyDelayCycles,
@@ -900,6 +906,7 @@ begin
     variable Local : AxiBus.ReadAddress'subtype ;
     variable ReadAddressReadyTimeOut : integer ;
     variable DelayCycles : integer ; 
+    alias ARValid is AxiBus.ReadAddress.Valid ; 
   begin
     -- AXI4 Lite Signaling
     AR.Valid  <= '0' ;
@@ -965,7 +972,8 @@ begin
       DoAxiValidHandshake (
       ---------------------
         Clk            =>  Clk,
-        Valid          =>  AxiBus.ReadAddress.Valid,
+        Valid          =>  ARValid,
+--        Valid          =>  AxiBus.ReadAddress.Valid,
         Ready          =>  AxiBus.ReadAddress.Ready,
         tpd_Clk_Valid  =>  tpd_Clk_ARValid,
         AlertLogID     =>  BusFailedID,
@@ -1003,6 +1011,7 @@ begin
     variable intReadyBeforeValid : integer ;
     variable ReadyDelayCycles : integer ;
     variable ReadDataValidTimeOut     : integer ;
+    alias RDReady is AxiBus.ReadData.Ready ; 
   begin
     AxiBus.ReadData.Ready <= '0' ;
     wait for 0 ns ; -- Allow Cov models to initialize 
@@ -1037,7 +1046,8 @@ begin
       ---------------------
         Clk                     => Clk,
         Valid                   => AxiBus.ReadData.Valid,
-        Ready                   => AxiBus.ReadData.Ready,
+        Ready                   => RDReady,
+--        Ready                   => AxiBus.ReadData.Ready,
         ReadyBeforeValid        => ReadyBeforeValid,
 --        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
         ReadyDelayCycles        => ReadyDelayCycles,

@@ -17,6 +17,7 @@
 #
 #  Revision History:
 #    Date      Version    Description
+#    10/2025   2025.10    Added Support for Mode Views
 #    11/2022   2022.11    Added Axi4OptionsArrayPkg
 #     1/2020   2020.01    Updated Licenses to Apache
 #     1/2019   2019.01    Compile Script for OSVVM
@@ -24,7 +25,7 @@
 #
 #  This file is part of OSVVM.
 #  
-#  Copyright (c) 2019 - 2020 by SynthWorks Design Inc.  
+#  Copyright (c) 2019 - 2025 by SynthWorks Design Inc.  
 #  
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -43,6 +44,11 @@ ChangeWorkingDirectory ./src
 analyze Axi4InterfaceCommonPkg.vhd
 analyze Axi4CommonPkg.vhd
 analyze Axi4ModelPkg.vhd
-analyze Axi4OptionsPkg.vhd
-analyze Axi4OptionsArrayPkg.vhd
+if {$::osvvm::VhdlVersion >= 2019 && $::osvvm::Supports2019Interface}  {
+  analyze Axi4OptionsPkg.vhd
+  analyze Axi4OptionsArrayPkg.vhd
+} else {
+  analyze deprecated/Axi4OptionsPkg.vhd
+  analyze deprecated/Axi4OptionsArrayPkg.vhd
+}
 analyze Axi4VersionCompatibilityPkg.vhd

@@ -40,19 +40,20 @@
 #
 library osvvm_axi4
 analyze Axi4InterfacePkg.vhd
-if {$::osvvm::VhdlVersion >= 2019}  {
+if {$::osvvm::VhdlVersion >= 2019 && $::osvvm::Supports2019Interface}  {
   analyze Axi4InterfaceModeViewPkg.vhd
+  analyze Axi4ComponentPkg.vhd
 } else {
-  analyze deprecated/Axi4InterfaceModeViewPkg_c.vhd  ;# Empty package
+  analyze deprecated/Axi4InterfaceModeViewPkg.vhd  ;# Empty package
+  analyze deprecated/Axi4ComponentPkg.vhd  ;# Empty package
 }
-analyze Axi4ComponentPkg.vhd
 analyze Axi4ComponentVtiPkg.vhd
 analyze Axi4Context.vhd
 
-if {$::osvvm::VhdlVersion >= 2019}  {
+if {$::osvvm::VhdlVersion >= 2019 && $::osvvm::Supports2019Interface}  {
   analyze Axi4Manager_e.vhd
 } else {
-  analyze deprecated/Axi4Manager_e_c.vhd  ;# Empty package
+  analyze deprecated/Axi4Manager_e.vhd  ;# Empty package
 }
 analyze Axi4Manager_a.vhd
 # for XSIM, VTI not supported in 2024.2

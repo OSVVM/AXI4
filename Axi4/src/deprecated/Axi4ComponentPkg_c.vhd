@@ -112,8 +112,7 @@ package Axi4ComponentPkg is
       AxiBus      : inout Axi4RecType ;
 
       -- Testbench Transaction Interface
-      -- TransRec    : inout AddressBusRecType 
-      TransRec    : view AddressBusVerificationComponentView of AddressBusRecType  
+      TransRec    : inout AddressBusRecType 
     ) ;
   end component Axi4Manager ;
 

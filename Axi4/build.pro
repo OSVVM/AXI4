@@ -17,8 +17,8 @@
 #
 #  Revision History:
 #    Date      Version    Description
-#     1/2019   2019.01    Compile Script for OSVVM
 #     1/2020   2020.01    Updated Licenses to Apache
+#     1/2019   2019.01    Compile Script for OSVVM
 #
 #
 #  This file is part of OSVVM.

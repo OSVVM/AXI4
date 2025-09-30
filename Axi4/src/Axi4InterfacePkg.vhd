@@ -207,7 +207,6 @@ package Axi4InterfacePkg is
 --    ReadAddress  ( Addr(open), ID(0 downto 1), User(0 downto 1) ),
 --    ReadData     ( Data(open), ID(0 downto 1), User(0 downto 1) )
 --  ) ;
---   alias Axi4LiteRecType is Axi4BaseRecType ; 
 
 -- -- Axi4 Record, Axi4 full elements are null arrays  
 -- subtype Axi4RecType is Axi4BaseRecType( 
@@ -232,21 +231,19 @@ package Axi4InterfacePkg is
   ------------------------------------------------------------
   procedure SetAxi4InterfaceDefault (
   -----------------------------------------------------------
-    variable AxiBus        : InOut Axi4BaseRecType ;
+    variable AxiBus        : InOut Axi4RecType ;
     constant Operation     : In    Axi4OptionsType ;
     constant OptVal        : In    integer
   ) ;
-  alias SetAxiParameter is SetAxi4InterfaceDefault[Axi4BaseRecType, Axi4OptionsType, integer];
+  alias SetAxiParameter is SetAxi4InterfaceDefault[Axi4RecType, Axi4OptionsType, integer];
 
   ------------------------------------------------------------
   impure function GetAxi4InterfaceDefault (
   -----------------------------------------------------------
-    constant AxiBus        : in  Axi4BaseRecType ;
+    constant AxiBus        : in  Axi4RecType ;
     constant Operation     : in  Axi4OptionsType
   ) return integer ;
-  alias GetAxiParameter is GetAxi4InterfaceDefault[Axi4BaseRecType, Axi4OptionsType return integer] ;
-
-
+  alias GetAxiParameter is GetAxi4InterfaceDefault[Axi4RecType, Axi4OptionsType return integer] ;
 
   
 end package Axi4InterfacePkg ;
@@ -380,7 +377,7 @@ package body Axi4InterfacePkg is
   ------------------------------------------------------------
   procedure SetAxi4InterfaceDefault (
   -----------------------------------------------------------
-    variable AxiBus        : InOut Axi4BaseRecType ;
+    variable AxiBus        : InOut Axi4RecType ;
     constant Operation     : In    Axi4OptionsType ;
     constant OptVal        : In    integer
   ) is
@@ -445,7 +442,7 @@ package body Axi4InterfacePkg is
   ------------------------------------------------------------
   impure function GetAxi4InterfaceDefault (
   -----------------------------------------------------------
-    constant AxiBus        : in  Axi4BaseRecType ;
+    constant AxiBus        : in  Axi4RecType ;
     constant Operation     : in  Axi4OptionsType
   ) return integer is
   begin
@@ -510,6 +507,3 @@ package body Axi4InterfacePkg is
   end function GetAxi4InterfaceDefault ;
 
 end package body Axi4InterfacePkg ; 
-
-  
-

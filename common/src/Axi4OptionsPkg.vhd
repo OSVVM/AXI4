@@ -20,13 +20,14 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    10/2025   2025.10    Refactored to remove Axi4[Lite]InterfacePkg references
 --    02/2022   2022.02    Added SetAxi4LiteInterfaceDefault, GetAxi4LiteInterfaceDefault
 --    01/2020   2020.02    Refactored from Axi4MasterTransactionPkg.vhd
 --
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2017 - 2020 by SynthWorks Design Inc.
+--  Copyright (c) 2017 - 2025 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -53,8 +54,6 @@ library OSVVM_Common ;
     context OSVVM_Common.OsvvmCommonContext ;
 
 use work.Axi4InterfaceCommonPkg.all ;
--- use work.Axi4InterfacePkg.all ;
--- use work.Axi4LiteInterfacePkg.all ; 
 
 package Axi4OptionsPkg is
 

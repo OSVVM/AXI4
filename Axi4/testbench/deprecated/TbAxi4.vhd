@@ -123,8 +123,7 @@ architecture TestHarness of TbAxi4 is
       nReset          : In    std_logic ;
 
       -- Transaction Interfaces
---      ManagerRec      : inout AddressBusRecType ;
-      ManagerRec      : view AddressBusTestCtrlView of AddressBusRecType ;
+      ManagerRec      : inout AddressBusRecType ;
       SubordinateRec  : inout AddressBusRecType
     ) ;
   end component TestCtrl ;

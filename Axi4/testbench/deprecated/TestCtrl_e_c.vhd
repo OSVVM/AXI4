@@ -63,8 +63,7 @@ entity TestCtrl is
     nReset          : In    std_logic ;
 
     -- Transaction Interfaces
-    ManagerRec    : view AddressBusTestCtrlView of AddressBusRecType ;
---    ManagerRec      : inout AddressBusRecType ;
+    ManagerRec      : inout AddressBusRecType ;
     SubordinateRec  : inout AddressBusRecType 
   ) ;
   

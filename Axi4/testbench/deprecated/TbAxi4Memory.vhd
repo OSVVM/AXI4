@@ -1,6 +1,6 @@
 --
---  File Name:         TbAxi4.vhd
---  Design Unit Name:  TbAxi4
+--  File Name:         TbAxi4Memory.vhd
+--  Design Unit Name:  TbAxi4Memory
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -19,14 +19,14 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    04/2018   2018       Initial revision
---    01/2020   2020.01    Updated license notice
 --    12/2020   2020.12    Updated signal and port names
+--    01/2020   2020.01    Updated license notice
+--    04/2018   2018       Initial revision
 --
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2018 - 2020 by SynthWorks Design Inc.
+--  Copyright (c) 2018 - 2024 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -52,13 +52,12 @@ library osvvm ;
 library OSVVM_AXI4 ;
   context OSVVM_AXI4.Axi4Context ;
 
-entity TbAxi4 is
-end entity TbAxi4 ;
-architecture TestHarness of TbAxi4 is
+entity TbAxi4Memory is
+end entity TbAxi4Memory ;
+architecture TestHarness of TbAxi4Memory is
   constant AXI_ADDR_WIDTH : integer := 32 ;
   constant AXI_DATA_WIDTH : integer := 32 ;
   constant AXI_STRB_WIDTH : integer := AXI_DATA_WIDTH/8 ;
-
 
   constant tperiod_Clk : time := 10 ns ;
   constant tpd         : time := 2 ns ;
@@ -66,28 +65,14 @@ architecture TestHarness of TbAxi4 is
   signal Clk         : std_logic ;
   signal nReset      : std_logic ;
 
---  -- Testbench Transaction Interface
---  subtype LocalTransactionRecType is AddressBusRecType(
---    Address(AXI_ADDR_WIDTH-1 downto 0),
---    DataToModel(AXI_DATA_WIDTH-1 downto 0),
---    DataFromModel(AXI_DATA_WIDTH-1 downto 0)
---  ) ;
---  signal ManagerRec   : LocalTransactionRecType ;
---  signal SubordinateRec  : LocalTransactionRecType ;
+  -- Testbench Transaction Interface
   signal ManagerRec, SubordinateRec  : AddressBusRecType (
           Address(AXI_ADDR_WIDTH-1 downto 0),
           DataToModel(AXI_DATA_WIDTH-1 downto 0),
           DataFromModel(AXI_DATA_WIDTH-1 downto 0)
         ) ;
 
---  -- AXI Manager Functional Interface
---  signal   AxiBus : Axi4RecType(
---    WriteAddress( AWAddr(AXI_ADDR_WIDTH-1 downto 0) ),
---    WriteData   ( WData (AXI_DATA_WIDTH-1 downto 0),   WStrb(AXI_STRB_WIDTH-1 downto 0) ),
---    ReadAddress ( ARAddr(AXI_ADDR_WIDTH-1 downto 0) ),
---    ReadData    ( RData (AXI_DATA_WIDTH-1 downto 0) )
---  ) ;
-
+  --  AXI Interface
   signal   ManagerAxiBus, SubordinateAxiBus : Axi4RecType(
     WriteAddress(
       Addr(AXI_ADDR_WIDTH-1 downto 0),
@@ -120,12 +105,11 @@ architecture TestHarness of TbAxi4 is
   component TestCtrl is
     port (
       -- Global Signal Interface
-      nReset          : In    std_logic ;
+      nReset           : In    std_logic ;
 
       -- Transaction Interfaces
---      ManagerRec      : inout AddressBusRecType ;
-      ManagerRec      : view AddressBusTestCtrlView of AddressBusRecType ;
-      SubordinateRec  : inout AddressBusRecType
+      ManagerRec       : inout AddressBusRecType ;
+      SubordinateRec   : inout AddressBusRecType
     ) ;
   end component TestCtrl ;
 
@@ -133,16 +117,16 @@ architecture TestHarness of TbAxi4 is
 begin
 
   ------------------------------------------------------------
-  -- create Clock
-  Osvvm.ClockResetPkg.CreateClock (
+  -- create Clock - From ClockResetPkg
+ CreateClock (
   ------------------------------------------------------------
     Clk        => Clk,
     Period     => Tperiod_Clk
   )  ;
 
   ------------------------------------------------------------
-  -- create nReset
-  Osvvm.ClockResetPkg.CreateReset (
+  -- create nReset - From ClockResetPkg
+  CreateReset (
   ------------------------------------------------------------
     Reset       => nReset,
     ResetActive => '0',
@@ -272,16 +256,17 @@ begin
   
   ------------------------------------------------------------
   -- Behavioral model.  Replaces DUT for labs
-  Subordinate_1 : Axi4Subordinate
+  Memory_1 : Axi4Memory
   ------------------------------------------------------------
+  generic map (  DEFAULT_DELAY  => 0 ns )
   port map (
     -- Globals
     Clk         => Clk,
     nReset      => nReset,
 
     -- AXI Manager Functional Interface
-    AxiBus      => SubordinateAxiBus,
-
+    AxiBus  => SubordinateAxiBus,
+    
     -- Testbench Transaction Interface
     TransRec    => SubordinateRec
   ) ;

@@ -20,12 +20,13 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    10/2025   2025.10    Removed Axi4[Lite]InterfacePkg package references
 --    11/2022   2022.11    Initial.  Derived from Axi4OptionsPkg
 --
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2022 by SynthWorks Design Inc.
+--  Copyright (c) 2022 - 2025 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -52,11 +53,7 @@ library OSVVM_Common ;
     context OSVVM_Common.OsvvmCommonContext ;
 
 use work.Axi4InterfaceCommonPkg.all ;
--- use work.Axi4InterfacePkg.all ;
--- use work.Axi4LiteInterfacePkg.all ; 
-
 use work.Axi4OptionsPkg.all ; 
-
 
 package Axi4OptionsArrayPkg is
 

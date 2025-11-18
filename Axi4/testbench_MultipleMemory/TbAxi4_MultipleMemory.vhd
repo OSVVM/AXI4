@@ -140,6 +140,7 @@ begin
   ) ;
 
   Memory_1 : Axi4Memory
+  generic map (MODEL_ID_NAME => "Memory_1")
   port map (
     -- Globals
     Clk         => Clk,
@@ -153,6 +154,7 @@ begin
   ) ;
 
   Memory_2 : Axi4Memory
+  generic map (MODEL_ID_NAME => "Memory_2")
   port map (
     -- Globals
     Clk         => Clk,

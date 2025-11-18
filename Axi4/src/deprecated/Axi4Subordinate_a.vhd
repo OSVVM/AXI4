@@ -484,7 +484,6 @@ begin
     variable ReadyBeforeValid    : boolean := TRUE ;
     variable intReadyBeforeValid : integer ;
     variable ReadyDelayCycles    : integer := 0 ;
-    alias    AWReady is AxiBus.WriteAddress.Ready ; 
   begin
     AW.Ready <= '0' ;
     wait for 0 ns ; -- Allow Cov models to initialize 
@@ -513,7 +512,7 @@ begin
       ---------------------
         Clk                     => Clk,
         Valid                   => AxiBus.WriteAddress.Valid,
-        Ready                   => AWReady,
+        Ready                   => AxiBus.WriteAddress.Ready,
         ReadyBeforeValid        => ReadyBeforeValid,
 --        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
         ReadyDelayCycles        => ReadyDelayCycles,
@@ -550,7 +549,6 @@ begin
     variable ReadyBeforeValid     : boolean := TRUE ;
     variable intReadyBeforeValid  : integer ;
     variable ReadyDelayCycles     : integer := 0 ;
-    alias    WDReady is AxiBus.WriteData.Ready ; 
   begin
     WD.Ready <= '0' ;
     wait for 0 ns ; -- Allow Cov models to initialize 
@@ -579,7 +577,7 @@ begin
       ---------------------
         Clk                     => Clk,
         Valid                   => AxiBus.WriteData.Valid,
-        Ready                   => WDReady,
+        Ready                   => AxiBus.WriteData.Ready,
         ReadyBeforeValid        => ReadyBeforeValid,
 --        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
         ReadyDelayCycles        => ReadyDelayCycles,
@@ -621,7 +619,6 @@ begin
     variable Local : AxiBus.WriteResponse'subtype ;
     variable WriteResponseReadyTimeOut: integer := 25 ;
     variable DelayCycles : integer ; 
-    alias WRValid is AxiBus.WriteResponse.Valid ; 
   begin
     -- initialize
     WR.Valid <= '0' ;
@@ -676,7 +673,7 @@ begin
       DoAxiValidHandshake (
       ---------------------
         Clk            =>  Clk,
-        Valid          =>  WRValid,
+        Valid          =>  AxiBus.WriteResponse.Valid,
         Ready          =>  AxiBus.WriteResponse.Ready,
         tpd_Clk_Valid  =>  tpd_Clk_BValid,
         AlertLogID     =>  BusFailedID,
@@ -704,7 +701,6 @@ begin
     variable ReadyBeforeValid    : boolean := TRUE ;
     variable intReadyBeforeValid : integer ;
     variable ReadyDelayCycles    : integer := 0 ;
-    alias ARReady is AxiBus.ReadAddress.Ready ; 
   begin
     -- Initialize
     AR.Ready <= '0' ;
@@ -734,7 +730,7 @@ begin
       ---------------------
         Clk                     => Clk,
         Valid                   => AxiBus.ReadAddress.Valid,
-        Ready                   => ARReady,
+        Ready                   => AxiBus.ReadAddress.Ready,
         ReadyBeforeValid        => ReadyBeforeValid,
 --        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
         ReadyDelayCycles        => ReadyDelayCycles,
@@ -768,7 +764,6 @@ begin
     variable Local : AxiBus.ReadData'subtype ;
     variable ReadDataReadyTimeOut: integer := 25 ;
     variable DelayCycles : integer ; 
-    alias RDValid is AxiBus.ReadData.Valid ; 
   begin
     -- initialize
     RD.Valid <= '0' ;
@@ -836,7 +831,7 @@ begin
       DoAxiValidHandshake (
       ---------------------
         Clk            =>  Clk,
-        Valid          =>  RDValid,
+        Valid          =>  AxiBus.ReadData.Valid,
         Ready          =>  AxiBus.ReadData.Ready,
         tpd_Clk_Valid  =>  tpd_Clk_RValid,
         AlertLogID     =>  BusFailedID,

@@ -63,9 +63,9 @@ entity TestCtrl is
     nReset          : In    std_logic ;
 
     -- Transaction Interfaces
-    ManagerRec    : view AddressBusTestCtrlView of AddressBusRecType ;
+    ManagerRec      : view AddressBusTestCtrlView of AddressBusRecType ;
 --    ManagerRec      : inout AddressBusRecType ;
-    SubordinateRec  : inout AddressBusRecType 
+    SubordinateRec  : view AddressBusTestCtrlView of AddressBusRecType 
   ) ;
   
   -- Derive AXI interface properties from the ManagerRec

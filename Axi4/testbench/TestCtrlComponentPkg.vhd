@@ -60,7 +60,7 @@ package TestCtrlComponentPkg is
       -- Transaction Interfaces
       ManagerRec       : view AddressBusTestCtrlView of AddressBusRecType ;
       -- ManagerRec       : inout AddressBusRecType ;
-      SubordinateRec   : inout AddressBusRecType
+      SubordinateRec   : view AddressBusTestCtrlView of AddressBusRecType
     ) ;
   end component TestCtrl ;
   

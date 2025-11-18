@@ -153,7 +153,6 @@ begin
     AxiBus      => AxiBus
   ) ;
 
-
   TestCtrl_1 : TestCtrl
   port map (
     -- Globals

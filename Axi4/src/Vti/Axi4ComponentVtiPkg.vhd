@@ -50,6 +50,7 @@ library osvvm_common ;
 
   use work.Axi4InterfaceCommonPkg.all ;
   use work.Axi4InterfacePkg.all ;
+  use work.Axi4InterfaceModeViewPkg.all ;
 
 package Axi4ComponentVtiPkg is
 
@@ -109,7 +110,7 @@ package Axi4ComponentVtiPkg is
       nReset      : in   std_logic ;
 
       -- AXI Manager Functional Interface
-      AxiBus  : inout Axi4RecType
+      AxiBus      : view Axi4ManagerView of Axi4RecType 
     ) ;
   end component Axi4ManagerVti ;
 
@@ -147,7 +148,7 @@ package Axi4ComponentVtiPkg is
       nReset      : in   std_logic ;
 
       -- AXI Manager Functional Interface
-      AxiBus      : inout Axi4RecType
+      AxiBus      : view Axi4SubordinateView of Axi4RecType 
     ) ;
   end component Axi4SubordinateVti ;
 
@@ -186,7 +187,7 @@ package Axi4ComponentVtiPkg is
       nReset      : in   std_logic ;
 
       -- AXI Slave Interface
-      AxiBus      : inout Axi4RecType
+      AxiBus      : view Axi4SubordinateView of Axi4RecType 
     ) ;
   end component Axi4MemoryVti ;
 

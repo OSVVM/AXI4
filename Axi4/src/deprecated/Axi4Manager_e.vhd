@@ -19,8 +19,8 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    10/2025   2025.10    Split entity from architecture to support 2019 interfaces
---                         Most modification information in architecture.
+--    10/2025   2025.10    Split entity and architecture to support 2019 interfaces
+--                         Moved MODEL_INSTANCE_NAME to architecture 
 --    01/2020   2020.01    Updated license notice
 --    04/2018   2018.04    First Release
 --    09/2017   2017       Initial revision
@@ -125,11 +125,6 @@ port (
   constant AXI_ADDR_WIDTH      : integer := AxiBus.WriteAddress.Addr'length ;
   constant AXI_DATA_WIDTH      : integer := AxiBus.WriteData.Data'length ;
   
-  -- Derive ModelInstance label from path_name
-  constant MODEL_INSTANCE_NAME : string :=
-    -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
-    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, to_lower(PathTail(Axi4Manager'PATH_NAME))) ;
-
   constant MODEL_NAME : string := "Axi4Manager" ;
   
 end entity Axi4Manager ;

@@ -1,6 +1,6 @@
 --
---  File Name:         Axi4Manager.vhd
---  Design Unit Name:  Axi4Manager
+--  File Name:         Axi4Manager_a.vhd
+--  Design Unit Name:  VerificationComponent of Axi4Manager
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -19,7 +19,8 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    10/2025   2025.10    Split entity from architecture to support 2019 interfaces
+--    10/2025   2025.10    Split entity and architecture to support 2019 interfaces
+--                         Moved MODEL_INSTANCE_NAME to architecture 
 --                         renamed architecture VerificationComponent
 --    07/2024   2024.07    Shortened AlertLog and data structure names for better printing
 --    03/2024   2024.03    Updated SafeResize to use ModelID
@@ -59,8 +60,10 @@
 --  limitations under the License.
 --
 architecture VerificationComponent of Axi4Manager is
-  alias TransRecRdy is TransRec.Rdy ; 
-  alias TransRecAck is TransRec.Ack ; 
+  -- Derive ModelInstance label from path_name
+  constant MODEL_INSTANCE_NAME : string :=
+    -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
+    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, to_lower(PathTail(Axi4Manager'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
   signal WriteAddressDelayCov, WriteDataDelayCov, WriteResponseDelayCov : DelayCoverageIDType ;
@@ -100,7 +103,7 @@ begin
   ------------------------------------------------------------
   -- Turn off drivers not being driven by this model
   ------------------------------------------------------------
-  -- InitAxi4Rec (AxiBusRec => AxiBus) ;
+  --%%UncommentFor2008 InitAxi4Rec (AxiBusRec => AxiBus) ;
 
 
   ------------------------------------------------------------
@@ -174,6 +177,7 @@ begin
 
     variable Operation       : AddressBusOperationType ;
     variable WriteDataCount   : integer := 0 ;
+
   begin
     AxiDefaults := InitAxi4Rec(AxiDefaults, '0') ;
     LAW.Size    := to_slv(AXI_BYTE_ADDR_WIDTH, LAW.Size'length) ;
@@ -197,10 +201,8 @@ begin
     DispatchLoop : loop
       WaitForTransaction(
          Clk      => Clk,
-         Rdy      => TransRecRdy,
-         Ack      => TransRecAck
---         Rdy      => TransRec.Rdy,
---         Ack      => TransRec.Ack
+         Rdy      => TransRec.Rdy,
+         Ack      => TransRec.Ack
       ) ;
       Operation := TransRec.Operation ;
 

@@ -66,14 +66,8 @@ library osvvm ;
   context osvvm.OsvvmContext ;
   use osvvm.ScoreboardPkg_slv.all ;
 
-library osvvm_common ;
-  context osvvm_common.OsvvmCommonContext ;
-
-  use work.Axi4OptionsPkg.all ;
-  use work.Axi4ModelPkg.all ;
-  use work.Axi4InterfaceCommonPkg.all ;
-  use work.Axi4InterfacePkg.all ;
-  use work.Axi4CommonPkg.all ;
+library osvvm_Axi4 ; 
+  context osvvm_Axi4.Axi4Context ; 
 
 entity Axi4ManagerVti is
 generic (

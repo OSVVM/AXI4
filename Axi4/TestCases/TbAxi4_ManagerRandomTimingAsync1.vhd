@@ -115,7 +115,7 @@ begin
     
     -- Let some number of Write Cycles complete before starting Read.   
     -- Reads will fail if this is too small
-    WaitForClock(ManagerRec, 8) ;
+    WaitForClock(ManagerRec, 16) ;
 
     for I in 1 to 32 loop
       ReadAddressAsync ( ManagerRec, X"0000_0000" + 16*I) ;

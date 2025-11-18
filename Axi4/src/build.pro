@@ -43,26 +43,46 @@ analyze Axi4InterfacePkg.vhd
 if {$::osvvm::VhdlVersion >= 2019 && $::osvvm::Supports2019Interface}  {
   analyze Axi4InterfaceModeViewPkg.vhd
   analyze Axi4ComponentPkg.vhd
+  analyze Vti/Axi4ComponentVtiPkg.vhd
 } else {
   analyze deprecated/Axi4InterfaceModeViewPkg.vhd  ;# Empty package
-  analyze deprecated/Axi4ComponentPkg.vhd  ;# Empty package
+  analyze deprecated/Axi4ComponentPkg.vhd  
+  analyze Vti/deprecated/Axi4ComponentVtiPkg.vhd
 }
-analyze Axi4ComponentVtiPkg.vhd
 analyze Axi4Context.vhd
 
 if {$::osvvm::VhdlVersion >= 2019 && $::osvvm::Supports2019Interface}  {
   analyze Axi4Manager_e.vhd
+  analyze Axi4Manager_a.vhd
+  analyze Axi4Memory_e.vhd
+  analyze Axi4Memory_a.vhd
+  analyze Axi4Subordinate_e.vhd
+  analyze Axi4Subordinate_a.vhd
 } else {
-  analyze deprecated/Axi4Manager_e.vhd  ;# Empty package
+  analyze deprecated/Axi4Manager_e.vhd  
+  analyze deprecated/Axi4Manager_a.vhd  
+  analyze deprecated/Axi4Memory_e.vhd
+  analyze deprecated/Axi4Memory_a.vhd
+  analyze deprecated/Axi4Subordinate_e.vhd
+  analyze deprecated/Axi4Subordinate_a.vhd
 }
-analyze Axi4Manager_a.vhd
 # for XSIM, VTI not supported in 2024.2
-analyze Axi4ManagerVti.vhd
-analyze Axi4Monitor_dummy.vhd
-analyze Axi4Subordinate.vhd
-analyze Axi4SubordinateVti.vhd
-analyze Axi4Memory.vhd
-analyze Axi4MemoryVti.vhd
+if {$::osvvm::VhdlVersion >= 2019 && $::osvvm::Supports2019Interface}  {
+  analyze Vti/Axi4ManagerVti_e.vhd
+  analyze Vti/Axi4ManagerVti_a.vhd
+  analyze Vti/Axi4MemoryVti_e.vhd
+  analyze Vti/Axi4MemoryVti_a.vhd
+  analyze Vti/Axi4SubordinateVti_e.vhd
+  analyze Vti/Axi4SubordinateVti_a.vhd
+} else {
+  analyze Vti/deprecated/Axi4ManagerVti_e.vhd
+  analyze Vti/deprecated/Axi4ManagerVti_a.vhd
+  analyze Vti/deprecated/Axi4MemoryVti_e.vhd
+  analyze Vti/deprecated/Axi4MemoryVti_a.vhd
+  analyze Vti/deprecated/Axi4SubordinateVti_e.vhd
+  analyze Vti/deprecated/Axi4SubordinateVti_a.vhd
+} 
 
+analyze Axi4Monitor_dummy.vhd
 analyze Axi4PassThru.vhd
 analyze Axi4GenericSignalsPkg.vhd

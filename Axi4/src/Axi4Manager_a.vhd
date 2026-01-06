@@ -66,9 +66,13 @@ architecture VerificationComponent of Axi4Manager is
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, to_lower(PathTail(Axi4Manager'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
-  signal WriteAddressDelayCov, WriteDataDelayCov, WriteResponseDelayCov : DelayCoverageIDType ;
-  signal ReadAddressDelayCov,  ReadDataDelayCov : DelayCoverageIDType ;
-  signal UseCoverageDelays : boolean := FALSE ; 
+  signal ArrDelayCovID         : DelayCoverageIDArrayType(1 to READ_DATA_ID) ;
+  alias  WriteAddressDelayCov  is ArrDelayCovID(WRITE_ADDRESS_ID) ;
+  alias  WriteDataDelayCov     is ArrDelayCovID(WRITE_DATA_ID) ;
+  alias  WriteResponseDelayCov is ArrDelayCovID(WRITE_RESPONSE_ID) ;
+  alias  ReadAddressDelayCov   is ArrDelayCovID(READ_ADDRESS_ID) ;
+  alias  ReadDataDelayCov      is ArrDelayCovID(READ_DATA_ID) ;
+  signal UseCoverageDelays     : boolean := FALSE ; 
 
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
@@ -92,6 +96,8 @@ architecture VerificationComponent of Axi4Manager is
   signal WriteResponseExpectCount, WriteResponseReceiveCount  : integer := 0 ;
   signal ReadAddressRequestCount,  ReadAddressDoneCount       : integer := 0 ;
   signal ReadDataExpectCount,      ReadDataReceiveCount       : integer := 0 ;
+
+  signal TransactionDone, WriteTransactionDone, ReadTransactionDone : boolean ; 
 
   signal WriteResponseActive, ReadDataActive : boolean ;
   
@@ -207,114 +213,6 @@ begin
       Operation := TransRec.Operation ;
 
       case Operation is
-        -- Execute Standard Directive Transactions
-        when WAIT_FOR_TRANSACTION =>
-          -- Waits for All WRITE and READ Transactions to complete
-          if WriteAddressRequestCount /= WriteAddressDoneCount then
-            -- Block until both write address done.
-            wait until WriteAddressRequestCount = WriteAddressDoneCount ;
-          end if ;
-          if WriteDataRequestCount /= WriteDataDoneCount then
-            -- Block until both write data done.
-            wait until WriteDataRequestCount = WriteDataDoneCount ;
-          end if ;
-          if WriteResponseExpectCount /= WriteResponseReceiveCount then
-            -- Block until both write response done.
-            wait until WriteResponseExpectCount = WriteResponseReceiveCount ;
-          end if ;
-
-          if ReadAddressRequestCount /= ReadAddressDoneCount then
-            -- Block until both read address done.
-            wait until ReadAddressRequestCount = ReadAddressDoneCount ;
-          end if ;
-          if ReadDataExpectCount /= ReadDataReceiveCount then
-            -- Block until both read data done.
-            wait until ReadDataExpectCount = ReadDataReceiveCount ;
-          end if ;
-
-        when WAIT_FOR_WRITE_TRANSACTION =>
-          if WriteAddressRequestCount /= WriteAddressDoneCount then
-            -- Block until both write address done.
-            wait until WriteAddressRequestCount = WriteAddressDoneCount ;
-          end if ;
-          if WriteDataRequestCount /= WriteDataDoneCount then
-            -- Block until both write data done.
-            wait until WriteDataRequestCount = WriteDataDoneCount ;
-          end if ;
-          if WriteResponseExpectCount /= WriteResponseReceiveCount then
-            -- Block until both write response done.
-            wait until WriteResponseExpectCount = WriteResponseReceiveCount ;
-          end if ;
-          wait for 0 ns ; 
-
-        when WAIT_FOR_READ_TRANSACTION =>
-          if ReadAddressRequestCount /= ReadAddressDoneCount then
-            -- Block until both read address done.
-            wait until ReadAddressRequestCount = ReadAddressDoneCount ;
-          end if ;
-          if ReadDataExpectCount /= ReadDataReceiveCount then
-            -- Block until both read data done.
-            wait until ReadDataExpectCount = ReadDataReceiveCount ;
-          end if ;
-          wait for 0 ns ; 
-
-        when WAIT_FOR_CLOCK =>
-          WaitForClock(Clk, TransRec.IntToModel) ;
-
-        when GET_ALERTLOG_ID =>
-          TransRec.IntFromModel <= integer(ModelID) ;
-          wait for 0 ns ; 
-
-        when SET_USE_RANDOM_DELAYS =>        
-          UseCoverageDelays      <= TransRec.BoolToModel ; 
-
-        when GET_USE_RANDOM_DELAYS =>
-          TransRec.BoolFromModel <= UseCoverageDelays ;
-
-        when SET_DELAYCOV_ID =>
-          case TransRec.Options is
-            when WRITE_ADDRESS_ID  =>  WriteAddressDelayCov  <= GetDelayCoverage(TransRec.IntToModel) ;
-            when WRITE_DATA_ID     =>  WriteDataDelayCov     <= GetDelayCoverage(TransRec.IntToModel) ;
-            when WRITE_RESPONSE_ID =>  WriteResponseDelayCov <= GetDelayCoverage(TransRec.IntToModel) ;
-            when READ_ADDRESS_ID   =>  ReadAddressDelayCov   <= GetDelayCoverage(TransRec.IntToModel) ;
-            when READ_DATA_ID      =>  ReadDataDelayCov      <= GetDelayCoverage(TransRec.IntToModel) ;
-            when others =>  Alert(ModelID, "SetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
-          end case ; 
-          UseCoverageDelays <= TRUE ; 
-
-        when GET_DELAYCOV_ID =>
-          case TransRec.Options is
-            when WRITE_ADDRESS_ID  =>  TransRec.IntFromModel <= WriteAddressDelayCov.ID  ;
-            when WRITE_DATA_ID     =>  TransRec.IntFromModel <= WriteDataDelayCov.ID     ;
-            when WRITE_RESPONSE_ID =>  TransRec.IntFromModel <= WriteResponseDelayCov.ID ;
-            when READ_ADDRESS_ID   =>  TransRec.IntFromModel <= ReadAddressDelayCov.ID   ;
-            when READ_DATA_ID      =>  TransRec.IntFromModel <= ReadDataDelayCov.ID      ;
-            when others =>  Alert(ModelID, "GetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
-          end case ; 
-          UseCoverageDelays <= TRUE ; 
-
-        when SET_BURST_MODE =>                      
-          BurstFifoMode       <= TransRec.IntToModel ;
-          BurstFifoByteMode   <= (TransRec.IntToModel = ADDRESS_BUS_BURST_BYTE_MODE) ;
-          wait for 0 ns ; 
-          AlertIf(ModelID, not IsAddressBusBurstMode(BurstFifoMode), 
-            "Invalid Burst Mode " & to_string(BurstFifoMode), FAILURE) ;
-              
-        when GET_BURST_MODE =>                      
-          TransRec.IntFromModel <= BurstFifoMode ;
-
-        when GET_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= integer(TransRec.Rdy) ; --  WriteAddressDoneCount + ReadAddressDoneCount ;
-          wait for 0 ns ; 
-
-        when GET_WRITE_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= WriteAddressDoneCount ;
-          wait for 0 ns ; 
-
-        when GET_READ_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= ReadAddressDoneCount ;
-          wait for 0 ns ; 
-
         -- Model Transaction Dispatch
         when WRITE_OP | WRITE_ADDRESS | WRITE_DATA | ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
           -- For All Write Operations - Write Address and Write Data
@@ -605,12 +503,33 @@ begin
 
         -- The End -- Done
         when others =>
-          -- Signal multiple Driver Detect or not implemented transactions.
-          Alert(ModelID, ClassifyUnimplementedOperation(TransRec), FAILURE) ;
+          -- Do Standard Directive Transactions or 
+          DoDirectiveTransactions (
+            TransRec              => TransRec             ,
+            Clk                   => Clk                  ,
+            ModelID               => ModelID              ,
+            UseCoverageDelays     => UseCoverageDelays    ,
+            DelayCovID            => ArrDelayCovID        ,
+            BurstFifoMode         => BurstFifoMode        ,
+            TransactionDone       => TransactionDone      ,
+            WriteTransactionDone  => WriteTransactionDone ,
+            ReadTransactionDone   => ReadTransactionDone  ,
+            WriteTransactionCount => WriteAddressDoneCount,
+            ReadTransactionCount  => ReadAddressDoneCount
+          ) ;
 
       end case ;
     end loop DispatchLoop ;
   end process TransactionDispatcher ;
+
+  BurstFifoByteMode     <= (BurstFifoMode = ADDRESS_BUS_BURST_BYTE_MODE) ;
+  TransactionDone       <= WriteTransactionDone and ReadTransactionDone ; 
+  WriteTransactionDone  <=  (WriteAddressRequestCount = WriteAddressDoneCount) and
+                            (WriteDataRequestCount = WriteDataDoneCount) and 
+                            (WriteResponseExpectCount = WriteResponseReceiveCount) ;
+
+  ReadTransactionDone   <= (ReadAddressRequestCount = ReadAddressDoneCount) and
+                           (ReadDataExpectCount = ReadDataReceiveCount) ; 
 
   ------------------------------------------------------------
   --  WriteAddressHandler

@@ -32,9 +32,9 @@
 %%    190 ns    Log    PASSED    in Default,                      TryCount 1
 %%    190 ns    Log    PASSED    in Default,                      Get Three Bytes:  Received : XX060504
 %%    200 ns    Log    INFO      in receiver_1,                   Word Receive.  Operation# 9  Data: 060504XX  TID: 00  TDest: 0  TUser: 0  TLast: 0
-%%    200 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: XXXXXX01  TStrb: 0001  TKeep: 0001  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 10
 %%    200 ns    Log    PASSED    in Default,                      TryCount 1
 %%    200 ns    Log    PASSED    in Default,                      Get Three Bytes:  Received : 060504XX
+%%    200 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: XXXXXX01  TStrb: 0001  TKeep: 0001  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 10
 %%    210 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: XXXX01XX  TStrb: 0010  TKeep: 0010  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 11
 %%    210 ns    Log    INFO      in receiver_1,                   Word Receive.  Operation# 10  Data: UUUUUU01  TID: 00  TDest: 0  TUser: 0  TLast: 0
 %%    210 ns    Log    PASSED    in Default,                      TryCount 1

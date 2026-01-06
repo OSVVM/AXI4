@@ -150,9 +150,9 @@ architecture behavioral of AxiStreamReceiver is
   signal LastOffsetCount   : integer := 0 ;
   constant DEFAULT_BURST_MODE : StreamFifoBurstModeType := STREAM_BURST_WORD_MODE ;
   signal   BurstFifoMode      : StreamFifoBurstModeType := DEFAULT_BURST_MODE ;
-  signal   BurstFifoByteMode  : boolean := (DEFAULT_BURST_MODE = STREAM_BURST_BYTE_MODE) ;
   
-  signal WaitForGet : boolean := FALSE ;
+  signal WaitForGet      : boolean := FALSE ;
+  signal TransactionDone : boolean ; 
 begin
 
 
@@ -218,47 +218,6 @@ begin
       ) ;
 
       case Operation is
-        when WAIT_FOR_CLOCK =>
-          WaitForClock(Clk, TransRec.IntToModel) ;
-
-        when WAIT_FOR_TRANSACTION =>
-          -- Receiver either blocks or does "try" operations
-          -- There are no operations in flight
-          -- There can be values received but not Get yet.
-          -- Cannot block on those.
-          wait for 0 ns ;
-
-        when GET_TRANSACTION_COUNT =>
-  --!! This is GetTotalTransactionCount vs. GetPendingTransactionCount
-  --!!  Get Pending Get Count = GetFifoCount(ReceiveFifo)
-          TransRec.IntFromModel <= WordReceiveCount ;
-          wait for 0 ns ;
-
-        when GET_ALERTLOG_ID =>
-          TransRec.IntFromModel <= integer(ModelID) ;
-          wait for 0 ns ;
-
-        when SET_USE_RANDOM_DELAYS =>
-          UseCoverageDelays <= TransRec.BoolToModel ; 
-
-        when GET_USE_RANDOM_DELAYS =>
-          TransRec.BoolFromModel <= UseCoverageDelays ;
-
-        when SET_DELAYCOV_ID =>
-          BurstCov          <= GetDelayCoverage(TransRec.IntToModel) ;
-          UseCoverageDelays <= TRUE ; 
-
-        when GET_DELAYCOV_ID =>
-          TransRec.IntFromModel <= BurstCov.ID ;
-          UseCoverageDelays <= TRUE ; 
-
-        when SET_BURST_MODE =>
-          BurstFifoMode       <= TransRec.IntToModel ;
-          BurstFifoByteMode   <= (TransRec.IntToModel = STREAM_BURST_BYTE_MODE) ;
-
-        when GET_BURST_MODE =>
-          TransRec.IntFromModel <= BurstFifoMode ;
-
         when GOT_BURST =>
           -- Used with TryCheckBurst with Patterns VectorOfWords, Increment, Random
           if not TryBurstWaiting then
@@ -585,8 +544,18 @@ begin
 
         -- The End -- Done
         when others =>
-          -- Signal multiple Driver Detect or not implemented transactions.
-          Alert(ModelID, ClassifyUnimplementedReceiverOperation(TransRec), FAILURE) ;
+          --  Do OSVVM stream directive transactions
+          DoDirectiveTransactions (
+            TransRec                 => TransRec             ,
+            Clk                      => Clk                  ,
+            ModelID                  => ModelID              ,
+            UseCoverageDelays        => UseCoverageDelays    ,
+            DelayCovID               => BurstCov             ,
+            BurstFifoMode            => BurstFifoMode        ,
+            TransactionDone          => TransactionDone      ,
+            TransactionCount         => WordReceiveCount     ,
+            PendingTransactionCount  => WordRequestCount - WordReceiveCount
+          ) ;
       end case ;
 
       -- Wait for 1 delta cycle, required if a wait is not in all case branches above
@@ -594,6 +563,7 @@ begin
     end loop DispatchLoop ;
   end process TransactionDispatcher ;
 
+  TransactionDone     <= TRUE ; -- current receiver operations are either blocking or are tryget
 
   ------------------------------------------------------------
   --  ReceiveHandler
@@ -647,7 +617,7 @@ begin
         -- BurstCoverage Delays
         (ReadyBeforeValid, ReadyDelayCycles)  := GetRandDelay(BurstCov) ; 
       else
-        -- Deprecated static settings
+        -- Static settings (default)
         ReadyBeforeValid := to_integer(not ReceiveReadyBeforeValid) ; 
         ReadyDelayCycles := ReceiveReadyDelayCycles ; 
       end if ; 
@@ -670,7 +640,7 @@ begin
       Strb := to_x01(TStrb) ;
       Keep := to_x01(TKeep) ;
       -- Either Strb or Keep can have a null range
-      -- Make Data a Z if Strb(i) is position byte
+      -- Make Data a W if Strb(i) is position byte
       for i in Strb'range loop
         if Strb(i) = '0' then
           Data(i*8 + 7 downto i*8) := (others => 'W') ;
@@ -683,7 +653,7 @@ begin
         end if;
       end loop ;
       
-      if BurstFifoByteMode then 
+      if (BurstFifoMode = STREAM_BURST_BYTE_MODE) then 
         -- For ByteMode, we drop words with X"--"
         -- For first Word in Transfer, Drop leading bytes until TKeep(i) = '1'
         if LastLast = '1' then

@@ -77,8 +77,6 @@ constant AXI_DATA_BYTE_WIDTH  : integer := AXI_DATA_WIDTH / 8 ;
   alias  WriteResponseDelayCov is ArrDelayCovID(WRITE_RESPONSE_ID) ;
   alias  ReadAddressDelayCov   is ArrDelayCovID(READ_ADDRESS_ID) ;
   alias  ReadDataDelayCov      is ArrDelayCovID(READ_DATA_ID) ;
---!!Remove  signal WriteAddressDelayCov, WriteDataDelayCov, WriteResponseDelayCov : DelayCoverageIDType ;
---!!Remove  signal ReadAddressDelayCov,  ReadDataDelayCov : DelayCoverageIDType ;
   signal UseCoverageDelays : boolean := FALSE ; 
   
   signal Params    : ModelParametersIDType ;
@@ -339,59 +337,8 @@ begin
           Count := ReadAddressReceiveCount ;
           wait until ReadAddressReceiveCount = Count + 1 ;
 
---!!Remove        when WAIT_FOR_CLOCK =>
---!!Remove          WaitForClock(Clk, TransRec.IntToModel) ;
---!!Remove
---!!Remove        when GET_ALERTLOG_ID =>
---!!Remove          TransRec.IntFromModel <= integer(ModelID) ;
---!!Remove          wait for 0 ns ;
---!!Remove
---!!Remove        when SET_USE_RANDOM_DELAYS =>        
---!!Remove          UseCoverageDelays      <= TransRec.BoolToModel ; 
---!!Remove
---!!Remove        when GET_USE_RANDOM_DELAYS =>
---!!Remove          TransRec.BoolFromModel <= UseCoverageDelays ;
---!!Remove
---!!Remove        when SET_DELAYCOV_ID =>
---!!Remove          case TransRec.Options is
---!!Remove            when WRITE_ADDRESS_ID  =>  WriteAddressDelayCov  <= GetDelayCoverage(TransRec.IntToModel) ;
---!!Remove            when WRITE_DATA_ID     =>  WriteDataDelayCov     <= GetDelayCoverage(TransRec.IntToModel) ;
---!!Remove            when WRITE_RESPONSE_ID =>  WriteResponseDelayCov <= GetDelayCoverage(TransRec.IntToModel) ;
---!!Remove            when READ_ADDRESS_ID   =>  ReadAddressDelayCov   <= GetDelayCoverage(TransRec.IntToModel) ;
---!!Remove            when READ_DATA_ID      =>  ReadDataDelayCov      <= GetDelayCoverage(TransRec.IntToModel) ;
---!!Remove            when others =>  Alert(ModelID, "SetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
---!!Remove          end case ; 
---!!Remove          UseCoverageDelays <= TRUE ; 
---!!Remove
---!!Remove        when GET_DELAYCOV_ID =>
---!!Remove          case TransRec.Options is
---!!Remove            when WRITE_ADDRESS_ID  =>  TransRec.IntFromModel <= WriteAddressDelayCov.ID  ;
---!!Remove            when WRITE_DATA_ID     =>  TransRec.IntFromModel <= WriteDataDelayCov.ID     ;
---!!Remove            when WRITE_RESPONSE_ID =>  TransRec.IntFromModel <= WriteResponseDelayCov.ID ;
---!!Remove            when READ_ADDRESS_ID   =>  TransRec.IntFromModel <= ReadAddressDelayCov.ID   ;
---!!Remove            when READ_DATA_ID      =>  TransRec.IntFromModel <= ReadDataDelayCov.ID      ;
---!!Remove            when others =>  Alert(ModelID, "GetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
---!!Remove          end case ; 
---!!Remove          UseCoverageDelays <= TRUE ; 
---!!Remove
---!!Remove        when GET_TRANSACTION_COUNT =>
---!!Remove          TransRec.IntFromModel <= integer(TransRec.Rdy) ;
---!!Remove          wait for 0 ns ;
---!!Remove
---!!Remove        when GET_WRITE_TRANSACTION_COUNT =>
---!!Remove          TransRec.IntFromModel <= WriteAddressReceiveCount ;
---!!Remove          wait for 0 ns ;
---!!Remove
---!!Remove        when GET_READ_TRANSACTION_COUNT =>
---!!Remove          TransRec.IntFromModel <= ReadAddressReceiveCount ;
---!!Remove          wait for 0 ns ;
---!!Remove
---!!Remove
-        -- The End -- Done
         when others =>
---!!Remove          -- Signal multiple Driver Detect or not implemented transactions.
---!!Remove          Alert(ModelID, ClassifyUnimplementedOperation(TransRec), FAILURE) ;
-          -- Do Standard Directive Transactions or 
+          -- Do Standard Directive Transactions or Error Handling
           DoDirectiveTransactions (
             TransRec              => TransRec             ,
             Clk                   => Clk                  ,

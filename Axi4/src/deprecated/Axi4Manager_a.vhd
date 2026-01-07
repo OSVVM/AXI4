@@ -502,7 +502,7 @@ begin
 
         -- The End -- Done
         when others =>
-          -- Do Standard Directive Transactions or 
+          -- Do Standard Directive Transactions and Error Handling
           DoDirectiveTransactions (
             TransRec              => TransRec             ,
             Clk                   => Clk                  ,

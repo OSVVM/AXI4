@@ -62,8 +62,6 @@ architecture Transactor of Axi4Subordinate is
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Subordinate'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
---!!Remove   signal WriteAddressDelayCov, WriteDataDelayCov, WriteResponseDelayCov : DelayCoverageIDType ;
---!!Remove   signal ReadAddressDelayCov,  ReadDataDelayCov : DelayCoverageIDType ;
   signal ArrDelayCovID         : DelayCoverageIDArrayType(1 to READ_DATA_ID) ;
   alias  WriteAddressDelayCov  is ArrDelayCovID(WRITE_ADDRESS_ID) ;
   alias  WriteDataDelayCov     is ArrDelayCovID(WRITE_DATA_ID) ;
@@ -429,54 +427,9 @@ begin
   --          wait until ReadDataRequestCount = ReadDataDoneCount ;
   --        end if ;
   --
---!!Remove        when WAIT_FOR_CLOCK =>
---!!Remove          WaitForClock(Clk, TransRec.IntToModel) ;
---!!Remove
---!!Remove        when GET_ALERTLOG_ID =>
---!!Remove          TransRec.IntFromModel <= integer(ModelID) ;
---!!Remove
---!!Remove        when SET_USE_RANDOM_DELAYS =>        
---!!Remove          UseCoverageDelays      <= TransRec.BoolToModel ; 
---!!Remove
---!!Remove        when GET_USE_RANDOM_DELAYS =>
---!!Remove          TransRec.BoolFromModel <= UseCoverageDelays ;
---!!Remove
---!!Remove        when SET_DELAYCOV_ID =>
---!!Remove          case TransRec.Options is
---!!Remove            when WRITE_ADDRESS_ID  =>  WriteAddressDelayCov  <= GetDelayCoverage(TransRec.IntToModel) ;
---!!Remove            when WRITE_DATA_ID     =>  WriteDataDelayCov     <= GetDelayCoverage(TransRec.IntToModel) ;
---!!Remove            when WRITE_RESPONSE_ID =>  WriteResponseDelayCov <= GetDelayCoverage(TransRec.IntToModel) ;
---!!Remove            when READ_ADDRESS_ID   =>  ReadAddressDelayCov   <= GetDelayCoverage(TransRec.IntToModel) ;
---!!Remove            when READ_DATA_ID      =>  ReadDataDelayCov      <= GetDelayCoverage(TransRec.IntToModel) ;
---!!Remove            when others =>  Alert(ModelID, "SetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
---!!Remove          end case ; 
---!!Remove          UseCoverageDelays <= TRUE ; 
---!!Remove
---!!Remove        when GET_DELAYCOV_ID =>
---!!Remove          case TransRec.Options is
---!!Remove            when WRITE_ADDRESS_ID  =>  TransRec.IntFromModel <= WriteAddressDelayCov.ID  ;
---!!Remove            when WRITE_DATA_ID     =>  TransRec.IntFromModel <= WriteDataDelayCov.ID     ;
---!!Remove            when WRITE_RESPONSE_ID =>  TransRec.IntFromModel <= WriteResponseDelayCov.ID ;
---!!Remove            when READ_ADDRESS_ID   =>  TransRec.IntFromModel <= ReadAddressDelayCov.ID   ;
---!!Remove            when READ_DATA_ID      =>  TransRec.IntFromModel <= ReadDataDelayCov.ID      ;
---!!Remove            when others =>  Alert(ModelID, "GetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
---!!Remove          end case ; 
---!!Remove          UseCoverageDelays <= TRUE ; 
---!!Remove
---!!Remove        when GET_TRANSACTION_COUNT =>
---!!Remove          TransRec.IntFromModel <= integer(TransRec.Rdy) ;
---!!Remove
---!!Remove        when GET_WRITE_TRANSACTION_COUNT =>
---!!Remove          TransRec.IntFromModel <= WriteAddressReceiveCount ;
---!!Remove
---!!Remove        when GET_READ_TRANSACTION_COUNT =>
---!!Remove          TransRec.IntFromModel <= ReadAddressReceiveCount ;
 
-        -- The End -- Done
         when others =>
---!!Remove          -- Signal multiple Driver Detect or not implemented transactions.
---!!Remove          Alert(ModelID, ClassifyUnimplementedOperation(TransRec), FAILURE) ;
-          -- Do Standard Directive Transactions or 
+          -- Do Standard Directive Transactions or Error Handling
           DoDirectiveTransactions (
             TransRec              => TransRec             ,
             Clk                   => Clk                  ,
@@ -490,7 +443,6 @@ begin
             WriteTransactionCount => WriteAddressReceiveCount,
             ReadTransactionCount  => ReadAddressReceiveCount
           ) ;
-
 
       end case ;
 

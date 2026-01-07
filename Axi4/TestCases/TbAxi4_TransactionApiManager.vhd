@@ -98,8 +98,9 @@ begin
     -- Must set Manager options before start otherwise, ready will be active on first cycle.
     wait for 0 ns ; 
     -- Verify Initial values of Transaction Counts
-    GetTransactionCount(ManagerRec, Count) ;  -- Expect 1
-    AffirmIfEqual(TbManagerID, Count, 1, "GetTransactionCount") ;
+    AffirmIfEqual(TbManagerID, ManagerRec.Rdy, 0, "ManagerRec.Rdy") ;
+    GetTransactionCount(ManagerRec, Count) ;  -- Expect 0
+    AffirmIfEqual(TbManagerID, Count, 0, "GetTransactionCount") ;
     GetWriteTransactionCount(ManagerRec, Count) ; -- Expect 0
     AffirmIfEqual(TbManagerID, Count, 0, "GetTransactionWriteCount") ;
     GetReadTransactionCount(ManagerRec, Count) ; -- Expect 0
@@ -115,8 +116,8 @@ begin
     WriteAsync(ManagerRec, Addr+4,  Data+1) ;
     WaitForTransaction(ManagerRec) ;
     WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetTransactionCount(ManagerRec, Count) ;  -- Expect 8
-    AffirmIfEqual(TbManagerID, Count, 8, "GetTransactionCount") ;
+    GetTransactionCount(ManagerRec, Count) ;  -- ManagerRec.Rdy 8
+    AffirmIfEqual(TbManagerID, Count, 2, "GetTransactionCount") ;
     GetWriteTransactionCount(ManagerRec, Count) ; -- Expect 2
     AffirmIfEqual(TbManagerID, Count, 2, "GetTransactionWriteCount") ;
     
@@ -126,8 +127,9 @@ begin
     WriteAsync(ManagerRec, Addr+12, Data+3) ;
     WaitForWriteTransaction(ManagerRec) ;
     WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetTransactionCount(ManagerRec, Count) ;  -- Expect 14
-    AffirmIfEqual(TbManagerID, Count, 14, "GetTransactionCount") ;
+    GetTransactionCount(ManagerRec, Count) ;  -- ManagerRec.Rdy 14
+    AffirmIfEqual(TbManagerID, Count, 4, "GetTransactionCount") ;
+    AffirmIfEqual(TbManagerID, ManagerRec.Rdy, 14, "ManagerRec.Rdy") ;
     GetWriteTransactionCount(ManagerRec, Count) ; -- Expect 4
     AffirmIfEqual(TbManagerID, Count, 4, "GetTransactionWriteCount") ;
     
@@ -232,6 +234,8 @@ begin
     AffirmIfEqual(TbManagerID, Count, 4, "GetTransactionReadCount") ;   
     GetWriteTransactionCount(ManagerRec, Count) ; -- Expect 8 
     AffirmIfEqual(TbManagerID, Count, 8, "GetTransactionWriteCount") ;
+    GetTransactionCount(ManagerRec, Count) ; -- Expect 12
+    AffirmIfEqual(TbManagerID, Count, 12, "GetTransactionCount") ;
 
 
     -- Wait for outputs to propagate and signal TestDone

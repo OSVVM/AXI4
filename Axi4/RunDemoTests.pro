@@ -50,3 +50,9 @@ RunTest  TbAxi4_BasicReadWrite.vhd
 RunTest  TbAxi4_ManagerRandomTiming1.vhd 
 RunTest  TbAxi4_ManagerMemoryRandomTiming1.vhd 
 RunTest  TbAxi4_MemoryBurstPattern1.vhd
+
+# RunTest    TbAxi4_TransactionApiSubordinate.vhd
+# RunTest    TbAxi4_TransactionApiManager.vhd
+# RunTest    TbAxi4_TransactionApiMemory.vhd
+# RunTest    TbAxi4_TransactionApiManagerBurst.vhd
+# RunTest    TbAxi4_TransactionApiMemoryBurst.vhd

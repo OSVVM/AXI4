@@ -103,7 +103,6 @@ architecture VerificationComponent of Axi4Manager is
   
   constant DEFAULT_BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;
   signal   BurstFifoMode      : AddressBusFifoBurstModeType := DEFAULT_BURST_MODE ;
-  signal   BurstFifoByteMode  : boolean := (DEFAULT_BURST_MODE = ADDRESS_BUS_BURST_BYTE_MODE) ; 
 begin
 
   ------------------------------------------------------------
@@ -283,7 +282,7 @@ begin
 --            AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Write Address length does not match", FAILURE) ;
 
             -- Burst transfer, calculate burst length
-            if BurstFifoByteMode then 
+            if (BurstFifoMode = ADDRESS_BUS_BURST_BYTE_MODE) then 
               LAW.Len := to_slv(CalculateBurstLen(TransRec.DataWidth, WriteByteAddr, BytesPerTransfer), LAW.Len'length) ;
             else 
               LAW.Len := to_slv(TransRec.DataWidth-1, LAW.Len'length) ;
@@ -296,7 +295,7 @@ begin
           end if ;
 
           if IsWriteData(Operation) then
-            if BurstFifoByteMode then 
+            if (BurstFifoMode = ADDRESS_BUS_BURST_BYTE_MODE) then 
               BytesToSend       := TransRec.DataWidth ;
               TransfersInBurst  := 1 + CalculateBurstLen(BytesToSend, WriteByteAddr, BytesPerTransfer) ;
             else
@@ -425,7 +424,7 @@ begin
             BytesPerTransfer := 2**to_integer(LAR.Size);
 
             -- Burst transfer, calculate burst length
-            if BurstFifoByteMode then 
+            if (BurstFifoMode = ADDRESS_BUS_BURST_BYTE_MODE) then 
               TransfersInBurst := 1 + CalculateBurstLen(TransRec.DataWidth, ReadByteAddr, BytesPerTransfer) ;
             else 
               TransfersInBurst := TransRec.DataWidth ; 
@@ -466,7 +465,7 @@ begin
 --!!              "/= AXI_DATA_BYTE_WIDTH (" & to_string(AXI_DATA_BYTE_WIDTH) & ")"
 --!!            );
 
-            if BurstFifoByteMode then 
+            if (BurstFifoMode = ADDRESS_BUS_BURST_BYTE_MODE) then 
               BytesToReceive    := TransRec.DataWidth ;
               TransfersInBurst  := 1 + CalculateBurstLen(BytesToReceive, ReadByteAddr, BytesPerTransfer) ;
             else
@@ -522,8 +521,7 @@ begin
     end loop DispatchLoop ;
   end process TransactionDispatcher ;
 
-  BurstFifoByteMode     <= (BurstFifoMode = ADDRESS_BUS_BURST_BYTE_MODE) ;
-  TransactionDone       <= WriteTransactionDone and ReadTransactionDone ; 
+  TransactionDone       <=  WriteTransactionDone and ReadTransactionDone ; 
   WriteTransactionDone  <=  (WriteAddressRequestCount = WriteAddressDoneCount) and
                             (WriteDataRequestCount = WriteDataDoneCount) and 
                             (WriteResponseExpectCount = WriteResponseReceiveCount) ;

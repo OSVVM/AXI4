@@ -39,7 +39,7 @@
 --  limitations under the License.
 --
 
-architecture ManagerRandomTiming1 of TestCtrl is
+architecture AxiManagerRandomTiming1 of TestCtrl is
 
   signal TestDone, WriteDone : integer_barrier := 1 ;
   constant BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;
@@ -181,12 +181,12 @@ begin
   end process MemoryProc ;
 
 
-end ManagerRandomTiming1 ;
+end AxiManagerRandomTiming1 ;
 
 Configuration TbAxi4_AxiManagerRandomTiming1 of TbAxi4Memory is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(ManagerRandomTiming1) ;
+      use entity work.TestCtrl(AxiManagerRandomTiming1) ;
     end for ;
 --!!    for Subordinate_1 : Axi4Subordinate
 --!!      use entity OSVVM_AXI4.Axi4Memory ;

@@ -49,8 +49,8 @@ library ieee ;
 library osvvm ;
     context osvvm.OsvvmContext ;
 
-library OSVVM_Common ;
-    context OSVVM_Common.OsvvmCommonContext ;
+library osvvm_common ;
+    context osvvm_common.OsvvmCommonContext ;
 
 use work.Axi4InterfaceCommonPkg.all ;
 use work.Axi4OptionsPkg.all ; 

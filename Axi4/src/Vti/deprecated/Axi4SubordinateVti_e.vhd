@@ -64,8 +64,8 @@ library osvvm ;
   context osvvm.OsvvmContext ;
   use osvvm.ScoreboardPkg_slv.all ;
 
-library OSVVM_Common ;
-  context OSVVM_Common.OsvvmCommonContext ;
+library osvvm_common ;
+  context osvvm_common.OsvvmCommonContext ;
 
 library osvvm_Axi4 ; 
   context osvvm_Axi4.Axi4Context ; 

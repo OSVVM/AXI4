@@ -2,6 +2,7 @@
 
 | Revision  |  Release Summary 
 ------------|----------- 
+| 2026.01   |  Added DoDirectiveTransactions to all AXI/AxiStream VC.  Added VHDL-2019 interface support to Axi4Full.   
 | 2025.06   |  build.pro replaced <DirectoryName>.pro.  Autogenerate OsvvmTestCommonPkg.  Update testbenches for TranscriptOpen and AffirmIfTranscriptsMatch
 | 2025.04   |  Updated test cases using delay coverage delays  
 | 2025.02   |  Axi4Manager, Axi4LiteManager - updates for Xilinx 
@@ -34,6 +35,17 @@
 | 2020.07   |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
 | 2020.02   |  Initial version of AddressBusTransactionPkg.
 | 2018.04   |  Initial public release
+
+## 2026.01  January 2026
+Added DoDirectiveTransactions to all AXI/AxiStream VC 
+
+For Axi4Full, added VHDL-2019 interfaces.
+This results in 4 architectures: (Port Based Interface, VTI) X (VHDL-2019, VHDL-2008)
+Selection is automatic based on ::osvvm::VhdlVersion via SetVHDLVersion and ::osvvm::Supports2019Interface
+Each tool has feature settings that it sets based on its version (in VendorScripts_***.tcl)
+If making edits, only edit architectures in src (not deprecated or 2008).   
+Set ::osvvm::OsvvmDevDeriveArchitectures to true to create the other architecures.
+
 
 ## 2025.04 April 2025
 Updated Axi4Full and AxiStream test cases that use Delay coverage

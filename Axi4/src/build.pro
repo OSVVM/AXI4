@@ -56,7 +56,7 @@ if {$::osvvm::VhdlVersion >= 2019 && $::osvvm::Supports2019Interface}  {
 analyze Axi4Context.vhd
 
 # Create derivative architectures for verification components if architecture is updated
-if {$::osvvm::CreateVti} {
+if {$::osvvm::OsvvmDevDeriveArchitectures} {
   if {[FileModified Axi4Manager_a.vhd] > [FileModified deprecated/Axi4Manager_a.vhd]} {
     ::osvvm::MakeArch Axi4Manager
   }

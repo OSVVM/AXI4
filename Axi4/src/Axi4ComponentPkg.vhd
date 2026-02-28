@@ -50,6 +50,7 @@ library osvvm_common ;
 
   use work.Axi4InterfaceCommonPkg.all ;
   use work.Axi4InterfacePkg.all ;
+  use work.Axi4InterfaceModeViewPkg.all ;
 
 package Axi4ComponentPkg is
 
@@ -109,10 +110,10 @@ package Axi4ComponentPkg is
       nReset      : in   std_logic ;
 
       -- AXI Manager Functional Interface
-      AxiBus      : inout Axi4RecType ;
+      AxiBus      : view Axi4ManagerView of Axi4RecType ;
 
       -- Testbench Transaction Interface
-      TransRec    : inout AddressBusRecType 
+      TransRec    : view AddressBusVerificationComponentView of AddressBusRecType  
     ) ;
   end component Axi4Manager ;
 
@@ -150,10 +151,10 @@ package Axi4ComponentPkg is
       nReset      : in   std_logic ;
 
       -- AXI Manager Functional Interface
-      AxiBus      : inout Axi4RecType ;
+      AxiBus      : view Axi4SubordinateView of Axi4RecType ;
 
       -- Testbench Transaction Interface
-      TransRec    : inout AddressBusRecType
+      TransRec    : view AddressBusVerificationComponentView of AddressBusRecType  
     ) ;
   end component Axi4Subordinate ;
 
@@ -192,10 +193,10 @@ package Axi4ComponentPkg is
       nReset      : in   std_logic ;
 
       -- AXI Subordinate Interface
-      AxiBus      : inout Axi4RecType ;
+      AxiBus      : view Axi4SubordinateView of Axi4RecType ;
 
       -- Testbench Transaction Interface
-      TransRec    : inout AddressBusRecType
+      TransRec    : view AddressBusVerificationComponentView of AddressBusRecType  
     ) ;
   end component Axi4Memory ;
 

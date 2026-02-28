@@ -1,6 +1,6 @@
 --
---  File Name:         Axi4MemoryVti.vhd
---  Design Unit Name:  Axi4MemoryVti
+--  File Name:         Axi4Memory_a.vhd
+--  Design Unit Name:  VerificationComponent of Axi4Memory
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -19,6 +19,9 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    10/2025   2025.10    Split entity and architecture to support 2019 interfaces
+--                         Moved MODEL_INSTANCE_NAME and LOCAL_MEMORY_NAME to architecture 
+--                         renamed architecture VerificationComponent
 --    09/2024   2024.09    Updated ClassifyUnimplementedOperation.  Added DEBUG log for LOCAL_MEMORY_NAME
 --    07/2024   2024.07    Shortened AlertLog and data structure names for better printing
 --    03/2024   2024.03    Updated SafeResize to use ModelID
@@ -34,13 +37,12 @@
 --    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
 --    06/2021   2021.06    GHDL support + new memory data structure  
 --    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.   
---    12/2020   2020.12    Added VTI based on Axi4Memory.vhd
---    01/2020   2020.06    Derived from Axi4Subordinate.vhd
+--    06/2020   2020.06    Derived from Axi4Subordinate.vhd
 --
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2020 - 2024 by SynthWorks Design Inc.
+--  Copyright (c) 2020 - 2025 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -55,94 +57,26 @@
 --  limitations under the License.
 --
 
-library ieee ;
-  use ieee.std_logic_1164.all ;
-  use ieee.numeric_std.all ;
-  use ieee.numeric_std_unsigned.all ;
-  use ieee.math_real.all ;
-
-library osvvm ;
-  context osvvm.OsvvmContext ;
-  use osvvm.ScoreboardPkg_slv.all ;
-
-library osvvm_common ;
-  context osvvm_common.OsvvmCommonContext ;
-
-  use work.Axi4OptionsPkg.all ;
-  use work.Axi4InterfaceCommonPkg.all ;
-  use work.Axi4InterfacePkg.all ;
-  use work.Axi4CommonPkg.all ;
-  use work.Axi4ModelPkg.all ;
-
-entity Axi4MemoryVti is
-generic (
-  MODEL_ID_NAME   : string := "" ;
-  MEMORY_NAME     : string := "" ;
-  tperiod_Clk     : time   := 10 ns ;
-
-  DEFAULT_DELAY   : time   := 1 ns ; 
-
-  tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
-
-  tpd_Clk_WReady  : time   := DEFAULT_DELAY ;
-
-  tpd_Clk_BValid  : time   := DEFAULT_DELAY ;
-  tpd_Clk_BResp   : time   := DEFAULT_DELAY ;
-  tpd_Clk_BID     : time   := DEFAULT_DELAY ;
-  tpd_Clk_BUser   : time   := DEFAULT_DELAY ;
-
-  tpd_Clk_ARReady : time   := DEFAULT_DELAY ;
-
-  tpd_Clk_RValid  : time   := DEFAULT_DELAY ;
-  tpd_Clk_RData   : time   := DEFAULT_DELAY ;
-  tpd_Clk_RResp   : time   := DEFAULT_DELAY ;
-  tpd_Clk_RID     : time   := DEFAULT_DELAY ;
-  tpd_Clk_RUser   : time   := DEFAULT_DELAY ;
-  tpd_Clk_RLast   : time   := DEFAULT_DELAY
-) ;
-port (
-  -- Globals
-  Clk         : in   std_logic ;
-  nReset      : in   std_logic ;
-
-  -- AXI Subordinate Interface
-  AxiBus      : inout Axi4RecType 
-) ;
-
-  -- Derive AXI interface properties from the AxiBus
-  constant AXI_ADDR_WIDTH : integer := AxiBus.WriteAddress.Addr'length ;
-  constant AXI_DATA_WIDTH : integer := AxiBus.WriteData.Data'length ;
-
-  -- Testbench Transaction Interface
-  -- Access via external names
-  signal TransRec : AddressBusRecType (
-          Address      (AXI_ADDR_WIDTH-1 downto 0),
-          DataToModel  (AXI_DATA_WIDTH-1 downto 0),
-          DataFromModel(AXI_DATA_WIDTH-1 downto 0)
-        ) ;
-
+architecture VerificationComponent of Axi4Memory is
   -- Derive ModelInstance label from path_name
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
-    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4MemoryVti'PATH_NAME))) ;
+    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, to_lower(PathTail(Axi4Memory'PATH_NAME))) ;
 
   -- Memory Data Structure, Access via MemoryName
   constant LOCAL_MEMORY_NAME : string := 
     IfElse(MEMORY_NAME /= "", MEMORY_NAME, MODEL_INSTANCE_NAME & ":memory") ;
---    IfElse(MEMORY_NAME /= "", MEMORY_NAME, to_lower(Axi4MemoryVti'PATH_NAME) & ":memory") ;
-    
-  constant MODEL_NAME : string := "Axi4MemoryVti" ;
 
-end entity Axi4MemoryVti ;
-
-architecture MemorySubordinate of Axi4MemoryVti is
-
-  constant AXI_DATA_BYTE_WIDTH  : integer := AXI_DATA_WIDTH / 8 ;
+constant AXI_DATA_BYTE_WIDTH  : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH  : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 
   signal ModelID, BusFailedID, DataCheckID : AlertLogIDType ;
-  signal WriteAddressDelayCov, WriteDataDelayCov, WriteResponseDelayCov : DelayCoverageIDType ;
-  signal ReadAddressDelayCov,  ReadDataDelayCov : DelayCoverageIDType ;
+  signal ArrDelayCovID         : DelayCoverageIDArrayType(1 to READ_DATA_ID) ;
+  alias  WriteAddressDelayCov  is ArrDelayCovID(WRITE_ADDRESS_ID) ;
+  alias  WriteDataDelayCov     is ArrDelayCovID(WRITE_DATA_ID) ;
+  alias  WriteResponseDelayCov is ArrDelayCovID(WRITE_RESPONSE_ID) ;
+  alias  ReadAddressDelayCov   is ArrDelayCovID(READ_ADDRESS_ID) ;
+  alias  ReadDataDelayCov      is ArrDelayCovID(READ_DATA_ID) ;
   signal UseCoverageDelays : boolean := FALSE ; 
   
   signal Params    : ModelParametersIDType ;
@@ -187,12 +121,16 @@ architecture MemorySubordinate of Axi4MemoryVti is
   signal ModelRUSER  : std_logic_vector(AxiBus.ReadData.User'length - 1 downto 0) := (others => '0') ;
   signal ModelRID    : std_logic_vector(AxiBus.ReadData.ID'length - 1 downto 0) := (others => '0') ;
 
+  -- Placeholders
+  signal TransactionDone, WriteTransactionDone, ReadTransactionDone : boolean := FALSE ; 
+  signal BurstFifoMode      : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;
+
 begin
 
   ------------------------------------------------------------
   -- Turn off drivers not being driven by this model
   ------------------------------------------------------------
-  InitAxi4Rec (AxiBusRec => AxiBus ) ;
+  InitAxi4Rec (AxiBusRec => AxiBus) ;
 
 
   ------------------------------------------------------------
@@ -282,68 +220,6 @@ begin
       TransactionCount := TransactionCount + 1 ; 
 
       case TransRec.Operation is
-        when WAIT_FOR_TRANSACTION =>
-          -- Wait for either next write or read access of memory to complete
-          Count := WriteAddressReceiveCount + ReadAddressReceiveCount ;
-          wait until (WriteAddressReceiveCount + ReadAddressReceiveCount) = Count + 1 ;
-
-        when WAIT_FOR_WRITE_TRANSACTION =>
-          -- Wait for next write to memory to complete
-          Count := WriteAddressReceiveCount ;
-          wait until WriteAddressReceiveCount = Count + 1 ;
-
-        when WAIT_FOR_READ_TRANSACTION =>
-          -- Wait for next read from memory to complete
-          Count := ReadAddressReceiveCount ;
-          wait until ReadAddressReceiveCount = Count + 1 ;
-
-        when WAIT_FOR_CLOCK =>
-          WaitForClock(Clk, TransRec.IntToModel) ;
-
-        when GET_ALERTLOG_ID =>
-          TransRec.IntFromModel <= integer(ModelID) ;
-          wait for 0 ns ;
-
-        when SET_USE_RANDOM_DELAYS =>        
-          UseCoverageDelays      <= TransRec.BoolToModel ; 
-
-        when GET_USE_RANDOM_DELAYS =>
-          TransRec.BoolFromModel <= UseCoverageDelays ;
-
-        when SET_DELAYCOV_ID =>
-          case TransRec.Options is
-            when WRITE_ADDRESS_ID  =>  WriteAddressDelayCov  <= GetDelayCoverage(TransRec.IntToModel) ;
-            when WRITE_DATA_ID     =>  WriteDataDelayCov     <= GetDelayCoverage(TransRec.IntToModel) ;
-            when WRITE_RESPONSE_ID =>  WriteResponseDelayCov <= GetDelayCoverage(TransRec.IntToModel) ;
-            when READ_ADDRESS_ID   =>  ReadAddressDelayCov   <= GetDelayCoverage(TransRec.IntToModel) ;
-            when READ_DATA_ID      =>  ReadDataDelayCov      <= GetDelayCoverage(TransRec.IntToModel) ;
-            when others =>  Alert(ModelID, "SetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
-          end case ; 
-          UseCoverageDelays <= TRUE ; 
-
-        when GET_DELAYCOV_ID =>
-          case TransRec.Options is
-            when WRITE_ADDRESS_ID  =>  TransRec.IntFromModel <= WriteAddressDelayCov.ID  ;
-            when WRITE_DATA_ID     =>  TransRec.IntFromModel <= WriteDataDelayCov.ID     ;
-            when WRITE_RESPONSE_ID =>  TransRec.IntFromModel <= WriteResponseDelayCov.ID ;
-            when READ_ADDRESS_ID   =>  TransRec.IntFromModel <= ReadAddressDelayCov.ID   ;
-            when READ_DATA_ID      =>  TransRec.IntFromModel <= ReadDataDelayCov.ID      ;
-            when others =>  Alert(ModelID, "GetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
-          end case ; 
-          UseCoverageDelays <= TRUE ; 
-
-        when GET_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= integer(TransRec.Rdy) ;
-          wait for 0 ns ;
-
-        when GET_WRITE_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= WriteAddressReceiveCount ;
-          wait for 0 ns ;
-
-        when GET_READ_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= ReadAddressReceiveCount ;
-          wait for 0 ns ;
-
         when WRITE_OP =>
           -- Back door Write access to memory.  Completes without time passing.
           Address    := SafeResize(ModelID, TransRec.Address, Address'length) ;
@@ -445,19 +321,44 @@ begin
             end case ;
           end if ;
 
-        -- The End -- Done
+        -- Handle Directives Transactionsthat differ from Norm
+        when WAIT_FOR_TRANSACTION =>
+          -- Wait for either next write or read access of memory to complete
+          Count := WriteAddressReceiveCount + ReadAddressReceiveCount ;
+          wait until (WriteAddressReceiveCount + ReadAddressReceiveCount) = Count + 1 ;
+
+        when WAIT_FOR_WRITE_TRANSACTION =>
+          -- Wait for next write to memory to complete
+          Count := WriteAddressReceiveCount ;
+          wait until WriteAddressReceiveCount = Count + 1 ;
+
+        when WAIT_FOR_READ_TRANSACTION =>
+          -- Wait for next read from memory to complete
+          Count := ReadAddressReceiveCount ;
+          wait until ReadAddressReceiveCount = Count + 1 ;
+
         when others =>
-          -- Signal multiple Driver Detect or not implemented transactions.
-          Alert(ModelID, ClassifyUnimplementedOperation(TransRec), FAILURE) ;
+          -- Do Standard Directive Transactions or Error Handling
+          DoDirectiveTransactions (
+            TransRec              => TransRec             ,
+            Clk                   => Clk                  ,
+            ModelID               => ModelID              ,
+            UseCoverageDelays     => UseCoverageDelays    ,
+            DelayCovID            => ArrDelayCovID        ,
+            BurstFifoMode         => BurstFifoMode        ,      -- Not used in Memory
+            TransactionDone       => TransactionDone      ,      -- implemented above
+            WriteTransactionDone  => WriteTransactionDone ,      -- implemented above
+            ReadTransactionDone   => ReadTransactionDone  ,      -- implemented above
+            WriteTransactionCount => WriteAddressReceiveCount,
+            ReadTransactionCount  => ReadAddressReceiveCount
+          ) ;
 
       end case ;
 
       -- Wait for 1 delta cycle, required if a wait is not in all case branches above
       wait for 0 ns ;
     end loop DispatchLoop ; 
-
   end process TransactionDispatcher ;
-
 
   ------------------------------------------------------------
   --  WriteAddressHandler
@@ -604,9 +505,9 @@ begin
   ------------------------------------------------------------
   WriteHandler : process
     variable LAW : AxiBus.WriteAddress'subtype ;
-    alias    AW : AxiBus.WriteAddress'subtype is AxiBus.WriteAddress ;
+    -- alias    AW : AxiBus.WriteAddress'subtype is AxiBus.WriteAddress ;
     variable LWD : AxiBus.WriteData'subtype ;
-    alias    WD  : AxiBus.WriteData'subtype is AxiBus.WriteData ;
+    -- alias    WD  : AxiBus.WriteData'subtype is AxiBus.WriteData ;
     variable BurstLen         : integer ;
     variable ByteAddressBits  : integer ;
     variable BytesPerTransfer : integer ;
@@ -773,7 +674,6 @@ begin
 
     end loop WriteResponseLoop ;
   end process WriteResponseHandler ;
-
 
   ------------------------------------------------------------
   --  ReadAddressHandler
@@ -979,24 +879,24 @@ begin
       end if ;
       (Local.Data, Local.Last, Local.Resp, Local.ID, Local.User) := pop(ReadDataFifo) ;
 
---?6 Add delay that is a function of the access: Single Word, First Burst, Burst, Last Burst
       -- Delay before generating RD.Valid
       if UseCoverageDelays then 
-        -- BurstCoverage Delays
         DelayCycles := GetRandDelay(ReadDataDelayCov) ; 
-        WaitForClock(Clk, DelayCycles) ;
       else
         -- Deprecated delays
         if NewTransfer then
-          WaitForClock(Clk, integer'(Get(Params, to_integer(READ_DATA_VALID_DELAY_CYCLES)))) ; 
---          WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_DELAY_CYCLES)))) ; 
-    --      elsif Burst then 
+          DelayCycles := Get(Params, to_integer(READ_DATA_VALID_DELAY_CYCLES)) ; 
         else 
-          WaitForClock(Clk, integer'(Get(Params, to_integer(READ_DATA_VALID_BURST_DELAY_CYCLES)))) ; 
---          WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_BURST_DELAY_CYCLES)))) ; 
+          DelayCycles := Get(Params, to_integer(READ_DATA_VALID_BURST_DELAY_CYCLES)) ; 
         end if ; 
       end if ; 
-      
+--      DelayCycles := 
+--        GetRandDelay(ReadDataDelayCov) when UseCoverageDelays else
+--        -- Deprecated static delays
+--        Get(Params, to_integer(READ_DATA_VALID_DELAY_CYCLES)) when NewTransfer else
+--        Get(Params, to_integer(READ_DATA_VALID_BURST_DELAY_CYCLES)) ;
+      WaitForClock(Clk, DelayCycles) ;
+
       NewTransfer := Local.Last ; -- Last is '1' for burst end and single word transfers
 
       -- Transaction Values
@@ -1045,5 +945,5 @@ begin
     end loop ReadDataLoop ;
   end process ReadDataHandler ;
 
-end architecture MemorySubordinate ;
+end architecture VerificationComponent ;
 

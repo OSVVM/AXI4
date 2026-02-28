@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    10/2025   2025.10    Removed unused Axi4InterfacePkg reference
 --    03/2022   2022.03    Removed deprecated items
 --    01/2020   2020.01    Updated license notice
 --    09/2017   2017       Initial revision
@@ -26,7 +27,7 @@
 --
 --  This file is part of OSVVM.
 --  
---  Copyright (c) 2017 - 2020 by SynthWorks Design Inc.  
+--  Copyright (c) 2017 - 2025 by SynthWorks Design Inc.  
 --  
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -54,7 +55,6 @@ library osvvm_common ;
   context osvvm_common.OsvvmCommonContext ;
     
 use work.Axi4InterfaceCommonPkg.all ;
-use work.Axi4InterfacePkg.all ; 
   
 package Axi4ModelPkg is 
 

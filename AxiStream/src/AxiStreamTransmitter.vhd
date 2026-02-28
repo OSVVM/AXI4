@@ -151,7 +151,8 @@ architecture SimpleTransmitter of AxiStreamTransmitter is
 
   constant DEFAULT_BURST_MODE : StreamFifoBurstModeType := STREAM_BURST_WORD_MODE ;
   signal   BurstFifoMode      : StreamFifoBurstModeType := DEFAULT_BURST_MODE ;
-  signal   BurstFifoByteMode  : boolean := (DEFAULT_BURST_MODE = STREAM_BURST_BYTE_MODE) ;
+
+  signal TransactionDone : boolean ; 
 
 begin
 
@@ -196,43 +197,6 @@ begin
       ) ;
 
       case TransRec.Operation is
-        when WAIT_FOR_CLOCK =>
-          WaitForClock(Clk, TransRec.IntToModel) ;
-
-        when WAIT_FOR_TRANSACTION =>
-          if TransmitRequestCount /= TransmitDoneCount then
-            wait until TransmitRequestCount = TransmitDoneCount ;
-          end if ;
-
-        when GET_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= TransmitDoneCount ;
-          wait for 0 ns ;
-
-        when GET_ALERTLOG_ID =>
-          TransRec.IntFromModel <= integer(ModelID) ;
-          wait for 0 ns ;
-
-        when SET_USE_RANDOM_DELAYS =>        
-          UseCoverageDelays      <= TransRec.BoolToModel ; 
-
-        when GET_USE_RANDOM_DELAYS =>
-          TransRec.BoolFromModel <= UseCoverageDelays ;
-
-        when SET_DELAYCOV_ID =>
-          BurstCov          <= GetDelayCoverage(TransRec.IntToModel) ;
-          UseCoverageDelays <= TRUE ; 
-
-        when GET_DELAYCOV_ID =>
-          TransRec.IntFromModel <= BurstCov.ID ;
-          UseCoverageDelays <= TRUE ; 
-
-        when SET_BURST_MODE =>
-          BurstFifoMode       <= TransRec.IntToModel ;
-          BurstFifoByteMode   <= (TransRec.IntToModel = STREAM_BURST_BYTE_MODE) ;
-
-        when GET_BURST_MODE =>
-          TransRec.IntFromModel <= BurstFifoMode ;
-
         when SEND | SEND_ASYNC =>
           Data   := SafeResize(ModelID, TransRec.DataToModel, Data'length) ;
           Param  := UpdateOptions(
@@ -260,7 +224,7 @@ begin
                       ParamLast  => 1,
                       Count      => ((TransmitRequestCount+1) - LastOffsetCount)
                     ) ;
-          if BurstFifoByteMode then
+          if (BurstFifoMode = STREAM_BURST_BYTE_MODE) then
             BytesToSend := TransRec.IntToModel ;
             NumberTransfers := integer(ceil(real(BytesToSend) / real(AXI_STREAM_DATA_BYTE_WIDTH))) ;
           else
@@ -356,10 +320,20 @@ begin
               Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
           end case ;
 
-        -- The End -- Done
         when others =>
-          -- Signal multiple Driver Detect or not implemented transactions.
-          Alert(ModelID, ClassifyUnimplementedTransmitterOperation(TransRec), FAILURE) ;
+          --  Do OSVVM stream directive transactions
+          DoDirectiveTransactions (
+            TransRec                 => TransRec             ,
+            Clk                      => Clk                  ,
+            ModelID                  => ModelID              ,
+            UseCoverageDelays        => UseCoverageDelays    ,
+            DelayCovID               => BurstCov             ,
+            BurstFifoMode            => BurstFifoMode        ,
+            TransactionDone          => TransactionDone      ,
+            TransactionCount         => TransmitDoneCount    ,
+            PendingTransactionCount  => TransmitRequestCount - TransmitDoneCount
+          ) ;
+
       end case ;
 
       -- Wait for 1 delta cycle, required if a wait is not in all case branches above
@@ -367,6 +341,7 @@ begin
     end loop DispatchLoop ;
   end process TransactionDispatcher ;
 
+  TransactionDone <= TransmitRequestCount = TransmitDoneCount ; 
 
   ------------------------------------------------------------
   --  TransmitHandler

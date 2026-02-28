@@ -1,6 +1,6 @@
 --
---  File Name:         Axi4Manager.vhd
---  Design Unit Name:  Axi4Manager
+--  File Name:         Axi4ManagerVti_a.vhd
+--  Design Unit Name:  VerificationComponent of Axi4ManagerVti
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -19,6 +19,9 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    10/2025   2025.10    Split entity and architecture to support 2019 interfaces
+--                         Moved MODEL_INSTANCE_NAME to architecture 
+--                         renamed architecture VerificationComponent
 --    07/2024   2024.07    Shortened AlertLog and data structure names for better printing
 --    03/2024   2024.03    Updated SafeResize to use ModelID
 --    01/2024   2024.01    Updated Params to use singleton data structure
@@ -42,7 +45,7 @@
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2017 - 2024 by SynthWorks Design Inc.
+--  Copyright (c) 2017 - 2025 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -56,103 +59,20 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --
-library ieee ;
-  use ieee.std_logic_1164.all ;
-  use ieee.numeric_std.all ;
-  use ieee.numeric_std_unsigned.all ;
-  use ieee.math_real.all ;
-
-library osvvm ;
-  context osvvm.OsvvmContext ;
-  use osvvm.ScoreboardPkg_slv.all ;
-
-library osvvm_common ;
-  context osvvm_common.OsvvmCommonContext ;
-
-  use work.Axi4OptionsPkg.all ;
-  use work.Axi4ModelPkg.all ;
-  use work.Axi4InterfaceCommonPkg.all ;
-  use work.Axi4InterfacePkg.all ;
-  use work.Axi4CommonPkg.all ;
-
-entity Axi4Manager is
-generic (
-  MODEL_ID_NAME    : string := "" ;
-  tperiod_Clk      : time   := 10 ns ;
-  
-  DEFAULT_DELAY    : time   := 1 ns ; 
-
-  tpd_Clk_AWAddr   : time   := DEFAULT_DELAY ;
-  tpd_Clk_AWProt   : time   := DEFAULT_DELAY ;
-  tpd_Clk_AWValid  : time   := DEFAULT_DELAY ;
-  -- AXI4 Full
-  tpd_clk_AWLen    : time   := DEFAULT_DELAY ;
-  tpd_clk_AWID     : time   := DEFAULT_DELAY ;
-  tpd_clk_AWSize   : time   := DEFAULT_DELAY ;
-  tpd_clk_AWBurst  : time   := DEFAULT_DELAY ;
-  tpd_clk_AWLock   : time   := DEFAULT_DELAY ;
-  tpd_clk_AWCache  : time   := DEFAULT_DELAY ;
-  tpd_clk_AWQOS    : time   := DEFAULT_DELAY ;
-  tpd_clk_AWRegion : time   := DEFAULT_DELAY ;
-  tpd_clk_AWUser   : time   := DEFAULT_DELAY ;
-
-  tpd_Clk_WValid   : time   := DEFAULT_DELAY ;
-  tpd_Clk_WData    : time   := DEFAULT_DELAY ;
-  tpd_Clk_WStrb    : time   := DEFAULT_DELAY ;
-  -- AXI4 Full
-  tpd_Clk_WLast    : time   := DEFAULT_DELAY ;
-  tpd_Clk_WUser    : time   := DEFAULT_DELAY ;
-  -- AXI3
-  tpd_Clk_WID      : time   := DEFAULT_DELAY ;
-
-  tpd_Clk_BReady   : time   := DEFAULT_DELAY ;
-
-  tpd_Clk_ARValid  : time   := DEFAULT_DELAY ;
-  tpd_Clk_ARProt   : time   := DEFAULT_DELAY ;
-  tpd_Clk_ARAddr   : time   := DEFAULT_DELAY ;
-  -- AXI4 Full
-  tpd_clk_ARLen    : time   := DEFAULT_DELAY ;
-  tpd_clk_ARID     : time   := DEFAULT_DELAY ;
-  tpd_clk_ARSize   : time   := DEFAULT_DELAY ;
-  tpd_clk_ARBurst  : time   := DEFAULT_DELAY ;
-  tpd_clk_ARLock   : time   := DEFAULT_DELAY ;
-  tpd_clk_ARCache  : time   := DEFAULT_DELAY ;
-  tpd_clk_ARQOS    : time   := DEFAULT_DELAY ;
-  tpd_clk_ARRegion : time   := DEFAULT_DELAY ;
-  tpd_clk_ARUser   : time   := DEFAULT_DELAY ;
-
-  tpd_Clk_RReady   : time   := DEFAULT_DELAY
-) ;
-port (
-  -- Globals
-  Clk         : in   std_logic ;
-  nReset      : in   std_logic ;
-
-  -- AXI Manager Functional Interface
-  AxiBus      : inout Axi4RecType ;
-
-  -- Testbench Transaction Interface
-  TransRec    : inout AddressBusRecType 
-) ;
-
-  -- Derive AXI interface properties from the AxiBus
-  constant AXI_ADDR_WIDTH      : integer := AxiBus.WriteAddress.Addr'length ;
-  constant AXI_DATA_WIDTH      : integer := AxiBus.WriteData.Data'length ;
-  
+architecture VerificationComponent of Axi4ManagerVti is
   -- Derive ModelInstance label from path_name
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
-    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, to_lower(PathTail(Axi4Manager'PATH_NAME))) ;
-
-  constant MODEL_NAME : string := "Axi4Manager" ;
-  
-end entity Axi4Manager ;
-architecture AxiFull of Axi4Manager is
+    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, to_lower(PathTail(Axi4ManagerVti'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
-  signal WriteAddressDelayCov, WriteDataDelayCov, WriteResponseDelayCov : DelayCoverageIDType ;
-  signal ReadAddressDelayCov,  ReadDataDelayCov : DelayCoverageIDType ;
-  signal UseCoverageDelays : boolean := FALSE ; 
+  signal ArrDelayCovID         : DelayCoverageIDArrayType(1 to READ_DATA_ID) ;
+  alias  WriteAddressDelayCov  is ArrDelayCovID(WRITE_ADDRESS_ID) ;
+  alias  WriteDataDelayCov     is ArrDelayCovID(WRITE_DATA_ID) ;
+  alias  WriteResponseDelayCov is ArrDelayCovID(WRITE_RESPONSE_ID) ;
+  alias  ReadAddressDelayCov   is ArrDelayCovID(READ_ADDRESS_ID) ;
+  alias  ReadDataDelayCov      is ArrDelayCovID(READ_DATA_ID) ;
+  signal UseCoverageDelays     : boolean := FALSE ; 
 
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
@@ -177,11 +97,12 @@ architecture AxiFull of Axi4Manager is
   signal ReadAddressRequestCount,  ReadAddressDoneCount       : integer := 0 ;
   signal ReadDataExpectCount,      ReadDataReceiveCount       : integer := 0 ;
 
+  signal TransactionDone, WriteTransactionDone, ReadTransactionDone : boolean ; 
+
   signal WriteResponseActive, ReadDataActive : boolean ;
   
   constant DEFAULT_BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;
   signal   BurstFifoMode      : AddressBusFifoBurstModeType := DEFAULT_BURST_MODE ;
-  signal   BurstFifoByteMode  : boolean := (DEFAULT_BURST_MODE = ADDRESS_BUS_BURST_BYTE_MODE) ; 
 begin
 
   ------------------------------------------------------------
@@ -261,6 +182,7 @@ begin
 
     variable Operation       : AddressBusOperationType ;
     variable WriteDataCount   : integer := 0 ;
+
   begin
     AxiDefaults := InitAxi4Rec(AxiDefaults, '0') ;
     LAW.Size    := to_slv(AXI_BYTE_ADDR_WIDTH, LAW.Size'length) ;
@@ -290,114 +212,6 @@ begin
       Operation := TransRec.Operation ;
 
       case Operation is
-        -- Execute Standard Directive Transactions
-        when WAIT_FOR_TRANSACTION =>
-          -- Waits for All WRITE and READ Transactions to complete
-          if WriteAddressRequestCount /= WriteAddressDoneCount then
-            -- Block until both write address done.
-            wait until WriteAddressRequestCount = WriteAddressDoneCount ;
-          end if ;
-          if WriteDataRequestCount /= WriteDataDoneCount then
-            -- Block until both write data done.
-            wait until WriteDataRequestCount = WriteDataDoneCount ;
-          end if ;
-          if WriteResponseExpectCount /= WriteResponseReceiveCount then
-            -- Block until both write response done.
-            wait until WriteResponseExpectCount = WriteResponseReceiveCount ;
-          end if ;
-
-          if ReadAddressRequestCount /= ReadAddressDoneCount then
-            -- Block until both read address done.
-            wait until ReadAddressRequestCount = ReadAddressDoneCount ;
-          end if ;
-          if ReadDataExpectCount /= ReadDataReceiveCount then
-            -- Block until both read data done.
-            wait until ReadDataExpectCount = ReadDataReceiveCount ;
-          end if ;
-
-        when WAIT_FOR_WRITE_TRANSACTION =>
-          if WriteAddressRequestCount /= WriteAddressDoneCount then
-            -- Block until both write address done.
-            wait until WriteAddressRequestCount = WriteAddressDoneCount ;
-          end if ;
-          if WriteDataRequestCount /= WriteDataDoneCount then
-            -- Block until both write data done.
-            wait until WriteDataRequestCount = WriteDataDoneCount ;
-          end if ;
-          if WriteResponseExpectCount /= WriteResponseReceiveCount then
-            -- Block until both write response done.
-            wait until WriteResponseExpectCount = WriteResponseReceiveCount ;
-          end if ;
-          wait for 0 ns ; 
-
-        when WAIT_FOR_READ_TRANSACTION =>
-          if ReadAddressRequestCount /= ReadAddressDoneCount then
-            -- Block until both read address done.
-            wait until ReadAddressRequestCount = ReadAddressDoneCount ;
-          end if ;
-          if ReadDataExpectCount /= ReadDataReceiveCount then
-            -- Block until both read data done.
-            wait until ReadDataExpectCount = ReadDataReceiveCount ;
-          end if ;
-          wait for 0 ns ; 
-
-        when WAIT_FOR_CLOCK =>
-          WaitForClock(Clk, TransRec.IntToModel) ;
-
-        when GET_ALERTLOG_ID =>
-          TransRec.IntFromModel <= integer(ModelID) ;
-          wait for 0 ns ; 
-
-        when SET_USE_RANDOM_DELAYS =>        
-          UseCoverageDelays      <= TransRec.BoolToModel ; 
-
-        when GET_USE_RANDOM_DELAYS =>
-          TransRec.BoolFromModel <= UseCoverageDelays ;
-
-        when SET_DELAYCOV_ID =>
-          case TransRec.Options is
-            when WRITE_ADDRESS_ID  =>  WriteAddressDelayCov  <= GetDelayCoverage(TransRec.IntToModel) ;
-            when WRITE_DATA_ID     =>  WriteDataDelayCov     <= GetDelayCoverage(TransRec.IntToModel) ;
-            when WRITE_RESPONSE_ID =>  WriteResponseDelayCov <= GetDelayCoverage(TransRec.IntToModel) ;
-            when READ_ADDRESS_ID   =>  ReadAddressDelayCov   <= GetDelayCoverage(TransRec.IntToModel) ;
-            when READ_DATA_ID      =>  ReadDataDelayCov      <= GetDelayCoverage(TransRec.IntToModel) ;
-            when others =>  Alert(ModelID, "SetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
-          end case ; 
-          UseCoverageDelays <= TRUE ; 
-
-        when GET_DELAYCOV_ID =>
-          case TransRec.Options is
-            when WRITE_ADDRESS_ID  =>  TransRec.IntFromModel <= WriteAddressDelayCov.ID  ;
-            when WRITE_DATA_ID     =>  TransRec.IntFromModel <= WriteDataDelayCov.ID     ;
-            when WRITE_RESPONSE_ID =>  TransRec.IntFromModel <= WriteResponseDelayCov.ID ;
-            when READ_ADDRESS_ID   =>  TransRec.IntFromModel <= ReadAddressDelayCov.ID   ;
-            when READ_DATA_ID      =>  TransRec.IntFromModel <= ReadDataDelayCov.ID      ;
-            when others =>  Alert(ModelID, "GetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
-          end case ; 
-          UseCoverageDelays <= TRUE ; 
-
-        when SET_BURST_MODE =>                      
-          BurstFifoMode       <= TransRec.IntToModel ;
-          BurstFifoByteMode   <= (TransRec.IntToModel = ADDRESS_BUS_BURST_BYTE_MODE) ;
-          wait for 0 ns ; 
-          AlertIf(ModelID, not IsAddressBusBurstMode(BurstFifoMode), 
-            "Invalid Burst Mode " & to_string(BurstFifoMode), FAILURE) ;
-              
-        when GET_BURST_MODE =>                      
-          TransRec.IntFromModel <= BurstFifoMode ;
-
-        when GET_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= integer(TransRec.Rdy) ; --  WriteAddressDoneCount + ReadAddressDoneCount ;
-          wait for 0 ns ; 
-
-        when GET_WRITE_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= WriteAddressDoneCount ;
-          wait for 0 ns ; 
-
-        when GET_READ_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= ReadAddressDoneCount ;
-          wait for 0 ns ; 
-
         -- Model Transaction Dispatch
         when WRITE_OP | WRITE_ADDRESS | WRITE_DATA | ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
           -- For All Write Operations - Write Address and Write Data
@@ -468,7 +282,7 @@ begin
 --            AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Write Address length does not match", FAILURE) ;
 
             -- Burst transfer, calculate burst length
-            if BurstFifoByteMode then 
+            if (BurstFifoMode = ADDRESS_BUS_BURST_BYTE_MODE) then 
               LAW.Len := to_slv(CalculateBurstLen(TransRec.DataWidth, WriteByteAddr, BytesPerTransfer), LAW.Len'length) ;
             else 
               LAW.Len := to_slv(TransRec.DataWidth-1, LAW.Len'length) ;
@@ -481,7 +295,7 @@ begin
           end if ;
 
           if IsWriteData(Operation) then
-            if BurstFifoByteMode then 
+            if (BurstFifoMode = ADDRESS_BUS_BURST_BYTE_MODE) then 
               BytesToSend       := TransRec.DataWidth ;
               TransfersInBurst  := 1 + CalculateBurstLen(BytesToSend, WriteByteAddr, BytesPerTransfer) ;
             else
@@ -610,7 +424,7 @@ begin
             BytesPerTransfer := 2**to_integer(LAR.Size);
 
             -- Burst transfer, calculate burst length
-            if BurstFifoByteMode then 
+            if (BurstFifoMode = ADDRESS_BUS_BURST_BYTE_MODE) then 
               TransfersInBurst := 1 + CalculateBurstLen(TransRec.DataWidth, ReadByteAddr, BytesPerTransfer) ;
             else 
               TransfersInBurst := TransRec.DataWidth ; 
@@ -651,7 +465,7 @@ begin
 --!!              "/= AXI_DATA_BYTE_WIDTH (" & to_string(AXI_DATA_BYTE_WIDTH) & ")"
 --!!            );
 
-            if BurstFifoByteMode then 
+            if (BurstFifoMode = ADDRESS_BUS_BURST_BYTE_MODE) then 
               BytesToReceive    := TransRec.DataWidth ;
               TransfersInBurst  := 1 + CalculateBurstLen(BytesToReceive, ReadByteAddr, BytesPerTransfer) ;
             else
@@ -688,12 +502,32 @@ begin
 
         -- The End -- Done
         when others =>
-          -- Signal multiple Driver Detect or not implemented transactions.
-          Alert(ModelID, ClassifyUnimplementedOperation(TransRec), FAILURE) ;
+          -- Do Standard Directive Transactions and Error Handling
+          DoDirectiveTransactions (
+            TransRec              => TransRec             ,
+            Clk                   => Clk                  ,
+            ModelID               => ModelID              ,
+            UseCoverageDelays     => UseCoverageDelays    ,
+            DelayCovID            => ArrDelayCovID        ,
+            BurstFifoMode         => BurstFifoMode        ,
+            TransactionDone       => TransactionDone      ,
+            WriteTransactionDone  => WriteTransactionDone ,
+            ReadTransactionDone   => ReadTransactionDone  ,
+            WriteTransactionCount => WriteAddressDoneCount,
+            ReadTransactionCount  => ReadAddressDoneCount
+          ) ;
 
       end case ;
     end loop DispatchLoop ;
   end process TransactionDispatcher ;
+
+  TransactionDone       <=  WriteTransactionDone and ReadTransactionDone ; 
+  WriteTransactionDone  <=  (WriteAddressRequestCount = WriteAddressDoneCount) and
+                            (WriteDataRequestCount = WriteDataDoneCount) and 
+                            (WriteResponseExpectCount = WriteResponseReceiveCount) ;
+
+  ReadTransactionDone   <= (ReadAddressRequestCount = ReadAddressDoneCount) and
+                           (ReadDataExpectCount = ReadDataReceiveCount) ; 
 
   ------------------------------------------------------------
   --  WriteAddressHandler
@@ -1157,4 +991,6 @@ begin
       FAILURE
     ) ;
   end process ReadDataProtocolChecker ;
-end architecture AxiFull ;
+end architecture VerificationComponent ;
+
+

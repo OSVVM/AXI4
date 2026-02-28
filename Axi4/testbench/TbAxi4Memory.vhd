@@ -52,6 +52,8 @@ library osvvm ;
 library OSVVM_AXI4 ;
   context OSVVM_AXI4.Axi4Context ;
 
+  use work.TestCtrlComponentPkg.all ; 
+
 entity TbAxi4Memory is
 end entity TbAxi4Memory ;
 architecture TestHarness of TbAxi4Memory is
@@ -100,19 +102,6 @@ architecture TestHarness of TbAxi4Memory is
       User(7 downto 0)
     )
   ) ;
-
-
-  component TestCtrl is
-    port (
-      -- Global Signal Interface
-      nReset           : In    std_logic ;
-
-      -- Transaction Interfaces
-      ManagerRec       : inout AddressBusRecType ;
-      SubordinateRec   : inout AddressBusRecType
-    ) ;
-  end component TestCtrl ;
-
 
 begin
 

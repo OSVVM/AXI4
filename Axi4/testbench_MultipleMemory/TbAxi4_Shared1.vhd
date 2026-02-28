@@ -174,13 +174,13 @@ Configuration TbAxi4_Shared1 of TbAxi4_MultipleMemory is
     end for ; 
 -- works with the TbAxi4_MultipleMemory.vhd
     for all : Axi4Memory
-      use entity OSVVM_AXI4.Axi4Memory(MemorySubordinate) 
+      use entity OSVVM_AXI4.Axi4Memory
           generic map (MEMORY_NAME => "SharedMemory", MODEL_ID_NAME => MODEL_ID_NAME);
     end for ; 
 -- works with the TbAxi4_MultipleMemory_Generate.vhd
 --!!    for GenerateVC 
 --!!      for all : Axi4Memory
---!!        use entity OSVVM_AXI4.Axi4Memory(MemorySubordinate) 
+--!!        use entity OSVVM_AXI4.Axi4Memory 
 --!!            generic map (MEMORY_NAME => "SharedMemory", MODEL_ID_NAME => MODEL_ID_NAME);
 --!!      end for ; 
 --!!    end for ; 

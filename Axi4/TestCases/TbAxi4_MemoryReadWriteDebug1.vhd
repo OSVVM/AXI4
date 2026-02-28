@@ -41,7 +41,7 @@
 --  limitations under the License.
 --  
 
-architecture MemoryReadWrite1 of TestCtrl is
+architecture MemoryReadWriteDebug1 of TestCtrl is
 
   signal TestDone, ManagerDone : integer_barrier := 1 ;
    
@@ -126,14 +126,14 @@ begin
   end process MemoryProc ;
 
 
-end MemoryReadWrite1 ;
+end MemoryReadWriteDebug1 ;
 
 library OSVVM_AXI4 ;
 
 Configuration TbAxi4_MemoryReadWriteDebug1 of TbAxi4Memory is
   for TestHarness
     for TestCtrl_1 : TestCtrl
-      use entity work.TestCtrl(MemoryReadWrite1) ; 
+      use entity work.TestCtrl(MemoryReadWriteDebug1) ; 
     end for ; 
 --!!    for Subordinate_1 : Axi4Subordinate 
 --!!      use entity OSVVM_AXI4.Axi4Memory ; 

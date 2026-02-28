@@ -48,6 +48,7 @@ context Axi4Context is
     use osvvm_axi4.Axi4CommonPkg.all ;        -- AXI handshaking
     use osvvm_axi4.Axi4InterfaceCommonPkg.all ;
     use osvvm_axi4.Axi4InterfacePkg.all ;     -- Interface definition
+    use osvvm_axi4.Axi4InterfaceModeViewPkg.all ;     -- Mode Views if using 2019 
 
     use osvvm_axi4.Axi4OptionsPkg.all ;       -- Model parameters
     use osvvm_axi4.Axi4OptionsArrayPkg.all ;  -- Model parameters - for Array parameters

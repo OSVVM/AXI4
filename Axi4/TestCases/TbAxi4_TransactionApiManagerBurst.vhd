@@ -102,8 +102,9 @@ begin
     -- Must set Manager options before start otherwise, ready will be active on first cycle.
     wait for 0 ns ; 
     -- Verify Initial values of Transaction Counts
-    GetTransactionCount(ManagerRec, Count) ;  -- Expect 1
-    AffirmIfEqual(TbManagerID, Count, 1, "GetTransactionCount") ;
+    AffirmIfEqual(TbManagerID, ManagerRec.Rdy, 0, "ManagerRec.Rdy") ;
+    GetTransactionCount(ManagerRec, Count) ;  -- Expect 0
+    AffirmIfEqual(TbManagerID, Count, 0, "GetTransactionCount") ;
     GetWriteTransactionCount(ManagerRec, Count) ; -- Expect 0
     AffirmIfEqual(TbManagerID, Count, 0, "GetTransactionWriteCount") ;
     GetReadTransactionCount(ManagerRec, Count) ; -- Expect 0
@@ -120,8 +121,8 @@ begin
     WriteBurstAsync(ManagerRec, Addr+64, 8) ;
     WaitForTransaction(ManagerRec) ;
     WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetTransactionCount(ManagerRec, Count) ;  -- Expect 8
-    AffirmIfEqual(TbManagerID, Count, 8, "GetTransactionCount") ;
+    GetTransactionCount(ManagerRec, Count) ;  -- ManagerRec.Rdy 8
+    AffirmIfEqual(TbManagerID, Count, 2, "GetTransactionCount") ;
     GetWriteTransactionCount(ManagerRec, Count) ; -- Expect 2
     AffirmIfEqual(TbManagerID, Count, 2, "GetTransactionWriteCount") ;
     
@@ -131,8 +132,9 @@ begin
     WriteBurstAsync(ManagerRec, Addr+256, 8) ;
     WaitForWriteTransaction(ManagerRec) ;
     WaitForTransactionCount <= WaitForTransactionCount + 1 ; 
-    GetTransactionCount(ManagerRec, Count) ;  -- Expect 14
-    AffirmIfEqual(TbManagerID, Count, 14, "GetTransactionCount") ;
+    GetTransactionCount(ManagerRec, Count) ;  -- ManagerRec.Rdy 14
+    AffirmIfEqual(TbManagerID, Count, 4, "GetTransactionCount") ;
+    AffirmIfEqual(TbManagerID, ManagerRec.Rdy, 14, "ManagerRec.Rdy") ;
     GetWriteTransactionCount(ManagerRec, Count) ; -- Expect 4
     AffirmIfEqual(TbManagerID, Count, 4, "GetTransactionWriteCount") ;
     

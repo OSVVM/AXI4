@@ -121,8 +121,12 @@ architecture MemorySubordinate of Axi4LiteMemory is
   constant AXI_BYTE_ADDR_WIDTH  : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 
   signal ModelID, BusFailedID, DataCheckID : AlertLogIDType ;
-  signal WriteAddressDelayCov, WriteDataDelayCov, WriteResponseDelayCov : DelayCoverageIDType ;
-  signal ReadAddressDelayCov,  ReadDataDelayCov : DelayCoverageIDType ;
+  signal ArrDelayCovID         : DelayCoverageIDArrayType(1 to READ_DATA_ID) ;
+  alias  WriteAddressDelayCov  is ArrDelayCovID(WRITE_ADDRESS_ID) ;
+  alias  WriteDataDelayCov     is ArrDelayCovID(WRITE_DATA_ID) ;
+  alias  WriteResponseDelayCov is ArrDelayCovID(WRITE_RESPONSE_ID) ;
+  alias  ReadAddressDelayCov   is ArrDelayCovID(READ_ADDRESS_ID) ;
+  alias  ReadDataDelayCov      is ArrDelayCovID(READ_DATA_ID) ;
   signal UseCoverageDelays : boolean := FALSE ; 
   
   signal Params    : ModelParametersIDType ;
@@ -160,6 +164,10 @@ architecture MemorySubordinate of Axi4LiteMemory is
   signal ModelBResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
   signal ModelRResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
   
+  -- Placeholders
+  signal TransactionDone, WriteTransactionDone, ReadTransactionDone : boolean := FALSE ; 
+  signal BurstFifoMode      : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;
+
 begin
 
   ------------------------------------------------------------
@@ -253,64 +261,6 @@ begin
       ) ;
 
       case TransRec.Operation is
-        when WAIT_FOR_TRANSACTION =>
-          -- Wait for either next write or read access of memory to complete
-          Count := WriteAddressReceiveCount + ReadAddressReceiveCount ;
-          wait until (WriteAddressReceiveCount + ReadAddressReceiveCount) = Count + 1 ;
-
-        when WAIT_FOR_WRITE_TRANSACTION =>
-          -- Wait for next write to memory to complete
-          Count := WriteAddressReceiveCount ;
-          wait until WriteAddressReceiveCount = Count + 1 ;
-
-        when WAIT_FOR_READ_TRANSACTION =>
-          -- Wait for next read from memory to complete
-          Count := ReadAddressReceiveCount ;
-          wait until ReadAddressReceiveCount = Count + 1 ;
-
-        when WAIT_FOR_CLOCK =>
-          WaitForClock(Clk, TransRec.IntToModel) ;
-
-        when GET_ALERTLOG_ID =>
-          TransRec.IntFromModel <= integer(ModelID) ;
-
-        when SET_USE_RANDOM_DELAYS =>        
-          UseCoverageDelays      <= TransRec.BoolToModel ; 
-
-        when GET_USE_RANDOM_DELAYS =>
-          TransRec.BoolFromModel <= UseCoverageDelays ;
-
-        when SET_DELAYCOV_ID =>
-          case TransRec.Options is
-            when WRITE_ADDRESS_ID  =>  WriteAddressDelayCov  <= GetDelayCoverage(TransRec.IntToModel) ;
-            when WRITE_DATA_ID     =>  WriteDataDelayCov     <= GetDelayCoverage(TransRec.IntToModel) ;
-            when WRITE_RESPONSE_ID =>  WriteResponseDelayCov <= GetDelayCoverage(TransRec.IntToModel) ;
-            when READ_ADDRESS_ID   =>  ReadAddressDelayCov   <= GetDelayCoverage(TransRec.IntToModel) ;
-            when READ_DATA_ID      =>  ReadDataDelayCov      <= GetDelayCoverage(TransRec.IntToModel) ;
-            when others =>  Alert(ModelID, "SetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
-          end case ; 
-          UseCoverageDelays <= TRUE ; 
-
-        when GET_DELAYCOV_ID =>
-          case TransRec.Options is
-            when WRITE_ADDRESS_ID  =>  TransRec.IntFromModel <= WriteAddressDelayCov.ID  ;
-            when WRITE_DATA_ID     =>  TransRec.IntFromModel <= WriteDataDelayCov.ID     ;
-            when WRITE_RESPONSE_ID =>  TransRec.IntFromModel <= WriteResponseDelayCov.ID ;
-            when READ_ADDRESS_ID   =>  TransRec.IntFromModel <= ReadAddressDelayCov.ID   ;
-            when READ_DATA_ID      =>  TransRec.IntFromModel <= ReadDataDelayCov.ID      ;
-            when others =>  Alert(ModelID, "GetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
-          end case ; 
-          UseCoverageDelays <= TRUE ; 
-
-        when GET_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= integer(TransRec.Rdy) ;
-
-        when GET_WRITE_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= WriteAddressReceiveCount ;
-
-        when GET_READ_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= ReadAddressReceiveCount ;
-
         when WRITE_OP =>
           -- Back door Write access to memory.  Completes without time passing.
           Address    := SafeResize(ModelID, TransRec.Address, Address'length) ;
@@ -398,9 +348,36 @@ begin
             end case ;
           end if ;
 
-          -- The End -- Done
-          when others =>
-            Alert(ModelID, ClassifyUnimplementedOperation(TransRec.Operation, TransRec.Rdy), FAILURE) ;
+        when WAIT_FOR_TRANSACTION =>
+          -- Wait for either next write or read access of memory to complete
+          Count := WriteAddressReceiveCount + ReadAddressReceiveCount ;
+          wait until (WriteAddressReceiveCount + ReadAddressReceiveCount) = Count + 1 ;
+
+        when WAIT_FOR_WRITE_TRANSACTION =>
+          -- Wait for next write to memory to complete
+          Count := WriteAddressReceiveCount ;
+          wait until WriteAddressReceiveCount = Count + 1 ;
+
+        when WAIT_FOR_READ_TRANSACTION =>
+          -- Wait for next read from memory to complete
+          Count := ReadAddressReceiveCount ;
+          wait until ReadAddressReceiveCount = Count + 1 ;
+
+        when others =>
+          -- Do Standard Directive Transactions or Error Handling
+          DoDirectiveTransactions (
+            TransRec              => TransRec             ,
+            Clk                   => Clk                  ,
+            ModelID               => ModelID              ,
+            UseCoverageDelays     => UseCoverageDelays    ,
+            DelayCovID            => ArrDelayCovID        ,
+            BurstFifoMode         => BurstFifoMode        ,      -- Not used in Memory
+            TransactionDone       => TransactionDone      ,      -- implemented above
+            WriteTransactionDone  => WriteTransactionDone ,      -- implemented above
+            ReadTransactionDone   => ReadTransactionDone  ,      -- implemented above
+            WriteTransactionCount => WriteAddressReceiveCount,
+            ReadTransactionCount  => ReadAddressReceiveCount
+          ) ;
 
       end case ;
 

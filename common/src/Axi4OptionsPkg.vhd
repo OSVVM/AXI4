@@ -20,13 +20,15 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    10/2025   2025.10    Refactored to remove Axi4[Lite]InterfacePkg references
+--                         Added Support for Mode Views
 --    02/2022   2022.02    Added SetAxi4LiteInterfaceDefault, GetAxi4LiteInterfaceDefault
 --    01/2020   2020.02    Refactored from Axi4MasterTransactionPkg.vhd
 --
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2017 - 2020 by SynthWorks Design Inc.
+--  Copyright (c) 2017 - 2025 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -49,12 +51,10 @@ library ieee ;
 library osvvm ;
     context osvvm.OsvvmContext ;
 
-library OSVVM_Common ;
-    context OSVVM_Common.OsvvmCommonContext ;
+library osvvm_common ;
+    context osvvm_common.OsvvmCommonContext ;
 
 use work.Axi4InterfaceCommonPkg.all ;
-use work.Axi4InterfacePkg.all ;
-use work.Axi4LiteInterfacePkg.all ; 
 
 package Axi4OptionsPkg is
 
@@ -176,19 +176,6 @@ package Axi4OptionsPkg is
 
   subtype Axi4OptionsType is resolved_max Axi4UnresolvedOptionsType ;
 
-  --                         00    01      10      11
-  type  Axi4RespEnumType is (OKAY, EXOKAY, SLVERR, DECERR) ;
---  type  Axi4UnresolvedRespEnumType is (OKAY, EXOKAY, SLVERR, DECERR) ;
---  type Axi4UnresolvedRespVectorEnumType is array (natural range <>) of Axi4UnresolvedRespEnumType ;
---  -- alias resolved_max is maximum[ Axi4UnresolvedRespVectorEnumType return Axi4UnresolvedRespEnumType] ;
---  -- Maximum is implicitly defined for any array type in VHDL-2008.   Function resolved_max is a fall back.
---  function resolved_max ( s : Axi4UnresolvedRespVectorEnumType) return Axi4UnresolvedRespEnumType ;
---  subtype Axi4RespEnumType is resolved_max Axi4UnresolvedRespEnumType ;
-
-  function from_Axi4RespType (a: Axi4RespType) return Axi4RespEnumType ;
-  function to_Axi4RespType (a: Axi4RespEnumType) return Axi4RespType ;
-  
-
 --!  type AxiParamsType is array (Axi4OptionsType range <>) of integer ;
 --! Need init Parms for default values - many parms all init with ignore values &
 --! call via named association
@@ -199,7 +186,7 @@ package Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    boolean
   ) ;
@@ -207,7 +194,7 @@ package Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    std_logic
   ) ;
@@ -215,7 +202,7 @@ package Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    integer
   ) ;
@@ -223,7 +210,7 @@ package Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    std_logic_vector
   ) ;
@@ -231,7 +218,7 @@ package Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    Axi4RespEnumType
   ) ;
@@ -239,7 +226,7 @@ package Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   boolean
   ) ;
@@ -247,7 +234,7 @@ package Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   std_logic
   ) ;
@@ -255,7 +242,7 @@ package Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   integer
   ) ;
@@ -263,7 +250,7 @@ package Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   std_logic_vector
   ) ;
@@ -271,7 +258,7 @@ package Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   Axi4RespEnumType
   ) ;
@@ -378,38 +365,6 @@ package Axi4OptionsPkg is
            ParentID      : in    AlertLogIDType
   ) ;
   
-  ------------------------------------------------------------
-  procedure SetAxi4InterfaceDefault (
-  -----------------------------------------------------------
-    variable AxiBus        : InOut Axi4BaseRecType ;
-    constant Operation     : In    Axi4OptionsType ;
-    constant OptVal        : In    integer
-  ) ;
-  alias SetAxiParameter is SetAxi4InterfaceDefault[Axi4BaseRecType, Axi4OptionsType, integer];
-
-  ------------------------------------------------------------
-  impure function GetAxi4InterfaceDefault (
-  -----------------------------------------------------------
-    constant AxiBus        : in  Axi4BaseRecType ;
-    constant Operation     : in  Axi4OptionsType
-  ) return integer ;
-  alias GetAxiParameter is GetAxi4InterfaceDefault[Axi4BaseRecType, Axi4OptionsType return integer] ;
-
-  ------------------------------------------------------------
-  procedure SetAxi4LiteInterfaceDefault (
-  -----------------------------------------------------------
-    variable AxiBus        : InOut Axi4LiteRecType ;
-    constant Operation     : In    Axi4OptionsType ;
-    constant OptVal        : In    integer
-  ) ;
-
-  ------------------------------------------------------------
-  impure function GetAxi4LiteInterfaceDefault (
-  -----------------------------------------------------------
-    constant AxiBus        : in  Axi4LiteRecType ;
-    constant Operation     : in  Axi4OptionsType
-  ) return integer ;
-
 --!! These are Deprecated !!
 --!! These are Deprecated !!
 --!! These are Deprecated !!
@@ -508,40 +463,13 @@ package body Axi4OptionsPkg is
 --     return maximum(s) ;
 --   end function resolved_max ; 
 
-  ------------------------------------------------------------
-  type TbRespType_indexby_Integer is array (integer range <>) of Axi4RespEnumType;
-  constant RESP_TYPE_TB_TABLE : TbRespType_indexby_Integer := (
-      0   => OKAY,
-      1   => EXOKAY,
-      2   => SLVERR,
-      3   => DECERR
-    ) ;
-  function from_Axi4RespType (a: Axi4RespType) return Axi4RespEnumType is
-  begin
-    return RESP_TYPE_TB_TABLE(to_integer(a)) ;
-  end function from_Axi4RespType ;
-  
-  ------------------------------------------------------------
-  type RespType_indexby_TbRespType is array (Axi4RespEnumType) of Axi4RespType;
-  constant TB_TO_RESP_TYPE_TABLE : RespType_indexby_TbRespType := (
-      OKAY     => "00",
-      EXOKAY   => "01",
-      SLVERR   => "10",
-      DECERR   => "11"
-    ) ;
-  function to_Axi4RespType (a: Axi4RespEnumType) return Axi4RespType is
-  begin
-    return TB_TO_RESP_TYPE_TABLE(a) ; 
-  end function to_Axi4RespType ;
-
-
   --
   --  Abstraction Layer to support SetModelOptions using enumerated values
   --
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    boolean
   ) is
@@ -552,7 +480,7 @@ package body Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    std_logic
   ) is
@@ -563,7 +491,7 @@ package body Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    integer
   ) is
@@ -574,7 +502,7 @@ package body Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    std_logic_vector
   ) is
@@ -585,7 +513,7 @@ package body Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    Axi4RespEnumType
   ) is
@@ -596,7 +524,7 @@ package body Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   boolean
   ) is
@@ -609,7 +537,7 @@ package body Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   std_logic
   ) is
@@ -622,7 +550,7 @@ package body Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   integer
   ) is
@@ -633,7 +561,7 @@ package body Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   std_logic_vector
   ) is
@@ -644,7 +572,7 @@ package body Axi4OptionsPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecType ;
+    signal   TransactionRec : view AddressBusTestCtrlView of AddressBusRecType ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   Axi4RespEnumType
   ) is
@@ -837,196 +765,6 @@ package body Axi4OptionsPkg is
     InitAxiOptions(vParams) ; 
     
   end procedure InitAxiOptions ;
-
-
-  ------------------------------------------------------------
-  procedure SetAxi4InterfaceDefault (
-  -----------------------------------------------------------
-    variable AxiBus        : InOut Axi4BaseRecType ;
-    constant Operation     : In    Axi4OptionsType ;
-    constant OptVal        : In    integer
-  ) is
-  begin
-    case Operation is
-      -- AXI
-      when AWPROT =>       AxiBus.WriteAddress.Prot   := to_slv(OptVal, AxiBus.WriteAddress.Prot'length) ;
-
-      -- AXI4 Full
-      when AWID =>         AxiBus.WriteAddress.ID     := to_slv(OptVal, AxiBus.WriteAddress.ID'length) ;
-      when AWSIZE =>       AxiBus.WriteAddress.Size   := to_slv(OptVal, AxiBus.WriteAddress.Size'length) ;
-      when AWBURST =>      AxiBus.WriteAddress.Burst  := to_slv(OptVal, AxiBus.WriteAddress.Burst'length) ;
-      when AWLOCK =>       AxiBus.WriteAddress.Lock   := '1' when OptVal mod 2 = 1 else '0' ;
-      when AWCACHE =>      AxiBus.WriteAddress.Cache  := to_slv(OptVal, AxiBus.WriteAddress.Cache'length) ;
-      when AWQOS =>        AxiBus.WriteAddress.QOS    := to_slv(OptVal, AxiBus.WriteAddress.QOS'length) ;
-      when AWREGION =>     AxiBus.WriteAddress.Region := to_slv(OptVal, AxiBus.WriteAddress.Region'length) ;
-      when AWUSER =>       AxiBus.WriteAddress.User   := to_slv(OptVal, AxiBus.WriteAddress.User'length) ;
-
-      -- Write Data:  AXI
-      -- AXI4 Full
-      when WLAST =>        AxiBus.WriteData.Last       := '1' when OptVal mod 2 = 1 else '0' ;
-      when WUSER =>        AxiBus.WriteData.User       := to_slv(OptVal, AxiBus.WriteData.User'length) ;
-
-      -- AXI3
-      when WID =>          AxiBus.WriteData.ID         := to_slv(OptVal, AxiBus.WriteData.ID'length) ;
-
-      -- Write Response:  AXI
-      when BRESP =>        AxiBus.WriteResponse.Resp   := to_slv(OptVal, AxiBus.WriteResponse.Resp'length) ;
-
-      -- AXI4 Full
-      when BID =>          AxiBus.WriteResponse.ID     := to_slv(OptVal, AxiBus.WriteResponse.ID'length) ;
-      when BUSER =>        AxiBus.WriteResponse.User   := to_slv(OptVal, AxiBus.WriteResponse.User'length) ;
-
-      -- Read Address:  AXI
-      when ARPROT =>       AxiBus.ReadAddress.Prot    := to_slv(OptVal, AxiBus.ReadAddress.Prot'length) ;
-
-      -- AXI4 Full
-      when ARID =>         AxiBus.ReadAddress.ID      := to_slv(OptVal, AxiBus.ReadAddress.ID'length) ;
-      when ARSIZE =>       AxiBus.ReadAddress.Size    := to_slv(OptVal, AxiBus.ReadAddress.Size'length) ;
-      when ARBURST =>      AxiBus.ReadAddress.Burst   := to_slv(OptVal, AxiBus.ReadAddress.Burst'length) ;
-      when ARLOCK =>       AxiBus.ReadAddress.Lock    := '1' when OptVal mod 2 = 1 else '0' ;
-      when ARCACHE =>      AxiBus.ReadAddress.Cache   := to_slv(OptVal, AxiBus.ReadAddress.Cache'length) ;
-      when ARQOS =>        AxiBus.ReadAddress.QOS     := to_slv(OptVal, AxiBus.ReadAddress.QOS'length) ;
-      when ARREGION =>     AxiBus.ReadAddress.Region  := to_slv(OptVal, AxiBus.ReadAddress.Region'length) ;
-      when ARUSER =>       AxiBus.ReadAddress.User    := to_slv(OptVal, AxiBus.ReadAddress.User'length) ;
-
-      -- Read Data: AXI
-      when RRESP =>         AxiBus.ReadData.Resp       := to_slv(OptVal, AxiBus.ReadData.Resp'length) ;
-
-      -- AXI4 Full
-      when RID =>           AxiBus.ReadData.ID         := to_slv(OptVal, AxiBus.ReadData.ID'length) ;
-      when RLAST =>         AxiBus.ReadData.Last       := '1' when OptVal mod 2 = 1 else '0' ;
-      when RUSER =>         AxiBus.ReadData.User       := to_slv(OptVal, AxiBus.ReadData.User'length) ;
-
-      -- The End -- Done
-      when others =>
-        Alert("Unknown model option", FAILURE) ;
-
-    end case ;
-  end procedure SetAxi4InterfaceDefault ;
-
-  ------------------------------------------------------------
-  impure function GetAxi4InterfaceDefault (
-  -----------------------------------------------------------
-    constant AxiBus        : in  Axi4BaseRecType ;
-    constant Operation     : in  Axi4OptionsType
-  ) return integer is
-  begin
-    case Operation is
-      -- Write Address
-      -- AXI
-      when AWPROT =>             return to_integer(AxiBus.WriteAddress.Prot);
-
-      -- AXI4 Full
-      when AWID =>               return to_integer(AxiBus.WriteAddress.ID    ) ;
-      when AWSIZE =>             return to_integer(AxiBus.WriteAddress.Size  ) ;
-      when AWBURST =>            return to_integer(AxiBus.WriteAddress.Burst ) ;
-      when AWLOCK =>             return to_integer(AxiBus.WriteAddress.Lock  ) ;
-      when AWCACHE =>            return to_integer(AxiBus.WriteAddress.Cache ) ;
-      when AWQOS =>              return to_integer(AxiBus.WriteAddress.QOS   ) ;
-      when AWREGION =>           return to_integer(AxiBus.WriteAddress.Region) ;
-      when AWUSER =>             return to_integer(AxiBus.WriteAddress.User  ) ;
-
-      -- Write Data
-      -- AXI4 Full
-      when WLAST =>              return to_integer(AxiBus.WriteData.Last) ;
-      when WUSER =>              return to_integer(AxiBus.WriteData.User) ;
-
-      -- AXI3
-      when WID =>                return to_integer(AxiBus.WriteData.ID) ;
-
-      -- Write Response
-      when BRESP =>              return to_integer(AxiBus.WriteResponse.Resp) ;
-
-      -- AXI4 Full
-      when BID =>                return to_integer(AxiBus.WriteResponse.ID  ) ;
-      when BUSER =>              return to_integer(AxiBus.WriteResponse.User) ;
-
-      -- Read Address
-      when ARPROT =>             return to_integer(AxiBus.ReadAddress.Prot) ;
-
-      -- AXI4 Full
-      when ARID =>               return to_integer(AxiBus.ReadAddress.ID    ) ;
-      when ARSIZE =>             return to_integer(AxiBus.ReadAddress.Size  ) ;
-      when ARBURST =>            return to_integer(AxiBus.ReadAddress.Burst ) ;
-      when ARLOCK =>             return to_integer(AxiBus.ReadAddress.Lock  ) ;
-      when ARCACHE =>            return to_integer(AxiBus.ReadAddress.Cache ) ;
-      when ARQOS =>              return to_integer(AxiBus.ReadAddress.QOS   ) ;
-      when ARREGION =>           return to_integer(AxiBus.ReadAddress.Region) ;
-      when ARUSER =>             return to_integer(AxiBus.ReadAddress.User  ) ;
-
-      -- Read Data
-      when RRESP =>              return to_integer(AxiBus.ReadData.Resp) ;
-
-      -- AXI4 Full
-      when RID =>                return to_integer(AxiBus.ReadData.ID   ) ;
-      when RLAST =>              return to_integer(AxiBus.ReadData.Last ) ;
-      when RUSER =>              return to_integer(AxiBus.ReadData.User ) ;
-
-      -- The End -- Done
-      when others =>
---        Alert(ModelID, "Unknown model option", FAILURE) ;
-        Alert("Unknown model option", FAILURE) ;
-        return integer'left ;
-
-    end case ;
-  end function GetAxi4InterfaceDefault ;
-
-  ------------------------------------------------------------
-  procedure SetAxi4LiteInterfaceDefault (
-  -----------------------------------------------------------
-    variable AxiBus        : InOut Axi4LiteRecType ;
-    constant Operation     : In    Axi4OptionsType ;
-    constant OptVal        : In    integer
-  ) is
-  begin
-    case Operation is
-      -- AXI
-      when AWPROT =>       AxiBus.WriteAddress.Prot   := to_slv(OptVal, AxiBus.WriteAddress.Prot'length) ;
-
-      -- Write Response:  AXI
-      when BRESP =>        AxiBus.WriteResponse.Resp   := to_slv(OptVal, AxiBus.WriteResponse.Resp'length) ;
-
-      -- Read Address:  AXI
-      when ARPROT =>       AxiBus.ReadAddress.Prot    := to_slv(OptVal, AxiBus.ReadAddress.Prot'length) ;
-
-      -- Read Data: AXI
-      when RRESP =>         AxiBus.ReadData.Resp       := to_slv(OptVal, AxiBus.ReadData.Resp'length) ;
-
-      -- The End -- Done
-      when others =>
-        Alert("Unknown model option", FAILURE) ;
-
-    end case ;
-  end procedure SetAxi4LiteInterfaceDefault ;
-
-  ------------------------------------------------------------
-  impure function GetAxi4LiteInterfaceDefault (
-  -----------------------------------------------------------
-    constant AxiBus        : in  Axi4LiteRecType ;
-    constant Operation     : in  Axi4OptionsType
-  ) return integer is
-  begin
-    case Operation is
-      -- Write Address
-      when AWPROT =>             return to_integer(AxiBus.WriteAddress.Prot);
-
-      -- Write Response
-      when BRESP =>              return to_integer(AxiBus.WriteResponse.Resp) ;
-
-      -- Read Address
-      when ARPROT =>             return to_integer(AxiBus.ReadAddress.Prot) ;
-
-      -- Read Data
-      when RRESP =>              return to_integer(AxiBus.ReadData.Resp) ;
-
-      -- The End -- Done
-      when others =>
---        Alert(ModelID, "Unknown model option", FAILURE) ;
-        Alert("Unknown model option", FAILURE) ;
-        return integer'left ;
-
-    end case ;
-  end function GetAxi4LiteInterfaceDefault ;
 
 -- !! These are deprecated
 -- !! These are deprecated

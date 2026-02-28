@@ -1,6 +1,6 @@
 --
---  File Name:         Axi4Memory.vhd
---  Design Unit Name:  Axi4Memory
+--  File Name:         Axi4Subordinate.vhd
+--  Design Unit Name:  Axi4Subordinate
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      Simple AXI Full Memory Subordinate Model
+--      Simple AXI Full Subordinate Transactor Model
 --
 --
 --  Developed by:
@@ -19,7 +19,6 @@
 --
 --  Revision History:
 --    Date      Version    Description
---    09/2024   2024.09    Updated ClassifyUnimplementedOperation.  Added DEBUG log for LOCAL_MEMORY_NAME
 --    07/2024   2024.07    Shortened AlertLog and data structure names for better printing
 --    03/2024   2024.03    Updated SafeResize to use ModelID
 --    01/2024   2024.01    Updated Params to use singleton data structure
@@ -29,17 +28,18 @@
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
 --    03/2022   2022.03    Updated calls to NewID for AlertLogID and FIFOs
 --    02/2022   2022.02    Replaced to_hstring with to_hxstring
---                         Added Search by NAME to NewID.
 --    01/2022   2022.01    Moved MODEL_INSTANCE_NAME and MODEL_NAME to entity declarative region
+--    09/2021   2021.09    Minor fix to push WriteDataFifo 
 --    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
---    06/2021   2021.06    GHDL support + new memory data structure  
+--    06/2021   2021.06    Updates for GHDL.   
 --    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.   
---    06/2020   2020.06    Derived from Axi4Subordinate.vhd
+--    12/2020   2020.12    Updated.  
+--    09/2017   2017       Initial revision
 --
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2020 - 2024 by SynthWorks Design Inc.
+--  Copyright (c) 2017 - 2024 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -70,13 +70,12 @@ library osvvm_common ;
   use work.Axi4OptionsPkg.all ;
   use work.Axi4InterfaceCommonPkg.all ;
   use work.Axi4InterfacePkg.all ;
-  use work.Axi4CommonPkg.all ;
   use work.Axi4ModelPkg.all ;
+  use work.Axi4CommonPkg.all ;
 
-entity Axi4Memory is
+entity Axi4Subordinate is
 generic (
   MODEL_ID_NAME   : string := "" ;
-  MEMORY_NAME     : string := "" ;
   tperiod_Clk     : time   := 10 ns ;
 
   DEFAULT_DELAY   : time   := 1 ns ; 
@@ -104,7 +103,7 @@ port (
   Clk         : in   std_logic ;
   nReset      : in   std_logic ;
 
-  -- AXI Subordinate Interface
+  -- AXI Manager Functional Interface
   AxiBus      : inout Axi4RecType ;
 
   -- Testbench Transaction Interface
@@ -114,46 +113,35 @@ port (
   -- Derive AXI interface properties from the AxiBus
   constant AXI_ADDR_WIDTH : integer := AxiBus.WriteAddress.Addr'length ;
   constant AXI_DATA_WIDTH : integer := AxiBus.WriteData.Data'length ;
-  
+
   -- Derive ModelInstance label from path_name
+  -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
-    -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
-    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Memory'PATH_NAME))) ;
+    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Subordinate'PATH_NAME))) ;
 
-  -- Memory Data Structure, Access via MemoryName
-  constant LOCAL_MEMORY_NAME : string := 
-    IfElse(MEMORY_NAME /= "", MEMORY_NAME, MODEL_INSTANCE_NAME & ":memory") ;
---    IfElse(MEMORY_NAME /= "", MEMORY_NAME, to_lower(Axi4Memory'PATH_NAME) & ":memory") ;
-    
-  constant MODEL_NAME : string := "Axi4Memory" ;
+  constant MODEL_NAME : string := "Axi4Subordinate" ;
 
-end entity Axi4Memory ;
+end entity Axi4Subordinate ;
 
-architecture MemorySubordinate of Axi4Memory is
-  constant AXI_DATA_BYTE_WIDTH  : integer := AXI_DATA_WIDTH / 8 ;
-  constant AXI_BYTE_ADDR_WIDTH  : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
+architecture Transactor of Axi4Subordinate is
 
-  signal ModelID, BusFailedID, DataCheckID : AlertLogIDType ;
+  signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
   signal WriteAddressDelayCov, WriteDataDelayCov, WriteResponseDelayCov : DelayCoverageIDType ;
   signal ReadAddressDelayCov,  ReadDataDelayCov : DelayCoverageIDType ;
   signal UseCoverageDelays : boolean := FALSE ; 
-  
+
+  constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
+  constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
+
   signal Params    : ModelParametersIDType ;
-  signal MemoryID  : MemoryIDType ; 
 
---  constant MemoryID : MemoryIDType := NewID(
---      Name       => LOCAL_MEMORY_NAME, 
---      AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
---      DataWidth  => 8,               -- Memory is byte oriented
---      Search     => NAME
---    ) ; 
-
-  signal WriteAddressFifo     : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
-  signal WriteDataFifo        : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
-  signal WriteResponseFifo    : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
-  
-  signal ReadAddressFifo      : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
-  signal ReadDataFifo         : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal WriteAddressFifo           : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal WriteDataFifo              : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+--  signal WriteTransactionFifo       : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal WriteResponseFifo          : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal ReadAddressFifo            : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal ReadAddressTransactionFifo : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
+  signal ReadDataFifo               : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
 
   -- Setup so that if no configuration is done, accept transactions
   signal WriteAddressExpectCount     : integer := 0 ;
@@ -168,7 +156,6 @@ architecture MemorySubordinate of Axi4Memory is
 
   signal ReadDataRequestCount        : integer := 0 ;
   signal ReadDataDoneCount           : integer := 0 ;
-
 
   -- A hack of a way to set the parameters for now.
   signal ModelBResp  : Axi4RespType := to_Axi4RespType(OKAY) ;
@@ -191,52 +178,34 @@ begin
   ------------------------------------------------------------
   --  Initialize AlertLogIDs
   ------------------------------------------------------------
-  InitalizeAlertLogIDs : process
-    variable ID, ParentID : AlertLogIDType ;
-    variable vMemID  : MemoryIDType ; 
+  Initalize : process
+    variable ID      : AlertLogIDType ;
     variable vParams : ModelParametersIDType ; 
   begin
-  
-    ID  := NewID(MODEL_INSTANCE_NAME) ;
-    ModelID   <= ID ;
-
-    -- Select ParentID for Memory Model
-    if MODEL_INSTANCE_NAME /= LOCAL_MEMORY_NAME then 
-      -- No Match:  Memory Model is a child of this ID 
-      ParentID := ID ; 
-    else
-      -- Match: Memory Data Structure uses same AlertLogID as VC
-      ParentID := ALERTLOG_BASE_ID ; 
-    end if ; 
-    
-    vMemID := NewID(
-      Name       => LOCAL_MEMORY_NAME, 
-      AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
-      DataWidth  => 8,               -- Memory is byte oriented
-      ParentID   => ParentID, 
-      Search     => NAME
-    ) ; 
-    MemoryID  <= vMemID ; 
-
     -- Alerts
-    BusFailedID  <= NewID("No response", ID ) ;
-    DataCheckID  <= NewID("Data Check", ID ) ;
-    
-    vParams                 := NewID("Axi4Memory Parameters", to_integer(OPTIONS_MARKER), ID) ; 
+    ID                      := NewID(MODEL_INSTANCE_NAME) ;
+    ModelID                 <= ID ;
+--    TransRec.AlertLogID     <= NewID("Transaction", ID ) ;
+    ProtocolID              <= NewID("Protocol Error", ID ) ;
+    DataCheckID             <= NewID("Data Check",     ID ) ;
+    BusFailedID             <= NewID("No response",    ID ) ;
+
+    vParams                 := NewID("AxiS Parameters", to_integer(OPTIONS_MARKER), ID) ; 
     InitAxiOptions(vParams) ;
     Params                  <= vParams ; 
 
     -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
     --   FIFOS only generate usage type errors 
-    WriteAddressFifo    <= NewID("WriteAddrFifo",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    WriteDataFifo       <= NewID("WriteDataFifo",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    WriteResponseFifo   <= NewID("WriteRespFifo",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    ReadAddressFifo     <= NewID("ReadAddrFifo",    ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    ReadDataFifo        <= NewID("ReadDataFifo",    ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
-    wait for 0 ns ; wait for 0 ns ; 
-    log(ID, "Memory name: " & LOCAL_MEMORY_NAME, DEBUG) ; 
+    WriteAddressFifo           <= NewID("WriteAddrFifo",          ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    WriteDataFifo              <= NewID("WriteDataFifo",          ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+--    WriteTransactionFifo       <= NewID("WriteTransactionFifo",   ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    WriteResponseFifo          <= NewID("WriteResponseFifo",      ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+
+    ReadAddressFifo            <= NewID("ReadAddrFifo",           ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    ReadAddressTransactionFifo <= NewID("ReadByteAddrFifo",       ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
+    ReadDataFifo               <= NewID("ReadDataFifo",           ID, ReportMode => DISABLED, Search => PRIVATE_NAME);
     wait ;
-  end process InitalizeAlertLogIDs ;
+  end process Initalize ;
 
 
   ------------------------------------------------------------
@@ -244,58 +213,93 @@ begin
   --    Handles transactions between TestCtrl and Model
   ------------------------------------------------------------
   TransactionDispatcher : process
-    variable Address          : std_logic_vector(AxiBus.WriteAddress.Addr'range) ;
-    variable Data             : std_logic_vector(AxiBus.WriteData.Data'range) ;
-    variable ExpectedData     : std_logic_vector(AxiBus.WriteData.Data'range) ;
-    variable ByteData         : std_logic_vector(7 downto 0) ;
-    variable DataWidth        : integer ;
-    variable NumBytes         : integer ;
-    variable Count            : integer ;
-    variable TransactionCount : integer := 0 ; 
-    variable Axi4Option       : Axi4OptionsType ;
-    variable Axi4OptionVal    : integer ; 
+
+    -- Formulate local copies of values for AXI Interface
+    variable LocalAW : AxiBus.WriteAddress'subtype ;
+    variable LocalWD : AxiBus.WriteData'subtype ;
+--    variable LocalWR : AxiBus.WriteResponse'subtype ;
+    variable LocalAR : AxiBus.ReadAddress'subtype ;
+    variable LocalRD : AxiBus.ReadData'subtype ;
+
+    variable WriteAvailable      : boolean := FALSE ;
+
+    variable WriteByteCount : integer ;
+    variable WriteByteAddr  : integer ;
+
+    variable ReadByteAddr  : integer ;
+    variable ReadAvailable : boolean := FALSE ;
+
+    variable Axi4Option    : Axi4OptionsType ; 
+    variable Axi4OptionVal : integer ; 
+    
+    variable FilterUndrivenWriteData       : boolean := TRUE ;
+    variable UndrivenWriteDataValue        : std_logic := '0' ;
+
+    variable WriteAddressTransactionCount  : integer := 0 ; 
+    variable WriteDataTransactionCount     : integer := 0 ; 
+    variable WriteResponseTransactionCount : integer := 0 ; 
   begin
     wait for 0 ns ; -- Allow ModelID to become valid
     TransRec.Params         <= Params ; 
-    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo",      ModelID, Search => PRIVATE_NAME) ;
-    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",       ModelID, Search => PRIVATE_NAME) ;
+--
+-- AxiLite does not support bursts
+--    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo",         ModelID, Search => PRIVATE_NAME) ;
+--    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",          ModelID, Search => PRIVATE_NAME) ;
     WriteAddressDelayCov    <= NewID("WriteAddrDelayCov",   ModelID, ReportMode => DISABLED) ; 
-    WriteDataDelayCov       <= NewID("WriteDataDelayCov",   ModelID, ReportMode => DISABLED) ; 
-    WriteResponseDelayCov   <= NewID("WriteRespDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    WriteDataDelayCov       <= NewID("WriteDataDelayCov",      ModelID, ReportMode => DISABLED) ; 
+    WriteResponseDelayCov   <= NewID("WriteRespDelayCov",  ModelID, ReportMode => DISABLED) ; 
     ReadAddressDelayCov     <= NewID("ReadAddrDelayCov",    ModelID, ReportMode => DISABLED) ; 
-    ReadDataDelayCov        <= NewID("ReadDataDelayCov",    ModelID, ReportMode => DISABLED) ; 
-    
---!! AWCache, ARCache Defaults
+    ReadDataDelayCov        <= NewID("ReadDataDelayCov",       ModelID, ReportMode => DISABLED) ; 
+
     DispatchLoop : loop
       WaitForTransaction(
          Clk      => Clk,
          Rdy      => TransRec.Rdy,
          Ack      => TransRec.Ack
       ) ;
-      TransactionCount := TransactionCount + 1 ; 
 
       case TransRec.Operation is
         when WAIT_FOR_TRANSACTION =>
-          -- Wait for either next write or read access of memory to complete
-          Count := WriteAddressReceiveCount + ReadAddressReceiveCount ;
-          wait until (WriteAddressReceiveCount + ReadAddressReceiveCount) = Count + 1 ;
+          -- wait for write or read transaction to be available
+          loop
+            exit when not IsEmpty(WriteAddressFifo) and not IsEmpty(WriteDataFifo) ; -- Write Available
+            exit when not IsEmpty(ReadAddressFifo) ; -- Read Available
+            wait on WriteAddressReceiveCount, WriteDataReceiveCount, ReadAddressReceiveCount ;
+          end loop ;
 
         when WAIT_FOR_WRITE_TRANSACTION =>
-          -- Wait for next write to memory to complete
-          Count := WriteAddressReceiveCount ;
-          wait until WriteAddressReceiveCount = Count + 1 ;
+          -- wait for write transaction to be available
+          if IsEmpty(WriteAddressFifo) then
+            WaitForToggle(WriteAddressReceiveCount) ;
+          end if ;
+          if IsEmpty(WriteDataFifo) then
+            WaitForToggle(WriteDataReceiveCount) ;
+          end if ;
 
         when WAIT_FOR_READ_TRANSACTION =>
-          -- Wait for next read from memory to complete
-          Count := ReadAddressReceiveCount ;
-          wait until ReadAddressReceiveCount = Count + 1 ;
+          -- wait for read transaction to be available
+          if IsEmpty(ReadAddressFifo) then
+            WaitForToggle(ReadAddressReceiveCount) ;
+          end if ;
 
+  --  Alternate interpretation of wait for transaction
+  --      when WAIT_FOR_WRITE_TRANSACTION =>
+  --        -- Wait for next write to memory to complete
+  --        if (WriteAddressReceiveCount /= WriteReceiveCount) or (WriteReceiveCount /= WriteResponseDoneCount) then
+  --          wait until (WriteAddressReceiveCount = WriteReceiveCount) and (WriteReceiveCount = WriteResponseDoneCount) ;
+  --        end if ;
+  --
+  --      when WAIT_FOR_READ_TRANSACTION =>
+  --        -- Wait for a requested Read Data Transaction to complete
+  --        if ReadDataRequestCount /= ReadDataDoneCount then
+  --          wait until ReadDataRequestCount = ReadDataDoneCount ;
+  --        end if ;
+  --
         when WAIT_FOR_CLOCK =>
           WaitForClock(Clk, TransRec.IntToModel) ;
 
         when GET_ALERTLOG_ID =>
           TransRec.IntFromModel <= integer(ModelID) ;
-          wait for 0 ns ;
 
         when SET_USE_RANDOM_DELAYS =>        
           UseCoverageDelays      <= TransRec.BoolToModel ; 
@@ -327,70 +331,155 @@ begin
 
         when GET_TRANSACTION_COUNT =>
           TransRec.IntFromModel <= integer(TransRec.Rdy) ;
-          wait for 0 ns ;
 
         when GET_WRITE_TRANSACTION_COUNT =>
           TransRec.IntFromModel <= WriteAddressReceiveCount ;
-          wait for 0 ns ;
 
         when GET_READ_TRANSACTION_COUNT =>
           TransRec.IntFromModel <= ReadAddressReceiveCount ;
-          wait for 0 ns ;
 
-        when WRITE_OP =>
-          -- Back door Write access to memory.  Completes without time passing.
-          Address    := SafeResize(ModelID, TransRec.Address, Address'length) ;
-          Data       := SafeResize(ModelID, TransRec.DataToModel, Data'length) ;
-          DataWidth  := TransRec.DataWidth ;
-          NumBytes   := DataWidth / 8 ;
+        when WRITE_OP | WRITE_ADDRESS | WRITE_DATA |
+             ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
 
-  --!9        -- Do checks  Is address appropriate for NumBytes
-  --        AlignCheckWriteData (ModelID, Data, Strb, TransRec.DataWidth, ByteAddr) ;
-
-          -- Memory is byte oriented.  Access as Bytes
-          for ByteNum in 0 to NumBytes-1 loop
-            ByteData := Data((8*ByteNum + 7)  downto 8*ByteNum) ;
-            MemWrite(MemoryID, Address + ByteNum, ByteData) ;
-          end loop ;
-
-        when READ_OP | READ_CHECK =>
-          -- Back door Read access to memory.  Completes without time passing.
-          Address    := SafeResize(ModelID, TransRec.Address, Address'length) ;
-  --        ByteAddr   := CalculateByteAddress(Address, AXI_BYTE_ADDR_WIDTH);
-          Data       := (others => '0') ;
-          DataWidth  := TransRec.DataWidth ;
-          NumBytes   := DataWidth / 8 ;
-
-  --!9        -- Do checks  Is address appropriate for NumBytes
-  --??  What if 32 bit read, but address is byte oriented??
-  --??  ERROR, or OK & return unaddressed bytes as X?
-
-          -- Memory is byte oriented.  Access as Bytes
-          for ByteNum in 0 to NumBytes-1 loop
-            MemRead(MemoryID, Address + ByteNum, ByteData) ;
-            Data((8*ByteNum + 7)  downto 8*ByteNum) := ByteData ;
-          end loop ;
-
-          TransRec.DataFromModel <= SafeResize(ModelID, Data, TransRec.DataFromModel'length) ;
-
-          if IsReadCheck(TransRec.Operation) then
-            ExpectedData := SafeResize(ModelID, TransRec.DataToModel, ExpectedData'length) ;
-            AffirmIf( DataCheckID, Data = ExpectedData,
-              "Read Address: " & to_hxstring(Address) &
-              "  Data: " & to_hxstring(Data) &
-              "  Expected: " & to_hxstring(ExpectedData),
-              IsLogEnabled(ModelID, INFO) ) ;
+          if (IsTryWriteAddress(TransRec.Operation) and IsEmpty(WriteAddressFifo)) or
+             (IsTryWriteData(TransRec.Operation)    and IsEmpty(WriteDataFifo)) then
+            WriteAvailable         := FALSE ;
+            TransRec.DataFromModel <= (TransRec.DataFromModel'range => '0') ; 
           else
-  --!! TODO:  Change format to Address, Data Transaction #, Read Data
-            Log( ModelID,
-              "Read Address: " & to_hxstring(Address) &
-              "  Data: " & to_hxstring(Data),
-              INFO
-            ) ;
+            WriteAvailable         := TRUE ;
+          end if ;
+          TransRec.BoolFromModel <= WriteAvailable ;
+
+          if WriteAvailable and IsWriteAddress(TransRec.Operation) then
+            -- Find Write Address transaction
+            if IsEmpty(WriteAddressFifo) then
+              WaitForToggle(WriteAddressReceiveCount) ;
+            end if ;
+
+            (LocalAW.Addr, LocalAW.Prot) := pop(WriteAddressFifo) ;
+            TransRec.Address       <= SafeResize(ModelID, LocalAW.Addr, TransRec.Address'length) ;
+            WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
+
+  --!! Address checks intentionally removed - only want an error if the value changes.  
+  --          AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "SlaveGetWrite, Address length does not match", FAILURE) ;
+  --!! Add checking for AWProt?
+  --     Suppress signaling of error during timeout?  return "----" on timeout
+  --          AlertIfNotEqual(ModelID, LocalAW.Prot, ModelWProt, "SlaveGetWrite, WProt", ERROR) ;
           end if ;
 
+          if WriteAvailable and IsWriteData(TransRec.Operation) then
+            -- Find Write Data transaction
+            if IsEmpty(WriteDataFifo) then
+              WaitForToggle(WriteDataReceiveCount) ;
+            end if ;
+
+            (LocalWD.Data, LocalWD.Strb, LocalWD.Last, LocalWD.User, LocalWD.ID) := pop(WriteDataFifo) ;
+
+            if IsWriteAddress(TransRec.Operation) then
+              WriteByteAddr := CalculateByteAddress(LocalAW.Addr, AXI_BYTE_ADDR_WIDTH) ;
+            else 
+              -- Calculate byte address based on strobes
+              WriteByteAddr := 0 ; 
+              for i in LocalWD.Strb'reverse_range loop 
+                exit when LocalWD.Strb(i) = '1' ; 
+                WriteByteAddr := WriteByteAddr + 1 ; 
+              end loop ; 
+            end if ; 
+            
+            FilterUndrivenWriteData := Get(Params, to_integer(WRITE_DATA_FILTER_UNDRIVEN)) ;
+            UndrivenWriteDataValue  := GetAxi4Parameter(Params, WRITE_DATA_UNDRIVEN_VALUE) ;
+--            GetAxi4Parameter(Params, WRITE_DATA_FILTER_UNDRIVEN, FilterUndrivenWriteData) ;
+--            GetAxi4Parameter(Params, WRITE_DATA_UNDRIVEN_VALUE,  UndrivenWriteDataValue) ;
+            if FilterUndrivenWriteData then
+              FilterUndrivenData(LocalWD.Data, LocalWD.Strb, UndrivenWriteDataValue) ;
+            end if ;
+
+            
+            LocalWD.Data := AlignDataBusToBytes(LocalWD.Data, TransRec.DataWidth, WriteByteAddr) ;
+            TransRec.DataFromModel  <= SafeResize(ModelID, LocalWD.Data, TransRec.DataFromModel'length) ;
+            
+            if LocalWD.Last = '1' then
+              WriteDataTransactionCount := Increment(WriteDataTransactionCount) ; 
+            end if ;
+
+
+            -- Check Data Size
+            CheckDataIsBytes(ModelID, TransRec.DataWidth, "GetWrite", WriteDataTransactionCount) ;
+            CheckDataWidth(ModelID, TransRec.DataWidth, WriteByteAddr, AXI_DATA_WIDTH, "GetWrite", WriteDataTransactionCount) ; 
+
+  --!! ??? Add Checking for WSTRB?
+  -- Works for SlaveGetWriteData - but only if access is correct sized, but not SlaveGetWrite
+  --          -- Check WStrb
+  --          ByteCount := TransRec.DataWidth / 8 ;
+  --          ExpectedWStrb := CalculateWriteStrobe(WriteByteAddr, ByteCount, AXI_DATA_BYTE_WIDTH) ;
+  --          AlertIfNotEqual(ModelID, LocalWD.Strb, ExpectedWStrb, "SlaveGetWrite, WStrb", ERROR) ;
+
+          end if ;
+
+          if WriteAddressTransactionCount /= WriteResponseTransactionCount and 
+                WriteDataTransactionCount /= WriteResponseTransactionCount then
+            push(WriteResponseFifo, ModelBResp) ;
+            increment(WriteReceiveCount) ;
+            WriteResponseTransactionCount := Increment(WriteResponseTransactionCount) ; 
+          end if ;
+
+  --    -- Log this operation
+  --    Log(ModelID,
+  --      "Write Operation." &
+  --      "  AWAddr: "    & to_hxstring(LocalAW.Addr) &
+  --      "  AWProt: "    & to_string(LocalAW.Prot) &
+  --      "  WData: "     & to_hxstring(LocalWD.Data) &
+  --      "  WStrb: "     & to_string(LocalWD.Strb) &
+  --      "  Operation# " & to_string(WriteReceiveCount),
+  --      DEBUG
+  --    ) ;
+
+          wait for 0 ns ;
+
+
+        when READ_OP | READ_ADDRESS | READ_DATA |
+             ASYNC_READ | ASYNC_READ_ADDRESS | ASYNC_READ_DATA =>
+
+          if (IsTryReadAddress(TransRec.Operation) and IsEmpty(ReadAddressFifo)) then
+            ReadAvailable          := FALSE ;
+          else
+            ReadAvailable          := TRUE ;
+          end if ;
+          TransRec.BoolFromModel <= ReadAvailable ;
+
+          if ReadAvailable and IsReadAddress(TransRec.Operation) then
+            -- Expect Read Address Cycle
+            if IsEmpty(ReadAddressFifo) then
+              WaitForToggle(ReadAddressReceiveCount) ;
+            end if ;
+            (LocalAR.Addr, LocalAR.Prot)  := pop(ReadAddressFifo) ;
+            TransRec.Address         <= SafeResize(ModelID, LocalAR.Addr, TransRec.Address'length) ;
+  --         AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Slave Read, Address length does not match", FAILURE) ;
+  --!TODO Add Check here for actual PROT vs expected (ModelRProt)
+  --        TransRec.Prot           <= to_integer(LocalAR.Prot) ;
+          end if ;
+
+          if ReadAvailable and IsReadData(TransRec.Operation) then
+            LocalAR.Addr := pop(ReadAddressTransactionFifo) ;
+            ReadByteAddr  :=  CalculateByteAddress(LocalAR.Addr, AXI_BYTE_ADDR_WIDTH);
+
+            -- Data Sizing Checks
+            CheckDataIsBytes(ModelID, TransRec.DataWidth, "Read Data", ReadDataRequestCount) ;
+            CheckDataWidth  (ModelID, TransRec.DataWidth, ReadByteAddr, AXI_DATA_WIDTH, "Read Data", ReadDataRequestCount) ; 
+   
+            -- Get Read Data Response Values
+            LocalRD.Data  := AlignBytesToDataBus(SafeResize(ModelID, TransRec.DataToModel, LocalRD.Data'length), TransRec.DataWidth, ReadByteAddr) ;
+            push(ReadDataFifo, LocalRD.Data & ModelRResp) ;
+            Increment(ReadDataRequestCount) ;
+
+  -- Currently all ReadData Operations are Async
+  -- Add blocking until completion here
+          end if ;
+
+          wait for 0 ns ;
+         
         when SET_MODEL_OPTIONS =>
-  --!!        Params.Set(TransRec.Options, TransRec.IntToModel) ;
+          -- Set Model Options
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
           if IsAxiParameter(Axi4Option) then
             Set(Params, TransRec.Options, TransRec.IntToModel) ;
@@ -408,13 +497,12 @@ begin
               when RUSER =>                ModelRUser <= to_slv(TransRec.IntToModel, ModelRUser'length) ;
               --
               -- The End -- Done
-              when others =>        
+              when others =>              
                 Alert(ModelID, "SetOptions, Unimplemented Option: " & to_string(Axi4OptionsType'val(TransRec.Options)), FAILURE) ;
             end case ;
           end if ;
 
         when GET_MODEL_OPTIONS =>
-  --!!        TransRec.IntFromModel <= Params.Get(TransRec.Options) ;
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
           if IsAxiParameter(Axi4Option) then
             TransRec.IntFromModel <= Get(Params, TransRec.Options) ;
@@ -451,7 +539,6 @@ begin
 
   end process TransactionDispatcher ;
 
-
   ------------------------------------------------------------
   --  WriteAddressHandler
   --    Execute Write Address Transactions
@@ -483,7 +570,7 @@ begin
 --        GetAxi4Parameter(Params, WRITE_ADDRESS_READY_BEFORE_VALID, ReadyBeforeValid) ;
 --        GetAxi4Parameter(Params, WRITE_ADDRESS_READY_DELAY_CYCLES, ReadyDelayCycles) ;
       end if ; 
-      
+
       ---------------------
       DoAxiReadyHandshake (
       ---------------------
@@ -493,32 +580,26 @@ begin
         ReadyBeforeValid        => ReadyBeforeValid,
 --        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
         ReadyDelayCycles        => ReadyDelayCycles,
-        tpd_Clk_Ready           => tpd_Clk_AWReady
+        tpd_Clk_Ready           => tpd_Clk_AWReady,
+        AlertLogID              => BusFailedID -- ,
+--        TimeOutMessage          => "Write Address # " & to_string(WriteAddressReceiveCount + 1)
       ) ;
 
---!9 Resolve Level
+      -- capture address, prot
+      push(WriteAddressFifo, AW.Addr & AW.Prot) ;
+
+      -- Log this operation
       Log(ModelID,
         "Write Address." &
-        "  AWAddr: "    & to_hxstring(AW.Addr) &
-        "  AWProt: "    & to_string (AW.Prot) &
-        "  AWLen: "     & to_string (AW.Len) &
-        "  AWSize: "    & to_string (AW.Size) &
-        "  AWBurst: "   & to_string (AW.Burst) &
-        "  AWID: "      & to_string (AW.ID) &
-        "  AWUser: "    & to_string (AW.User) &
-        "  Operation# " & to_string (WriteAddressReceiveCount + 1),
-        DEBUG
+        "  AWAddr: "  & to_hxstring(AW.Addr) &
+        "  AWProt: "  & to_string(AW.Prot) &
+        "  Operation# " & to_string(WriteAddressReceiveCount + 1),
+        INFO
       ) ;
-
-      -- Send Address Information to WriteHandler
-      push(WriteAddressFifo, AW.Addr & AW.Len & AW.Prot & AW.Size & AW.Burst & AW.ID & AW.User ) ;
 
       -- Signal completion
       increment(WriteAddressReceiveCount) ;
       wait for 0 ns ;
-
---?6 Add delay between accepting addresses determined by type of address: Single Word, First Burst, Burst, Last Burst
-
     end loop WriteAddressOperation ;
   end process WriteAddressHandler ;
 
@@ -554,7 +635,7 @@ begin
 --        GetAxi4Parameter(Params, WRITE_DATA_READY_BEFORE_VALID, ReadyBeforeValid) ;
 --        GetAxi4Parameter(Params, WRITE_DATA_READY_DELAY_CYCLES, ReadyDelayCycles) ;
       end if ; 
-      
+
       ---------------------
       DoAxiReadyHandshake(
       ---------------------
@@ -564,126 +645,33 @@ begin
         ReadyBeforeValid        => ReadyBeforeValid,
 --        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
         ReadyDelayCycles        => ReadyDelayCycles,
-        tpd_Clk_Ready           => tpd_Clk_WReady
+        tpd_Clk_Ready           => tpd_Clk_WReady,  
+        AlertLogID              => BusFailedID  -- ,
+--        TimeOutMessage          => "Write Data # " & to_string(WriteDataReceiveCount + 1)
       ) ;
 
+      -- capture Data, wstrb
+      if WD.Valid = '1' then
+        push(WriteDataFifo, WD.Data & WD.Strb & WD.Last & WD.User & WD.ID) ;
+      else
+        -- On failure to receive Valid, assert LAST
+        push(WriteDataFifo, WD.Data & WD.Strb & '1' & WD.User & WD.ID) ;
+      end if ;
 
-      -- Send to WriteHandler
-      push(WriteDataFifo, WD.Data & WD.Strb) ;
-
---!! Add AXI Full Information
---!9 Resolve Level
+      -- Log this operation
       Log(ModelID,
         "Write Data." &
         "  WData: "  & to_hxstring(WD.Data) &
         "  WStrb: "  & to_string(WD.Strb) &
         "  Operation# " & to_string(WriteDataReceiveCount + 1),
-        DEBUG
+        INFO
       ) ;
 
       -- Signal completion
       increment(WriteDataReceiveCount) ;
-
---!9 Delay between accepting words determined by type of write address: Single Word, First Burst, Burst, Last Burst
-
-    end loop WriteDataOperation ;
-    wait ; -- remove "no wait" warning
-  end process WriteDataHandler ;
-
-
-  ------------------------------------------------------------
-  --  WriteHandler
-  --    Collect Write Address and Data transactions
-  ------------------------------------------------------------
-  WriteHandler : process
-    variable LAW : AxiBus.WriteAddress'subtype ;
-    -- alias    AW : AxiBus.WriteAddress'subtype is AxiBus.WriteAddress ;
-    variable LWD : AxiBus.WriteData'subtype ;
-    -- alias    WD  : AxiBus.WriteData'subtype is AxiBus.WriteData ;
-    variable BurstLen         : integer ;
-    variable ByteAddressBits  : integer ;
-    variable BytesPerTransfer : integer ;
-    variable TransferAddress, MemoryAddress : std_logic_vector(LAW.Addr'range) ;
-    variable ByteData         : std_logic_vector(7 downto 0) ;
-  begin
-    wait for 0 ns ; -- Allow WriteAddressFifo to initialize
-    
-    WriteHandlerLoop : loop 
-      -- Find Write Address and Data transaction
-      if IsEmpty(WriteAddressFifo) then
-        WaitForToggle(WriteAddressReceiveCount) ;
-      end if ;
-      (LAW.Addr, LAW.Len, LAW.Prot, LAW.Size, LAW.Burst, LAW.ID, LAW.User) := pop(WriteAddressFifo) ;
-
-      if LAW.Len'length > 0 then
-        BurstLen := to_integer(LAW.Len) + 1 ;
-      else
-        BurstLen := 1 ;
-      end if ;
-
-      if LAW.Size'length > 0 then
-        ByteAddressBits   := to_integer(LAW.Size) ;
-        BytesPerTransfer  := 2 ** ByteAddressBits ;
-      else
-        ByteAddressBits   := AXI_BYTE_ADDR_WIDTH ;
-        BytesPerTransfer  := AXI_DATA_BYTE_WIDTH ;
-      end if ;
-
-      -- first word in a burst or single word transfer
-      TransferAddress  := LAW.Addr(LAW.Addr'left downto ByteAddressBits) & (ByteAddressBits downto 1 => '0') ;
-      -- GetWordAddr(Addr, BytesPerTransfer) ;
-      MemoryAddress    := TransferAddress(LAW.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
-      -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
-
-  --!3 Delay before first word - burst vs. single word
-
-      -- Burst transfers
-      BurstLoop : for BurstIndex in 1 to BurstLen loop
-        -- Wait for Data
-        if IsEmpty(WriteDataFifo) then
-          WaitForToggle(WriteDataReceiveCount) ;
-        end if ;
-        (LWD.Data, LWD.Strb) := pop(WriteDataFifo) ;
-
-        if BurstIndex = 1 then
-          Log(ModelID,
-            "Memory Write." &
-            "  AWAddr: "    & to_hxstring(LAW.Addr) &
-            "  AWProt: "    & to_string (LAW.Prot) &
-            "  WData: "     & to_hxstring(LWD.Data) &
-            "  WStrb: "     & to_string (LWD.Strb) &
-            "  Operation# " & to_string (WriteReceiveCount),
-            INFO
-          ) ;
-        end if ;
-
-        -- Memory is byte oriented.  Access as Bytes
-        for j in 0 to AXI_DATA_BYTE_WIDTH-1 loop
-          if LWD.Strb(j) = '1' then
-            ByteData := LWD.Data((8*j + 7)  downto 8*j) ;
-            MemWrite(MemoryID, MemoryAddress + j, ByteData) ;
-          end if ;
-        end loop ;
-
-  --!5        GetNextBurstAddress(Address, BurstType) ;  -- to support Wrap addressing
-        TransferAddress := TransferAddress + BytesPerTransfer ;
-        MemoryAddress   := TransferAddress(LAW.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
-        -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
-
-        --!3 Delay between burst words - burst vs. single word
-
-      end loop BurstLoop ;
-
-  --!3 Delay after last word - burst vs. single word
-
-  --!9 Get response from Params
-  --!9 Does response vary with Address?
-  --!! Only one response per burst cycle.  Last cycle of a burst only
-      push(WriteResponseFifo, ModelBResp & LAW.ID & LAW.User) ;
-      increment(WriteReceiveCount) ;
       wait for 0 ns ;
-    end loop WriteHandlerLoop ; 
-  end process WriteHandler ;
+    end loop WriteDataOperation ;
+  end process WriteDataHandler ;
 
 
   ------------------------------------------------------------
@@ -693,14 +681,14 @@ begin
   WriteResponseHandler : process
     alias    WR    : AxiBus.WriteResponse'subtype is AxiBus.WriteResponse ;
     variable Local : AxiBus.WriteResponse'subtype ;
-    variable WriteResponseReadyTimeOut : integer := 25 ;
+    variable WriteResponseReadyTimeOut: integer := 25 ;
     variable DelayCycles : integer ; 
   begin
     -- initialize
     WR.Valid <= '0' ;
-    WR.Resp  <= (Local.Resp'range => '0') ;
-    WR.ID    <= (Local.ID'range => '0') ;
-    WR.User  <= (Local.User'range => '0') ;
+    WR.Resp  <= (WR.Resp'range => '0') ;
+    WR.ID    <= (WR.ID'range => '0') ;
+    WR.User  <= (WR.User'range => '0') ;
     wait for 0 ns ; -- Allow WriteResponseFifo to initialize
     wait for 0 ns ; -- Allow Cov models to initialize 
     AddBins (WriteResponseDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
@@ -709,11 +697,17 @@ begin
 
     WriteResponseLoop : loop
       -- Find Transaction
-      if IsEmpty(WriteResponseFifo) then
+--! Done always less than Receive, change to just "="
+--! ">" will break due to roll over if there are more than 2**30 transfers
+      if WriteResponseDoneCount >= WriteReceiveCount then
         WaitForToggle(WriteReceiveCount) ;
       end if ;
-      (Local.Resp, Local.ID, Local.User) := pop(WriteResponseFifo) ;
-
+      if not IsEmpty(WriteResponseFifo) then
+        Local.Resp := pop(WriteResponseFifo) ;
+      else
+        Local.Resp := AXI4_RESP_OKAY ;
+      end if ;
+      
       if UseCoverageDelays then 
         -- BurstCoverage Delays
         DelayCycles := GetRandDelay(WriteResponseDelayCov) ; 
@@ -726,18 +720,16 @@ begin
 
       -- Do Transaction
       WR.Resp  <= Local.Resp  after tpd_Clk_BResp ;
-      WR.ID    <= Local.ID    after tpd_Clk_BID ;
-      WR.User  <= Local.User  after tpd_Clk_BUser ;
+      WR.ID    <= ModelBID    after tpd_Clk_BID ; 
+      WR.User  <= ModelBUser  after tpd_Clk_BUser ; 
 
       Log(ModelID,
         "Write Response." &
         "  BResp: "  & to_hxstring(Local.Resp) &
-        "  BID: "    & to_hxstring(Local.ID) &
-        "  BUser: "  & to_hxstring(Local.User) &
         "  Operation# " & to_string(WriteResponseDoneCount + 1),
-        DEBUG
+        INFO
       ) ;
-
+      
       WriteResponseReadyTimeOut := Get(Params, to_integer(WRITE_RESPONSE_READY_TIME_OUT)) ;
 --      GetAxi4Parameter(Params, WRITE_RESPONSE_READY_TIME_OUT, WriteResponseReadyTimeOut) ;
 
@@ -754,23 +746,19 @@ begin
       ) ;
 
       -- State after operation
-      WR.Resp  <= not Local.Resp  after tpd_Clk_BResp ;
-      WR.ID    <= not Local.ID    after tpd_Clk_BID ;
-      WR.User  <= not Local.User  after tpd_Clk_BUser ;
+      WR.Resp  <= not Local.Resp after tpd_Clk_BResp ;
+      WR.ID    <= not ModelBID    after tpd_Clk_BID ; 
+      WR.User  <= not ModelBUser  after tpd_Clk_BUser ; 
 
       -- Signal completion
       Increment(WriteResponseDoneCount) ;
       wait for 0 ns ;
-
---!9 response delay based on type of write address: Single Word, First Burst, Burst, Last Burst
-
     end loop WriteResponseLoop ;
   end process WriteResponseHandler ;
 
   ------------------------------------------------------------
   --  ReadAddressHandler
   --    Execute Read Address Transactions
-  --    Handles addresses as received, adds appropriate interface characterists
   ------------------------------------------------------------
   ReadAddressHandler : process
     alias    AR : AxiBus.ReadAddress'subtype is AxiBus.ReadAddress ;
@@ -789,8 +777,6 @@ begin
     WaitForClock(Clk, 2) ;  -- Initialize
 
     ReadAddressOperation : loop
---!! ToDo Add Delay calculation here that is f(ReadAddressBurstCov) 
-      -- Ready Delays:  ReadyDelayCycles + ReadAddressDelayCycles
       if UseCoverageDelays then 
         -- BurstCoverage Delays
         (intReadyBeforeValid, ReadyDelayCycles)  := GetRandDelay(ReadAddressDelayCov) ; 
@@ -802,7 +788,7 @@ begin
 --        GetAxi4Parameter(Params, READ_ADDRESS_READY_BEFORE_VALID, ReadyBeforeValid) ;
 --        GetAxi4Parameter(Params, READ_ADDRESS_READY_DELAY_CYCLES, ReadyDelayCycles) ;
       end if ; 
-  
+      
       ---------------------
       DoAxiReadyHandshake (
       ---------------------
@@ -812,206 +798,99 @@ begin
         ReadyBeforeValid        => ReadyBeforeValid,
 --        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
         ReadyDelayCycles        => ReadyDelayCycles,
-        tpd_Clk_Ready           => tpd_Clk_ARReady
+        tpd_Clk_Ready           => tpd_Clk_ARReady,
+        AlertLogID              => BusFailedID  --,
+--        TimeOutMessage          => "Read Address # " & to_string(ReadAddressReceiveCount + 1)
       ) ;
 
---!9 Resolve Level
+      -- capture address, prot
+      push(ReadAddressFifo, AR.Addr & AR.Prot) ;
+      push(ReadAddressTransactionFifo, AR.Addr) ;
+      increment(ReadAddressReceiveCount) ;
+      wait for 0 ns ;
+
       Log(ModelID,
         "Read Address." &
-        "  ARAddr: "    & to_hxstring(AR.Addr) &
-        "  ARProt: "    & to_string (AR.Prot) &
-        "  ARLen: "     & to_string (AR.Len) &
-        "  ARSize: "    & to_string (AR.Size) &
-        "  ARBurst: "   & to_string (AR.Burst) &
-        "  ARID: "      & to_string (AR.ID) &
-        "  ARUser: "    & to_string (AR.User) &
-        "  Operation# " & to_string (ReadAddressReceiveCount+1),
-        DEBUG
+        "  ARAddr: "  & to_hxstring(AR.Addr) &
+        "  ARProt: "  & to_string(AR.Prot) &
+        "  Operation# " & to_string(ReadAddressReceiveCount), -- adjusted for delay of ReadAddressReceiveCount
+        INFO
       ) ;
-
-      -- Send Address Information to ReadHandler
-      push(ReadAddressFifo, AR.Addr & AR.Len & AR.Prot & AR.Size & AR.Burst & AR.ID & AR.User ) ;
-
-    -- Signal completion
-      increment(ReadAddressReceiveCount) ;
---      ReadAddressReceiveCount <= ReadAddressReceiveCount + BurstCount ;
-
---?6 Add delay between accepting addresses determined by type of address: Single Word, First Burst, Burst, Last Burst
-
     end loop ReadAddressOperation ;
-    wait ; -- remove "no wait" warning
   end process ReadAddressHandler ;
-
-
-  ------------------------------------------------------------
-  --  ReadHandler
-  --    Accesses Memory
-  --    Introduces cycle delays due to accessing memory
-  ------------------------------------------------------------
-  ReadHandler : process
-    variable LAR : AxiBus.ReadAddress'subtype ;
-    alias    AR  : AxiBus.ReadAddress'subtype is AxiBus.ReadAddress ;
-    -- variable LAR : Axi4ReadAddressRecType (
-                          -- Addr(AR.Addr'range),
-                          -- ID(AR.ID'range),
-                          -- User(AR.User'range)
-                        -- ) ;
-    variable LRD : AxiBus.ReadData'subtype ;
-    alias    RD  : AxiBus.ReadData'subtype is AxiBus.ReadData ;
-    -- variable LRD : Axi4ReadDataRecType (
-                      -- Data(RD.Data'range),
-                      -- User(RD.User'range),
-                      -- ID(RD.ID'range)
-                    -- );
-
-    variable BurstLen         : integer ;
-    variable ByteAddressBits  : integer ;
-    variable BytesPerTransfer : integer ;
-    variable MemoryAddress, TransferAddress : std_logic_vector(LAR.Addr'length-1 downto 0) ;
-    variable ByteData         : std_logic_vector(7 downto 0) ;
-  begin
-    wait for 0 ns ; -- Allow ReadAddressFifo to initialize
-
-    ReadHandlerLoop : loop 
-      if IsEmpty(ReadAddressFifo) then
-        WaitForToggle(ReadAddressReceiveCount) ;
-      end if ;
-      (LAR.Addr, LAR.Len, LAR.Prot, LAR.Size, LAR.Burst, LAR.ID, LAR.User) := pop(ReadAddressFifo) ;
-
-  --!6 Add delay to access memory by type of address: Single Word, First Burst, Burst, Last Burst
-
-      if LAR.Len'length > 0 then
-        BurstLen := to_integer(LAR.Len) + 1 ;
-      else
-        BurstLen := 1 ;
-      end if ;
-
-      if LAR.Size'length > 0 then
-        ByteAddressBits   := to_integer(LAR.Size) ;
-        BytesPerTransfer  := 2 ** ByteAddressBits ;
-      else
-        ByteAddressBits   := AXI_BYTE_ADDR_WIDTH ;
-        BytesPerTransfer  := AXI_DATA_BYTE_WIDTH ;
-      end if ;
-
-      -- first word in a burst or single word transfer
-      TransferAddress  := LAR.Addr(LAR.Addr'left downto ByteAddressBits) & (ByteAddressBits downto 1 => '0') ;
-      -- GetWordAddr(Addr, BytesPerTransfer) ;
-      MemoryAddress    := TransferAddress(LAR.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
-      -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
-
-      LRD.Last := '0' ;
-      BurstLoop : for BurstIndex in 1 to BurstLen loop
-        -- Memory is byte oriented.  Access as Bytes
-        for ByteNum in 0 to AXI_DATA_BYTE_WIDTH-1 loop
-          MemRead(MemoryID, MemoryAddress + ByteNum, ByteData) ;
-          LRD.Data((8*ByteNum + 7)  downto 8*ByteNum) := ByteData ;
-        end loop ;
-
-        if BurstIndex = 1 then
-          Log(ModelID,
-            "Memory Read." &
-            "  ARAddr: "    & to_hxstring(LAR.Addr) &
-            "  ARProt: "    & to_string (LAR.Prot) &
-            "  RData: "     & to_hxstring(LRD.Data) &
-            "  Operation# " & to_string (ReadDataRequestCount),
-            INFO
-          ) ;
-        end if ;
-
-  --!5        GetNextBurstAddress(TransferAddress, BurstType) ;  -- to support Wrap
-        TransferAddress := TransferAddress + BytesPerTransfer ;
-        MemoryAddress    := TransferAddress(TransferAddress'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
-        -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
-
-        if BurstIndex = BurstLen then
-          LRD.Last := '1' ;
-        end if ;
-        push(ReadDataFifo, LRD.Data & LRD.Last & ModelRResp & LAR.ID & LAR.User) ;
-        increment(ReadDataRequestCount) ;
-        if BurstIndex /= BurstLen then 
-          wait until Rising_Edge(Clk) ; -- read memory location per clock
-        else
-          wait for 0 ns ;
-        end if ; 
-
-      end loop BurstLoop ;
-    end loop ReadHandlerLoop ;
-  end process ReadHandler ;
-
 
   ------------------------------------------------------------
   --  ReadDataHandler
-  --    Create Read Data Response Transactions
-  --    All delays at this point are due to AXI Read Data interface operations
+  --    Receive Read Data Transactions
   ------------------------------------------------------------
   ReadDataHandler : process
     alias    RD    : AxiBus.ReadData'subtype is AxiBus.ReadData ;
     variable Local : AxiBus.ReadData'subtype ;
-    variable ReadDataReadyTimeOut : integer := 25 ;
-    variable NewTransfer : std_logic := '1' ; 
+    variable ReadDataReadyTimeOut: integer := 25 ;
     variable DelayCycles : integer ; 
   begin
     -- initialize
     RD.Valid <= '0' ;
-    RD.Data  <= (Local.Data'range => '0') ;
-    RD.Resp  <= (Local.Resp'range => '0') ;
-    RD.ID    <= (Local.ID'range => '0') ;
-    RD.User  <= (Local.User'range => '0') ;
-    RD.Last  <= '0' ;
-    wait for 0 ns ; -- Allow ReadDataFifo to initialize
+    RD.Data  <= (RD.Data'range => '0') ;
+    RD.Resp  <= (RD.Resp'range => '0') ;
+    RD.ID    <= (RD.ID'range => '0') ;
+    RD.User  <= (RD.User'range => '0') ; 
+    RD.Last  <= '0' ; 
+    wait for 0 ns ; -- Allow Cov models to initialize
     wait for 0 ns ; -- Allow Cov models to initialize 
     AddBins (ReadDataDelayCov.BurstLengthCov,  GenBin(2,10,1)) ;
     AddBins (ReadDataDelayCov.BurstDelayCov,   GenBin(2,5,1)) ;
     AddBins (ReadDataDelayCov.BeatDelayCov,    GenBin(0)) ;
 
     ReadDataLoop : loop
+      -- Start a Read Data Response Transaction after receiving a read address
+      if ReadAddressReceiveCount <= ReadDataDoneCount then
+        WaitForToggle(ReadAddressReceiveCount) ;
+      end if ;
+
+      -- Read Data Valid Delays
+      if UseCoverageDelays then 
+        -- BurstCoverage Delays
+        DelayCycles := GetRandDelay(ReadDataDelayCov) ; 
+        WaitForClock(Clk, DelayCycles) ;
+      else
+        -- Deprecated delays
+        WaitForClock(Clk, integer'(Get(Params, to_integer(READ_DATA_VALID_DELAY_CYCLES)))) ; 
+--        WaitForClock(Clk, integer'(Params.Get(Axi4OptionsType'POS(READ_DATA_VALID_DELAY_CYCLES)))) ; 
+      end if ;
+
       if IsEmpty(ReadDataFifo) then
         WaitForToggle(ReadDataRequestCount) ;
       end if ;
-      (Local.Data, Local.Last, Local.Resp, Local.ID, Local.User) := pop(ReadDataFifo) ;
 
-      -- Delay before generating RD.Valid
-      if UseCoverageDelays then 
-        DelayCycles := GetRandDelay(ReadDataDelayCov) ; 
-      else
-        -- Deprecated delays
-        if NewTransfer then
-          DelayCycles := Get(Params, to_integer(READ_DATA_VALID_DELAY_CYCLES)) ; 
-        else 
-          DelayCycles := Get(Params, to_integer(READ_DATA_VALID_BURST_DELAY_CYCLES)) ; 
-        end if ; 
-      end if ; 
---      DelayCycles := 
---        GetRandDelay(ReadDataDelayCov) when UseCoverageDelays else
---        -- Deprecated static delays
---        Get(Params, to_integer(READ_DATA_VALID_DELAY_CYCLES)) when NewTransfer else
---        Get(Params, to_integer(READ_DATA_VALID_BURST_DELAY_CYCLES)) ;
-      WaitForClock(Clk, DelayCycles) ;
+      (Local.Data, Local.Resp) := pop(ReadDataFifo) ;
 
-      NewTransfer := Local.Last ; -- Last is '1' for burst end and single word transfers
+--      -- Find Response if available
+--      if not IsEmpty(ReadDataFifo) then
+--        (Local.Data, Local.Resp) := pop(ReadDataFifo) ;
+--      else
+--        Local.Data := to_slv(ReadAddressReceiveCount, RData'length) ;
+--        Local.Resp := AXI4_RESP_OKAY ;
+--      end if ;
 
       -- Transaction Values
       RD.Data  <= Local.Data  after tpd_Clk_RDATA ;
       RD.Resp  <= Local.Resp  after tpd_Clk_RResp ;
-      RD.ID    <= Local.ID    after tpd_Clk_RID ;
-      RD.User  <= Local.User  after tpd_Clk_RUser ;
-      RD.Last  <= Local.Last  after tpd_Clk_RLast ;
+      RD.ID    <= ModelRID    after tpd_Clk_RID ; 
+      RD.User  <= ModelRUser  after tpd_Clk_RUser ; 
+      RD.Last  <= '1'         after tpd_Clk_RLast ;
 
---!9 Resolve Level
       Log(ModelID,
         "Read Data." &
-        "  RData: "     & to_hxstring(Local.Data) &
-        "  RResp: "     & to_hxstring(Local.Resp) &
-        "  RID: "       & to_hxstring(Local.ID) &
-        "  RUser: "     & to_hxstring(Local.User) &
+        "  RData: "  & to_hxstring(Local.Data) &
+        "  RResp: "  & to_hxstring(Local.Resp) &
         "  Operation# " & to_string(ReadDataDoneCount + 1),
-        DEBUG
+        INFO
       ) ;
 
       ReadDataReadyTimeOut := Get(Params, to_integer(READ_DATA_READY_TIME_OUT)) ; 
 --      GetAxi4Parameter(Params, READ_DATA_READY_TIME_OUT, ReadDataReadyTimeOut) ;
-
+      
       ---------------------
       DoAxiValidHandshake (
       ---------------------
@@ -1025,16 +904,16 @@ begin
       ) ;
 
       -- State after operation
-      RD.Data  <= not Local.Data  after tpd_Clk_RDATA ;
-      RD.Resp  <= not Local.Resp  after tpd_Clk_RResp ;
-      RD.ID    <= Local.ID    after tpd_Clk_RID ;
-      RD.User  <= Local.User  after tpd_Clk_RUser ;
-      RD.Last  <= not Local.Last  after tpd_Clk_RLast ;
+      RD.Valid <= '0' after tpd_Clk_RValid ;
+      RD.Data  <= not Local.Data after tpd_clk_RData ;
+      RD.Resp  <= not Local.Resp after tpd_Clk_RResp ;
+      RD.ID    <= not ModelRID   after tpd_Clk_RID ; 
+      RD.User  <= not ModelRUser after tpd_Clk_RUser ; 
+      RD.Last  <= '0'            after tpd_Clk_RLast ;
 
       -- Signal completion
       Increment(ReadDataDoneCount) ;
       wait for 0 ns ;
     end loop ReadDataLoop ;
   end process ReadDataHandler ;
-
-end architecture MemorySubordinate ;
+end architecture Transactor ;

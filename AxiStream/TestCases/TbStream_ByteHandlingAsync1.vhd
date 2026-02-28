@@ -71,9 +71,12 @@ begin
     WaitForBarrier(TestDone, 35 ms) ;
     
     TranscriptClose ; 
-    if CHECK_TRANSCRIPT then 
-      AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ; 
-    end if ;   
+  --   Order dependencies in test case results does not allow checking 
+  --   except sometimes within a single simulator - but don't count on it,
+  --   because optimization allows different processes to run in different orders
+  --  if CHECK_TRANSCRIPT then 
+  --    AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ; 
+  --  end if ;   
    
     EndOfTestReports(TimeOut => (now >= 35 ms)) ; 
     std.env.stop ; 

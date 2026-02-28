@@ -20,12 +20,14 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    10/2025   2025.10    Removed Axi4[Lite]InterfacePkg package references
+--                         Added Support for Mode Views
 --    11/2022   2022.11    Initial.  Derived from Axi4OptionsPkg
 --
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2022 by SynthWorks Design Inc.
+--  Copyright (c) 2022 - 2025 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -48,15 +50,11 @@ library ieee ;
 library osvvm ;
     context osvvm.OsvvmContext ;
 
-library OSVVM_Common ;
-    context OSVVM_Common.OsvvmCommonContext ;
+library osvvm_common ;
+    context osvvm_common.OsvvmCommonContext ;
 
 use work.Axi4InterfaceCommonPkg.all ;
-use work.Axi4InterfacePkg.all ;
-use work.Axi4LiteInterfacePkg.all ; 
-
 use work.Axi4OptionsPkg.all ; 
-
 
 package Axi4OptionsArrayPkg is
 
@@ -66,7 +64,7 @@ package Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    boolean
@@ -75,7 +73,7 @@ package Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    std_logic
@@ -84,7 +82,7 @@ package Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    integer
@@ -93,7 +91,7 @@ package Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    std_logic_vector
@@ -102,7 +100,7 @@ package Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    Axi4RespEnumType
@@ -111,7 +109,7 @@ package Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   boolean
@@ -120,7 +118,7 @@ package Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   std_logic
@@ -129,7 +127,7 @@ package Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   integer
@@ -138,7 +136,7 @@ package Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   std_logic_vector
@@ -147,7 +145,7 @@ package Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   Axi4RespEnumType
@@ -166,7 +164,7 @@ package body Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    boolean
@@ -178,7 +176,7 @@ package body Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    std_logic
@@ -190,7 +188,7 @@ package body Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    integer
@@ -202,7 +200,7 @@ package body Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    std_logic_vector
@@ -214,7 +212,7 @@ package body Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure SetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     constant OptVal         : In    Axi4RespEnumType
@@ -226,7 +224,7 @@ package body Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   boolean
@@ -240,7 +238,7 @@ package body Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   std_logic
@@ -254,7 +252,7 @@ package body Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   integer
@@ -266,7 +264,7 @@ package body Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   std_logic_vector
@@ -278,7 +276,7 @@ package body Axi4OptionsArrayPkg is
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
-    signal   TransactionRec : InOut AddressBusRecArrayType ;
+    signal   TransactionRec : view (AddressBusTestCtrlView) of AddressBusRecArrayType ;
     constant Index          : In    integer ;
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   Axi4RespEnumType

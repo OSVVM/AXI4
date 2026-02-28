@@ -1,6 +1,6 @@
 --
---  File Name:         Axi4Subordinate.vhd
---  Design Unit Name:  Axi4Subordinate
+--  File Name:         Axi4SubordinateVti_a.vhd
+--  Design Unit Name:  Transactor of Axi4SubordinateVti
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    10/2025   2025.10    Split entity from architecture to simplify support of 2019 interfaces
 --    07/2024   2024.07    Shortened AlertLog and data structure names for better printing
 --    03/2024   2024.03    Updated SafeResize to use ModelID
 --    01/2024   2024.01    Updated Params to use singleton data structure
@@ -54,80 +55,19 @@
 --  limitations under the License.
 --
 
-library ieee ;
-  use ieee.std_logic_1164.all ;
-  use ieee.numeric_std.all ;
-  use ieee.numeric_std_unsigned.all ;
-  use ieee.math_real.all ;
-
-library osvvm ;
-  context osvvm.OsvvmContext ;
-  use osvvm.ScoreboardPkg_slv.all ;
-
-library OSVVM_Common ;
-  context OSVVM_Common.OsvvmCommonContext ;
-
-  use work.Axi4OptionsPkg.all ;
-  use work.Axi4InterfaceCommonPkg.all ;
-  use work.Axi4InterfacePkg.all ;
-  use work.Axi4ModelPkg.all ;
-  use work.Axi4CommonPkg.all ;
-
-entity Axi4Subordinate is
-generic (
-  MODEL_ID_NAME   : string := "" ;
-  tperiod_Clk     : time   := 10 ns ;
-
-  DEFAULT_DELAY   : time   := 1 ns ; 
-
-  tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
-
-  tpd_Clk_WReady  : time   := DEFAULT_DELAY ;
-
-  tpd_Clk_BValid  : time   := DEFAULT_DELAY ;
-  tpd_Clk_BResp   : time   := DEFAULT_DELAY ;
-  tpd_Clk_BID     : time   := DEFAULT_DELAY ;
-  tpd_Clk_BUser   : time   := DEFAULT_DELAY ;
-
-  tpd_Clk_ARReady : time   := DEFAULT_DELAY ;
-
-  tpd_Clk_RValid  : time   := DEFAULT_DELAY ;
-  tpd_Clk_RData   : time   := DEFAULT_DELAY ;
-  tpd_Clk_RResp   : time   := DEFAULT_DELAY ;
-  tpd_Clk_RID     : time   := DEFAULT_DELAY ;
-  tpd_Clk_RUser   : time   := DEFAULT_DELAY ;
-  tpd_Clk_RLast   : time   := DEFAULT_DELAY
-) ;
-port (
-  -- Globals
-  Clk         : in   std_logic ;
-  nReset      : in   std_logic ;
-
-  -- AXI Manager Functional Interface
-  AxiBus      : inout Axi4RecType ;
-
-  -- Testbench Transaction Interface
-  TransRec    : inout AddressBusRecType
-) ;
-
-  -- Derive AXI interface properties from the AxiBus
-  constant AXI_ADDR_WIDTH : integer := AxiBus.WriteAddress.Addr'length ;
-  constant AXI_DATA_WIDTH : integer := AxiBus.WriteData.Data'length ;
-
+architecture Transactor of Axi4SubordinateVti is
   -- Derive ModelInstance label from path_name
   -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
   constant MODEL_INSTANCE_NAME : string :=
-    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Subordinate'PATH_NAME))) ;
-
-  constant MODEL_NAME : string := "Axi4Subordinate" ;
-
-end entity Axi4Subordinate ;
-
-architecture Transactor of Axi4Subordinate is
+    IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4SubordinateVti'PATH_NAME))) ;
 
   signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
-  signal WriteAddressDelayCov, WriteDataDelayCov, WriteResponseDelayCov : DelayCoverageIDType ;
-  signal ReadAddressDelayCov,  ReadDataDelayCov : DelayCoverageIDType ;
+  signal ArrDelayCovID         : DelayCoverageIDArrayType(1 to READ_DATA_ID) ;
+  alias  WriteAddressDelayCov  is ArrDelayCovID(WRITE_ADDRESS_ID) ;
+  alias  WriteDataDelayCov     is ArrDelayCovID(WRITE_DATA_ID) ;
+  alias  WriteResponseDelayCov is ArrDelayCovID(WRITE_RESPONSE_ID) ;
+  alias  ReadAddressDelayCov   is ArrDelayCovID(READ_ADDRESS_ID) ;
+  alias  ReadDataDelayCov      is ArrDelayCovID(READ_DATA_ID) ;
   signal UseCoverageDelays : boolean := FALSE ; 
 
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
@@ -167,12 +107,16 @@ architecture Transactor of Axi4Subordinate is
   signal ModelRUSER  : std_logic_vector(AxiBus.ReadData.User'length - 1 downto 0) := (others => '0') ;
   signal ModelRID    : std_logic_vector(AxiBus.ReadData.ID'length - 1 downto 0) := (others => '0') ;
 
+  -- Placeholders
+  signal TransactionDone, WriteTransactionDone, ReadTransactionDone : boolean := FALSE ; 
+  signal BurstFifoMode      : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;
+
 begin
 
   ------------------------------------------------------------
   -- Turn off drivers not being driven by this model
   ------------------------------------------------------------
-  InitAxi4Rec (AxiBusRec => AxiBus ) ;
+  InitAxi4Rec (AxiBusRec => AxiBus) ;
 
 
   ------------------------------------------------------------
@@ -246,10 +190,10 @@ begin
 --    TransRec.WriteBurstFifo <= NewID("WriteBurstFifo",         ModelID, Search => PRIVATE_NAME) ;
 --    TransRec.ReadBurstFifo  <= NewID("ReadBurstFifo",          ModelID, Search => PRIVATE_NAME) ;
     WriteAddressDelayCov    <= NewID("WriteAddrDelayCov",   ModelID, ReportMode => DISABLED) ; 
-    WriteDataDelayCov       <= NewID("WriteDataDelayCov",      ModelID, ReportMode => DISABLED) ; 
-    WriteResponseDelayCov   <= NewID("WriteRespDelayCov",  ModelID, ReportMode => DISABLED) ; 
+    WriteDataDelayCov       <= NewID("WriteDataDelayCov",   ModelID, ReportMode => DISABLED) ; 
+    WriteResponseDelayCov   <= NewID("WriteRespDelayCov",   ModelID, ReportMode => DISABLED) ; 
     ReadAddressDelayCov     <= NewID("ReadAddrDelayCov",    ModelID, ReportMode => DISABLED) ; 
-    ReadDataDelayCov        <= NewID("ReadDataDelayCov",       ModelID, ReportMode => DISABLED) ; 
+    ReadDataDelayCov        <= NewID("ReadDataDelayCov",    ModelID, ReportMode => DISABLED) ; 
 
     DispatchLoop : loop
       WaitForTransaction(
@@ -259,85 +203,6 @@ begin
       ) ;
 
       case TransRec.Operation is
-        when WAIT_FOR_TRANSACTION =>
-          -- wait for write or read transaction to be available
-          loop
-            exit when not IsEmpty(WriteAddressFifo) and not IsEmpty(WriteDataFifo) ; -- Write Available
-            exit when not IsEmpty(ReadAddressFifo) ; -- Read Available
-            wait on WriteAddressReceiveCount, WriteDataReceiveCount, ReadAddressReceiveCount ;
-          end loop ;
-
-        when WAIT_FOR_WRITE_TRANSACTION =>
-          -- wait for write transaction to be available
-          if IsEmpty(WriteAddressFifo) then
-            WaitForToggle(WriteAddressReceiveCount) ;
-          end if ;
-          if IsEmpty(WriteDataFifo) then
-            WaitForToggle(WriteDataReceiveCount) ;
-          end if ;
-
-        when WAIT_FOR_READ_TRANSACTION =>
-          -- wait for read transaction to be available
-          if IsEmpty(ReadAddressFifo) then
-            WaitForToggle(ReadAddressReceiveCount) ;
-          end if ;
-
-  --  Alternate interpretation of wait for transaction
-  --      when WAIT_FOR_WRITE_TRANSACTION =>
-  --        -- Wait for next write to memory to complete
-  --        if (WriteAddressReceiveCount /= WriteReceiveCount) or (WriteReceiveCount /= WriteResponseDoneCount) then
-  --          wait until (WriteAddressReceiveCount = WriteReceiveCount) and (WriteReceiveCount = WriteResponseDoneCount) ;
-  --        end if ;
-  --
-  --      when WAIT_FOR_READ_TRANSACTION =>
-  --        -- Wait for a requested Read Data Transaction to complete
-  --        if ReadDataRequestCount /= ReadDataDoneCount then
-  --          wait until ReadDataRequestCount = ReadDataDoneCount ;
-  --        end if ;
-  --
-        when WAIT_FOR_CLOCK =>
-          WaitForClock(Clk, TransRec.IntToModel) ;
-
-        when GET_ALERTLOG_ID =>
-          TransRec.IntFromModel <= integer(ModelID) ;
-
-        when SET_USE_RANDOM_DELAYS =>        
-          UseCoverageDelays      <= TransRec.BoolToModel ; 
-
-        when GET_USE_RANDOM_DELAYS =>
-          TransRec.BoolFromModel <= UseCoverageDelays ;
-
-        when SET_DELAYCOV_ID =>
-          case TransRec.Options is
-            when WRITE_ADDRESS_ID  =>  WriteAddressDelayCov  <= GetDelayCoverage(TransRec.IntToModel) ;
-            when WRITE_DATA_ID     =>  WriteDataDelayCov     <= GetDelayCoverage(TransRec.IntToModel) ;
-            when WRITE_RESPONSE_ID =>  WriteResponseDelayCov <= GetDelayCoverage(TransRec.IntToModel) ;
-            when READ_ADDRESS_ID   =>  ReadAddressDelayCov   <= GetDelayCoverage(TransRec.IntToModel) ;
-            when READ_DATA_ID      =>  ReadDataDelayCov      <= GetDelayCoverage(TransRec.IntToModel) ;
-            when others =>  Alert(ModelID, "SetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
-          end case ; 
-          UseCoverageDelays <= TRUE ; 
-
-        when GET_DELAYCOV_ID =>
-          case TransRec.Options is
-            when WRITE_ADDRESS_ID  =>  TransRec.IntFromModel <= WriteAddressDelayCov.ID  ;
-            when WRITE_DATA_ID     =>  TransRec.IntFromModel <= WriteDataDelayCov.ID     ;
-            when WRITE_RESPONSE_ID =>  TransRec.IntFromModel <= WriteResponseDelayCov.ID ;
-            when READ_ADDRESS_ID   =>  TransRec.IntFromModel <= ReadAddressDelayCov.ID   ;
-            when READ_DATA_ID      =>  TransRec.IntFromModel <= ReadDataDelayCov.ID      ;
-            when others =>  Alert(ModelID, "GetDelayCoverageID, Invalid ID requested = " & to_string(TransRec.IntToModel), FAILURE) ;  
-          end case ; 
-          UseCoverageDelays <= TRUE ; 
-
-        when GET_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= integer(TransRec.Rdy) ;
-
-        when GET_WRITE_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= WriteAddressReceiveCount ;
-
-        when GET_READ_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= ReadAddressReceiveCount ;
-
         when WRITE_OP | WRITE_ADDRESS | WRITE_DATA |
              ASYNC_WRITE | ASYNC_WRITE_ADDRESS | ASYNC_WRITE_DATA =>
 
@@ -526,10 +391,58 @@ begin
             end case ;
           end if ;
 
-        -- The End -- Done
+        when WAIT_FOR_TRANSACTION =>
+          -- wait for write or read transaction to be available
+          loop
+            exit when not IsEmpty(WriteAddressFifo) and not IsEmpty(WriteDataFifo) ; -- Write Available
+            exit when not IsEmpty(ReadAddressFifo) ; -- Read Available
+            wait on WriteAddressReceiveCount, WriteDataReceiveCount, ReadAddressReceiveCount ;
+          end loop ;
+
+        when WAIT_FOR_WRITE_TRANSACTION =>
+          -- wait for write transaction to be available
+          if IsEmpty(WriteAddressFifo) then
+            WaitForToggle(WriteAddressReceiveCount) ;
+          end if ;
+          if IsEmpty(WriteDataFifo) then
+            WaitForToggle(WriteDataReceiveCount) ;
+          end if ;
+
+        when WAIT_FOR_READ_TRANSACTION =>
+          -- wait for read transaction to be available
+          if IsEmpty(ReadAddressFifo) then
+            WaitForToggle(ReadAddressReceiveCount) ;
+          end if ;
+
+  --  Alternate interpretation of wait for transaction
+  --      when WAIT_FOR_WRITE_TRANSACTION =>
+  --        -- Wait for next write to memory to complete
+  --        if (WriteAddressReceiveCount /= WriteReceiveCount) or (WriteReceiveCount /= WriteResponseDoneCount) then
+  --          wait until (WriteAddressReceiveCount = WriteReceiveCount) and (WriteReceiveCount = WriteResponseDoneCount) ;
+  --        end if ;
+  --
+  --      when WAIT_FOR_READ_TRANSACTION =>
+  --        -- Wait for a requested Read Data Transaction to complete
+  --        if ReadDataRequestCount /= ReadDataDoneCount then
+  --          wait until ReadDataRequestCount = ReadDataDoneCount ;
+  --        end if ;
+  --
+
         when others =>
-          -- Signal multiple Driver Detect or not implemented transactions.
-          Alert(ModelID, ClassifyUnimplementedOperation(TransRec), FAILURE) ;
+          -- Do Standard Directive Transactions or Error Handling
+          DoDirectiveTransactions (
+            TransRec              => TransRec             ,
+            Clk                   => Clk                  ,
+            ModelID               => ModelID              ,
+            UseCoverageDelays     => UseCoverageDelays    ,
+            DelayCovID            => ArrDelayCovID        ,
+            BurstFifoMode         => BurstFifoMode        ,      -- Not used in Memory
+            TransactionDone       => TransactionDone      ,      -- implemented above
+            WriteTransactionDone  => WriteTransactionDone ,      -- implemented above
+            ReadTransactionDone   => ReadTransactionDone  ,      -- implemented above
+            WriteTransactionCount => WriteAddressReceiveCount,
+            ReadTransactionCount  => ReadAddressReceiveCount
+          ) ;
 
       end case ;
 
@@ -917,3 +830,5 @@ begin
     end loop ReadDataLoop ;
   end process ReadDataHandler ;
 end architecture Transactor ;
+
+

@@ -70,9 +70,9 @@ begin
     WaitForBarrier(TestDone, 5 ms) ;
     
     TranscriptClose ; 
-    if CHECK_TRANSCRIPT then 
-      AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ; 
-    end if ;   
+--    if CHECK_TRANSCRIPT then 
+--      AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ; 
+--    end if ;   
     
     EndOfTestReports(TimeOut => (now >= 5 ms)) ; 
     std.env.stop ; 

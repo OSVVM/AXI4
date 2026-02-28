@@ -69,9 +69,10 @@ begin
     WaitForBarrier(TestDone, 1 ms) ;
     
     TranscriptClose ; 
-    if CHECK_TRANSCRIPT then 
-      AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ; 
-    end if ;   
+-- Printing order will differ between different processes
+--    if CHECK_TRANSCRIPT then 
+--      AffirmIfTranscriptsMatch(PATH_TO_VALIDATED_RESULTS) ; 
+--    end if ;   
     
     EndOfTestReports(ExternalErrors => (0, -5, 0), TimeOut => (now >= 1 ms)) ; 
 

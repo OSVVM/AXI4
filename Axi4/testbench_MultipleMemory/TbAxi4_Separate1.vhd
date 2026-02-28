@@ -175,7 +175,7 @@ Configuration TbAxi4_Separate1 of TbAxi4_MultipleMemory is
     end for ; 
     
 -- ##    for all : Axi4Memory
--- ##      use entity OSVVM_AXI4.Axi4Memory(MemorySubordinate) 
+-- ##      use entity OSVVM_AXI4.Axi4Memory 
 -- ##          generic map (MEMORY_NAME => "SharedMemory");
 -- ##    end for ; 
 

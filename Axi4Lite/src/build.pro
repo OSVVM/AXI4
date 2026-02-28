@@ -37,9 +37,11 @@
 #  limitations under the License.
 #
 library osvvm_axi4
+analyze Axi4LiteInterfacePkg.vhd
 analyze Axi4LiteComponentPkg.vhd
 analyze Axi4LiteComponentVtiPkg.vhd
 analyze Axi4LiteContext.vhd
+
 analyze Axi4LiteManager.vhd
 analyze Axi4LiteManagerVti.vhd
 analyze Axi4LiteMonitor_dummy.vhd

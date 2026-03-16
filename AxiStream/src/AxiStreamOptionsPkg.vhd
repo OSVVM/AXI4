@@ -272,7 +272,7 @@ package body AxiStreamOptionsPkg is
     constant Option      : In    AxiStreamOptionsType ;
     variable OptVal      : Out   DelayCoverageIDType
   ) is
-    variable IntVal : integer ; 
+    -- variable IntVal : integer ; 
   begin
     GetDelayCoverageID(TransRec, OptVal) ; 
 --    GetModelOptions(TransRec, AxiStreamOptionsType'POS(Option), IntVal) ;

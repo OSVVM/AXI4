@@ -121,7 +121,7 @@ entity AxiStreamReceiverVti is
 end entity AxiStreamReceiverVti ;
 architecture behavioral of AxiStreamReceiverVti is
 
-  signal ModelID, ProtocolID, DataCheckID, BusFailedID, BurstFifoID : AlertLogIDType ;
+  signal ModelID, DataCheckID, BusFailedID, BurstFifoID : AlertLogIDType ;
   signal BurstCov : DelayCoverageIDType ;
   
   signal UseCoverageDelays : Boolean := FALSE ;
@@ -138,7 +138,6 @@ architecture behavioral of AxiStreamReceiverVti is
 
   signal WordRequestCount, BurstRequestCount : integer := 0 ; 
   signal WordReceiveCount, BurstReceiveCount : integer := 0 ;
-  signal ReceiveByteCount, TransferByteCount : integer := 0 ;
 
   -- Verification Component Configuration
   signal ReceiveReadyBeforeValid : boolean := TRUE ;
@@ -166,7 +165,6 @@ begin
     -- Alerts
     ID            := NewID(MODEL_INSTANCE_NAME) ;
     ModelID       <= ID ;
---    ProtocolID    <= NewID("Protocol Error", ID ) ;
     DataCheckID   <= NewID("Data Check", ID ) ;
     BusFailedID   <= NewID("No response", ID ) ;
     ReceiveFifo   <= NewID("ReceiveFifo", ID, ReportMode => DISABLED, Search => PRIVATE_NAME) ;
@@ -609,7 +607,7 @@ begin
   ReceiveHandler : process
     variable Data           : std_logic_vector(TData'length-1 downto 0) ;
     variable Last           : std_logic ;
-    variable BurstBoundary  : std_logic ;
+--    variable BurstBoundary  : std_logic ;
     variable LastID         : std_logic_vector(TID'range)   := (TID'range   => '-') ;
     variable LastDest       : std_logic_vector(TDest'range) := (TDest'range => '-') ;
     variable LastLast       : std_logic := '1' ;
@@ -654,7 +652,7 @@ begin
         -- BurstCoverage Delays
         (ReadyBeforeValid, ReadyDelayCycles)  := GetRandDelay(BurstCov) ; 
       else
-        -- Deprecated static settings
+        -- Static settings
         ReadyBeforeValid := to_integer(not ReceiveReadyBeforeValid) ; 
         ReadyDelayCycles := ReceiveReadyDelayCycles ; 
       end if ; 
@@ -669,7 +667,7 @@ begin
 --        ReadyDelayCycles        => ReadyDelayCycles * tperiod_Clk,
         ReadyDelayCycles        => ReadyDelayCycles,
         tpd_Clk_Ready           => tpd_Clk_TReady,
-        AlertLogID              => ModelID
+        AlertLogID              => BusFailedID
       ) ;
 
       Data := to_x01(TData) ;

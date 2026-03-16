@@ -76,7 +76,7 @@ architecture VerificationComponent of Axi4ManagerVti is
 
   constant AXI_DATA_BYTE_WIDTH : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
-  constant AXI_STRB_WIDTH      : integer := AXI_DATA_WIDTH/8 ;
+--  constant AXI_STRB_WIDTH      : integer := AXI_DATA_WIDTH/8 ;
   
   signal Params : ModelParametersIDType ;
 
@@ -150,12 +150,10 @@ begin
   --    Dispatches transactions to
   ------------------------------------------------------------
   TransactionDispatcher : process
-    variable ReadDataTransactionCount : integer := 1 ;
-    variable ByteCount          : integer ;
+    -- variable ReadDataTransactionCount : integer := 1 ;
     variable TransfersInBurst   : integer ;
 
     variable Axi4Option    : Axi4OptionsType ;
-    variable Axi4OptionVal : integer ;
 
     variable AxiDefaults    : AxiBus'subtype ;
 
@@ -169,11 +167,7 @@ begin
 
     variable BytesToSend              : integer ;
     variable BytesPerTransfer         : integer ;
-    variable MaxBytesInFirstTransfer  : integer ;
-
-    variable BytesInTransfer : integer ;
     variable BytesToReceive  : integer ;
-    variable DataBitOffset   : integer ;
 
     variable ReadByteAddr    : integer ;
     variable ReadProt        : Axi4ProtType ;

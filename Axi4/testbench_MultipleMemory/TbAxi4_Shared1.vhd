@@ -88,7 +88,6 @@ begin
   --   Generate transactions for AxiManager
   ------------------------------------------------------------
   ManagerProc1 : process
-    variable StartTime : time ; 
     variable IntOption  : integer ; 
     variable BoolOption : boolean ; 
   begin
@@ -123,7 +122,6 @@ begin
   --   Generate transactions for AxiManager
   ------------------------------------------------------------
   ManagerProc2 : process
-    variable StartTime : time ; 
     variable IntOption  : integer ; 
     variable BoolOption : boolean ; 
   begin

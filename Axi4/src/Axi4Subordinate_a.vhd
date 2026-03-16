@@ -61,7 +61,7 @@ architecture Transactor of Axi4Subordinate is
   constant MODEL_INSTANCE_NAME : string :=
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4Subordinate'PATH_NAME))) ;
 
-  signal ModelID, ProtocolID, DataCheckID, BusFailedID : AlertLogIDType ;
+  signal ModelID, BusFailedID : AlertLogIDType ;
   signal ArrDelayCovID         : DelayCoverageIDArrayType(1 to READ_DATA_ID) ;
   alias  WriteAddressDelayCov  is ArrDelayCovID(WRITE_ADDRESS_ID) ;
   alias  WriteDataDelayCov     is ArrDelayCovID(WRITE_DATA_ID) ;
@@ -82,10 +82,6 @@ architecture Transactor of Axi4Subordinate is
   signal ReadAddressFifo            : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
   signal ReadAddressTransactionFifo : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
   signal ReadDataFifo               : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
-
-  -- Setup so that if no configuration is done, accept transactions
-  signal WriteAddressExpectCount     : integer := 0 ;
-  signal WriteDataExpectCount        : integer := 0 ;
 
   signal WriteAddressReceiveCount    : integer := 0 ;
   signal WriteDataReceiveCount       : integer := 0 ;
@@ -129,9 +125,6 @@ begin
     -- Alerts
     ID                      := NewID(MODEL_INSTANCE_NAME) ;
     ModelID                 <= ID ;
---    TransRec.AlertLogID     <= NewID("Transaction", ID ) ;
-    ProtocolID              <= NewID("Protocol Error", ID ) ;
-    DataCheckID             <= NewID("Data Check",     ID ) ;
     BusFailedID             <= NewID("No response",    ID ) ;
 
     vParams                 := NewID("AxiS Parameters", to_integer(OPTIONS_MARKER), ID) ; 
@@ -174,7 +167,6 @@ begin
     variable ReadAvailable : boolean := FALSE ;
 
     variable Axi4Option    : Axi4OptionsType ; 
-    variable Axi4OptionVal : integer ; 
     
     variable FilterUndrivenWriteData       : boolean := TRUE ;
     variable UndrivenWriteDataValue        : std_logic := '0' ;

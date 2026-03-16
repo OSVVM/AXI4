@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    05/2026   2026.05    Memory Data Width matches Data Bus
 --    10/2025   2025.10    Split entity and architecture to support 2019 interfaces
 --                         Moved MODEL_INSTANCE_NAME and LOCAL_MEMORY_NAME to architecture 
 --                         renamed architecture VerificationComponent
@@ -42,7 +43,7 @@
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2020 - 2025 by SynthWorks Design Inc.
+--  Copyright (c) 2020 - 2026 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -67,7 +68,7 @@ architecture VerificationComponent of Axi4MemoryVti is
   constant LOCAL_MEMORY_NAME : string := 
     IfElse(MEMORY_NAME /= "", MEMORY_NAME, MODEL_INSTANCE_NAME & ":memory") ;
 
-constant AXI_DATA_BYTE_WIDTH  : integer := AXI_DATA_WIDTH / 8 ;
+  constant AXI_DATA_BYTE_WIDTH  : integer := AXI_DATA_WIDTH / 8 ;
   constant AXI_BYTE_ADDR_WIDTH  : integer := integer(ceil(log2(real(AXI_DATA_BYTE_WIDTH)))) ;
 
   signal ModelID, BusFailedID, DataCheckID : AlertLogIDType ;
@@ -97,9 +98,6 @@ constant AXI_DATA_BYTE_WIDTH  : integer := AXI_DATA_WIDTH / 8 ;
   signal ReadDataFifo         : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
 
   -- Setup so that if no configuration is done, accept transactions
-  signal WriteAddressExpectCount     : integer := 0 ;
-  signal WriteDataExpectCount        : integer := 0 ;
-
   signal WriteAddressReceiveCount    : integer := 0 ;
   signal WriteDataReceiveCount       : integer := 0 ;
   signal WriteReceiveCount           : integer := 0 ;
@@ -156,8 +154,12 @@ begin
     
     vMemID := NewID(
       Name       => LOCAL_MEMORY_NAME, 
-      AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
-      DataWidth  => 8,               -- Memory is byte oriented
+--!!
+      -- Adjust Addr to remove bytes
+--      AddrWidth  => AXI_ADDR_WIDTH,  -- Address is byte address
+--      DataWidth  => 8,               -- Memory is byte oriented
+      AddrWidth  => AXI_ADDR_WIDTH - AXI_BYTE_ADDR_WIDTH,  -- Address is byte address
+      DataWidth  => AXI_DATA_WIDTH, 
       ParentID   => ParentID, 
       Search     => NAME
     ) ; 
@@ -189,16 +191,20 @@ begin
   --    Handles transactions between TestCtrl and Model
   ------------------------------------------------------------
   TransactionDispatcher : process
-    variable Address          : std_logic_vector(AxiBus.WriteAddress.Addr'range) ;
+    variable Address          : std_logic_vector(AxiBus.WriteAddress.Addr'length-1 downto 0) ;
+    variable WordAddress      : std_logic_vector(AxiBus.WriteAddress.Addr'length-AXI_BYTE_ADDR_WIDTH-1 downto 0) ;
+    variable ByteAddr         : integer ;
     variable Data             : std_logic_vector(AxiBus.WriteData.Data'range) ;
+    variable Strb             : std_logic_vector(AxiBus.WriteData.Strb'range) ;
+    variable MemoryWord       : std_logic_vector(AxiBus.WriteData.Data'range) ;
     variable ExpectedData     : std_logic_vector(AxiBus.WriteData.Data'range) ;
-    variable ByteData         : std_logic_vector(7 downto 0) ;
+--!!    variable ByteData         : std_logic_vector(7 downto 0) ;
     variable DataWidth        : integer ;
-    variable NumBytes         : integer ;
+--!!    variable NumBytes         : integer ;
     variable Count            : integer ;
     variable TransactionCount : integer := 0 ; 
     variable Axi4Option       : Axi4OptionsType ;
-    variable Axi4OptionVal    : integer ; 
+    -- variable Axi4OptionVal    : integer ; 
   begin
     wait for 0 ns ; -- Allow ModelID to become valid
     TransRec.Params         <= Params ; 
@@ -222,38 +228,53 @@ begin
       case TransRec.Operation is
         when WRITE_OP =>
           -- Back door Write access to memory.  Completes without time passing.
-          Address    := SafeResize(ModelID, TransRec.Address, Address'length) ;
-          Data       := SafeResize(ModelID, TransRec.DataToModel, Data'length) ;
-          DataWidth  := TransRec.DataWidth ;
-          NumBytes   := DataWidth / 8 ;
+          Address     := SafeResize(ModelID, TransRec.Address, Address'length) ;
+          WordAddress := Address(Address'left downto AXI_BYTE_ADDR_WIDTH) ;
+          ByteAddr    := CalculateByteAddress(Address, AXI_BYTE_ADDR_WIDTH);
+--          Data       := SafeResize(ModelID, TransRec.DataToModel, Data'length) ;
+          DataWidth   := TransRec.DataWidth ;
+          Data  := AlignBytesToDataBus(SafeResize(ModelID, TransRec.DataToModel, Data'length), DataWidth, ByteAddr) ;
+          Strb  := CalculateWriteStrobe(Data) ;
+--!!          NumBytes    := DataWidth / 8 ;
 
   --!9        -- Do checks  Is address appropriate for NumBytes
   --        AlignCheckWriteData (ModelID, Data, Strb, TransRec.DataWidth, ByteAddr) ;
+          MemoryWord := MemRead(MemoryID, WordAddress) ;
+        -- Write to Bytes that correspond to ByteEnables = Strb
+        for j in 0 to AXI_DATA_BYTE_WIDTH-1 loop
+          if Strb(j) = '1' then
+            MemoryWord((8*j + 7)  downto 8*j) := Data((8*j + 7)  downto 8*j) ;
+          end if ;
+        end loop ;
 
-          -- Memory is byte oriented.  Access as Bytes
-          for ByteNum in 0 to NumBytes-1 loop
-            ByteData := Data((8*ByteNum + 7)  downto 8*ByteNum) ;
-            MemWrite(MemoryID, Address + ByteNum, ByteData) ;
-          end loop ;
+        -- Write Data to Memory
+        MemWrite(MemoryID, WordAddress, MemoryWord) ;
+--!!          -- Memory is byte oriented.  Access as Bytes
+--!!          for ByteNum in 0 to NumBytes-1 loop
+--!!            ByteData := Data((8*ByteNum + 7)  downto 8*ByteNum) ;
+--!!            MemWrite(MemoryID, Address + ByteNum, ByteData) ;
+--!!          end loop ;
 
         when READ_OP | READ_CHECK =>
           -- Back door Read access to memory.  Completes without time passing.
-          Address    := SafeResize(ModelID, TransRec.Address, Address'length) ;
-  --        ByteAddr   := CalculateByteAddress(Address, AXI_BYTE_ADDR_WIDTH);
-          Data       := (others => '0') ;
-          DataWidth  := TransRec.DataWidth ;
-          NumBytes   := DataWidth / 8 ;
+          Address     := SafeResize(ModelID, TransRec.Address, Address'length) ;
+          WordAddress := Address(Address'left downto AXI_BYTE_ADDR_WIDTH) ;
+          ByteAddr    := CalculateByteAddress(Address, AXI_BYTE_ADDR_WIDTH);
+          Data        := (others => '0') ;
+          DataWidth   := TransRec.DataWidth ;
+--!!          NumBytes    := DataWidth / 8 ;
 
   --!9        -- Do checks  Is address appropriate for NumBytes
   --??  What if 32 bit read, but address is byte oriented??
   --??  ERROR, or OK & return unaddressed bytes as X?
+          Data := MemRead(MemoryID, WordAddress) ; 
+--!!          -- Memory is byte oriented.  Access as Bytes
+--!!          for ByteNum in 0 to NumBytes-1 loop
+--!!            MemRead(MemoryID, Address + ByteNum, ByteData) ;
+--!!            Data((8*ByteNum + 7)  downto 8*ByteNum) := ByteData ;
+--!!          end loop ;
 
-          -- Memory is byte oriented.  Access as Bytes
-          for ByteNum in 0 to NumBytes-1 loop
-            MemRead(MemoryID, Address + ByteNum, ByteData) ;
-            Data((8*ByteNum + 7)  downto 8*ByteNum) := ByteData ;
-          end loop ;
-
+          Data := AlignDataBusToBytes(Data, DataWidth, ByteAddr) ;
           TransRec.DataFromModel <= SafeResize(ModelID, Data, TransRec.DataFromModel'length) ;
 
           if IsReadCheck(TransRec.Operation) then
@@ -511,8 +532,11 @@ begin
     variable BurstLen         : integer ;
     variable ByteAddressBits  : integer ;
     variable BytesPerTransfer : integer ;
-    variable TransferAddress, MemoryAddress : std_logic_vector(LAW.Addr'range) ;
-    variable ByteData         : std_logic_vector(7 downto 0) ;
+    variable TransferAddress  : std_logic_vector(LAW.Addr'length-1 downto 0) ;
+    -- variable MemoryAddress : std_logic_vector(LAW.Addr'length-1 downto 0) ;
+    -- variable ByteData         : std_logic_vector(7 downto 0) ;
+    variable WordAddress      : std_logic_vector(LAW.Addr'length - AXI_BYTE_ADDR_WIDTH - 1 downto 0) ;
+    variable MemoryWord       : LWD.Data'subtype ; 
   begin
     wait for 0 ns ; -- Allow WriteAddressFifo to initialize
     
@@ -537,11 +561,12 @@ begin
         BytesPerTransfer  := AXI_DATA_BYTE_WIDTH ;
       end if ;
 
-      -- first word in a burst or single word transfer
+--      -- first word in a burst or single word transfer
       TransferAddress  := LAW.Addr(LAW.Addr'left downto ByteAddressBits) & (ByteAddressBits downto 1 => '0') ;
-      -- GetWordAddr(Addr, BytesPerTransfer) ;
-      MemoryAddress    := TransferAddress(LAW.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
-      -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
+--      -- GetWordAddr(Addr, BytesPerTransfer) ;
+--      MemoryAddress    := TransferAddress(LAW.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
+--      -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
+      WordAddress    := TransferAddress(TransferAddress'left downto AXI_BYTE_ADDR_WIDTH) ;
 
   --!3 Delay before first word - burst vs. single word
 
@@ -565,18 +590,27 @@ begin
           ) ;
         end if ;
 
-        -- Memory is byte oriented.  Access as Bytes
+--!!  Updates
+        -- Read Data from Memory
+        MemoryWord := MemRead(MemoryID, WordAddress) ;
+
+        -- Write to Bytes that correspond to ByteEnables = Strb
         for j in 0 to AXI_DATA_BYTE_WIDTH-1 loop
           if LWD.Strb(j) = '1' then
-            ByteData := LWD.Data((8*j + 7)  downto 8*j) ;
-            MemWrite(MemoryID, MemoryAddress + j, ByteData) ;
+            -- ByteData := LWD.Data((8*j + 7)  downto 8*j) ;
+            -- MemWrite(MemoryID, MemoryAddress + j, ByteData) ;
+            MemoryWord((8*j + 7)  downto 8*j) := LWD.Data((8*j + 7)  downto 8*j) ;
           end if ;
         end loop ;
 
+        -- Write Data to Memory
+        MemWrite(MemoryID, WordAddress, MemoryWord) ;
+
   --!5        GetNextBurstAddress(Address, BurstType) ;  -- to support Wrap addressing
         TransferAddress := TransferAddress + BytesPerTransfer ;
-        MemoryAddress   := TransferAddress(LAW.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
-        -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
+  --      MemoryAddress   := TransferAddress(LAW.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
+  --      -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
+        WordAddress    := TransferAddress(TransferAddress'left downto AXI_BYTE_ADDR_WIDTH) ;
 
         --!3 Delay between burst words - burst vs. single word
 
@@ -758,14 +792,14 @@ begin
   ------------------------------------------------------------
   ReadHandler : process
     variable LAR : AxiBus.ReadAddress'subtype ;
-    alias    AR  : AxiBus.ReadAddress'subtype is AxiBus.ReadAddress ;
+    -- alias    AR  : AxiBus.ReadAddress'subtype is AxiBus.ReadAddress ;
     -- variable LAR : Axi4ReadAddressRecType (
                           -- Addr(AR.Addr'range),
                           -- ID(AR.ID'range),
                           -- User(AR.User'range)
                         -- ) ;
     variable LRD : AxiBus.ReadData'subtype ;
-    alias    RD  : AxiBus.ReadData'subtype is AxiBus.ReadData ;
+    -- alias    RD  : AxiBus.ReadData'subtype is AxiBus.ReadData ;
     -- variable LRD : Axi4ReadDataRecType (
                       -- Data(RD.Data'range),
                       -- User(RD.User'range),
@@ -775,8 +809,10 @@ begin
     variable BurstLen         : integer ;
     variable ByteAddressBits  : integer ;
     variable BytesPerTransfer : integer ;
-    variable MemoryAddress, TransferAddress : std_logic_vector(LAR.Addr'length-1 downto 0) ;
-    variable ByteData         : std_logic_vector(7 downto 0) ;
+    variable TransferAddress  : std_logic_vector(LAR.Addr'length-1 downto 0) ;
+    -- variable MemoryAddress : std_logic_vector(LAR.Addr'length-1 downto 0) ;
+    -- variable ByteData         : std_logic_vector(7 downto 0) ;
+    variable WordAddress      : std_logic_vector(LAR.Addr'length - AXI_BYTE_ADDR_WIDTH - 1 downto 0) ;
   begin
     wait for 0 ns ; -- Allow ReadAddressFifo to initialize
 
@@ -802,19 +838,21 @@ begin
         BytesPerTransfer  := AXI_DATA_BYTE_WIDTH ;
       end if ;
 
-      -- first word in a burst or single word transfer
+--      -- first word in a burst or single word transfer
       TransferAddress  := LAR.Addr(LAR.Addr'left downto ByteAddressBits) & (ByteAddressBits downto 1 => '0') ;
-      -- GetWordAddr(Addr, BytesPerTransfer) ;
-      MemoryAddress    := TransferAddress(LAR.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
-      -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
+--      -- GetWordAddr(Addr, BytesPerTransfer) ;
+--      MemoryAddress    := TransferAddress(LAR.Addr'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
+--      -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
+      WordAddress    := TransferAddress(TransferAddress'left downto AXI_BYTE_ADDR_WIDTH) ;
 
       LRD.Last := '0' ;
       BurstLoop : for BurstIndex in 1 to BurstLen loop
-        -- Memory is byte oriented.  Access as Bytes
-        for ByteNum in 0 to AXI_DATA_BYTE_WIDTH-1 loop
-          MemRead(MemoryID, MemoryAddress + ByteNum, ByteData) ;
-          LRD.Data((8*ByteNum + 7)  downto 8*ByteNum) := ByteData ;
-        end loop ;
+--        -- Memory is byte oriented.  Access as Bytes
+--        for ByteNum in 0 to AXI_DATA_BYTE_WIDTH-1 loop
+--          MemRead(MemoryID, MemoryAddress + ByteNum, ByteData) ;
+--          LRD.Data((8*ByteNum + 7)  downto 8*ByteNum) := ByteData ;
+--        end loop ;
+        LRD.Data := MemRead(MemoryID, WordAddress) ;
 
         if BurstIndex = 1 then
           Log(ModelID,
@@ -827,10 +865,11 @@ begin
           ) ;
         end if ;
 
-  --!5        GetNextBurstAddress(TransferAddress, BurstType) ;  -- to support Wrap
+--  --!5        GetNextBurstAddress(TransferAddress, BurstType) ;  -- to support Wrap
         TransferAddress := TransferAddress + BytesPerTransfer ;
-        MemoryAddress    := TransferAddress(TransferAddress'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
-        -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
+--        MemoryAddress    := TransferAddress(TransferAddress'left downto AXI_BYTE_ADDR_WIDTH) & (AXI_BYTE_ADDR_WIDTH downto 1 => '0') ;
+--        -- GetWordAddr(TransferAddress, AXI_BYTE_ADDR_WIDTH) ;
+        WordAddress    := TransferAddress(TransferAddress'left downto AXI_BYTE_ADDR_WIDTH) ;
 
         if BurstIndex = BurstLen then
           LRD.Last := '1' ;

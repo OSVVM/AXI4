@@ -759,8 +759,6 @@ begin
       end if ;
       WriteResponseActive <= TRUE ;
 
-      Log(ModelID, "Waiting for Write Response.", DEBUG) ;
-
       if UseCoverageDelays then 
         -- BurstCoverage Delays
         (intReadyBeforeValid, ReadyDelayCycles)  := GetRandDelay(WriteResponseDelayCov) ; 

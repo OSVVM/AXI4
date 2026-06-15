@@ -237,7 +237,8 @@ begin
 --!!nn            AWSettings.QOS     <= LocalAW.QOS ; 
 --!!nn            AWSettings.Region  <= LocalAW.Region ; 
 --!!nn            AWSettings.User    <= LocalAW.User ;
-
+            
+            ModelBID <= LocalAW.ID; -- Initialize response code with current AWID
             WriteAddressTransactionCount := Increment(WriteAddressTransactionCount) ; 
 
   --!! Address checks intentionally removed - only want an error if the value changes.  
@@ -299,7 +300,7 @@ begin
 
           if WriteAddressTransactionCount /= WriteResponseTransactionCount and 
                 WriteDataTransactionCount /= WriteResponseTransactionCount then
-            push(WriteResponseFifo, ModelBResp) ;
+            push(WriteResponseFifo, ModelBResp & ModelBID) ;
             increment(WriteReceiveCount) ;
             WriteResponseTransactionCount := Increment(WriteResponseTransactionCount) ; 
           end if ;
@@ -336,6 +337,7 @@ begin
 --            (LocalAR.Addr, LocalAR.Prot)  := pop(ReadAddressFifo) ;
             (LocalAR.Addr, LocalAR.Prot, LocalAR.ID, LocalAR.Len, LocalAR.Size, LocalAR.Burst, LocalAR.Lock, LocalAR.Cache, LocalAR.QOS, LocalAR.Region, LocalAR.User) := pop(ReadAddressFifo) ;
             TransRec.Address         <= SafeResize(ModelID, LocalAR.Addr, TransRec.Address'length) ;
+            ModelRID <= LocalAR.ID; -- Initialize response code with current ARID
   --         AlertIf(ModelID, TransRec.AddrWidth /= AXI_ADDR_WIDTH, "Slave Read, Address length does not match", FAILURE) ;
 --!!nn            ARSettings.Prot    <= LocalAR.Prot ; 
 --!!nn            ARSettings.ID      <= LocalAR.ID ; 
@@ -359,7 +361,7 @@ begin
    
             -- Get Read Data Response Values
             LocalRD.Data  := AlignBytesToDataBus(SafeResize(ModelID, TransRec.DataToModel, LocalRD.Data'length), TransRec.DataWidth, ReadByteAddr) ;
-            push(ReadDataFifo, LocalRD.Data & ModelRResp) ;
+            push(ReadDataFifo, LocalRD.Data & ModelRResp & ModelRID) ;
             Increment(ReadDataRequestCount) ;
 
   -- Currently all ReadData Operations are Async
@@ -565,6 +567,7 @@ begin
         "Write Address." &
         "  AWAddr: "  & to_hxstring(AW.Addr) &
         "  AWProt: "  & to_string(AW.Prot) &
+        "  AWID:   "  & to_string(AW.ID) &
         "  Operation# " & to_string(WriteAddressReceiveCount + 1),
         INFO
       ) ;
@@ -675,10 +678,11 @@ begin
         WaitForToggle(WriteReceiveCount) ;
       end if ;
       if not IsEmpty(WriteResponseFifo) then
-        Local.Resp := pop(WriteResponseFifo) ;
+        (Local.Resp, Local.ID) := pop(WriteResponseFifo) ;
       else
 --!! branch never happens.  If WriteReceiveCount incremented, FIFO has Data
         Local.Resp := AXI4_RESP_OKAY ;
+        Local.ID   := ModelBID;
       end if ;
       
       if UseCoverageDelays then 
@@ -693,12 +697,13 @@ begin
 
       -- Do Transaction
       WR.Resp  <= Local.Resp  after tpd_Clk_BResp ;
-      WR.ID    <= ModelBID    after tpd_Clk_BID ; 
+      WR.ID    <= Local.ID    after tpd_Clk_BID ; 
       WR.User  <= ModelBUser  after tpd_Clk_BUser ; 
 
       Log(ModelID,
         "Write Response." &
         "  BResp: "  & to_hxstring(Local.Resp) &
+        "  BID:   "  & to_hxstring(Local.ID) &
         "  Operation# " & to_string(WriteResponseDoneCount + 1),
         INFO
       ) ;
@@ -720,8 +725,8 @@ begin
 
       -- State after operation
       WR.Resp  <= not Local.Resp after tpd_Clk_BResp ;
-      WR.ID    <= not ModelBID    after tpd_Clk_BID ; 
-      WR.User  <= not ModelBUser  after tpd_Clk_BUser ; 
+      WR.ID    <= not Local.ID   after tpd_Clk_BID ; 
+      WR.User  <= not ModelBUser after tpd_Clk_BUser ; 
 
       -- Signal completion
       Increment(WriteResponseDoneCount) ;
@@ -786,6 +791,7 @@ begin
         "Read Address." &
         "  ARAddr: "  & to_hxstring(AR.Addr) &
         "  ARProt: "  & to_string(AR.Prot) &
+        "  ARID:   "  & to_string(AR.ID) &
         "  Operation# " & to_string(ReadAddressReceiveCount), -- adjusted for delay of ReadAddressReceiveCount
         INFO
       ) ;
@@ -836,7 +842,7 @@ begin
         WaitForToggle(ReadDataRequestCount) ;
       end if ;
 
-      (Local.Data, Local.Resp) := pop(ReadDataFifo) ;
+      (Local.Data, Local.Resp, Local.ID) := pop(ReadDataFifo) ;
 
 --      -- Find Response if available
 --      if not IsEmpty(ReadDataFifo) then
@@ -849,7 +855,7 @@ begin
       -- Transaction Values
       RD.Data  <= Local.Data  after tpd_Clk_RDATA ;
       RD.Resp  <= Local.Resp  after tpd_Clk_RResp ;
-      RD.ID    <= ModelRID    after tpd_Clk_RID ; 
+      RD.ID    <= Local.ID    after tpd_Clk_RID ; 
       RD.User  <= ModelRUser  after tpd_Clk_RUser ; 
       RD.Last  <= '1'         after tpd_Clk_RLast ;
 
@@ -857,6 +863,7 @@ begin
         "Read Data." &
         "  RData: "  & to_hxstring(Local.Data) &
         "  RResp: "  & to_hxstring(Local.Resp) &
+        "  RID:   "  & to_hxstring(Local.ID) &
         "  Operation# " & to_string(ReadDataDoneCount + 1),
         INFO
       ) ;
@@ -880,7 +887,7 @@ begin
       RD.Valid <= '0' after tpd_Clk_RValid ;
       RD.Data  <= not Local.Data after tpd_clk_RData ;
       RD.Resp  <= not Local.Resp after tpd_Clk_RResp ;
-      RD.ID    <= not ModelRID   after tpd_Clk_RID ; 
+      RD.ID    <= not Local.ID   after tpd_Clk_RID ; 
       RD.User  <= not ModelRUser after tpd_Clk_RUser ; 
       RD.Last  <= '0'            after tpd_Clk_RLast ;
 

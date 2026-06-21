@@ -105,6 +105,11 @@ architecture VerificationComponent of Axi4Manager is
 
   constant DEFAULT_BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;
   signal   BurstFifoMode      : AddressBusFifoBurstModeType := DEFAULT_BURST_MODE ;
+
+  constant HAS_AWID : boolean := AxiBus.WriteAddress.ID'length > 0 ;
+  constant HAS_AWUSER : boolean := AxiBus.WriteAddress.User'length > 0 ;
+  constant HAS_ARID : boolean := AxiBus.ReadAddress.ID'length  > 0 ;
+  constant HAS_ARUSER : boolean := AxiBus.ReadAddress.User'length  > 0 ;
 begin
 
   ------------------------------------------------------------
@@ -223,7 +228,9 @@ begin
 
             -- Initiate Write Address
             Push(WriteAddressFifo, LAW.Addr  & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
-            Push(WriteIDScoreboard, LAW.ID) ;
+            if HAS_AWID then
+              Push(WriteIDScoreboard, LAW.ID) ;
+            end if ;
             Increment(WriteAddressRequestCount) ;
           end if ;
 
@@ -289,7 +296,9 @@ begin
 
             -- Initiate Write Address
             Push(WriteAddressFifo, LAW.Addr & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
-            Push(WriteIDScoreboard, LAW.ID) ;
+            if HAS_AWID then
+              Push(WriteIDScoreboard, LAW.ID) ;
+            end if ;
             Increment(WriteAddressRequestCount) ;
           end if ;
 
@@ -360,9 +369,13 @@ begin
 
             -- Expect a Read Data Cycle
             Push(ReadResponseScoreboard, LRD.Resp) ;
-            Push(ReadIDScoreboard,       LAR.ID) ;
+            if HAS_ARID then
+              Push(ReadIDScoreboard,       LAR.ID) ;
+            end if ;
             increment(ReadDataExpectCount) ;
           end if ;
+
+          -- Allow ReadDataExpectCount to update
           wait for 0 ns ;
 
           if IsTryReadData(Operation) and IsEmpty(ReadDataFifo) then
@@ -438,7 +451,9 @@ begin
             -- Expect a Read Data Cycle
             for i in 1 to TransfersInBurst loop
               Push(ReadResponseScoreboard, LRD.Resp) ;
-              Push(ReadIDScoreboard,       LAR.ID) ;
+              if HAS_ARID then
+                Push(ReadIDScoreboard,       LAR.ID) ;
+              end if ;
             end loop ;
   -- Should this be + TransfersInBurst ; ???
             ReadDataExpectCount <= Increment(ReadDataExpectCount, TransfersInBurst) ;
@@ -622,14 +637,18 @@ begin
       AW.Prot   <= Local.Prot   + 1  after tpd_clk_AWProt   ;
       -- AXI4 Full
       AW.Len    <= Local.Len    + 1  after tpd_clk_AWLen    ;
-      AW.ID     <= Local.ID     + 1  after tpd_clk_AWID     ;
+      if HAS_AWID then
+        AW.ID     <= Local.ID     + 1  after tpd_clk_AWID     ;
+      end if ;
       AW.Size   <= Local.Size   + 1  after tpd_clk_AWSize   ;
       AW.Burst  <= Local.Burst  + 1  after tpd_clk_AWBurst  ;
       AW.Lock   <= Local.Lock        after tpd_clk_AWLock   ;
       AW.Cache  <= Local.Cache  + 1  after tpd_clk_AWCache  ;
       AW.QOS    <= Local.QOS    + 1  after tpd_clk_AWQOS    ;
       AW.Region <= Local.Region + 1  after tpd_clk_AWRegion ;
-      AW.User   <= Local.User   + 1  after tpd_clk_AWUser   ;
+      if HAS_AWUSER then
+        AW.User   <= Local.User   + 1  after tpd_clk_AWUser   ;
+      end if ;
       -- Signal completion
       Increment(WriteAddressDoneCount) ;
       wait for 0 ns ;
@@ -789,10 +808,12 @@ begin
 
       -- Check Write Response
       Check(WriteResponseScoreboard,  AxiBus.WriteResponse.Resp) ;
-      if (Get(Params, to_integer(CHECK_ID))) then
-        Check(WriteIDScoreboard, AxiBus.WriteResponse.ID) ;
-      else
-        WriteID := pop(WriteIDScoreboard) ;
+      if HAS_AWID then
+        if (Get(Params, to_integer(CHECK_ID))) then
+          Check(WriteIDScoreboard, AxiBus.WriteResponse.ID) ;
+        else
+          WriteID := pop(WriteIDScoreboard) ;
+        end if ;
       end if ;
 
       -- Signal Completion
@@ -905,14 +926,18 @@ begin
       AR.Prot   <= Local.Prot   + 1  after tpd_clk_ARProt   ;
       -- AXI4 Full
       AR.Len    <= Local.Len    + 1  after tpd_clk_ARLen    ;
-      AR.ID     <= Local.ID     + 1  after tpd_clk_ARID     ;
+      if HAS_ARID then
+        AR.ID     <= Local.ID     + 1  after tpd_clk_ARID     ;
+      end if ;
       AR.Size   <= Local.Size   + 1  after tpd_clk_ARSize   ;
       AR.Burst  <= Local.Burst  + 1  after tpd_clk_ARBurst  ;
       AR.Lock   <= Local.Lock        after tpd_clk_ARLock   ;
       AR.Cache  <= Local.Cache  + 1  after tpd_clk_ARCache  ;
       AR.QOS    <= Local.QOS    + 1  after tpd_clk_ARQOS    ;
       AR.Region <= Local.Region + 1  after tpd_clk_ARRegion ;
-      AR.User   <= Local.User   + 1  after tpd_clk_ARUser   ;
+      if HAS_ARUSER then
+        AR.User   <= Local.User   + 1  after tpd_clk_ARUser   ;
+      end if ;
 
       -- Signal completion
       Increment(ReadAddressDoneCount) ;
@@ -978,11 +1003,13 @@ begin
       -- capture data
       push(ReadDataFifo, AxiBus.ReadData.Data) ;
       Check(ReadResponseScoreboard, AxiBus.ReadData.Resp) ;
-      if (Get(Params, to_integer(CHECK_ID))) then
-        Check(ReadIDScoreboard, AxiBus.ReadData.ID) ;
-      else
-        -- ID is in the scoreboard, so POP it.
-        ReadID := pop(ReadIDScoreboard) ;
+      if HAS_ARID then
+        if (Get(Params, to_integer(CHECK_ID))) then
+          Check(ReadIDScoreboard, AxiBus.ReadData.ID) ;
+        else
+          -- ID is in the scoreboard, so POP it.
+          ReadID := pop(ReadIDScoreboard) ;
+        end if ;
       end if ;
 
       increment(ReadDataReceiveCount) ;

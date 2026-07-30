@@ -93,6 +93,11 @@ architecture VerificationComponent of Axi4ManagerVti is
   signal ReadResponseScoreboard      : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
   signal ReadIDScoreboard            : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
 
+  signal WriteResponseAlertLogID     : AlertLogIDType ;
+  signal WriteIDAlertLogID           : AlertLogIDType ;
+  signal ReadResponseAlertLogID      : AlertLogIDType ;
+  signal ReadIDAlertLogID            : AlertLogIDType ;
+
   signal WriteAddressRequestCount, WriteAddressDoneCount      : integer := 0 ;
   signal WriteDataRequestCount,    WriteDataDoneCount         : integer := 0 ;
   signal WriteResponseExpectCount, WriteResponseReceiveCount  : integer := 0 ;
@@ -124,6 +129,7 @@ begin
   Initialize : process
     variable ID : AlertLogIDType ;
     variable vParams : ModelParametersIDType ;
+    variable TempSbId : osvvm.ScoreboardPkg_slv.ScoreboardIDType ;
   begin
 
     -- Alerts
@@ -137,10 +143,18 @@ begin
     InitAxiOptions(vParams) ;
     Params                  <= vParams ;
 
-    WriteResponseScoreboard <= NewID("WriteResp SB", ID, Search => PRIVATE_NAME);
-    WriteIDScoreboard       <= NewID("Write ID SB",  ID, Search => PRIVATE_NAME);
-    ReadResponseScoreboard  <= NewID("ReadResp SB",  ID, Search => PRIVATE_NAME);
-    ReadIDScoreboard        <= NewID("Read ID SB",   ID, Search => PRIVATE_NAME);
+    TempSbId                := NewID("WriteResp SB", ID, Search => PRIVATE_NAME) ;
+    WriteResponseScoreboard <= TempSbId ;
+    WriteResponseAlertLogID <= GetAlertLogID(TempSbId) ;
+    TempSbId                := NewID("Write ID SB",  ID, Search => PRIVATE_NAME) ;
+    WriteIDScoreboard       <= TempSbId ;
+    WriteIDAlertLogID       <= GetAlertLogID(TempSbId) ;
+    TempSbId                := NewID("ReadResp SB",  ID, Search => PRIVATE_NAME) ;
+    ReadResponseScoreboard  <= TempSbId ;
+    ReadResponseAlertLogID  <= GetAlertLogID(TempSbId) ;
+    TempSbId                := NewID("Read ID SB",   ID, Search => PRIVATE_NAME) ;
+    ReadIDScoreboard        <= TempSbId ;
+    ReadIDAlertLogID        <= GetAlertLogID(TempSbId) ;
 
     -- FIFOs get an AlertLogID with NewID, however, it does not print in ReportAlerts (due to DoNotReport)
     --   FIFOS only generate usage type errors
@@ -409,7 +423,8 @@ begin
               AffirmIf( DataCheckID, MetaMatch(LRD.Data, ExpectedData),
                 "Read Data: " & to_hxstring(LRD.Data) &
                 "  Read Address: " & to_hxstring(LAR.Addr) &
-                "  Prot: " & to_hxstring(ReadProt),
+                "  Prot: " & to_hxstring(ReadProt) &
+                "  Operation# " & to_string(ReadDataExpectCount),
                 "  Expected: " & to_hxstring(ExpectedData),
                 TransRec.StatusMsgOn or IsLogEnabled(ModelID, INFO) ) ;
             else
@@ -418,7 +433,8 @@ begin
               Log( ModelID,
                 "Read Data: " & to_hxstring(LRD.Data) &
                 "  Read Address: " & to_hxstring(LAR.Addr) &
-                "  Prot: " & to_hxstring(ReadProt),
+                "  Prot: " & to_hxstring(ReadProt) &
+                "  Operation# " & to_string(ReadDataExpectCount),
                 INFO,
                 TransRec.StatusMsgOn
               ) ;
@@ -760,7 +776,8 @@ begin
     variable ReadyBeforeValid  : boolean ;
     variable ReadyDelayCycles  : integer ;
     variable ValidTimeOut : integer ;
-    variable WriteID : AxiBus.WriteResponse.ID'subtype ;
+    variable ExpectedWriteResp : AxiBus.WriteResponse.RESP'subtype ;
+    variable ExpectedWriteID   : AxiBus.WriteResponse.ID'subtype ;
   begin
     -- initialize
     AxiBus.WriteResponse.Ready <= '0' ;
@@ -807,12 +824,24 @@ begin
       ) ;
 
       -- Check Write Response
-      Check(WriteResponseScoreboard,  AxiBus.WriteResponse.Resp) ;
+--      Check(WriteResponseScoreboard,  AxiBus.WriteResponse.Resp) ;
+      ExpectedWriteResp := Pop(WriteResponseScoreboard) ;
+      AffirmIf( WriteResponseAlertLogID, AxiBus.WriteResponse.Resp = ExpectedWriteResp,
+        "Write Response: " & to_string(AxiBus.WriteResponse.Resp) &
+        "  Operation# " & to_string(WriteResponseReceiveCount + 1),
+        "  Expected: " & to_string(ExpectedWriteResp),
+        TransRec.StatusMsgOn or IsLogEnabled(WriteResponseAlertLogID, DEBUG) ) ;
       if HAS_AWID then
+        ExpectedWriteID := pop(WriteIDScoreboard) ;
         if (Get(Params, to_integer(CHECK_ID))) then
-          Check(WriteIDScoreboard, AxiBus.WriteResponse.ID) ;
-        else
-          WriteID := pop(WriteIDScoreboard) ;
+          AffirmIf( WriteIDAlertLogID, AxiBus.WriteResponse.ID = ExpectedWriteID,
+            "Write Response ID: " & to_string(AxiBus.WriteResponse.ID) &
+            "  Operation# " & to_string(WriteResponseReceiveCount + 1),
+            "  Expected: " & to_string(ExpectedWriteID),
+            TransRec.StatusMsgOn or IsLogEnabled(WriteIDAlertLogID, DEBUG) ) ;
+--          Check(WriteIDScoreboard, AxiBus.WriteResponse.ID) ;
+--        else
+--          ExpectedWriteID := pop(WriteIDScoreboard) ;
         end if ;
       end if ;
 
@@ -955,7 +984,8 @@ begin
     variable intReadyBeforeValid : integer ;
     variable ReadyDelayCycles : integer ;
     variable ReadDataValidTimeOut     : integer ;
-    variable ReadID : AxiBus.ReadData.ID'subtype ;
+    variable ExpectedReadResp : AxiBus.ReadData.RESP'subtype ;
+    variable ExpectedReadID   : AxiBus.ReadData.ID'subtype ;
   begin
     AxiBus.ReadData.Ready <= '0' ;
     wait for 0 ns ; -- Allow Cov models to initialize
@@ -1002,13 +1032,25 @@ begin
 
       -- capture data
       push(ReadDataFifo, AxiBus.ReadData.Data) ;
-      Check(ReadResponseScoreboard, AxiBus.ReadData.Resp) ;
+--      Check(ReadResponseScoreboard, AxiBus.ReadData.Resp) ;
+      ExpectedReadResp := Pop(ReadResponseScoreboard) ;
+      AffirmIf( ReadResponseAlertLogID, AxiBus.ReadData.Resp = ExpectedReadResp,
+        "Read Response: " & to_string(AxiBus.ReadData.Resp) &
+        "  Operation# " & to_string(ReadDataReceiveCount + 1),
+        "  Expected: " & to_string(ExpectedReadResp),
+        TransRec.StatusMsgOn or IsLogEnabled(ReadResponseAlertLogID, DEBUG) ) ;
       if HAS_ARID then
+        ExpectedReadID := pop(ReadIDScoreboard) ;
         if (Get(Params, to_integer(CHECK_ID))) then
-          Check(ReadIDScoreboard, AxiBus.ReadData.ID) ;
-        else
-          -- ID is in the scoreboard, so POP it.
-          ReadID := pop(ReadIDScoreboard) ;
+          AffirmIf( ReadIDAlertLogID, AxiBus.ReadData.ID = ExpectedReadID,
+            "Read Response ID: " & to_string(AxiBus.ReadData.ID) &
+            "  Operation# " & to_string(ReadDataReceiveCount + 1),
+            "  Expected: " & to_string(ExpectedReadID),
+            TransRec.StatusMsgOn or IsLogEnabled(ReadIDAlertLogID, DEBUG) ) ;
+--          Check(ReadIDScoreboard, AxiBus.ReadData.ID) ;
+--        else
+--          -- ID is in the scoreboard, so POP it.
+--          ReadID := pop(ReadIDScoreboard) ;
         end if ;
       end if ;
 

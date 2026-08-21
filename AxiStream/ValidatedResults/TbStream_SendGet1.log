@@ -628,8 +628,8 @@
 %%        1070.0 ns    Log    PASSED    in Default,                      Transmit TransactionCount: Received : 96
 %%        1070.0 ns    Log    PASSED    in Default,                      Receiver, GetErrorCount: Verify that ErrorCount is 0 Received : 0
 %%        1070.0 ns    Log    PASSED    in Default,                      Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 0
-%%        1070.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.0700 us
-%%        1070.0 ns    Log    PASSED    in Default,                      Transmitter: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.0700 us
+%%        1070.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.070 us
+%%        1070.0 ns    Log    PASSED    in Default,                      Transmitter: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.070 us
 %%        1070.0 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 87868584  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 97
 %%        1080.0 ns    Log    INFO      in receiver_1,                   Word Receive.  Operation# 97  Data: 87868584  TID: 00  TDest: 0  TUser: 0  TLast: 0
 %%        1080.0 ns    Log    PASSED    in Default,                      Receive TranasctionCount: Received : 97
@@ -838,8 +838,8 @@
 %%        1390.0 ns    Log    PASSED    in Default,                      Transmit TransactionCount: Received : 128
 %%        1390.0 ns    Log    PASSED    in Default,                      Receiver, GetErrorCount: Verify that ErrorCount is 0 Received : 1
 %%        1390.0 ns    Log    PASSED    in Default,                      Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 0
-%%        1390.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.3900 us
-%%        1390.0 ns    Log    PASSED    in Default,                      Transmitter: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.3900 us
+%%        1390.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.390 us
+%%        1390.0 ns    Log    PASSED    in Default,                      Transmitter: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.390 us
 %%        1390.0 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 07060504  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 129
 %%        1400.0 ns    Log    INFO      in receiver_1,                   Word Receive.  Operation# 129  Data: 07060504  TID: 00  TDest: 0  TUser: 0  TLast: 0
 %%        1400.0 ns    Log    PASSED    in Default,                      Receive TranasctionCount: Received : 129
@@ -1048,8 +1048,8 @@
 %%        1710.0 ns    Log    PASSED    in Default,                      Transmit TransactionCount: Received : 160
 %%        1710.0 ns    Log    PASSED    in Default,                      Receiver, GetErrorCount: Verify that ErrorCount is 0 Received : 1
 %%        1710.0 ns    Log    PASSED    in Default,                      Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 0
-%%        1710.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.7100 us
-%%        1710.0 ns    Log    PASSED    in Default,                      Transmitter: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.7100 us
+%%        1710.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.710 us
+%%        1710.0 ns    Log    PASSED    in Default,                      Transmitter: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.710 us
 %%        1710.0 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 87868584  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 161
 %%        1720.0 ns    Log    INFO      in receiver_1,                   Word Receive.  Operation# 161  Data: 87868584  TID: 00  TDest: 0  TUser: 0  TLast: 0
 %%        1720.0 ns    Log    PASSED    in Default,                      Receive TranasctionCount: Received : 161
@@ -1258,8 +1258,8 @@
 %%        2030.0 ns    Log    PASSED    in Default,                      Transmit TransactionCount: Received : 192
 %%        2030.0 ns    Log    PASSED    in Default,                      Receiver, GetErrorCount: Verify that ErrorCount is 0 Received : 1
 %%        2030.0 ns    Log    PASSED    in Default,                      Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 0
-%%        2030.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.0300 us
-%%        2030.0 ns    Log    PASSED    in Default,                      Transmitter: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.0300 us
+%%        2030.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.030 us
+%%        2030.0 ns    Log    PASSED    in Default,                      Transmitter: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.030 us
 %%        2030.0 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 07060504  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 193
 %%        2040.0 ns    Log    INFO      in receiver_1,                   Word Receive.  Operation# 193  Data: 07060504  TID: 00  TDest: 0  TUser: 0  TLast: 0
 %%        2040.0 ns    Log    PASSED    in Default,                      Receive TranasctionCount: Received : 193
@@ -1468,8 +1468,8 @@
 %%        2350.0 ns    Log    PASSED    in Default,                      Transmit TransactionCount: Received : 224
 %%        2350.0 ns    Log    PASSED    in Default,                      Receiver, GetErrorCount: Verify that ErrorCount is 0 Received : 1
 %%        2350.0 ns    Log    PASSED    in Default,                      Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 0
-%%        2350.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.3500 us
-%%        2350.0 ns    Log    PASSED    in Default,                      Transmitter: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.3500 us
+%%        2350.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.350 us
+%%        2350.0 ns    Log    PASSED    in Default,                      Transmitter: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.350 us
 %%        2350.0 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 87868584  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 225
 %%        2360.0 ns    Log    INFO      in receiver_1,                   Word Receive.  Operation# 225  Data: 87868584  TID: 00  TDest: 0  TUser: 0  TLast: 0
 %%        2360.0 ns    Log    PASSED    in Default,                      Receive TranasctionCount: Received : 225
@@ -1678,5 +1678,5 @@
 %%        2670.0 ns    Log    PASSED    in Default,                      Transmit TransactionCount: Received : 256
 %%        2670.0 ns    Log    PASSED    in Default,                      Receiver, GetErrorCount: Verify that ErrorCount is 0 Received : 2
 %%        2670.0 ns    Log    PASSED    in Default,                      Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 0
-%%        2670.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.6700 us
-%%        2670.0 ns    Log    PASSED    in Default,                      Transmitter: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.6700 us
+%%        2670.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.670 us
+%%        2670.0 ns    Log    PASSED    in Default,                      Transmitter: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.670 us

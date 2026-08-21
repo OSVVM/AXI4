@@ -725,7 +725,7 @@
 %%        1150.0 ns    Log    PASSED    in Default,                      Receive TranasctionCount: Received : 96
 %%        1150.0 ns    Log    PASSED    in Default,                      TryCount 1
 %%        1150.0 ns    Log    PASSED    in Default,                      Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 0
-%%        1150.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.1500 us
+%%        1150.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.150 us
 %%        1190.0 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 87868584  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 97
 %%        1190.0 ns    Log    ALWAYS    in Default,                      Transmitter Queued Transactions: 97 Completed Transactions: 96
 %%        1190.0 ns    Log    PASSED    in Default,                      Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0 Received : 0
@@ -967,7 +967,7 @@
 %%        1510.0 ns    Log    PASSED    in Default,                      Receive TranasctionCount: Received : 128
 %%        1510.0 ns    Log    PASSED    in Default,                      TryCount 1
 %%        1510.0 ns    Log    PASSED    in Default,                      Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 1
-%%        1510.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.5100 us
+%%        1510.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.510 us
 %%        1550.0 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 07060504  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 129
 %%        1550.0 ns    Log    ALWAYS    in Default,                      Transmitter Queued Transactions: 129 Completed Transactions: 128
 %%        1550.0 ns    Log    PASSED    in Default,                      Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0 Received : 0
@@ -1209,7 +1209,7 @@
 %%        1870.0 ns    Log    PASSED    in Default,                      Receive TranasctionCount: Received : 160
 %%        1870.0 ns    Log    PASSED    in Default,                      TryCount 1
 %%        1870.0 ns    Log    PASSED    in Default,                      Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 1
-%%        1870.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.8700 us
+%%        1870.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 1.870 us
 %%        1910.0 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 87868584  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 161
 %%        1910.0 ns    Log    ALWAYS    in Default,                      Transmitter Queued Transactions: 161 Completed Transactions: 160
 %%        1910.0 ns    Log    PASSED    in Default,                      Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0 Received : 0
@@ -1451,7 +1451,7 @@
 %%        2230.0 ns    Log    PASSED    in Default,                      Receive TranasctionCount: Received : 192
 %%        2230.0 ns    Log    PASSED    in Default,                      TryCount 1
 %%        2230.0 ns    Log    PASSED    in Default,                      Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 1
-%%        2230.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.2300 us
+%%        2230.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.230 us
 %%        2270.0 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 07060504  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 193
 %%        2270.0 ns    Log    ALWAYS    in Default,                      Transmitter Queued Transactions: 193 Completed Transactions: 192
 %%        2270.0 ns    Log    PASSED    in Default,                      Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0 Received : 0
@@ -1693,7 +1693,7 @@
 %%        2590.0 ns    Log    PASSED    in Default,                      Receive TranasctionCount: Received : 224
 %%        2590.0 ns    Log    PASSED    in Default,                      TryCount 1
 %%        2590.0 ns    Log    PASSED    in Default,                      Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 1
-%%        2590.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.5900 us
+%%        2590.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.590 us
 %%        2630.0 ns    Log    INFO      in transmitter_1,                Axi Stream Send.  TData: 87868584  TStrb: 1111  TKeep: 1111  TID: 00  TDest: 0  TUser: 0  TLast: 0  Operation# 225
 %%        2630.0 ns    Log    ALWAYS    in Default,                      Transmitter Queued Transactions: 225 Completed Transactions: 224
 %%        2630.0 ns    Log    PASSED    in Default,                      Transmitter, GetAlertLogID/GetAlertCount: Verify that ErrorCount is 0 Received : 0
@@ -1935,4 +1935,4 @@
 %%        2950.0 ns    Log    PASSED    in Default,                      Receive TranasctionCount: Received : 256
 %%        2950.0 ns    Log    PASSED    in Default,                      TryCount 1
 %%        2950.0 ns    Log    PASSED    in Default,                      Transmitter, GetErrorCount: Verify that ErrorCount is 0 Received : 2
-%%        2950.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.9500 us
+%%        2950.0 ns    Log    PASSED    in Default,                      Receiver: WaitForTransaction executes in 0 time when using blocking transactions Received : 2.950 us

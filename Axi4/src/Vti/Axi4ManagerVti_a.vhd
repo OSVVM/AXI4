@@ -111,9 +111,9 @@ architecture VerificationComponent of Axi4ManagerVti is
   constant DEFAULT_BURST_MODE : AddressBusFifoBurstModeType := ADDRESS_BUS_BURST_WORD_MODE ;
   signal   BurstFifoMode      : AddressBusFifoBurstModeType := DEFAULT_BURST_MODE ;
 
-  constant HAS_AWID : boolean := AxiBus.WriteAddress.ID'length > 0 ;
+  constant HAS_AWID   : boolean := AxiBus.WriteAddress.ID'length > 0 ;
   constant HAS_AWUSER : boolean := AxiBus.WriteAddress.User'length > 0 ;
-  constant HAS_ARID : boolean := AxiBus.ReadAddress.ID'length  > 0 ;
+  constant HAS_ARID   : boolean := AxiBus.ReadAddress.ID'length  > 0 ;
   constant HAS_ARUSER : boolean := AxiBus.ReadAddress.User'length  > 0 ;
 begin
 
@@ -833,7 +833,7 @@ begin
         TransRec.StatusMsgOn or IsLogEnabled(WriteResponseAlertLogID, DEBUG) ) ;
       if HAS_AWID then
         ExpectedWriteID := pop(WriteIDScoreboard) ;
-        if (Get(Params, to_integer(CHECK_ID))) then
+        if (Get(Params, to_integer(CHECK_BID))) then
           AffirmIf( WriteIDAlertLogID, AxiBus.WriteResponse.ID = ExpectedWriteID,
             "Write Response ID: " & to_string(AxiBus.WriteResponse.ID) &
             "  Operation# " & to_string(WriteResponseReceiveCount + 1),
@@ -1041,7 +1041,7 @@ begin
         TransRec.StatusMsgOn or IsLogEnabled(ReadResponseAlertLogID, DEBUG) ) ;
       if HAS_ARID then
         ExpectedReadID := pop(ReadIDScoreboard) ;
-        if (Get(Params, to_integer(CHECK_ID))) then
+        if (Get(Params, to_integer(CHECK_RID))) then
           AffirmIf( ReadIDAlertLogID, AxiBus.ReadData.ID = ExpectedReadID,
             "Read Response ID: " & to_string(AxiBus.ReadData.ID) &
             "  Operation# " & to_string(ReadDataReceiveCount + 1),

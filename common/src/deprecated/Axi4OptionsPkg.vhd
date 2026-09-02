@@ -54,6 +54,7 @@ library osvvm_common ;
     context osvvm_common.OsvvmCommonContext ;
 
 use work.Axi4InterfaceCommonPkg.all ;
+use work.Axi4SettingsPkg.all ;
 
 package Axi4OptionsPkg is
 
@@ -97,7 +98,8 @@ package Axi4OptionsPkg is
     WRITE_DATA_FILTER_UNDRIVEN,
     WRITE_DATA_UNDRIVEN_VALUE,
 
-    CHECK_ID,
+    CHECK_BID,
+    CHECK_RID,
 
     -- Marker
     OPTIONS_MARKER,
@@ -255,7 +257,7 @@ package Axi4OptionsPkg is
     constant Option         : In    Axi4OptionsType ;
     variable OptVal         : Out   std_logic_vector
   ) ;
-  
+
   ------------------------------------------------------------
   procedure GetAxi4Options (
   ------------------------------------------------------------
@@ -282,7 +284,7 @@ package Axi4OptionsPkg is
   ------------------------------------------------------------
   impure function to_integer (Operation : Axi4OptionsType) return integer ;
   function IsAxiParameter (Operation : Axi4OptionsType) return boolean ;
-  function IsAxiInterface (Operation : Axi4OptionsType) return boolean ; 
+  function IsAxiInterface (Operation : Axi4OptionsType) return boolean ;
 
   ------------------------------------------------------------
   procedure SetAxi4Parameter (
@@ -320,30 +322,30 @@ package Axi4OptionsPkg is
   impure function GetAxi4Parameter (
   -----------------------------------------------------------
     constant Params        : in    ModelParametersIDType ;
-    constant Operation     : in    Axi4OptionsType 
+    constant Operation     : in    Axi4OptionsType
   ) return boolean ;
 
   ------------------------------------------------------------
   impure function GetAxi4Parameter (
   -----------------------------------------------------------
     constant Params        : in    ModelParametersIDType ;
-    constant Operation     : in    Axi4OptionsType 
+    constant Operation     : in    Axi4OptionsType
   ) return std_logic ;
 
   ------------------------------------------------------------
   impure function GetAxi4Parameter (
   -----------------------------------------------------------
     constant Params        : in    ModelParametersIDType ;
-    constant Operation     : in    Axi4OptionsType 
+    constant Operation     : in    Axi4OptionsType
   ) return integer ;
 
   ------------------------------------------------------------
   impure function GetAxi4Parameter (
   -----------------------------------------------------------
     constant Params        : in    ModelParametersIDType ;
-    constant Operation     : in    Axi4OptionsType 
+    constant Operation     : in    Axi4OptionsType
   ) return std_logic_vector ;
-  
+
   ------------------------------------------------------------
   impure function GetAxi4Parameter (
   -----------------------------------------------------------
@@ -351,97 +353,20 @@ package Axi4OptionsPkg is
     constant Operation     : in    Axi4OptionsType ;
     constant Size          : in    natural
   ) return std_logic_vector ;
-  
+
   ------------------------------------------------------------
   procedure InitAxiOptions (
   -----------------------------------------------------------
-    constant Params        : in ModelParametersIDType 
+    constant Params        : in ModelParametersIDType
   ) ;
 
   ------------------------------------------------------------
   procedure InitAxiOptions (
   -----------------------------------------------------------
     signal Params        : InOut ModelParametersIDType ;
-           Name          : in    string ; 
+           Name          : in    string ;
            ParentID      : in    AlertLogIDType
   ) ;
-  
---!! These are Deprecated !!
---!! These are Deprecated !!
---!! These are Deprecated !!
-  ------------------------------------------------------------
-  procedure SetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    constant OptVal        : in    boolean
-  ) ;
-
-  ------------------------------------------------------------
-  procedure SetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    constant OptVal        : in    std_logic
-  ) ;
-
-  ------------------------------------------------------------
-  procedure SetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    constant OptVal        : in    integer
-  ) ;
-
-  ------------------------------------------------------------
-  procedure SetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    constant OptVal        : in    std_logic_vector
-  ) ;
-
-  ------------------------------------------------------------
-  procedure GetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    variable OptVal        : out   boolean
-  ) ;
-
-  ------------------------------------------------------------
-  procedure GetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    variable OptVal        : out   std_logic
-  ) ;
-
-  ------------------------------------------------------------
-  procedure GetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    variable OptVal        : out   integer
-  ) ;
-
-  ------------------------------------------------------------
-  procedure GetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    variable OptVal        : out   std_logic_vector
-  ) ;
-  --
-  -- Remove after updating Axi4Lite VC
-  --
---!!  alias SetAxiOption is SetAxi4Parameter[ModelParametersPType, Axi4OptionsType, boolean];
---!!  alias SetAxiOption is SetAxi4Parameter[ModelParametersPType, Axi4OptionsType, integer];
---!!  alias SetAxiOption is SetAxi4Parameter[ModelParametersPType, Axi4OptionsType, std_logic_vector];
---!!  alias GetAxiOption is GetAxi4Parameter[ModelParametersPType, Axi4OptionsType, boolean];
---!!  alias GetAxiOption is GetAxi4Parameter[ModelParametersPType, Axi4OptionsType, integer];
---!!  alias GetAxiOption is GetAxi4Parameter[ModelParametersPType, Axi4OptionsType, std_logic_vector];
-
 
 end package Axi4OptionsPkg ;
 
@@ -462,7 +387,7 @@ package body Axi4OptionsPkg is
 --   function resolved_max ( s : Axi4UnresolvedRespVectorEnumType) return Axi4UnresolvedRespEnumType is
 --   begin
 --     return maximum(s) ;
---   end function resolved_max ; 
+--   end function resolved_max ;
 
   --
   --  Abstraction Layer to support SetModelOptions using enumerated values
@@ -621,21 +546,21 @@ package body Axi4OptionsPkg is
   -- Axi4 Verification Component Support Subprograms
   --
   ------------------------------------------------------------
-  impure function to_integer (Operation : Axi4OptionsType) return integer is 
+  impure function to_integer (Operation : Axi4OptionsType) return integer is
   -----------------------------------------------------------
   begin
     return Axi4OptionsType'POS(Operation) ;
   end function to_integer ;
 
   ------------------------------------------------------------
-  function IsAxiParameter (Operation : Axi4OptionsType) return boolean is 
+  function IsAxiParameter (Operation : Axi4OptionsType) return boolean is
   -----------------------------------------------------------
   begin
     return (Operation < OPTIONS_MARKER) ;
   end function IsAxiParameter ;
 
   ------------------------------------------------------------
-  function IsAxiInterface (Operation : Axi4OptionsType) return boolean is 
+  function IsAxiInterface (Operation : Axi4OptionsType) return boolean is
   ------------------------------------------------------------
   begin
     return (Operation > OPTIONS_MARKER) ;
@@ -689,7 +614,7 @@ package body Axi4OptionsPkg is
   impure function GetAxi4Parameter (
   -----------------------------------------------------------
     constant Params        : in    ModelParametersIDType ;
-    constant Operation     : in    Axi4OptionsType 
+    constant Operation     : in    Axi4OptionsType
   ) return boolean is
   begin
     return Get(Params, Axi4OptionsType'POS(Operation)) ;
@@ -699,7 +624,7 @@ package body Axi4OptionsPkg is
   impure function GetAxi4Parameter (
   -----------------------------------------------------------
     constant Params        : in    ModelParametersIDType ;
-    constant Operation     : in    Axi4OptionsType 
+    constant Operation     : in    Axi4OptionsType
   ) return std_logic is
     variable IntOptval : integer ;
   begin
@@ -711,7 +636,7 @@ package body Axi4OptionsPkg is
   impure function GetAxi4Parameter (
   -----------------------------------------------------------
     constant Params        : in    ModelParametersIDType ;
-    constant Operation     : in    Axi4OptionsType 
+    constant Operation     : in    Axi4OptionsType
   ) return integer is
   begin
     return Get(Params, Axi4OptionsType'POS(Operation)) ;
@@ -721,265 +646,87 @@ package body Axi4OptionsPkg is
   impure function GetAxi4Parameter (
   -----------------------------------------------------------
     constant Params        : in    ModelParametersIDType ;
-    constant Operation     : in    Axi4OptionsType 
-  ) return std_logic_vector is 
+    constant Operation     : in    Axi4OptionsType
+  ) return std_logic_vector is
   begin
     return Get(Params, Axi4OptionsType'POS(Operation)) ;
   end function GetAxi4Parameter ;
-  
+
   ------------------------------------------------------------
   impure function GetAxi4Parameter (
   -----------------------------------------------------------
     constant Params        : in    ModelParametersIDType ;
     constant Operation     : in    Axi4OptionsType ;
     constant Size          : in    natural
-  ) return std_logic_vector is 
+  ) return std_logic_vector is
   begin
     return Get(Params, Axi4OptionsType'POS(Operation), Size) ;
   end function GetAxi4Parameter ;
-  
+
   ------------------------------------------------------------
   procedure InitAxiOptions (
   -----------------------------------------------------------
-    constant Params        : in ModelParametersIDType 
+    constant Params        : in ModelParametersIDType
   ) is
   begin
     -- AXI4 Model Options
     -- Ready timeout
-    SetAxi4Parameter(Params, WRITE_ADDRESS_READY_TIME_OUT,       25 ) ;
-    SetAxi4Parameter(Params, WRITE_DATA_READY_TIME_OUT,          25 ) ;
-    SetAxi4Parameter(Params, WRITE_RESPONSE_READY_TIME_OUT,      25 ) ; -- S
-    SetAxi4Parameter(Params, READ_ADDRESS_READY_TIME_OUT,        25 ) ;
-    SetAxi4Parameter(Params, READ_DATA_READY_TIME_OUT,           25 ) ; -- S
+    SetAxi4Parameter(Params, WRITE_ADDRESS_READY_TIME_OUT,       AXI4_DEFAULT_WRITE_ADDRESS_READY_TIME_OUT  ) ;
+    SetAxi4Parameter(Params, WRITE_DATA_READY_TIME_OUT,          AXI4_DEFAULT_WRITE_DATA_READY_TIME_OUT     ) ;
+    SetAxi4Parameter(Params, WRITE_RESPONSE_READY_TIME_OUT,      AXI4_DEFAULT_WRITE_RESPONSE_READY_TIME_OUT ) ; -- S
+    SetAxi4Parameter(Params, READ_ADDRESS_READY_TIME_OUT,        AXI4_DEFAULT_READ_ADDRESS_READY_TIME_OUT   ) ;
+    SetAxi4Parameter(Params, READ_DATA_READY_TIME_OUT,           AXI4_DEFAULT_READ_DATA_READY_TIME_OUT      ) ; -- S
 
     -- Ready Controls
-    SetAxi4Parameter(Params, WRITE_ADDRESS_READY_BEFORE_VALID,   TRUE) ; -- S
-    SetAxi4Parameter(Params, WRITE_DATA_READY_BEFORE_VALID,      TRUE) ; -- S
-    SetAxi4Parameter(Params, WRITE_RESPONSE_READY_BEFORE_VALID,  TRUE) ;
-    SetAxi4Parameter(Params, READ_ADDRESS_READY_BEFORE_VALID,    TRUE) ; -- S
-    SetAxi4Parameter(Params, READ_DATA_READY_BEFORE_VALID,       TRUE) ;
+    SetAxi4Parameter(Params, WRITE_ADDRESS_READY_BEFORE_VALID,   AXI4_DEFAULT_WRITE_ADDRESS_READY_BEFORE_VALID ) ; -- S
+    SetAxi4Parameter(Params, WRITE_DATA_READY_BEFORE_VALID,      AXI4_DEFAULT_WRITE_DATA_READY_BEFORE_VALID    ) ; -- S
+    SetAxi4Parameter(Params, WRITE_RESPONSE_READY_BEFORE_VALID,  AXI4_DEFAULT_WRITE_RESPONSE_READY_BEFORE_VALID) ;
+    SetAxi4Parameter(Params, READ_ADDRESS_READY_BEFORE_VALID,    AXI4_DEFAULT_READ_ADDRESS_READY_BEFORE_VALID  ) ; -- S
+    SetAxi4Parameter(Params, READ_DATA_READY_BEFORE_VALID,       AXI4_DEFAULT_READ_DATA_READY_BEFORE_VALID     ) ;
 
     -- Ready Delay
-    SetAxi4Parameter(Params, WRITE_ADDRESS_READY_DELAY_CYCLES,   0) ;  -- S
-    SetAxi4Parameter(Params, WRITE_DATA_READY_DELAY_CYCLES,      0) ;  -- S
-    SetAxi4Parameter(Params, WRITE_RESPONSE_READY_DELAY_CYCLES,  0) ;
-    SetAxi4Parameter(Params, READ_ADDRESS_READY_DELAY_CYCLES,    0) ;  -- S
-    SetAxi4Parameter(Params, READ_DATA_READY_DELAY_CYCLES,       0) ;
+    SetAxi4Parameter(Params, WRITE_ADDRESS_READY_DELAY_CYCLES,   AXI4_DEFAULT_WRITE_ADDRESS_READY_DELAY_CYCLES ) ;  -- S
+    SetAxi4Parameter(Params, WRITE_DATA_READY_DELAY_CYCLES,      AXI4_DEFAULT_WRITE_DATA_READY_DELAY_CYCLES    ) ;  -- S
+    SetAxi4Parameter(Params, WRITE_RESPONSE_READY_DELAY_CYCLES,  AXI4_DEFAULT_WRITE_RESPONSE_READY_DELAY_CYCLES) ;
+    SetAxi4Parameter(Params, READ_ADDRESS_READY_DELAY_CYCLES,    AXI4_DEFAULT_READ_ADDRESS_READY_DELAY_CYCLES  ) ;  -- S
+    SetAxi4Parameter(Params, READ_DATA_READY_DELAY_CYCLES,       AXI4_DEFAULT_READ_DATA_READY_DELAY_CYCLES     ) ;
 
     -- Valid Timeouts
-    SetAxi4Parameter(Params, WRITE_RESPONSE_VALID_TIME_OUT,      8192) ;
-    SetAxi4Parameter(Params, READ_DATA_VALID_TIME_OUT,           25) ;
+    SetAxi4Parameter(Params, WRITE_RESPONSE_VALID_TIME_OUT,      AXI4_DEFAULT_WRITE_RESPONSE_VALID_TIME_OUT) ;
+    SetAxi4Parameter(Params, READ_DATA_VALID_TIME_OUT,           AXI4_DEFAULT_READ_DATA_VALID_TIME_OUT     ) ;
 
     -- Valid Delays
-    SetAxi4Parameter(Params, WRITE_ADDRESS_VALID_DELAY_CYCLES,     0) ;
-    SetAxi4Parameter(Params, WRITE_DATA_VALID_DELAY_CYCLES,        0) ;
-    SetAxi4Parameter(Params, WRITE_DATA_VALID_BURST_DELAY_CYCLES,  0) ;
-    SetAxi4Parameter(Params, WRITE_RESPONSE_VALID_DELAY_CYCLES,    0) ;  -- S
-    SetAxi4Parameter(Params, READ_ADDRESS_VALID_DELAY_CYCLES,      0) ;
-    SetAxi4Parameter(Params, READ_DATA_VALID_DELAY_CYCLES,         0) ;  -- S
-    SetAxi4Parameter(Params, READ_DATA_VALID_BURST_DELAY_CYCLES,   0) ;  -- S
+    SetAxi4Parameter(Params, WRITE_ADDRESS_VALID_DELAY_CYCLES,     AXI4_DEFAULT_WRITE_ADDRESS_VALID_DELAY_CYCLES   ) ;
+    SetAxi4Parameter(Params, WRITE_DATA_VALID_DELAY_CYCLES,        AXI4_DEFAULT_WRITE_DATA_VALID_DELAY_CYCLES      ) ;
+    SetAxi4Parameter(Params, WRITE_DATA_VALID_BURST_DELAY_CYCLES,  AXI4_DEFAULT_WRITE_DATA_VALID_BURST_DELAY_CYCLES) ;
+    SetAxi4Parameter(Params, WRITE_RESPONSE_VALID_DELAY_CYCLES,    AXI4_DEFAULT_WRITE_RESPONSE_VALID_DELAY_CYCLES  ) ;  -- S
+    SetAxi4Parameter(Params, READ_ADDRESS_VALID_DELAY_CYCLES,      AXI4_DEFAULT_READ_ADDRESS_VALID_DELAY_CYCLES    ) ;
+    SetAxi4Parameter(Params, READ_DATA_VALID_DELAY_CYCLES,         AXI4_DEFAULT_READ_DATA_VALID_DELAY_CYCLES       ) ;  -- S
+    SetAxi4Parameter(Params, READ_DATA_VALID_BURST_DELAY_CYCLES,   AXI4_DEFAULT_READ_DATA_VALID_BURST_DELAY_CYCLES ) ;  -- S
 
     -- Write Data Filtering
-    SetAxi4Parameter(Params, WRITE_DATA_FILTER_UNDRIVEN,            TRUE) ;
-    SetAxi4Parameter(Params, WRITE_DATA_UNDRIVEN_VALUE,             '0') ;
+    SetAxi4Parameter(Params, WRITE_DATA_FILTER_UNDRIVEN,            AXI4_DEFAULT_WRITE_DATA_FILTER_UNDRIVEN) ;
+    SetAxi4Parameter(Params, WRITE_DATA_UNDRIVEN_VALUE,             AXI4_DEFAULT_WRITE_DATA_UNDRIVEN_VALUE ) ;
 
-    SetAxi4Parameter(Params, CHECK_ID,                              TRUE) ;
+    SetAxi4Parameter(Params, CHECK_BID,                             AXI4_DEFAULT_CHECK_BID) ;
+    SetAxi4Parameter(Params, CHECK_RID,                             AXI4_DEFAULT_CHECK_RID) ;
   end procedure InitAxiOptions ;
 
   ------------------------------------------------------------
   procedure InitAxiOptions (
   -----------------------------------------------------------
     signal Params        : InOut ModelParametersIDType ;
-           Name          : in    string ; 
+           Name          : in    string ;
            ParentID      : in    AlertLogIDType
   ) is
-    variable vParams : ModelParametersIDType ; 
+    variable vParams : ModelParametersIDType ;
   begin
-    -- 
+    --
     -- Size the Data structure, such that it creates 1 parameter for each option
-    vParams := NewID(Name, to_integer(OPTIONS_MARKER), ParentID); 
-    Params  <= vParams ; 
-    InitAxiOptions(vParams) ; 
-    
-  end procedure InitAxiOptions ;
+    vParams := NewID(Name, to_integer(OPTIONS_MARKER), ParentID);
+    Params  <= vParams ;
+    InitAxiOptions(vParams) ;
 
--- !! These are deprecated
--- !! These are deprecated
--- !! These are deprecated
-  ------------------------------------------------------------
-  procedure SetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    constant OptVal        : in    boolean
-  ) is
-  begin
-    Params.Set(Axi4OptionsType'POS(Operation), OptVal) ;
-  end procedure SetAxi4Parameter ;
-
-  ------------------------------------------------------------
-  procedure SetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    constant OptVal        : in    std_logic
-  ) is
-  begin
-    Params.Set(Axi4OptionsType'POS(Operation), std_logic'pos(OptVal)) ;
-  end procedure SetAxi4Parameter ;
-
-  ------------------------------------------------------------
-  procedure SetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    constant OptVal        : in    integer
-  ) is
-  begin
-    Params.Set(Axi4OptionsType'POS(Operation), OptVal) ;
-  end procedure SetAxi4Parameter ;
-
-  ------------------------------------------------------------
-  procedure SetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    constant OptVal        : in    std_logic_vector
-  ) is
-  begin
-    Params.Set(Axi4OptionsType'POS(Operation), OptVal) ;
-  end procedure SetAxi4Parameter ;
-
-  ------------------------------------------------------------
-  procedure GetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    variable OptVal        : out   boolean
-  ) is
-  begin
-    OptVal:= Params.Get(Axi4OptionsType'POS(Operation)) ;
-  end procedure GetAxi4Parameter ;
-
-  ------------------------------------------------------------
-  procedure GetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    variable OptVal        : out   std_logic
-  ) is
-    variable IntOptval : integer ;
-  begin
-    IntOptVal:= Params.Get(Axi4OptionsType'POS(Operation)) ;
-    OptVal := std_logic'val(IntOptVal) ;
-  end procedure GetAxi4Parameter ;
-
-  ------------------------------------------------------------
-  procedure GetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    variable OptVal        : out   integer
-  ) is
-  begin
-    OptVal:= Params.Get(Axi4OptionsType'POS(Operation)) ;
-  end procedure GetAxi4Parameter ;
-
-  ------------------------------------------------------------
-  procedure GetAxi4Parameter (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType ;
-    constant Operation     : in    Axi4OptionsType ;
-    variable OptVal        : out   std_logic_vector
-  ) is
-  begin
-    OptVal:= Params.Get(Axi4OptionsType'POS(Operation), OptVal'length) ;
-  end procedure GetAxi4Parameter ;
-
-  ------------------------------------------------------------
-  procedure InitAxiOptions (
-  -----------------------------------------------------------
-    variable Params        : InOut ModelParametersPType --;
---    signal   AxiBus        : In    Axi4BaseRecType
-  ) is
-  begin
-    -- Size the Data structure, such that it creates 1 parameter for each option
-    Params.Init(Axi4OptionsType'POS(OPTIONS_MARKER)) ;
-
-    -- AXI4 Model Options
-    -- Ready timeout
-    SetAxi4Parameter(Params, WRITE_ADDRESS_READY_TIME_OUT,       25 ) ;
-    SetAxi4Parameter(Params, WRITE_DATA_READY_TIME_OUT,          25 ) ;
-    SetAxi4Parameter(Params, WRITE_RESPONSE_READY_TIME_OUT,      25 ) ; -- S
-    SetAxi4Parameter(Params, READ_ADDRESS_READY_TIME_OUT,        25 ) ;
-    SetAxi4Parameter(Params, READ_DATA_READY_TIME_OUT,           25 ) ; -- S
-
-    -- Ready Controls
-    SetAxi4Parameter(Params, WRITE_ADDRESS_READY_BEFORE_VALID,   TRUE) ; -- S
-    SetAxi4Parameter(Params, WRITE_DATA_READY_BEFORE_VALID,      TRUE) ; -- S
-    SetAxi4Parameter(Params, WRITE_RESPONSE_READY_BEFORE_VALID,  TRUE) ;
-    SetAxi4Parameter(Params, READ_ADDRESS_READY_BEFORE_VALID,    TRUE) ; -- S
-    SetAxi4Parameter(Params, READ_DATA_READY_BEFORE_VALID,       TRUE) ;
-
-    -- Ready Delay
-    SetAxi4Parameter(Params, WRITE_ADDRESS_READY_DELAY_CYCLES,   0) ;  -- S
-    SetAxi4Parameter(Params, WRITE_DATA_READY_DELAY_CYCLES,      0) ;  -- S
-    SetAxi4Parameter(Params, WRITE_RESPONSE_READY_DELAY_CYCLES,  0) ;
-    SetAxi4Parameter(Params, READ_ADDRESS_READY_DELAY_CYCLES,    0) ;  -- S
-    SetAxi4Parameter(Params, READ_DATA_READY_DELAY_CYCLES,       0) ;
-
-    -- Valid Timeouts
-    SetAxi4Parameter(Params, WRITE_RESPONSE_VALID_TIME_OUT,      8192) ;
-    SetAxi4Parameter(Params, READ_DATA_VALID_TIME_OUT,           25) ;
-
-    -- Valid Delays
-    SetAxi4Parameter(Params, WRITE_ADDRESS_VALID_DELAY_CYCLES,     0) ;
-    SetAxi4Parameter(Params, WRITE_DATA_VALID_DELAY_CYCLES,        0) ;
-    SetAxi4Parameter(Params, WRITE_DATA_VALID_BURST_DELAY_CYCLES,  0) ;
-    SetAxi4Parameter(Params, WRITE_RESPONSE_VALID_DELAY_CYCLES,    0) ;  -- S
-    SetAxi4Parameter(Params, READ_ADDRESS_VALID_DELAY_CYCLES,      0) ;
-    SetAxi4Parameter(Params, READ_DATA_VALID_DELAY_CYCLES,         0) ;  -- S
-    SetAxi4Parameter(Params, READ_DATA_VALID_BURST_DELAY_CYCLES,   0) ;  -- S
-
-    -- Write Data Filtering
-    SetAxi4Parameter(Params, WRITE_DATA_FILTER_UNDRIVEN,            TRUE) ;
-    SetAxi4Parameter(Params, WRITE_DATA_UNDRIVEN_VALUE,             '0') ;
-
---    -- AXI Interface Settings
---    -- Set all AXI bus parameters to 0 and Size them to match the corresponding AXI Bus signal.
---    -- Write Address
---    SetAxi4Parameter(Params, AWPROT,    to_slv(0, AxiBus.WriteAddress.Prot'length)) ;
---    SetAxi4Parameter(Params, AWID,      to_slv(0, AxiBus.WriteAddress.ID'length)) ;
---    SetAxi4Parameter(Params, AWSIZE,    to_slv(0, AxiBus.WriteAddress.Size'length)) ;
---    SetAxi4Parameter(Params, AWBURST,   to_slv(0, AxiBus.WriteAddress.Burst'length)) ;
---    SetAxi4Parameter(Params, AWLOCK,    to_slv(0, 1)) ;
---    SetAxi4Parameter(Params, AWCACHE,   to_slv(0, AxiBus.WriteAddress.Cache'length)) ;
---    SetAxi4Parameter(Params, AWQOS,     to_slv(0, AxiBus.WriteAddress.Region'length)) ;
---    SetAxi4Parameter(Params, AWREGION,  to_slv(0, AxiBus.WriteAddress.Size'length)) ;
---    SetAxi4Parameter(Params, AWUSER,    to_slv(0, AxiBus.WriteAddress.User'length)) ;
---    -- Write Data
---    SetAxi4Parameter(Params, WLAST,     to_slv(0, 1)) ;
---    SetAxi4Parameter(Params, WUSER,     to_slv(0, AxiBus.WriteData.User'length)) ;
---    SetAxi4Parameter(Params, WID,       to_slv(0, AxiBus.WriteData.ID'length)) ;
---    -- Write Response
---    SetAxi4Parameter(Params, BRESP,     to_slv(0, AxiBus.WriteResponse.Resp'length)) ;
---    SetAxi4Parameter(Params, BID,       to_slv(0, AxiBus.WriteResponse.ID'length)) ;
---    SetAxi4Parameter(Params, BUSER,     to_slv(0, AxiBus.WriteResponse.User'length)) ;
---    -- Read Address
---    SetAxi4Parameter(Params, ARPROT,    to_slv(0, AxiBus.ReadAddress.Prot'length)) ;
---    SetAxi4Parameter(Params, ARID,      to_slv(0, AxiBus.ReadAddress.ID'length)) ;
---    SetAxi4Parameter(Params, ARSIZE,    to_slv(0, AxiBus.ReadAddress.Size'length)) ;
---    SetAxi4Parameter(Params, ARBURST,   to_slv(0, AxiBus.ReadAddress.Burst'length)) ;
---    SetAxi4Parameter(Params, ARLOCK,    to_slv(0, 1)) ;
---    SetAxi4Parameter(Params, ARCACHE,   to_slv(0, AxiBus.ReadAddress.Cache'length)) ;
---    SetAxi4Parameter(Params, ARQOS,     to_slv(0, AxiBus.ReadAddress.QOS'length)) ;
---    SetAxi4Parameter(Params, ARREGION,  to_slv(0, AxiBus.ReadAddress.Region'length)) ;
---    SetAxi4Parameter(Params, ARUSER,    to_slv(0, AxiBus.ReadAddress.User'length)) ;
---    -- Read Data
---    SetAxi4Parameter(Params, RRESP,     to_slv(0, AxiBus.ReadData.Resp'length)) ;
---    SetAxi4Parameter(Params, RID,       to_slv(0, AxiBus.ReadData.ID'length)) ;
---    SetAxi4Parameter(Params, RLAST,     to_slv(0, 1)) ;
---    SetAxi4Parameter(Params, RUSER,     to_slv(0, AxiBus.ReadData.User'length)) ;
   end procedure InitAxiOptions ;
 
 end package body Axi4OptionsPkg ;

@@ -20,7 +20,7 @@
 --  Revision History:
 --    Date      Version    Description
 --    10/2025   2025.10    Split entity and architecture to support 2019 interfaces
---                         Moved MODEL_INSTANCE_NAME to architecture 
+--                         Moved MODEL_INSTANCE_NAME to architecture
 --    01/2020   2020.01    Updated license notice
 --    04/2018   2018.04    First Release
 --    09/2017   2017       Initial revision
@@ -52,15 +52,14 @@ library osvvm ;
   context osvvm.OsvvmContext ;
   use osvvm.ScoreboardPkg_slv.all ;
 
-library osvvm_Axi4 ; 
-  context osvvm_Axi4.Axi4Context ; 
+library osvvm_Axi4 ;
+  context osvvm_Axi4.Axi4Context ;
 
 entity Axi4Manager is
 generic (
   MODEL_ID_NAME    : string := "" ;
-  tperiod_Clk      : time   := 10 ns ;
-  
-  DEFAULT_DELAY    : time   := 1 ns ; 
+  tperiod_Clk      : time   := AXI4_DEFAULT_tperiod_Clk ;
+  DEFAULT_DELAY    : time   := AXI4_DEFAULT_DELAY ;
 
   tpd_Clk_AWAddr   : time   := DEFAULT_DELAY ;
   tpd_Clk_AWProt   : time   := DEFAULT_DELAY ;
@@ -112,7 +111,7 @@ port (
   AxiBus      : view Axi4ManagerView of Axi4RecType ;
 
   -- Testbench Transaction Interface
-  TransRec    : view AddressBusVerificationComponentView of AddressBusRecType  
+  TransRec    : view AddressBusVerificationComponentView of AddressBusRecType
 ) ;
 
   -- Derive AXI interface properties from the AxiBus
@@ -120,5 +119,5 @@ port (
   constant AXI_DATA_WIDTH      : integer := AxiBus.WriteData.Data'length ;
 
   constant MODEL_NAME : string := "Axi4Manager" ;
-  
+
 end entity Axi4Manager ;

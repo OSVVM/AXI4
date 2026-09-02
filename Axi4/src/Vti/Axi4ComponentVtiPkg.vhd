@@ -51,6 +51,7 @@ library osvvm_common ;
   use work.Axi4InterfaceCommonPkg.all ;
   use work.Axi4InterfacePkg.all ;
   use work.Axi4InterfaceModeViewPkg.all ;
+  use work.Axi4SettingsPkg.all ;
 
 package Axi4ComponentVtiPkg is
 
@@ -59,9 +60,8 @@ package Axi4ComponentVtiPkg is
   ------------------------------------------------------------
     generic (
       MODEL_ID_NAME    : string := "" ;
-      tperiod_Clk      : time   := 10 ns ;
-
-      DEFAULT_DELAY    : time   := 1 ns ; 
+      tperiod_Clk      : time   := AXI4_DEFAULT_tperiod_Clk ;
+      DEFAULT_DELAY    : time   := AXI4_DEFAULT_DELAY ;
 
       tpd_Clk_AWAddr   : time   := DEFAULT_DELAY ;
       tpd_Clk_AWProt   : time   := DEFAULT_DELAY ;
@@ -110,7 +110,7 @@ package Axi4ComponentVtiPkg is
       nReset      : in   std_logic ;
 
       -- AXI Manager Functional Interface
-      AxiBus      : view Axi4ManagerView of Axi4RecType 
+      AxiBus      : view Axi4ManagerView of Axi4RecType
     ) ;
   end component Axi4ManagerVti ;
 
@@ -122,7 +122,7 @@ package Axi4ComponentVtiPkg is
       MODEL_ID_NAME   : string := "" ;
       tperiod_Clk     : time   := 10 ns ;
 
-      DEFAULT_DELAY   : time   := 1 ns ; 
+      DEFAULT_DELAY   : time   := 1 ns ;
 
       tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
 
@@ -148,7 +148,7 @@ package Axi4ComponentVtiPkg is
       nReset      : in   std_logic ;
 
       -- AXI Manager Functional Interface
-      AxiBus      : view Axi4SubordinateView of Axi4RecType 
+      AxiBus      : view Axi4SubordinateView of Axi4RecType
     ) ;
   end component Axi4SubordinateVti ;
 
@@ -161,7 +161,7 @@ package Axi4ComponentVtiPkg is
       MEMORY_NAME      : string := "" ;
       tperiod_Clk     : time   := 10 ns ;
 
-      DEFAULT_DELAY   : time   := 1 ns ; 
+      DEFAULT_DELAY   : time   := 1 ns ;
 
       tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
 
@@ -187,7 +187,7 @@ package Axi4ComponentVtiPkg is
       nReset      : in   std_logic ;
 
       -- AXI Slave Interface
-      AxiBus      : view Axi4SubordinateView of Axi4RecType 
+      AxiBus      : view Axi4SubordinateView of Axi4RecType
     ) ;
   end component Axi4MemoryVti ;
 

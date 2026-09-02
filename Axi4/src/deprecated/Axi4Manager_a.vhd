@@ -203,11 +203,11 @@ begin
   begin
     AxiDefaults := InitAxi4Rec(AxiDefaults, '0') ;
     LAW.Size    := to_slv(AXI_BYTE_ADDR_WIDTH, LAW.Size'length) ;
-    LAW.Burst   := "01" ;  -- INCR
-    LWR.Resp    := to_Axi4RespType(OKAY);
+    LAW.Burst   := AXI4_DEFAULT_AWBURST ;  -- INCR
+    LWR.Resp    := AXI4_DEFAULT_BRESP;
     LAR.Size    := to_slv(AXI_BYTE_ADDR_WIDTH, LAR.Size'length) ;
-    LAR.Burst   := "01" ;  -- INCR
-    LRD.Resp    := to_Axi4RespType(OKAY) ;
+    LAR.Burst   := AXI4_DEFAULT_ARBURST ;  -- INCR
+    LRD.Resp    := AXI4_DEFAULT_RRESP ;
 
     wait for 0 ns ; -- Allow ModelID to become valid
     TransRec.Params         <= Params ;

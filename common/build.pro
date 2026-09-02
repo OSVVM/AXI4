@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Top level script to compile the Axi4 common packages   
+#        Top level script to compile the Axi4 common packages
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -24,15 +24,15 @@
 #
 #
 #  This file is part of OSVVM.
-#  
-#  Copyright (c) 2019 - 2025 by SynthWorks Design Inc.  
-#  
+#
+#  Copyright (c) 2019 - 2025 by SynthWorks Design Inc.
+#
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
-#  
+#
 #      https://www.apache.org/licenses/LICENSE-2.0
-#  
+#
 #  Unless required by applicable law or agreed to in writing, software
 #  distributed under the License is distributed on an "AS IS" BASIS,
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,6 +42,14 @@
 library osvvm_axi4
 ChangeWorkingDirectory ./src
 analyze Axi4InterfaceCommonPkg.vhd
+
+if {$::osvvm::OsvvmDevDerivePackageHeaders} {
+  # only needs to run if Axi4SettingsPkg_default changes
+  MakeSettingsPkg Axi4SettingsPkg     ;# create package declaration from body
+}
+analyze Axi4SettingsPkg.vhd
+analyze [FindSettingsPkgBody Axi4SettingsPkg]  ;# Nominally uses Axi4SettingsPkg_default.vhd
+
 if {$::osvvm::ToolName ne "XSIM"} {
   analyze Axi4CommonPkg.vhd
 } else {

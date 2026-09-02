@@ -101,6 +101,8 @@ begin
   begin
     wait until nReset = '1' ;
     WaitForClock(ManagerRec, 2) ;
+    SetAxi4Options(ManagerRec, CHECK_BID, TRUE) ;
+    SetAxi4Options(ManagerRec, CHECK_RID, TRUE) ;
 
     PreviousErrorCount := GetAlertCount ;
     ExpectedErrors    <= (0, 0, 0) ;

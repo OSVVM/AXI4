@@ -1,16 +1,17 @@
 # AXI4 Verification Component Change Log
 
-| Revision  |  Release Summary 
-------------|----------- 
+| Revision  |  Release Summary
+------------|-----------
+| 2026.08   |  Added Axi4SettingsPkg_default.vhd.   Added CHECK_BID and CHECK_RID to Axi4Manager (full)
 | 2026.05   |  Axi4Memory updated to match memory width
-|           |  Axi4CommonPkg updates for Xilinx.      
-| 2026.01   |  Added DoDirectiveTransactions to all AXI/AxiStream VC.  Added VHDL-2019 interface support to Axi4Full.   
+|           |  Axi4CommonPkg updates for Xilinx.
+| 2026.01   |  Added DoDirectiveTransactions to all AXI/AxiStream VC.  Added VHDL-2019 interface support to Axi4Full.
 | 2025.06   |  build.pro replaced <DirectoryName>.pro.  Autogenerate OsvvmTestCommonPkg.  Update testbenches for TranscriptOpen and AffirmIfTranscriptsMatch
-| 2025.04   |  Updated test cases using delay coverage delays  
-| 2025.02   |  Axi4Manager, Axi4LiteManager - updates for Xilinx 
-| 2024.11   |  AxiStream - updated DEFAULT_DELAY 
-| 2024.09   |  Axi4InterfacePkg - updated Added Axi4RecArrayType 
-| 2024.07   |  Updated Axi4 VC to shorten AlertLogID names.  Added OsvvmVcInit barrier to AxiStreamReceiver 
+| 2025.04   |  Updated test cases using delay coverage delays
+| 2025.02   |  Axi4Manager, Axi4LiteManager - updates for Xilinx
+| 2024.11   |  AxiStream - updated DEFAULT_DELAY
+| 2024.09   |  Axi4InterfacePkg - updated Added Axi4RecArrayType
+| 2024.07   |  Updated Axi4 VC to shorten AlertLogID names.  Added OsvvmVcInit barrier to AxiStreamReceiver
 | 2024.04   |  Updated SafeResize to include ModelID.
 | 2023.09   |  Updated Unimplemented Transaction messages in VC.
 | 2023.05   |  Beta implementation of randomizing Ready and Valid in Axi4 Full VC and AxiStream VC.
@@ -33,11 +34,15 @@
 | 2021.03   |  Minor updates to scripts for case sensitivity on Linux
 | 2021.02   |  Added TRANSMIT_VALID_DELAY_CYCLES to AxiStreamTransmitter
 | 2020.12   |  More Bursting and Virtual Transaction Interfaces.
-| 2020.10   |  Added Bursting to AxiStream. 
+| 2020.10   |  Added Bursting to AxiStream.
 | 2020.07   |  Major:  Axi4Lite, Axi4(Full) w/ Bursting, AddressBusTransactionPkg, Responder
 | 2020.02   |  Initial version of AddressBusTransactionPkg.
 | 2018.04   |  Initial public release
 
+
+## 2026.08  August 2026
+Added Axi4SettingsPkg_default.vhd to configure AXI VC
+Axi4Manager now can CHECK_BID and CHECK_RID (default is FALSE in Axi4SettingsPkg)
 
 ## 2026.05  May 2026
 Updated Axi4Memory to match integer width.
@@ -45,13 +50,13 @@ Updated Axi4CommonPkg and Axi4CommonPkg_xilinx to address xilinx issues.
 Updates to remove Sigasi issues.
 
 ## 2026.01  January 2026
-Added DoDirectiveTransactions to all AXI/AxiStream VC 
+Added DoDirectiveTransactions to all AXI/AxiStream VC
 
 For Axi4Full, added VHDL-2019 interfaces.
 This results in 4 architectures: (Port Based Interface, VTI) X (VHDL-2019, VHDL-2008)
 Selection is automatic based on ::osvvm::VhdlVersion via SetVHDLVersion and ::osvvm::Supports2019Interface
 Each tool has feature settings that it sets based on its version (in VendorScripts_***.tcl)
-If making edits, only edit architectures in src (not deprecated or 2008).   
+If making edits, only edit architectures in src (not deprecated or 2008).
 Set ::osvvm::OsvvmDevDeriveArchitectures to true to create the other architecures.
 
 
@@ -90,9 +95,9 @@ Updated Unimplemented Transaction messages in VC.
 
 ## 2023.05 May 2023
 - Beta implementation of randomizing Ready and Valid in:
-   - AxiStreamTransmitter[Vti], AxiStreamReceiver[Vti], 
+   - AxiStreamTransmitter[Vti], AxiStreamReceiver[Vti],
    - Axi4Manager[Vti], Axi4Memory[Vti], Axi4Subordinate[Vti]
-   - Note:  Beta implementation updates API and use models 
+   - Note:  Beta implementation updates API and use models
 
 ## 2023.04 April 2023
 - Added Alpha implementation of randomizing TValid and TReady delays in AxiStreamTransmitter and AxiStreamReceiver
@@ -124,7 +129,7 @@ Updated SetAxi4Options s.t. it allows parameter of type Axi4RespEnumType
 - Axi4Lite - Rebaselined against Axi4 FULL - now works with GHDL.
 - All - Updated calls to NewID for AlertLogID and FIFOs.
 - AxiStream - SendBurst without TLast - SendBurst(XXX, "0"). Suitable for sending packets with TestCtrl idles.
-- AxiStream - Update TxSTrb and TxKeep at start and end. 
+- AxiStream - Update TxSTrb and TxKeep at start and end.
 
 ## 2022.02 February 2022
 - Axi4LiteMaster - Added SET_MODEL_OPTIONS
@@ -141,7 +146,7 @@ Updated SetAxi4Options s.t. it allows parameter of type Axi4RespEnumType
 - AxiStreamReceiver+ added GotBurst transaction
 
 ## 2021.09 September 2021
-- Minor bug fix to Axi4Subordinate.  
+- Minor bug fix to Axi4Subordinate.
 - Updates to testbenches to support writing YAML files.
 - Minor updates to support compilation in Cadence Xcelium.
 
@@ -157,7 +162,7 @@ Updated SetAxi4Options s.t. it allows parameter of type Axi4RespEnumType
 - Minor script update for case sensitivity on Linux
 
 ## 2020.12 December 2020
-- Added Word Based Bursting to Axi4Master. 
+- Added Word Based Bursting to Axi4Master.
 - Added Virtual Transaction Interfaces (VTI) to Axi4 (full) verification components.
 - Added VTI to AxiStream verification components.
 - Not Done:  Axi4Lite and UART VTI and Bursting.
@@ -184,11 +189,11 @@ Port names, Axi4Bus replaced Axi4LiteBus.
 This is needed for compatibility with Axi4 full models.
 
 In record structure in Axi4LiteInterface package,
-the redundant abbreviations AW, W, B, AR, R were 
-removed.   A long version of the name that is more 
+the redundant abbreviations AW, W, B, AR, R were
+removed.   A long version of the name that is more
 understandable is in the next layer of the record
 structure.   This impacts connecting the Axi4Lite
-interface to your designs.   
+interface to your designs.
 
 The packages Axi4LiteMasterTransactionPkg.vhd and
 Axi4LiteMasterTransactionPkg.vhd have been replaced
@@ -197,10 +202,10 @@ by OSVVM-Common:   Common/src/AddressBusTransactionpkg.
 ### AxiStream
 Updated to use OSVVM Model Independent Transactions for Streaming.
 See OSVVM-Common  Common/src/StreamTransactionPkg.vhd
- 
+
 ## Copyright and License
-Copyright (C) 2006-2020 by [SynthWorks Design Inc.](http://www.synthworks.com/)   
-Copyright (C) 2020 by [OSVVM contributors](CONTRIBUTOR.md)   
+Copyright (C) 2006-2020 by [SynthWorks Design Inc.](http://www.synthworks.com/)
+Copyright (C) 2020 by [OSVVM contributors](CONTRIBUTOR.md)
 
 This file is part of OSVVM.
 

@@ -40,15 +40,16 @@
 --
 
 context Axi4Context is
-    library osvvm_common ;  
+    library osvvm_common ;
     context osvvm_common.OsvvmCommonContext ; -- Address Bus Transactions
 
     library osvvm_axi4 ;
 
     use osvvm_axi4.Axi4CommonPkg.all ;        -- AXI handshaking
     use osvvm_axi4.Axi4InterfaceCommonPkg.all ;
+    use osvvm_axi4.Axi4SettingsPkg.all ;
     use osvvm_axi4.Axi4InterfacePkg.all ;     -- Interface definition
-    use osvvm_axi4.Axi4InterfaceModeViewPkg.all ;     -- Mode Views if using 2019 
+    use osvvm_axi4.Axi4InterfaceModeViewPkg.all ;     -- Mode Views if using 2019
 
     use osvvm_axi4.Axi4OptionsPkg.all ;       -- Model parameters
     use osvvm_axi4.Axi4OptionsArrayPkg.all ;  -- Model parameters - for Array parameters
@@ -56,7 +57,7 @@ context Axi4Context is
 
     use osvvm_axi4.Axi4ComponentPkg.all ;     -- Connected Transaction Interface
     use osvvm_axi4.Axi4ComponentVtiPkg.all ;  -- Virtual Transaction Interface
-    
+
     -- Temporary inclusion of Axi4 things that become deprecated with changes
  --x   use osvvm_axi4.Axi4VersionCompatibilityPkg.all ;
 

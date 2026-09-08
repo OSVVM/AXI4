@@ -23,16 +23,16 @@
 --    03/2024   2024.03    Updated SafeResize to use ModelID
 --    01/2024   2024.01    Updated Params to use singleton data structure
 --    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedOperation
---    05/2023   2023.05    Adding Randomization of Valid and Ready timing   
---    12/2022   2022.12    Updated read check to use MetaMatch.   
---    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   
+--    05/2023   2023.05    Adding Randomization of Valid and Ready timing
+--    12/2022   2022.12    Updated read check to use MetaMatch.
+--    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
 --    03/2022   2022.03    Updated calls to NewID for AlertLogID and FIFOs
 --    02/2022   2022.02    Replaced to_hstring with to_hxstring
 --    01/2022   2022.01    Moved MODEL_INSTANCE_NAME and MODEL_NAME to entity declarative region
---    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
---    06/2021   2021.06    GHDL support + New Burst FIFOs 
---    02/2021   2021.02    Added MultiDriver Detect.  Added Valid Delays.  Updated Generics.   
+--    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability
+--    06/2021   2021.06    GHDL support + New Burst FIFOs
+--    02/2021   2021.02    Added MultiDriver Detect.  Added Valid Delays.  Updated Generics.
 --    12/2020   2020.12    Added Burst Word Mode.  Refactored code.  Added VTI
 --    07/2020   2020.07    Created Axi4 FULL from Axi4Lite
 --    01/2020   2020.01    Updated license notice
@@ -66,15 +66,14 @@ library osvvm ;
   context osvvm.OsvvmContext ;
   use osvvm.ScoreboardPkg_slv.all ;
 
-library osvvm_Axi4 ; 
-  context osvvm_Axi4.Axi4Context ; 
+library osvvm_Axi4 ;
+  context osvvm_Axi4.Axi4Context ;
 
 entity Axi4ManagerVti is
 generic (
   MODEL_ID_NAME    : string := "" ;
-  tperiod_Clk      : time   := 10 ns ;
-
-  DEFAULT_DELAY    : time   := 1 ns ; 
+  tperiod_Clk      : time   := AXI4_DEFAULT_tperiod_Clk ;
+  DEFAULT_DELAY    : time   := AXI4_DEFAULT_DELAY ;
 
   tpd_Clk_AWAddr   : time   := DEFAULT_DELAY ;
   tpd_Clk_AWProt   : time   := DEFAULT_DELAY ;
@@ -123,13 +122,13 @@ port (
   nReset      : in   std_logic ;
 
   -- AXI Manager Functional Interface
-  AxiBus      : inout Axi4RecType 
+  AxiBus      : inout Axi4RecType
 ) ;
 
   -- Derive AXI interface properties from the AxiBus
   constant AXI_ADDR_WIDTH      : integer := AxiBus.WriteAddress.Addr'length ;
   constant AXI_DATA_WIDTH      : integer := AxiBus.WriteData.Data'length ;
-  
+
   -- Testbench Transaction Interface
   -- Access via external names
   signal TransRec : AddressBusRecType (

@@ -20,7 +20,7 @@
 --  Revision History:
 --    Date      Version    Description
 --    10/2025   2025.10    Split entity and architecture to support 2019 interfaces
---                         Moved MODEL_INSTANCE_NAME to architecture 
+--                         Moved MODEL_INSTANCE_NAME to architecture
 --    01/2020   2020.01    Updated license notice
 --    04/2018   2018.04    First Release
 --    09/2017   2017       Initial revision
@@ -55,18 +55,14 @@ library osvvm ;
 library osvvm_common ;
   context osvvm_common.OsvvmCommonContext ;
 
-  use work.Axi4OptionsPkg.all ;
-  use work.Axi4ModelPkg.all ;
-  use work.Axi4InterfaceCommonPkg.all ;
-  use work.Axi4InterfacePkg.all ;
-  use work.Axi4CommonPkg.all ;
+library osvvm_Axi4 ;
+  context osvvm_Axi4.Axi4Context ;
 
 entity Axi4Manager is
 generic (
   MODEL_ID_NAME    : string := "" ;
-  tperiod_Clk      : time   := 10 ns ;
-  
-  DEFAULT_DELAY    : time   := 1 ns ; 
+  tperiod_Clk      : time   := AXI4_DEFAULT_tperiod_Clk ;
+  DEFAULT_DELAY    : time   := AXI4_DEFAULT_DELAY ;
 
   tpd_Clk_AWAddr   : time   := DEFAULT_DELAY ;
   tpd_Clk_AWProt   : time   := DEFAULT_DELAY ;
@@ -118,13 +114,13 @@ port (
   AxiBus      : inout Axi4RecType ;
 
   -- Testbench Transaction Interface
-  TransRec    : inout AddressBusRecType 
+  TransRec    : inout AddressBusRecType
 ) ;
 
   -- Derive AXI interface properties from the AxiBus
   constant AXI_ADDR_WIDTH      : integer := AxiBus.WriteAddress.Addr'length ;
   constant AXI_DATA_WIDTH      : integer := AxiBus.WriteData.Data'length ;
-  
+
   constant MODEL_NAME : string := "Axi4Manager" ;
-  
+
 end entity Axi4Manager ;

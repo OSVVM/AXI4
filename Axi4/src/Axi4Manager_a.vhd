@@ -19,6 +19,7 @@
 --
 --  Revision History:
 --    Date      Version    Description
+--    08/2026   2026.08    added CHECK_BID and CHECK_RID
 --    10/2025   2025.10    Split entity and architecture to support 2019 interfaces
 --                         Moved MODEL_INSTANCE_NAME to architecture
 --                         renamed architecture VerificationComponent

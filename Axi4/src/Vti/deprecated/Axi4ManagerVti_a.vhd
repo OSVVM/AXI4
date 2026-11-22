@@ -665,9 +665,9 @@ begin
       AW.Addr   <= Local.Addr   + 4  after tpd_Clk_AWAddr   ;
       AW.Prot   <= Local.Prot   + 1  after tpd_clk_AWProt   ;
       -- AXI4 Full
-      AW.Len    <= Local.Len    + 1  after tpd_clk_AWLen    ;
+      AW.Len    <= Local.Len         after tpd_clk_AWLen    ;
       if HAS_AWID then
-        AW.ID     <= Local.ID     + 1  after tpd_clk_AWID     ;
+        AW.ID  <= Local.ID     + 1   after tpd_clk_AWID     ;
       end if ;
       AW.Size   <= Local.Size   + 1  after tpd_clk_AWSize   ;
       AW.Burst  <= Local.Burst  + 1  after tpd_clk_AWBurst  ;
@@ -967,9 +967,9 @@ begin
       AR.Addr   <= Local.Addr   + 4  after tpd_Clk_ARAddr   ;
       AR.Prot   <= Local.Prot   + 1  after tpd_clk_ARProt   ;
       -- AXI4 Full
-      AR.Len    <= Local.Len    + 1  after tpd_clk_ARLen    ;
+      AR.Len    <= Local.Len         after tpd_clk_ARLen    ;
       if HAS_ARID then
-        AR.ID     <= Local.ID     + 1  after tpd_clk_ARID     ;
+        AR.ID   <= Local.ID     + 1  after tpd_clk_ARID     ;
       end if ;
       AR.Size   <= Local.Size   + 1  after tpd_clk_ARSize   ;
       AR.Burst  <= Local.Burst  + 1  after tpd_clk_ARBurst  ;

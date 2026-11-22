@@ -20,22 +20,22 @@
 --  Revision History:
 --    Date      Version    Description
 --    10/2025   2025.10    Split entity and architecture to support 2019 interfaces
---                         Moved MODEL_INSTANCE_NAME and LOCAL_MEMORY_NAME to architecture 
+--                         Moved MODEL_INSTANCE_NAME and LOCAL_MEMORY_NAME to architecture
 --    09/2024   2024.09    Updated ClassifyUnimplementedOperation.  Added DEBUG log for LOCAL_MEMORY_NAME
 --    07/2024   2024.07    Shortened AlertLog and data structure names for better printing
 --    03/2024   2024.03    Updated SafeResize to use ModelID
 --    01/2024   2024.01    Updated Params to use singleton data structure
 --    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedOperation
---    05/2023   2023.05    Adding Randomization of Valid and Ready timing   
---    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   
+--    05/2023   2023.05    Adding Randomization of Valid and Ready timing
+--    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
 --    03/2022   2022.03    Updated calls to NewID for AlertLogID and FIFOs
 --    02/2022   2022.02    Replaced to_hstring with to_hxstring
 --                         Added Search by NAME to NewID.
 --    01/2022   2022.01    Moved MODEL_INSTANCE_NAME and MODEL_NAME to entity declarative region
---    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
---    06/2021   2021.06    GHDL support + new memory data structure  
---    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.   
+--    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability
+--    06/2021   2021.06    GHDL support + new memory data structure
+--    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.
 --    06/2020   2020.06    Derived from Axi4Subordinate.vhd
 --
 --
@@ -66,8 +66,8 @@ library osvvm ;
   context osvvm.OsvvmContext ;
   use osvvm.ScoreboardPkg_slv.all ;
 
-library osvvm_Axi4 ; 
-  context osvvm_Axi4.Axi4Context ; 
+library osvvm_Axi4 ;
+  context osvvm_Axi4.Axi4Context ;
 
 entity Axi4Memory is
 generic (
@@ -75,7 +75,7 @@ generic (
   MEMORY_NAME     : string := "" ;
   tperiod_Clk     : time   := 10 ns ;
 
-  DEFAULT_DELAY   : time   := 1 ns ; 
+  DEFAULT_DELAY   : time   := maximum(tperiod_Clk/10, std.env.resolution_limit) ;
 
   tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
 
@@ -110,7 +110,7 @@ port (
   -- Derive AXI interface properties from the AxiBus
   constant AXI_ADDR_WIDTH : integer := AxiBus.WriteAddress.Addr'length ;
   constant AXI_DATA_WIDTH : integer := AxiBus.WriteData.Data'length ;
-      
+
   constant MODEL_NAME : string := "Axi4Memory" ;
 
 end entity Axi4Memory ;

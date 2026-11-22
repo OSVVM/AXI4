@@ -60,7 +60,7 @@ package Axi4ComponentVtiPkg is
     generic (
       MODEL_ID_NAME    : string := "" ;
       tperiod_Clk      : time   := AXI4_DEFAULT_tperiod_Clk ;
-      DEFAULT_DELAY    : time   := AXI4_DEFAULT_DELAY ;
+      DEFAULT_DELAY    : time   := maximum(tperiod_Clk/10, std.env.resolution_limit) ;
 
       tpd_Clk_AWAddr   : time   := DEFAULT_DELAY ;
       tpd_Clk_AWProt   : time   := DEFAULT_DELAY ;
@@ -121,7 +121,7 @@ package Axi4ComponentVtiPkg is
       MODEL_ID_NAME   : string := "" ;
       tperiod_Clk     : time   := 10 ns ;
 
-      DEFAULT_DELAY   : time   := 1 ns ;
+      DEFAULT_DELAY   : time   := maximum(tperiod_Clk/10, std.env.resolution_limit) ;
 
       tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
 
@@ -157,10 +157,10 @@ package Axi4ComponentVtiPkg is
   ------------------------------------------------------------
     generic (
       MODEL_ID_NAME   : string := "" ;
-      MEMORY_NAME      : string := "" ;
+      MEMORY_NAME     : string := "" ;
       tperiod_Clk     : time   := 10 ns ;
 
-      DEFAULT_DELAY   : time   := 1 ns ;
+      DEFAULT_DELAY   : time   := maximum(tperiod_Clk/10, std.env.resolution_limit) ;
 
       tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
 

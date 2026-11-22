@@ -60,6 +60,7 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --
+
 architecture VerificationComponent of Axi4Manager is
   -- Derive ModelInstance label from path_name
   constant MODEL_INSTANCE_NAME : string :=
@@ -175,11 +176,11 @@ begin
   ------------------------------------------------------------
   TransactionDispatcher : process
     -- variable ReadDataTransactionCount : integer := 1 ;
-    variable TransfersInBurst   : integer ;
+    variable TransfersInBurst : integer ;
 
-    variable Axi4Option    : Axi4OptionsType ;
+    variable Axi4Option       : Axi4OptionsType ;
 
-    variable AxiDefaults    : AxiBus'subtype ;
+    variable AxiDefaults      : AxiBus'subtype ;
 
     alias    LAW : AxiDefaults.WriteAddress'subtype  is AxiDefaults.WriteAddress ;
     alias    LWD : AxiDefaults.WriteData'subtype     is AxiDefaults.WriteData ;
@@ -199,7 +200,8 @@ begin
     variable ExpectedData    : std_logic_vector(LRD.Data'range) ;
 
     variable Operation       : AddressBusOperationType ;
-    variable WriteDataCount   : integer := 0 ;
+    variable WriteDataCount  : integer := 0 ;
+    variable ReadDataCount   : integer ;
 
   begin
     AxiDefaults := InitAxi4Rec(AxiDefaults, '0') ;
@@ -304,10 +306,15 @@ begin
 
             -- Burst transfer, calculate burst length
             if (BurstFifoMode = ADDRESS_BUS_BURST_BYTE_MODE) then
-              LAW.Len := to_slv(CalculateBurstLen(TransRec.DataWidth, WriteByteAddr, BytesPerTransfer), LAW.Len'length) ;
+              TransfersInBurst := 1 + CalculateBurstLen(TransRec.DataWidth, WriteByteAddr, BytesPerTransfer) ;
             else
-              LAW.Len := to_slv(TransRec.DataWidth-1, LAW.Len'length) ;
+              TransfersInBurst := TransRec.DataWidth ;
             end if ;
+            if (TransfersInBurst > AXI_MAX_BURST_LENGTH) then
+              Alert(ModelID, "ReadBurst: Transfers in Burst: " & to_string(TransfersInBurst) &
+                              "Items in FIFO: " & to_string(TransRec.DataWidth), FAILURE) ;
+            end if ;
+            LAW.Len := to_slv(TransfersInBurst - 1, LAW.Len'length) ;
 
             -- Initiate Write Address
             Push(WriteAddressFifo, LAW.Addr & LAW.Len & LAW.Prot & LAW.ID & LAW.Size & LAW.Burst & LAW.Lock & LAW.Cache & LAW.QOS & LAW.Region & LAW.User) ;
@@ -400,7 +407,7 @@ begin
             TransRec.DataFromModel <= (TransRec.DataFromModel'range => '0') ;
           elsif IsReadData(Operation) then
             (LAR.Addr, ReadProt) := Pop(ReadAddressTransactionFifo) ;
-            ReadByteAddr  :=  CalculateByteAddress(LAR.Addr, AXI_BYTE_ADDR_WIDTH);
+            ReadByteAddr         :=  CalculateByteAddress(LAR.Addr, AXI_BYTE_ADDR_WIDTH);
 
             -- Wait for Data Ready
             if IsEmpty(ReadDataFifo) then
@@ -410,8 +417,9 @@ begin
 
             -- Get Read Data
             LRD.Data := Pop(ReadDataFifo) ;
-            CheckDataIsBytes(ModelID, TransRec.DataWidth, "Manager Read: ", ReadDataExpectCount) ;
-            CheckDataWidth  (ModelID, TransRec.DataWidth, ReadByteAddr, AXI_DATA_WIDTH, "Manager Read: ", ReadDataExpectCount) ;
+            ReadDataCount := GetPopCount(ReadDataFifo) ;
+            CheckDataIsBytes(ModelID, TransRec.DataWidth, "Manager Read: ", ReadDataCount) ;
+            CheckDataWidth  (ModelID, TransRec.DataWidth, ReadByteAddr, AXI_DATA_WIDTH, "Manager Read: ", ReadDataCount) ;
             LRD.Data := AlignDataBusToBytes(LRD.Data, TransRec.DataWidth, ReadByteAddr) ;
 --            AxiReadDataAlignCheck (ModelID, LRD.Data, TransRec.DataWidth, LAR.Addr, AXI_DATA_BYTE_WIDTH, AXI_BYTE_ADDR_WIDTH) ;
             TransRec.DataFromModel <= SafeResize(ModelID, LRD.Data, TransRec.DataFromModel'length) ;
@@ -425,7 +433,7 @@ begin
                 "Read Data: " & to_hxstring(LRD.Data) &
                 "  Read Address: " & to_hxstring(LAR.Addr) &
                 "  Prot: " & to_hxstring(ReadProt) &
-                "  Operation# " & to_string(ReadDataExpectCount),
+                "  Operation# " & to_string(ReadDataCount),
                 "  Expected: " & to_hxstring(ExpectedData),
                 TransRec.StatusMsgOn or IsLogEnabled(ModelID, INFO) ) ;
             else
@@ -435,7 +443,7 @@ begin
                 "Read Data: " & to_hxstring(LRD.Data) &
                 "  Read Address: " & to_hxstring(LAR.Addr) &
                 "  Prot: " & to_hxstring(ReadProt) &
-                "  Operation# " & to_string(ReadDataExpectCount),
+                "  Operation# " & to_string(ReadDataCount),
                 INFO,
                 TransRec.StatusMsgOn
               ) ;
@@ -458,6 +466,10 @@ begin
               TransfersInBurst := 1 + CalculateBurstLen(TransRec.DataWidth, ReadByteAddr, BytesPerTransfer) ;
             else
               TransfersInBurst := TransRec.DataWidth ;
+            end if ;
+            if (TransfersInBurst > AXI_MAX_BURST_LENGTH) then
+              Alert(ModelID, "ReadBurst: Transfers in Burst: " & to_string(TransfersInBurst) &
+                              "Items in FIFO: " & to_string(TransRec.DataWidth), FAILURE) ;
             end if ;
             LAR.Len := to_slv(TransfersInBurst - 1, LAR.Len'length) ;
 
@@ -520,19 +532,19 @@ begin
         when SET_MODEL_OPTIONS =>
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
           if IsAxiInterface(Axi4Option) then
-            SetAxi4InterfaceDefault(AxiDefaults, Axi4Option, TransRec.IntToModel) ;
+            SetAxi4InterfaceDefault(ModelID, AxiDefaults, Axi4Option, TransRec.IntToModel) ;
           else
             Set(Params, TransRec.Options, TransRec.IntToModel) ;
-            Alert("Interface Parameter not handled by SetAxi4Options", FAILURE) ;
+            Alert(ModelID, "Interface Parameter not handled by SetAxi4Options", FAILURE) ;
           end if ;
 
         when GET_MODEL_OPTIONS =>
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
           if IsAxiInterface(Axi4Option) then
-            TransRec.IntFromModel <= GetAxi4InterfaceDefault(AxiDefaults, Axi4Option) ;
+            TransRec.IntFromModel <= GetAxi4InterfaceDefault(ModelID, AxiDefaults, Axi4Option) ;
           else
             TransRec.IntFromModel <= Get(Params, TransRec.Options) ;
-            Alert("Interface Parameter not handled by GetAxi4Options", FAILURE) ;
+            Alert(ModelID, "Interface Parameter not handled by GetAxi4Options", FAILURE) ;
           end if ;
 
         -- The End -- Done
@@ -723,8 +735,8 @@ begin
       NewTransfer := Local.Last ; -- Last is '1' for burst end and single word transfers
 
       -- Do Transaction
-      WD.Data  <= Local.Data after tpd_clk_WStrb ;
-      WD.Strb  <= Local.Strb after tpd_Clk_WData ;
+      WD.Data  <= Local.Data after tpd_Clk_WData ;
+      WD.Strb  <= Local.Strb after tpd_clk_WStrb ;
       -- AXI4 Full
       WD.Last  <= Local.Last after tpd_Clk_WLast ;
       WD.User  <= Local.User after tpd_Clk_WUser ;

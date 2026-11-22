@@ -317,7 +317,7 @@ begin
           end if ;
 
           if ReadAvailable and IsReadData(TransRec.Operation) then
-            LocalAR.Addr := pop(ReadAddressTransactionFifo) ;
+            LocalAR.Addr  :=  pop(ReadAddressTransactionFifo) ;
             ReadByteAddr  :=  CalculateByteAddress(LocalAR.Addr, AXI_BYTE_ADDR_WIDTH);
 
             -- Data Sizing Checks
@@ -341,7 +341,7 @@ begin
           if IsAxiParameter(Axi4Option) then
             Set(Params, TransRec.Options, TransRec.IntToModel) ;
 --            SetAxi4Parameter(Params, Axi4Option, TransRec.IntToModel) ;
-            Alert("Interface Parameter not handled by SetAxi4Options", FAILURE) ;
+            Alert(ModelID, "Interface Parameter not handled by SetAxi4Options", FAILURE) ;
           else
             case Axi4Option is
               -- Write Response Settings
@@ -364,7 +364,7 @@ begin
           Axi4Option := Axi4OptionsType'val(TransRec.Options) ;
           if IsAxiParameter(Axi4Option) then
             TransRec.IntFromModel <= Get(Params, TransRec.Options) ;
-            Alert("Interface Parameter not handled by GetAxi4Options", FAILURE) ;
+            Alert(ModelID, "Interface Parameter not handled by GetAxi4Options", FAILURE) ;
 --            GetAxi4Parameter(Params, Axi4Option, Axi4OptionVal) ;
 --            TransRec.IntFromModel <= Axi4OptionVal ;
           else
@@ -528,14 +528,25 @@ begin
       push(WriteAddressFifo, AW.Addr & AW.Prot & AW.ID & AW.Len & AW.Size & AW.Burst & AW.Lock & AW.Cache & AW.QOS & AW.Region & AW.User) ;
 
       -- Log this operation
-      Log(ModelID,
-        "Write Address." &
-        "  AWAddr: "  & to_hxstring(AW.Addr) &
-        "  AWProt: "  & to_string(AW.Prot) &
-        "  AWID:   "  & to_string(AW.ID) &
-        "  Operation# " & to_string(WriteAddressReceiveCount + 1),
-        INFO
-      ) ;
+      if AW.Len = 0 then
+        Log(ModelID,
+          "Write Address." &
+          "  AWAddr: "  & to_hxstring(AW.Addr) &
+          "  AWProt: "  & to_string(AW.Prot) &
+          "  AWID:   "  & to_string(AW.ID) &
+          "  Operation# " & to_string(WriteAddressReceiveCount + 1),
+          INFO
+        ) ;
+      else
+        Alert(ModelID,
+          "AWLen /= 0.  Write Address." &
+          "  AWAddr: "  & to_hxstring(AW.Addr) &
+          "  AWProt: "  & to_string(AW.Prot) &
+          "  AWID:   "  & to_string(AW.ID) &
+          "  Operation# " & to_string(WriteAddressReceiveCount + 1),
+          ERROR
+        ) ;
+      end if ;
 
       -- Signal completion
       increment(WriteAddressReceiveCount) ;
@@ -743,15 +754,28 @@ begin
       push(ReadAddressTransactionFifo, AR.Addr) ;
       increment(ReadAddressReceiveCount) ;
       wait for 0 ns ;
+      -- Log this operation
+      if AR.Len = 0 then
+        Log(ModelID,
+          "Read Address." &
+          "  ARAddr: "  & to_hxstring(AR.Addr) &
+          "  ARProt: "  & to_string(AR.Prot) &
+          "  ARID:   "  & to_string(AR.ID) &
+          "  Operation# " & to_string(ReadAddressReceiveCount), -- adjusted for delay of ReadAddressReceiveCount
+          INFO
+        ) ;
+      else
+        Alert(ModelID,
+          "ARLen /= 0.  Read Address." &
+          "  ARAddr: "  & to_hxstring(AR.Addr) &
+          "  ARProt: "  & to_string(AR.Prot) &
+          "  ARID:   "  & to_string(AR.ID) &
+          "  Operation# " & to_string(ReadAddressReceiveCount), -- adjusted for delay of ReadAddressReceiveCount
+          ERROR
+        ) ;
+      end if ;
 
-      Log(ModelID,
-        "Read Address." &
-        "  ARAddr: "  & to_hxstring(AR.Addr) &
-        "  ARProt: "  & to_string(AR.Prot) &
-        "  ARID:   "  & to_string(AR.ID) &
-        "  Operation# " & to_string(ReadAddressReceiveCount), -- adjusted for delay of ReadAddressReceiveCount
-        INFO
-      ) ;
+
     end loop ReadAddressOperation ;
   end process ReadAddressHandler ;
 

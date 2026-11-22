@@ -20,22 +20,22 @@
 --  Revision History:
 --    Date      Version    Description
 --    10/2025   2025.10    Split entity and architecture to support 2019 interfaces
---                         Moved MODEL_INSTANCE_NAME to architecture 
+--                         Moved MODEL_INSTANCE_NAME to architecture
 --    07/2024   2024.07    Shortened AlertLog and data structure names for better printing
 --    03/2024   2024.03    Updated SafeResize to use ModelID
 --    01/2024   2024.01    Updated Params to use singleton data structure
 --    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedOperation
---    05/2023   2023.05    Adding Randomization of Valid and Ready timing   
---    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   
+--    05/2023   2023.05    Adding Randomization of Valid and Ready timing
+--    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
 --    03/2022   2022.03    Updated calls to NewID for AlertLogID and FIFOs
 --    02/2022   2022.02    Replaced to_hstring with to_hxstring
 --    01/2022   2022.01    Moved MODEL_INSTANCE_NAME and MODEL_NAME to entity declarative region
---    09/2021   2021.09    Minor fix to push WriteDataFifo 
---    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
---    06/2021   2021.06    Updates for GHDL.   
---    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.   
---    12/2020   2020.12    Updated.  
+--    09/2021   2021.09    Minor fix to push WriteDataFifo
+--    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability
+--    06/2021   2021.06    Updates for GHDL.
+--    02/2021   2021.02    Added MultiDriver Detect.  Updated Generics.
+--    12/2020   2020.12    Updated.
 --    09/2017   2017       Initial revision
 --
 --
@@ -66,15 +66,15 @@ library osvvm ;
   context osvvm.OsvvmContext ;
   use osvvm.ScoreboardPkg_slv.all ;
 
-library osvvm_Axi4 ; 
-  context osvvm_Axi4.Axi4Context ; 
+library osvvm_Axi4 ;
+  context osvvm_Axi4.Axi4Context ;
 
 entity Axi4Subordinate is
 generic (
   MODEL_ID_NAME   : string := "" ;
   tperiod_Clk     : time   := 10 ns ;
 
-  DEFAULT_DELAY   : time   := 1 ns ; 
+  DEFAULT_DELAY   : time   := maximum(tperiod_Clk/10, std.env.resolution_limit) ;
 
   tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
 

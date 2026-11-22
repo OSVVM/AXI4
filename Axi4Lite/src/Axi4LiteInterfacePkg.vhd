@@ -11,8 +11,8 @@
 --  Description:
 --      Defines types, constants, and subprograms to support the Axi4Lite interface to DUT
 --      These are currently only intended for testbench models.
---      When VHDL-2018 intefaces gain popular support, these will be changed to support them. 
---          
+--      When VHDL-2018 intefaces gain popular support, these will be changed to support them.
+--
 --
 --  Developed by:
 --        SynthWorks Design Inc.
@@ -27,111 +27,112 @@
 --
 --
 --  This file is part of OSVVM.
---  
---  Copyright (c) 2017 - 2022 by SynthWorks Design Inc.  
---  
+--
+--  Copyright (c) 2017 - 2022 by SynthWorks Design Inc.
+--
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
 --  You may obtain a copy of the License at
---  
+--
 --      https://www.apache.org/licenses/LICENSE-2.0
---  
+--
 --  Unless required by applicable law or agreed to in writing, software
 --  distributed under the License is distributed on an "AS IS" BASIS,
 --  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
---  
+--
 
-library ieee ; 
+library ieee ;
   use ieee.std_logic_1164.all ;
   use ieee.numeric_std.all ;
   use ieee.numeric_std_unsigned.all ;
-  
+
 library osvvm ;
     context osvvm.OsvvmContext ;
 
 use work.Axi4InterfaceCommonPkg.all ;
 use work.Axi4OptionsPkg.all ;
 
-package Axi4LiteInterfacePkg is 
+package Axi4LiteInterfacePkg is
   -- AXI Write Address Channel
   type Axi4LiteWriteAddressRecType is record
-    Valid     : std_logic ; 
-    Ready     : std_logic ; 
-    Addr      : std_logic_vector ; 
+    Valid     : std_logic ;
+    Ready     : std_logic ;
+    Addr      : std_logic_vector ;
     Prot      : Axi4ProtType ;
-  end record Axi4LiteWriteAddressRecType ; 
-  
+  end record Axi4LiteWriteAddressRecType ;
+
   function InitAxi4LiteWriteAddressRec (AW : Axi4LiteWriteAddressRecType; InitVal : std_logic := 'Z' ) return Axi4LiteWriteAddressRecType ;
-  
+
 --
 --!TODO Add VHDL-2018 mode declarations here
 -- Comment out for now, also include `ifdef for language revision
 --
-  
+
   -- AXI Write Data Channel
   type Axi4LiteWriteDataRecType is record
-    Valid      : std_logic ; 
-    Ready      : std_logic ; 
-    Data       : std_logic_vector ; 
-    Strb       : std_logic_vector ; 
-  end record Axi4LiteWriteDataRecType ; 
-  
+    Valid      : std_logic ;
+    Ready      : std_logic ;
+    Data       : std_logic_vector ;
+    Strb       : std_logic_vector ;
+  end record Axi4LiteWriteDataRecType ;
+
   function InitAxi4LiteWriteDataRec (WD : Axi4LiteWriteDataRecType; InitVal : std_logic := 'Z' ) return Axi4LiteWriteDataRecType ;
 
 -- Add VHDL-2018 modes here
 
   -- AXI Write Response Channel
   type Axi4LiteWriteResponseRecType is record
-    Valid      : std_logic ; 
-    Ready      : std_logic ; 
-    Resp       : Axi4RespType ; 
-  end record Axi4LiteWriteResponseRecType ; 
-  
+    Valid      : std_logic ;
+    Ready      : std_logic ;
+    Resp       : Axi4RespType ;
+  end record Axi4LiteWriteResponseRecType ;
+
   function InitAxi4LiteWriteResponseRec(InitVal : std_logic := 'Z') return Axi4LiteWriteResponseRecType ;
-  
+
 -- Add VHDL-2018 modes here
 
-  
+
   -- AXI Read Address Channel
   type Axi4LiteReadAddressRecType is record
-    Valid     : std_logic ; 
-    Ready     : std_logic ; 
-    Addr      : std_logic_vector ; 
-    Prot      : Axi4ProtType ; 
-  end record Axi4LiteReadAddressRecType ; 
-  
+    Valid     : std_logic ;
+    Ready     : std_logic ;
+    Addr      : std_logic_vector ;
+    Prot      : Axi4ProtType ;
+  end record Axi4LiteReadAddressRecType ;
+
   function InitAxi4LiteReadAddressRec (AR : Axi4LiteReadAddressRecType; InitVal : std_logic := 'Z' ) return Axi4LiteReadAddressRecType ;
 
 -- Add VHDL-2018 modes here
 
   -- AXI Read Data Channel
   type Axi4LiteReadDataRecType is record
-    Valid      : std_logic ; 
-    Ready      : std_logic ; 
-    Data       : std_logic_vector ; 
+    Valid      : std_logic ;
+    Ready      : std_logic ;
+    Data       : std_logic_vector ;
     Resp       : Axi4RespType ;
-  end record Axi4LiteReadDataRecType ; 
-  
+  end record Axi4LiteReadDataRecType ;
+
   function InitAxi4LiteReadDataRec (RD : Axi4LiteReadDataRecType; InitVal : std_logic := 'Z' ) return Axi4LiteReadDataRecType ;
-  
+
 -- Add VHDL-2018 modes here
-  
+
   type Axi4LiteRecType is record
-    WriteAddress   : Axi4LiteWriteAddressRecType ; 
-    WriteData      : Axi4LiteWriteDataRecType ; 
-    WriteResponse  : Axi4LiteWriteResponseRecType ; 
-    ReadAddress    : Axi4LiteReadAddressRecType ; 
-    ReadData       : Axi4LiteReadDataRecType ; 
-  end record Axi4LiteRecType ; 
-  
+    WriteAddress   : Axi4LiteWriteAddressRecType ;
+    WriteData      : Axi4LiteWriteDataRecType ;
+    WriteResponse  : Axi4LiteWriteResponseRecType ;
+    ReadAddress    : Axi4LiteReadAddressRecType ;
+    ReadData       : Axi4LiteReadDataRecType ;
+  end record Axi4LiteRecType ;
+
   function  InitAxi4LiteRec (AxiBusRec : Axi4LiteRecType; InitVal : std_logic := 'Z') return Axi4LiteRecType ;
   procedure InitAxi4LiteRec (signal AxiBusRec : inout Axi4LiteRecType ) ;
-  
+
   ------------------------------------------------------------
   procedure SetAxi4LiteInterfaceDefault (
   -----------------------------------------------------------
+    constant ModelID       : In    AlertLogIDType ;
     variable AxiBus        : InOut Axi4LiteRecType ;
     constant Operation     : In    Axi4OptionsType ;
     constant OptVal        : In    integer
@@ -140,73 +141,74 @@ package Axi4LiteInterfacePkg is
   ------------------------------------------------------------
   impure function GetAxi4LiteInterfaceDefault (
   -----------------------------------------------------------
+    constant ModelID       : In    AlertLogIDType ;
     constant AxiBus        : in  Axi4LiteRecType ;
     constant Operation     : in  Axi4OptionsType
   ) return integer ;
 
 end package Axi4LiteInterfacePkg ;
-package body Axi4LiteInterfacePkg is 
+package body Axi4LiteInterfacePkg is
 
 -- add function bodies here
   function InitAxi4LiteWriteAddressRec (AW : Axi4LiteWriteAddressRecType; InitVal : std_logic := 'Z' ) return Axi4LiteWriteAddressRecType is
   begin
     return (
-      Valid => InitVal, 
-      Ready => InitVal, 
-      Addr  => (AW.Addr'range  => InitVal), 
+      Valid => InitVal,
+      Ready => InitVal,
+      Addr  => (AW.Addr'range  => InitVal),
       Prot  => (others         => InitVal)
     ) ;
-  end function InitAxi4LiteWriteAddressRec ; 
+  end function InitAxi4LiteWriteAddressRec ;
 
   function InitAxi4LiteWriteDataRec (WD : Axi4LiteWriteDataRecType; InitVal : std_logic := 'Z' ) return Axi4LiteWriteDataRecType is
   begin
     return (
       Valid  => InitVal,
       Ready  => InitVal,
-      Data   => (WD.Data'range  => InitVal),  
-      Strb   => (WD.Strb'range  => InitVal) 
+      Data   => (WD.Data'range  => InitVal),
+      Strb   => (WD.Strb'range  => InitVal)
     ) ;
-  end function InitAxi4LiteWriteDataRec ; 
+  end function InitAxi4LiteWriteDataRec ;
 
   function InitAxi4LiteWriteResponseRec(InitVal : std_logic := 'Z') return Axi4LiteWriteResponseRecType is
   begin
     return (
       Valid  => InitVal,
       Ready  => InitVal,
-      Resp   => (others => InitVal)  
+      Resp   => (others => InitVal)
     ) ;
-  end function InitAxi4LiteWriteResponseRec ; 
+  end function InitAxi4LiteWriteResponseRec ;
 
   function InitAxi4LiteReadAddressRec (AR : Axi4LiteReadAddressRecType; InitVal : std_logic := 'Z' ) return Axi4LiteReadAddressRecType is
   begin
     return (
-      Valid => InitVal, 
-      Ready => InitVal, 
-      Addr  => (AR.Addr'range  => InitVal), 
+      Valid => InitVal,
+      Ready => InitVal,
+      Addr  => (AR.Addr'range  => InitVal),
       Prot  => (others         => InitVal)
     ) ;
-  end function InitAxi4LiteReadAddressRec ; 
+  end function InitAxi4LiteReadAddressRec ;
 
   function InitAxi4LiteReadDataRec (RD : Axi4LiteReadDataRecType; InitVal : std_logic := 'Z' ) return Axi4LiteReadDataRecType is
   begin
     return (
       Valid  => InitVal,
       Ready  => InitVal,
-      Data   => (RD.Data'range  => InitVal),  
-      Resp   => (others         => InitVal)  
+      Data   => (RD.Data'range  => InitVal),
+      Resp   => (others         => InitVal)
     ) ;
-  end function InitAxi4LiteReadDataRec ; 
-    
+  end function InitAxi4LiteReadDataRec ;
+
   function InitAxi4LiteRec (AxiBusRec : Axi4LiteRecType; InitVal : std_logic := 'Z') return Axi4LiteRecType is
   begin
-    return ( 
+    return (
       WriteAddress   => InitAxi4LiteWriteAddressRec( AxiBusRec.WriteAddress,   InitVal),
       WriteData      => InitAxi4LiteWriteDataRec(    AxiBusRec.WriteData,      InitVal),
-      WriteResponse  => InitAxi4LiteWriteResponseRec(                          InitVal), 
+      WriteResponse  => InitAxi4LiteWriteResponseRec(                          InitVal),
       ReadAddress    => InitAxi4LiteReadAddressRec(  AxiBusRec.ReadAddress,    InitVal),
       ReadData       => InitAxi4LiteReadDataRec(     AxiBusRec.ReadData,       InitVal)
     ) ;
-  end function InitAxi4LiteRec ; 
+  end function InitAxi4LiteRec ;
 
 
   procedure InitAxi4LiteRec (signal AxiBusRec : inout Axi4LiteRecType ) is
@@ -217,6 +219,7 @@ package body Axi4LiteInterfacePkg is
   ------------------------------------------------------------
   procedure SetAxi4LiteInterfaceDefault (
   -----------------------------------------------------------
+    constant ModelID       : In    AlertLogIDType ;
     variable AxiBus        : InOut Axi4LiteRecType ;
     constant Operation     : In    Axi4OptionsType ;
     constant OptVal        : In    integer
@@ -237,7 +240,7 @@ package body Axi4LiteInterfacePkg is
 
       -- The End -- Done
       when others =>
-        Alert("Unknown model option", FAILURE) ;
+        Alert(ModelID, "Unknown model option", FAILURE) ;
 
     end case ;
   end procedure SetAxi4LiteInterfaceDefault ;
@@ -245,6 +248,7 @@ package body Axi4LiteInterfacePkg is
   ------------------------------------------------------------
   impure function GetAxi4LiteInterfaceDefault (
   -----------------------------------------------------------
+    constant ModelID       : In   AlertLogIDType ;
     constant AxiBus        : in  Axi4LiteRecType ;
     constant Operation     : in  Axi4OptionsType
   ) return integer is
@@ -264,14 +268,13 @@ package body Axi4LiteInterfacePkg is
 
       -- The End -- Done
       when others =>
---        Alert(ModelID, "Unknown model option", FAILURE) ;
-        Alert("Unknown model option", FAILURE) ;
+        Alert(ModelID, "Unknown model option", FAILURE) ;
         return integer'left ;
 
     end case ;
   end function GetAxi4LiteInterfaceDefault ;
 
-end package body Axi4LiteInterfacePkg ; 
+end package body Axi4LiteInterfacePkg ;
 
-  
+
 

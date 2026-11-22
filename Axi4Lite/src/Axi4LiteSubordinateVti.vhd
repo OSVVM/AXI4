@@ -64,7 +64,7 @@ generic (
   MODEL_ID_NAME   : string := "" ;
   tperiod_Clk     : time   := 10 ns ;
 
-  DEFAULT_DELAY   : time   := 1 ns ; 
+  DEFAULT_DELAY    : time := maximum(tperiod_Clk/10, std.env.resolution_limit) ;
 
   tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
 
@@ -77,7 +77,7 @@ generic (
 
   tpd_Clk_RValid  : time   := DEFAULT_DELAY ;
   tpd_Clk_RData   : time   := DEFAULT_DELAY ;
-  tpd_Clk_RResp   : time   := DEFAULT_DELAY 
+  tpd_Clk_RResp   : time   := DEFAULT_DELAY
 ) ;
 port (
   -- Globals
@@ -85,7 +85,7 @@ port (
   nReset      : in   std_logic ;
 
   -- AXI Manager Functional Interface
-  AxiBus      : inout Axi4LiteRecType 
+  AxiBus      : inout Axi4LiteRecType
 ) ;
 
   -- Derive AXI interface properties from the AxiBus
@@ -127,8 +127,8 @@ begin
 
     tpd_Clk_RValid  => tpd_Clk_RValid,
     tpd_Clk_RData   => tpd_Clk_RData,
-    tpd_Clk_RResp   => tpd_Clk_RResp  
-  )   
+    tpd_Clk_RResp   => tpd_Clk_RResp
+  )
   port map (
     -- Globals
     Clk         => Clk,

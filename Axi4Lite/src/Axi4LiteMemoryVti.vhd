@@ -65,7 +65,7 @@ generic (
   MEMORY_NAME     : string := "" ;
   tperiod_Clk     : time   := 10 ns ;
 
-  DEFAULT_DELAY   : time   := 1 ns ; 
+  DEFAULT_DELAY    : time := maximum(tperiod_Clk/10, std.env.resolution_limit) ;
 
   tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
 
@@ -78,7 +78,7 @@ generic (
 
   tpd_Clk_RValid  : time   := DEFAULT_DELAY ;
   tpd_Clk_RData   : time   := DEFAULT_DELAY ;
-  tpd_Clk_RResp   : time   := DEFAULT_DELAY 
+  tpd_Clk_RResp   : time   := DEFAULT_DELAY
 ) ;
 port (
   -- Globals
@@ -86,13 +86,13 @@ port (
   nReset      : in   std_logic ;
 
   -- AXI Subordinate Interface
-  AxiBus      : inout Axi4LiteRecType 
+  AxiBus      : inout Axi4LiteRecType
 ) ;
 
   -- Derive AXI interface properties from the AxiBus
   constant AXI_ADDR_WIDTH : integer := AxiBus.WriteAddress.Addr'length ;
   constant AXI_DATA_WIDTH : integer := AxiBus.WriteData.Data'length ;
-  
+
   -- VTI Testbench Transaction Interface
   -- Access via external names
   signal TransRec : AddressBusRecType (
@@ -107,10 +107,10 @@ port (
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4LiteMemoryVti'PATH_NAME))) ;
 
   -- Memory Data Structure, Access via MemoryName
-  constant LOCAL_MEMORY_NAME : string := 
+  constant LOCAL_MEMORY_NAME : string :=
     IfElse(MEMORY_NAME /= "", MEMORY_NAME, MODEL_INSTANCE_NAME & ":memory") ;
 --    IfElse(MEMORY_NAME /= "", MEMORY_NAME, to_lower(Axi4LiteMemoryVti'PATH_NAME) & ":memory") ;
-    
+
 end entity Axi4LiteMemoryVti ;
 
 architecture MemorySubordinate of Axi4LiteMemoryVti is
@@ -135,8 +135,8 @@ begin
 
     tpd_Clk_RValid  => tpd_Clk_RValid,
     tpd_Clk_RData   => tpd_Clk_RData,
-    tpd_Clk_RResp   => tpd_Clk_RResp  
-  )   
+    tpd_Clk_RResp   => tpd_Clk_RResp
+  )
   port map (
     -- Globals
     Clk         => Clk,
@@ -148,5 +148,5 @@ begin
     -- Testbench Transaction Interface
     TransRec    => TransRec
   ) ;
-  
+
 end architecture MemorySubordinate ;

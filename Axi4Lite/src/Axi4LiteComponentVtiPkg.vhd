@@ -23,38 +23,38 @@
 --
 --
 --  This file is part of OSVVM.
---  
---  Copyright (c) 2025 by SynthWorks Design Inc.  
---  
+--
+--  Copyright (c) 2025 by SynthWorks Design Inc.
+--
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
 --  You may obtain a copy of the License at
---  
+--
 --      https://www.apache.org/licenses/LICENSE-2.0
---  
+--
 --  Unless required by applicable law or agreed to in writing, software
 --  distributed under the License is distributed on an "AS IS" BASIS,
 --  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
---  
+--
 
 library ieee ;
   use ieee.std_logic_1164.all ;
-  
-library osvvm_common ;  
+
+library osvvm_common ;
   context osvvm_common.OsvvmCommonContext ;
 
   use work.Axi4InterfaceCommonPkg.all ;
-  use work.Axi4LiteInterfacePkg.all ; 
+  use work.Axi4LiteInterfacePkg.all ;
 
 package Axi4LiteComponentVtiPkg is
   component Axi4LiteManagerVti is
     generic (
       MODEL_ID_NAME    : string := "" ;
       tperiod_Clk      : time   := 10 ns ;
-      
-      DEFAULT_DELAY    : time   := 1 ns ; 
+
+      DEFAULT_DELAY    : time := maximum(tperiod_Clk/10, std.env.resolution_limit) ;
 
       tpd_Clk_AWAddr   : time   := DEFAULT_DELAY ;
       tpd_Clk_AWProt   : time   := DEFAULT_DELAY ;
@@ -78,49 +78,18 @@ package Axi4LiteComponentVtiPkg is
       nReset      : in   std_logic ;
 
       -- AXI Manager Functional Interface
-      AxiBus      : inout Axi4LiteRecType  
+      AxiBus      : inout Axi4LiteRecType
     ) ;
   end component Axi4LiteManagerVti ;
-  
-  
+
+
   component Axi4LiteMemoryVti is
     generic (
-    MODEL_ID_NAME   : string := "" ;
-    MEMORY_NAME     : string := "" ;
-    tperiod_Clk     : time   := 10 ns ;
-
-    DEFAULT_DELAY   : time   := 1 ns ; 
-
-    tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
-
-    tpd_Clk_WReady  : time   := DEFAULT_DELAY ;
-
-    tpd_Clk_BValid  : time   := DEFAULT_DELAY ;
-    tpd_Clk_BResp   : time   := DEFAULT_DELAY ;
-
-    tpd_Clk_ARReady : time   := DEFAULT_DELAY ;
-
-    tpd_Clk_RValid  : time   := DEFAULT_DELAY ;
-    tpd_Clk_RData   : time   := DEFAULT_DELAY ;
-    tpd_Clk_RResp   : time   := DEFAULT_DELAY 
-    ) ;
-    port (
-    -- Globals
-    Clk         : in   std_logic ;
-    nReset      : in   std_logic ;
-
-    -- AXI Subordinate Interface
-    AxiBus      : inout Axi4LiteRecType 
-    ) ;
-  end component Axi4LiteMemoryVti ;
-
-
-  component Axi4LiteSubordinateVti is
-    generic (
       MODEL_ID_NAME   : string := "" ;
+      MEMORY_NAME     : string := "" ;
       tperiod_Clk     : time   := 10 ns ;
 
-      DEFAULT_DELAY   : time   := 1 ns ; 
+      DEFAULT_DELAY   : time := maximum(tperiod_Clk/10, std.env.resolution_limit) ;
 
       tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
 
@@ -133,7 +102,38 @@ package Axi4LiteComponentVtiPkg is
 
       tpd_Clk_RValid  : time   := DEFAULT_DELAY ;
       tpd_Clk_RData   : time   := DEFAULT_DELAY ;
-      tpd_Clk_RResp   : time   := DEFAULT_DELAY 
+      tpd_Clk_RResp   : time   := DEFAULT_DELAY
+    ) ;
+    port (
+      -- Globals
+      Clk         : in   std_logic ;
+      nReset      : in   std_logic ;
+
+      -- AXI Subordinate Interface
+      AxiBus      : inout Axi4LiteRecType
+    ) ;
+  end component Axi4LiteMemoryVti ;
+
+
+  component Axi4LiteSubordinateVti is
+    generic (
+      MODEL_ID_NAME   : string := "" ;
+      tperiod_Clk     : time   := 10 ns ;
+
+      DEFAULT_DELAY   : time := maximum(tperiod_Clk/10, std.env.resolution_limit) ;
+
+      tpd_Clk_AWReady : time   := DEFAULT_DELAY ;
+
+      tpd_Clk_WReady  : time   := DEFAULT_DELAY ;
+
+      tpd_Clk_BValid  : time   := DEFAULT_DELAY ;
+      tpd_Clk_BResp   : time   := DEFAULT_DELAY ;
+
+      tpd_Clk_ARReady : time   := DEFAULT_DELAY ;
+
+      tpd_Clk_RValid  : time   := DEFAULT_DELAY ;
+      tpd_Clk_RData   : time   := DEFAULT_DELAY ;
+      tpd_Clk_RResp   : time   := DEFAULT_DELAY
     ) ;
     port (
       -- Globals
@@ -141,9 +141,9 @@ package Axi4LiteComponentVtiPkg is
       nReset      : in   std_logic ;
 
       -- AXI Manager Functional Interface
-      AxiBus      : inout Axi4LiteRecType 
+      AxiBus      : inout Axi4LiteRecType
     ) ;
-  end component Axi4LiteSubordinateVti ;  
+  end component Axi4LiteSubordinateVti ;
 
 end package Axi4LiteComponentVtiPkg ;
 

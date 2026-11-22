@@ -62,8 +62,8 @@ entity Axi4LiteManagerVti is
 generic (
   MODEL_ID_NAME    : string := "" ;
   tperiod_Clk      : time   := 10 ns ;
-  
-  DEFAULT_DELAY    : time   := 1 ns ; 
+
+  DEFAULT_DELAY    : time := maximum(tperiod_Clk/10, std.env.resolution_limit) ;
 
   tpd_Clk_AWAddr   : time   := DEFAULT_DELAY ;
   tpd_Clk_AWProt   : time   := DEFAULT_DELAY ;
@@ -87,13 +87,13 @@ port (
   nReset      : in   std_logic ;
 
   -- AXI Manager Functional Interface
-  AxiBus      : inout Axi4LiteRecType 
+  AxiBus      : inout Axi4LiteRecType
 ) ;
 
   -- Derive AXI interface properties from the AxiBus
   constant AXI_ADDR_WIDTH      : integer := AxiBus.WriteAddress.Addr'length ;
   constant AXI_DATA_WIDTH      : integer := AxiBus.WriteData.Data'length ;
-  
+
   -- VTI Testbench Transaction Interface
   -- Access via external names
   signal TransRec : AddressBusRecType (
@@ -106,7 +106,7 @@ port (
   constant MODEL_INSTANCE_NAME : string :=
     -- use MODEL_ID_NAME Generic if set, otherwise use instance label (preferred if set as entityname_1)
     IfElse(MODEL_ID_NAME /= "", MODEL_ID_NAME, PathTail(to_lower(Axi4LiteManagerVti'PATH_NAME))) ;
-  
+
 end entity Axi4LiteManagerVti ;
 architecture behavioral of Axi4LiteManagerVti is
 begin
@@ -115,8 +115,8 @@ begin
     generic map (
       MODEL_ID_NAME    => MODEL_INSTANCE_NAME,
       tperiod_Clk      => tperiod_Clk,
-      
-      DEFAULT_DELAY    => DEFAULT_DELAY, 
+
+      DEFAULT_DELAY    => DEFAULT_DELAY,
 
       tpd_Clk_AWAddr   => tpd_Clk_AWAddr ,
       tpd_Clk_AWProt   => tpd_Clk_AWProt,
@@ -133,7 +133,7 @@ begin
       tpd_Clk_ARAddr   => tpd_Clk_ARAddr ,
 
       tpd_Clk_RReady   => tpd_Clk_RReady
-    ) 
+    )
     port map (
       -- Globals
       Clk         => Clk,

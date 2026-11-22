@@ -7,7 +7,7 @@
 #
 #
 #  Description:
-#        Script to compile the Axi Stream models  
+#        Script to compile the Axi Stream models
 #
 #  Developed for:
 #        SynthWorks Design Inc.
@@ -22,15 +22,15 @@
 #
 #
 #  This file is part of OSVVM.
-#  
-#  Copyright (c) 2019 - 2020 by SynthWorks Design Inc.  
-#  
+#
+#  Copyright (c) 2019 - 2020 by SynthWorks Design Inc.
+#
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
-#  
+#
 #      https://www.apache.org/licenses/LICENSE-2.0
-#  
+#
 #  Unless required by applicable law or agreed to in writing, software
 #  distributed under the License is distributed on an "AS IS" BASIS,
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -42,10 +42,22 @@ analyze AxiStreamOptionsPkg.vhd
 analyze AxiStreamOptionsArrayPkg.vhd
 analyze AxiStreamTbPkg.vhd
 
-analyze AxiStreamTransmitter.vhd
-analyze AxiStreamTransmitterVti.vhd
-analyze AxiStreamReceiver.vhd
-analyze AxiStreamReceiverVti.vhd
+analyze AxiStreamTransmitter_e.vhd
+analyze AxiStreamTransmitter_a.vhd
+if {[FileModified AxiStreamTransmitter_a.vhd] > [FileModified Vti/AxiStreamTransmitterVti_a.vhd]} {
+  ::osvvm::MakeVti AxiStreamTransmitter $CurrentWorkingDirectory
+}
+analyze Vti/AxiStreamTransmitterVti_e.vhd
+analyze Vti/AxiStreamTransmitterVti_a.vhd
+
+
+analyze AxiStreamReceiver_e.vhd
+analyze AxiStreamReceiver_a.vhd
+if {[FileModified AxiStreamReceiver_a.vhd] > [FileModified Vti/AxiStreamReceiverVti_a.vhd]} {
+  ::osvvm::MakeVti AxiStreamReceiver $CurrentWorkingDirectory
+}
+analyze Vti/AxiStreamReceiverVti_e.vhd
+analyze Vti/AxiStreamReceiverVti_a.vhd
 
 analyze AxiStreamMonitor.vhd
 

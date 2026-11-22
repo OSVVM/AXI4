@@ -1,6 +1,6 @@
 --
---  File Name:         AxiStreamTransmitterVti.vhd
---  Design Unit Name:  AxiStreamTransmitterVti
+--  File Name:         AxiStreamTransmitter_a.vhd
+--  Design Unit Name:  AxiStreamTransmitter
 --  Revision:          OSVVM MODELS STANDARD VERSION
 --
 --  Maintainer:        Jim Lewis      email:  jim@synthworks.com
@@ -9,7 +9,7 @@
 --
 --
 --  Description:
---      AXI Stream Transmitter Verification Component with Virtual Transaction Interface
+--      AXI Stream Transmitter Verification Component
 --
 --
 --  Developed by:
@@ -20,22 +20,27 @@
 --  Revision History:
 --    Date      Version    Description
 --    03/2024   2024.03    Updated SafeResize to use ModelID
---    05/2023   2023.05    Updated methods for Randomized delays 
+--    09/2023   2023.09    Unimplemented transactions handled with ClassifyUnimplementedTransmitterOperation
+--    05/2023   2023.05    Updated methods for Randomized delays
 --    04/2023   2023.04    Update delays on TValid to be randomized
---    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.   
+--    10/2022   2022.10    Changed enum value PRIVATE to PRIVATE_NAME due to VHDL-2019 keyword conflict.
 --    05/2022   2022.05    Updated FIFOs so they are Search => PRIVATE
 --    03/2022   2022.03    Updated calls to NewID for AlertLogID and FIFOs
---                         Updated handling of TStrb
+--                         Updated TKeep and TStrb generation
 --    02/2022   2022.02    Replaced to_hstring to to_hxstring
 --    01/2022   2022.01    Moved MODEL_INSTANCE_NAME and MODEL_NAME to entity declarative region
---    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability 
+--    07/2021   2021.07    All FIFOs and Scoreboards now use the New Scoreboard/FIFO capability
 --    06/2021   2021.06    Updated Burst FIFOs.
 --    02/2021   2021.02    Added Valid Delays.  Added MultiDriver Detect.  Updated Generics.
---    12/2020   2020.12    Created Virtual Transaction Interface from AxiStreamTransmitter.vhd
+--    10/2020   2020.10    Added Bursting per updates to Model Independent Transactions
+--    07/2020   2020.07    Updated for Streaming Model Independent Transactions
+--    01/2020   2020.01    Updated license notice
+--    05/2018   2018.05    First Release
+--
 --
 --  This file is part of OSVVM.
 --
---  Copyright (c) 2018 - 2023 by SynthWorks Design Inc.
+--  Copyright (c) 2018 - 2026 by SynthWorks Design Inc.
 --
 --  Licensed under the Apache License, Version 2.0 (the "License");
 --  you may not use this file except in compliance with the License.
@@ -49,87 +54,11 @@
 --  See the License for the specific language governing permissions and
 --  limitations under the License.
 --
-
-library ieee ;
-  use ieee.std_logic_1164.all ;
-  use ieee.numeric_std.all ;
-  use ieee.numeric_std_unsigned.all ;
-  use ieee.math_real.all ;
-
-library osvvm ;
-  context osvvm.OsvvmContext ;
-  use osvvm.ScoreboardPkg_slv.all ;
-
-library osvvm_common ;
-  context osvvm_common.OsvvmCommonContext ;
-
-  use work.AxiStreamOptionsPkg.all ;
-  use work.Axi4CommonPkg.all ;
-  use work.AxiStreamTbPkg.all ;
-
-entity AxiStreamTransmitterVti is
-  generic (
-    MODEL_ID_NAME  : string := "" ;
-    INIT_ID        : std_logic_vector := "" ;
-    INIT_DEST      : std_logic_vector := "" ;
-    INIT_USER      : std_logic_vector := "" ;
-    INIT_LAST      : natural := 0 ;
-
-    tperiod_Clk    : time := 10 ns ;
-
-    DEFAULT_DELAY  : time := 1 ns ;
-
-    tpd_Clk_TValid : time := DEFAULT_DELAY ;
-    tpd_Clk_TID    : time := DEFAULT_DELAY ;
-    tpd_Clk_TDest  : time := DEFAULT_DELAY ;
-    tpd_Clk_TUser  : time := DEFAULT_DELAY ;
-    tpd_Clk_TData  : time := DEFAULT_DELAY ;
-    tpd_Clk_TStrb  : time := DEFAULT_DELAY ;
-    tpd_Clk_TKeep  : time := DEFAULT_DELAY ;
-    tpd_Clk_TLast  : time := DEFAULT_DELAY
-  ) ;
-  port (
-    -- Globals
-    Clk       : in  std_logic ;
-    nReset    : in  std_logic ;
-
-    -- AXI Transmitter Functional Interface
-    TValid    : out std_logic ;
-    TReady    : in  std_logic ;
-    TID       : out std_logic_vector ;
-    TDest     : out std_logic_vector ;
-    TUser     : out std_logic_vector ;
-    TData     : out std_logic_vector ;
-    TStrb     : out std_logic_vector ;
-    TKeep     : out std_logic_vector ;
-    TLast     : out std_logic
-  ) ;
-
-  -- Derive AXI interface properties from interface signals
-  constant AXI_STREAM_DATA_WIDTH   : integer := TData'length ;
-  constant AXI_STREAM_PARAM_WIDTH  : integer := TID'length + TDest'length + TUser'length + 1 ;
-
-  -- Testbench Transaction Interface
-  -- Access via external names
-  signal TransRec  : StreamRecType (
-    DataToModel   (AXI_STREAM_DATA_WIDTH-1  downto 0),
-    DataFromModel (AXI_STREAM_DATA_WIDTH-1  downto 0),
-    ParamToModel  (AXI_STREAM_PARAM_WIDTH-1 downto 0),
-    ParamFromModel(AXI_STREAM_PARAM_WIDTH-1 downto 0)
-  ) ;
-
-  -- Use MODEL_ID_NAME Generic if set, otherwise,
-  -- use model instance label (preferred if set as entityname_1)
-  constant MODEL_INSTANCE_NAME : string :=
-    IfElse(MODEL_ID_NAME'length > 0, MODEL_ID_NAME, 
-      to_lower(PathTail(AxiStreamTransmitterVti'PATH_NAME))) ;
-
-end entity AxiStreamTransmitterVti ;
-architecture SimpleTransmitter of AxiStreamTransmitterVti is
+architecture SimpleTransmitter of AxiStreamTransmitter is
   signal ModelID, BusFailedID : AlertLogIDType ;
 --  signal ProtocolID, DataCheckID : AlertLogIDType ;
   signal BurstCov : DelayCoverageIDType ;
-  
+
   signal UseCoverageDelays : Boolean := FALSE ;
 
   constant AXI_STREAM_DATA_BYTE_WIDTH  : integer := integer(ceil(real(AXI_STREAM_DATA_WIDTH) / 8.0)) ;
@@ -153,7 +82,8 @@ architecture SimpleTransmitter of AxiStreamTransmitterVti is
 
   constant DEFAULT_BURST_MODE : StreamFifoBurstModeType := STREAM_BURST_WORD_MODE ;
   signal   BurstFifoMode      : StreamFifoBurstModeType := DEFAULT_BURST_MODE ;
-  signal   BurstFifoByteMode  : boolean := (DEFAULT_BURST_MODE = STREAM_BURST_BYTE_MODE) ;
+
+  signal TransactionDone : boolean ;
 
 begin
 
@@ -169,7 +99,7 @@ begin
 --    ProtocolID       <= NewID("Protocol Error", ID ) ;
 --    DataCheckID      <= NewID("Data Check", ID ) ;
     BusFailedID      <= NewID("No response",  ID) ;
-    TransmitFifo     <= NewID("TransmitFifo", ID, ReportMode => DISABLED, Search => PRIVATE_NAME) ; 
+    TransmitFifo     <= NewID("TransmitFifo", ID, ReportMode => DISABLED, Search => PRIVATE_NAME) ;
     wait ;
   end process Initialize ;
 
@@ -186,11 +116,11 @@ begin
     variable Last : std_logic ;
     variable User : std_logic_vector(TUser'range) ;
   begin
-    wait for 0 ns ; 
+    wait for 0 ns ;
     TransRec.BurstFifo <= NewID("TxBurstFifo", ModelID, Search => PRIVATE_NAME) ;
     BurstCov           <= NewID("DelayCov", ModelID, ReportMode => DISABLED, Search => NAME_AND_PARENT) ;
-    
-    DispatchLoop : loop 
+
+    DispatchLoop : loop
       WaitForTransaction(
          Clk      => Clk,
          Rdy      => TransRec.Rdy,
@@ -198,43 +128,6 @@ begin
       ) ;
 
       case TransRec.Operation is
-        when WAIT_FOR_CLOCK =>
-          WaitForClock(Clk, TransRec.IntToModel) ;
-
-        when WAIT_FOR_TRANSACTION =>
-          if TransmitRequestCount /= TransmitDoneCount then
-            wait until TransmitRequestCount = TransmitDoneCount ;
-          end if ;
-
-        when GET_TRANSACTION_COUNT =>
-          TransRec.IntFromModel <= TransmitDoneCount ;
-          wait for 0 ns ;
-
-        when GET_ALERTLOG_ID =>
-          TransRec.IntFromModel <= integer(ModelID) ;
-          wait for 0 ns ;
-
-        when SET_USE_RANDOM_DELAYS =>        
-          UseCoverageDelays      <= TransRec.BoolToModel ; 
-
-        when GET_USE_RANDOM_DELAYS =>
-          TransRec.BoolFromModel <= UseCoverageDelays ;
-
-        when SET_DELAYCOV_ID =>
-          BurstCov          <= GetDelayCoverage(TransRec.IntToModel) ;
-          UseCoverageDelays <= TRUE ; 
-
-        when GET_DELAYCOV_ID =>
-          TransRec.IntFromModel <= BurstCov.ID ;
-          UseCoverageDelays <= TRUE ; 
-
-        when SET_BURST_MODE =>
-          BurstFifoMode       <= TransRec.IntToModel ;
-          BurstFifoByteMode   <= (TransRec.IntToModel = STREAM_BURST_BYTE_MODE) ;
-
-        when GET_BURST_MODE =>
-          TransRec.IntFromModel <= BurstFifoMode ;
-
         when SEND | SEND_ASYNC =>
           Data   := SafeResize(ModelID, TransRec.DataToModel, Data'length) ;
           Param  := UpdateOptions(
@@ -262,7 +155,7 @@ begin
                       ParamLast  => 1,
                       Count      => ((TransmitRequestCount+1) - LastOffsetCount)
                     ) ;
-          if BurstFifoByteMode then
+          if (BurstFifoMode = STREAM_BURST_BYTE_MODE) then
             BytesToSend := TransRec.IntToModel ;
             NumberTransfers := integer(ceil(real(BytesToSend) / real(AXI_STREAM_DATA_BYTE_WIDTH))) ;
           else
@@ -304,11 +197,11 @@ begin
           case AxiStreamOptionsType'val(TransRec.Options) is
             when TRANSMIT_VALID_DELAY_CYCLES =>
               ValidDelayCycles <= TransRec.IntToModel ;
-              UseCoverageDelays <= FALSE ; 
+              UseCoverageDelays <= FALSE ;
 
             when TRANSMIT_VALID_BURST_DELAY_CYCLES =>
               ValidBurstDelayCycles <= TransRec.IntToModel ;
-              UseCoverageDelays <= FALSE ; 
+              UseCoverageDelays <= FALSE ;
 
             when TRANSMIT_READY_TIME_OUT =>
               TransmitReadyTimeOut      <= TransRec.IntToModel ;
@@ -338,7 +231,7 @@ begin
 
             when TRANSMIT_VALID_BURST_DELAY_CYCLES =>
               TransRec.IntFromModel   <= ValidBurstDelayCycles ;
-              
+
             when TRANSMIT_READY_TIME_OUT =>
               TransRec.IntFromModel   <=  TransmitReadyTimeOut ;
 
@@ -358,13 +251,20 @@ begin
               Alert(ModelID, "GetOptions, Unimplemented Option: " & to_string(AxiStreamOptionsType'val(TransRec.Options)), FAILURE) ;
           end case ;
 
-        when MULTIPLE_DRIVER_DETECT =>
-          Alert(ModelID, "Multiple Drivers on Transaction Record." & 
-                         "  Transaction # " & to_string(TransRec.Rdy), FAILURE) ;
-
-        -- The End -- Done
         when others =>
-          Alert(ModelID, "Unimplemented Transaction: " & to_string(TransRec.Operation), FAILURE) ;
+          --  Do OSVVM stream directive transactions
+          DoDirectiveTransactions (
+            TransRec                 => TransRec             ,
+            Clk                      => Clk                  ,
+            ModelID                  => ModelID              ,
+            UseCoverageDelays        => UseCoverageDelays    ,
+            DelayCovID               => BurstCov             ,
+            BurstFifoMode            => BurstFifoMode        ,
+            TransactionDone          => TransactionDone      ,
+            TransactionCount         => TransmitDoneCount    ,
+            PendingTransactionCount  => TransmitRequestCount - TransmitDoneCount
+          ) ;
+
       end case ;
 
       -- Wait for 1 delta cycle, required if a wait is not in all case branches above
@@ -372,6 +272,7 @@ begin
     end loop DispatchLoop ;
   end process TransactionDispatcher ;
 
+  TransactionDone <= TransmitRequestCount = TransmitDoneCount ;
 
   ------------------------------------------------------------
   --  TransmitHandler
@@ -387,8 +288,8 @@ begin
     variable Last  : std_logic ;
     variable NewTransfer : std_logic := '1' ;
     variable Burst : std_logic ;
-    variable DelayCycles : integer ; 
-    variable BurstLength : integer := 0 ; 
+    variable DelayCycles : integer ;
+    variable BurstLength : integer := 0 ;
   begin
     -- Initialize
     TValid  <= '0' ;
@@ -399,8 +300,8 @@ begin
     TStrb   <= (TStrb'range => 'X') ;
     TKeep   <= (TKeep'range => 'X') ;
     TLast   <= 'X' ;
-    wait for 0 ns ; -- Allow Cov models to initialize 
-    wait for 0 ns ; -- Allow Cov models to initialize 
+    wait for 0 ns ; -- Allow Cov models to initialize
+    wait for 0 ns ; -- Allow Cov models to initialize
     -- BurstLength - once per BurstLength, use BurstDelay, otherwise use BeatDelay
     AddBins (BurstCov.BurstLengthCov,  80, GenBin(3,11,1)) ;     -- 80% Small Burst Length
     AddBins (BurstCov.BurstLengthCov,  20, GenBin(109,131,1)) ;  -- 20% Large Burst Length
@@ -423,9 +324,9 @@ begin
       (Burst, Data, ID, Dest, User, Last) := Pop(TransmitFifo) ;
 
       -- Delay between consecutive signaling of Valid
-      if UseCoverageDelays then 
+      if UseCoverageDelays then
         -- BurstCoverage Delays
-        DelayCycles := GetRandDelay(BurstCov) ; 
+        DelayCycles := GetRandDelay(BurstCov) ;
         WaitForClock(Clk, DelayCycles) ;
       else
         -- Deprecated static settings
@@ -435,7 +336,7 @@ begin
           WaitForClock(Clk, ValidBurstDelayCycles) ;  -- beat delays
         end if ;
         NewTransfer := Last or not Burst ;
-      end if ; 
+      end if ;
 
       -- Calculate Strb. 1 when data else 0
       -- If Strb is unused it may be null range
@@ -506,5 +407,3 @@ begin
     end loop TransmitLoop ;
   end process TransmitHandler ;
 end architecture SimpleTransmitter ;
-
-

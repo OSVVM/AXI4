@@ -50,7 +50,7 @@ library osvvm ;
 entity AxiStreamMonitor is
   generic (
     MODEL_ID_NAME  : string :="" ;
-    USES_TLAST     : boolean := FALSE 
+    USES_TLAST     : boolean := TRUE
   ) ;
   port (
     -- Globals
@@ -66,7 +66,7 @@ entity AxiStreamMonitor is
     TData     : in  std_logic_vector ;
     TStrb     : in  std_logic_vector ;
     TKeep     : in  std_logic_vector ;
-    TLast     : in  std_logic 
+    TLast     : in  std_logic
   ) ;
 
   -- Use MODEL_ID_NAME Generic if set, otherwise,
@@ -78,9 +78,9 @@ entity AxiStreamMonitor is
 end entity AxiStreamMonitor ;
 architecture MonitorVC of AxiStreamMonitor is
   signal ModelID : AlertLogIDType ;
-  signal TIdPrev   : TID'subtype ; 
-  signal TDestPrev : TDest'subtype ; 
-  signal TLastPrev : std_logic ; 
+  signal TIdPrev   : TID'subtype ;
+  signal TDestPrev : TDest'subtype ;
+  signal TLastPrev : std_logic ;
 
 begin
 
@@ -112,17 +112,17 @@ begin
         wait until Rising_Edge(Clk) and TValid = '1' ;
 
         -- If not at start of cycle, check that ID and Dest do not change
-        If TLastPrev /= '1' then 
+        If TLastPrev /= '1' then
           AlertIf(ModelID, TID /= TIdPrev,      "TID: "   & to_string(TID) &   " /= Previous TID: "   & to_string(TIdPrev) ) ;
           AlertIf(ModelID, TDest /= TDestPrev,  "TDest: " & to_string(TDest) & " /= Previous TDest: " & to_string(TDestPrev) ) ;
-        end if  ; 
+        end if  ;
 
         -- Log values from this cycle
-        TIdPrev   <= TID ; 
+        TIdPrev   <= TID ;
         TDestPrev <= TDest ;
-        TLastPrev <= TLast ; 
-      end loop MonitorLoop ; 
-    end process MonitorIdDestProc ; 
+        TLastPrev <= TLast ;
+      end loop MonitorLoop ;
+    end process MonitorIdDestProc ;
   end Generate MonitorIdDestGen ;
 
 end architecture MonitorVC ;
